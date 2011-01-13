@@ -1,30 +1,27 @@
 #ifndef OSCILLATOR_H
 #define OSCILLATOR_H
 
-#include <QStack>
-
 class Oscillator
 {
 public:
     Oscillator();
 
     void setSampleRate(double sampleRate);
+    double getSampleRate() const;
+    void setFrequency(double frequency);
+    double getFrequency() const;
 
-    void pushNote(unsigned char midiNoteNumber);
-    void popNote(unsigned char midiNoteNumber);
+    void resetPhase();
 
-    double createSample();
+    double nextSample();
 
 protected:
     virtual double valueAtPhase(double phase);
 
 private:
-    QStack<double> frequencies;
-    QStack<unsigned char> midiNoteNumbers;
-    double sampleRate, phase, phaseIncrement;
+    double frequency, sampleRate, phase, phaseIncrement;
 
     void computePhaseIncrement();
-    double computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber);
 };
 
 #endif // OSCILLATOR_H

@@ -14,7 +14,7 @@ bool SimpleMonophonicClient::setup()
         return false;
     }
     // initialize the oscillator with the current sample rate:
-    oscillator.setSampleRate(getSampleRate());
+    synthesizer.setSampleRate(getSampleRate());
     return true;
 }
 
@@ -34,34 +34,30 @@ bool SimpleMonophonicClient::process(jack_nframes_t nframes)
             jack_midi_event_get(&midiEvent, midiInputBuffer, currentMidiEventIndex);
             // produce audio until the event happens:
             for (; currentFrame < midiEvent.time; currentFrame++) {
-                audioOutputBuffer[currentFrame] = oscillator.createSample();
+                audioOutputBuffer[currentFrame] = synthesizer.nextSample();
             }
             currentMidiEventIndex++;
             // interpret the midi event:
             unsigned char statusByte = midiEvent.buffer[0];
             unsigned char highNibble = statusByte >> 4;
-            qDebug() << "highNibble" << highNibble;
             if (highNibble == 0x08) {
                 unsigned char noteNumber = midiEvent.buffer[1];
-                qDebug() << "noteNumber" << noteNumber;
-                oscillator.popNote(noteNumber);
+                synthesizer.popNote(noteNumber);
             } else if (highNibble == 0x09) {
                 unsigned char noteNumber = midiEvent.buffer[1];
-                qDebug() << "noteNumber" << noteNumber;
                 unsigned char velocity = midiEvent.buffer[2];
-                qDebug() << "velocity" << velocity;
                 if (velocity) {
                     // note on event:
-                    oscillator.pushNote(noteNumber);
+                    synthesizer.pushNote(noteNumber);
                 } else {
                     // note off event:
-                    oscillator.popNote(noteNumber);
+                    synthesizer.popNote(noteNumber);
                 }
             }
         } else {
             // produce audio until the end of the buffer:
             for (; currentFrame < nframes; currentFrame++) {
-                audioOutputBuffer[currentFrame] = oscillator.createSample();
+                audioOutputBuffer[currentFrame] = synthesizer.nextSample();
             }
         }
     }

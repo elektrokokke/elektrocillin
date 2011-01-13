@@ -2,7 +2,7 @@
 #define SIMPLEMONOPHONICCLIENT_H
 
 #include "midi2audioclient.h"
-#include "oscillator.h"
+#include "monophonicsynthesizer.h"
 
 class SimpleMonophonicClient : public Midi2AudioClient
 {
@@ -14,7 +14,7 @@ protected:
     virtual bool process(jack_nframes_t nframes);
 
 private:
-    Oscillator oscillator;
+    MonophonicSynthesizer synthesizer;
 };
 
 #endif // SIMPLEMONOPHONICCLIENT_H

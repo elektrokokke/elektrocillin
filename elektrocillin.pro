@@ -15,13 +15,17 @@ SOURCES += main.cpp\
     midi2audioclient.cpp \
     jackclient.cpp \
     oscillator.cpp \
-    simplemonophonicclient.cpp
+    simplemonophonicclient.cpp \
+    monophonicsynthesizer.cpp \
+    pulseoscillator.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
     jackclient.h \
     oscillator.h \
-    simplemonophonicclient.h
+    simplemonophonicclient.h \
+    monophonicsynthesizer.h \
+    pulseoscillator.h
 
 FORMS    += mainwindow.ui
 
