@@ -11,8 +11,19 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    midi2audioclient.cpp \
+    jackclient.cpp \
+    oscillator.cpp \
+    simplemonophonicclient.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    midi2audioclient.h \
+    jackclient.h \
+    oscillator.h \
+    simplemonophonicclient.h
 
 FORMS    += mainwindow.ui
+
+win32:INCLUDEPATH += "C:\Program Files\Jack v1.9.6\includes"
+win32:LIBS += $$quote(c:\Program Files\Jack v1.9.6\lib\libjack.a)

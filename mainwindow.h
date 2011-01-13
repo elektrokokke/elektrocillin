@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+class SimpleMonophonicClient;
+
 namespace Ui {
     class MainWindow;
 }
@@ -15,8 +17,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void on_actionSimple_monophonic_triggered();
+
 private:
     Ui::MainWindow *ui;
+
+    SimpleMonophonicClient *simpleMonophonicClient;
 };
 
 #endif // MAINWINDOW_H
