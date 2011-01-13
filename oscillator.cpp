@@ -3,26 +3,22 @@
 #include <QtGlobal>
 
 Oscillator::Oscillator() :
-    phase(0.0)
+    phase(0.0),
+    filter(0.01, 0.99)
 {
 }
 
 void Oscillator::setSampleRate(double sampleRate)
 {
-    this->sampleRate = sampleRate;
+    AudioSource::setSampleRate(sampleRate);
     // recompute phase increment:
     computePhaseIncrement();
-}
-
-double Oscillator::getSampleRate() const
-{
-    return sampleRate;
 }
 
 void Oscillator::setFrequency(double frequency)
 {
     // the frequency is rounded to integer fractions of the sample rate to avoid jitter:
-    this->frequency = sampleRate / (double)qRound(sampleRate / frequency);
+    this->frequency = getSampleRate() / (double)qRound(getSampleRate() / frequency);
     // recompute phase increment:
     computePhaseIncrement();
 }
@@ -32,16 +28,17 @@ double Oscillator::getFrequency() const
     return frequency;
 }
 
-void Oscillator::resetPhase()
+void Oscillator::reset()
 {
     phase = 0.0;
+    filter.reset();
 }
 
 double Oscillator::nextSample()
 {
     double value = valueAtPhase(phase);
     // advance phase:
-    phase += phaseIncrement;
+    phase += filter.filter(phaseIncrement);
     if (phase >= 2.0 * M_PI) {
         phase -= 2.0 * M_PI;
     }
@@ -55,6 +52,6 @@ double Oscillator::valueAtPhase(double phase)
 
 void Oscillator::computePhaseIncrement()
 {
-    phaseIncrement = frequency * 2.0 * M_PI / sampleRate;
+    phaseIncrement = frequency * 2.0 * M_PI / getSampleRate();
 }
 

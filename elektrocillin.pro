@@ -18,7 +18,9 @@ SOURCES += main.cpp\
     simplemonophonicclient.cpp \
     monophonicsynthesizer.cpp \
     pulseoscillator.cpp \
-    simplelowpassfilter.cpp
+    simplelowpassfilter.cpp \
+    adsrenvelope.cpp \
+    audiosource.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -27,7 +29,9 @@ HEADERS  += mainwindow.h \
     simplemonophonicclient.h \
     monophonicsynthesizer.h \
     pulseoscillator.h \
-    simplelowpassfilter.h
+    simplelowpassfilter.h \
+    adsrenvelope.h \
+    audiosource.h
 
 FORMS    += mainwindow.ui
 

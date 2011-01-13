@@ -3,15 +3,13 @@
 
 #include "pulseoscillator.h"
 #include "simplelowpassfilter.h"
+#include "adsrenvelope.h"
 #include <QStack>
 
-class MonophonicSynthesizer
+class MonophonicSynthesizer : public AudioSource
 {
 public:
     MonophonicSynthesizer();
-
-    void setSampleRate(double sampleRate);
-    double getSampleRate() const;
 
     void pushNote(unsigned char midiNoteNumber);
     void popNote(unsigned char midiNoteNumber);
@@ -19,8 +17,9 @@ public:
     double nextSample();
 
 private:
-    int attack, release;
     PulseOscillator oscillator;
+    AdsrEnvelope envelope;
+    SimpleLowpassFilter filter;
     QStack<double> frequencies;
     QStack<unsigned char> midiNoteNumbers;
 

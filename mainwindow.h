@@ -20,6 +20,8 @@ public:
 private slots:
     void on_actionSimple_monophonic_triggered();
 
+    void on_actionADSR_envelope_test_triggered();
+
 private:
     Ui::MainWindow *ui;
 

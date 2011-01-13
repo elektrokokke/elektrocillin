@@ -8,8 +8,11 @@ public:
 
     double filter(double sample);
 
+    void reset();
+
 private:
     double previous, a, b;
+    bool started;
 };
 
 #endif // SIMPLELOWPASSFILTER_H

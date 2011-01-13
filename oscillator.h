@@ -1,25 +1,29 @@
 #ifndef OSCILLATOR_H
 #define OSCILLATOR_H
 
-class Oscillator
+#include "audiosource.h"
+#include "simplelowpassfilter.h"
+
+class Oscillator : public AudioSource
 {
 public:
     Oscillator();
 
-    void setSampleRate(double sampleRate);
-    double getSampleRate() const;
+    virtual void setSampleRate(double sampleRate);
+
     void setFrequency(double frequency);
     double getFrequency() const;
 
-    void resetPhase();
-
     double nextSample();
+
+    void reset();
 
 protected:
     virtual double valueAtPhase(double phase);
 
 private:
-    double frequency, sampleRate, phase, phaseIncrement;
+    double frequency, phase, phaseIncrement;
+    SimpleLowpassFilter filter;
 
     void computePhaseIncrement();
 };
