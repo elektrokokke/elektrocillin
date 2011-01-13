@@ -1,5 +1,6 @@
 #include "oscillator.h"
 #include <cmath>
+#include <QtGlobal>
 
 Oscillator::Oscillator() :
     phase(0.0)
@@ -20,7 +21,8 @@ double Oscillator::getSampleRate() const
 
 void Oscillator::setFrequency(double frequency)
 {
-    this->frequency = frequency;
+    // the frequency is rounded to integer fractions of the sample rate to avoid jitter:
+    this->frequency = sampleRate / (double)qRound(sampleRate / frequency);
     // recompute phase increment:
     computePhaseIncrement();
 }

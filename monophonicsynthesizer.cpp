@@ -53,20 +53,18 @@ void MonophonicSynthesizer::popNote(unsigned char midiNoteNumber)
 
 double MonophonicSynthesizer::nextSample()
 {
+    double sample = 0.0;
     // incorporate very short attack and release phase to avoid clicks:
     if (attack) {
-        double sample = oscillator.nextSample() * (1.0 - 0.01 * (double)attack);
+        sample = oscillator.nextSample() * (1.0 - 0.01 * (double)attack);
         attack -= 1;
-        return sample;
     } else if (release) {
-        double sample = oscillator.nextSample() * 0.01 * (double)release;
+        sample = oscillator.nextSample() * 0.01 * (double)release;
         release -= 1;
-        return sample;
     } else if (!midiNoteNumbers.isEmpty()) {
-        return oscillator.nextSample();
-    } else {
-        return 0.0;
+        sample = oscillator.nextSample();
     }
+    return sample;
 }
 
 double MonophonicSynthesizer::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)

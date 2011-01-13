@@ -2,6 +2,7 @@
 #define MONOPHONICSYNTHESIZER_H
 
 #include "pulseoscillator.h"
+#include "simplelowpassfilter.h"
 #include <QStack>
 
 class MonophonicSynthesizer
