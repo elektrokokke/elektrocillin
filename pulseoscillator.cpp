@@ -1,11 +1,10 @@
 #include "pulseoscillator.h"
-#include <cmath>
 
-PulseOscillator::PulseOscillator()
+PulseOscillator::PulseOscillator(double pulseWidth)
 {
-}
-
-double PulseOscillator::valueAtPhase(double phase)
-{
-    return (phase < M_PI ? 1.0 : -1.0);
+    Q_ASSERT((pulseWidth >= 0.0) && (pulseWidth <= 2.0 * M_PI));
+    addNode(0.0, -1.0);
+    addNode(pulseWidth, -1.0);
+    addNode(pulseWidth, 1.0);
+    addNode(2.0 * M_PI, 1.0);
 }

@@ -2,15 +2,58 @@
 #include <cmath>
 
 MonophonicSynthesizer::MonophonicSynthesizer() :
+    pulseOsc1(0.1),
+    pulseOsc2(2.0 * M_PI - 0.1),
+    sawOsc1(0.1),
+    sawOsc2(M_PI - 0.1),
+    morphOsc1(&pulseOsc1, &pulseOsc2),
+    morphOsc2(&sawOsc1, &sawOsc2),
+    morphOsc3(&morphOsc1, &morphOsc2),
+    lfo(false),
+    lfo2(false),
+    lfo3(false),
     envelope(0.001, 0.01, 0.5, 0.5)
 {
+    lfo.setFrequency(99.0);
+    lfo2.setFrequency(99.1);
+    lfo3.setFrequency(99.2);
+}
+
+void MonophonicSynthesizer::setSampleRate(double sampleRate)
+{
+    AudioSource::setSampleRate(sampleRate);
+    pulseOsc1.setSampleRate(sampleRate);
+    pulseOsc2.setSampleRate(sampleRate);
+    sawOsc1.setSampleRate(sampleRate);
+    sawOsc2.setSampleRate(sampleRate);
+    morphOsc1.setSampleRate(sampleRate);
+    morphOsc2.setSampleRate(sampleRate);
+    morphOsc3.setSampleRate(sampleRate);
+    lfo.setSampleRate(sampleRate);
+    lfo2.setSampleRate(sampleRate);
+    lfo3.setSampleRate(sampleRate);
+    envelope.setSampleRate(sampleRate);
+}
+
+void MonophonicSynthesizer::setFrequency(double frequency)
+{
+    pulseOsc1.setFrequency(frequency);
+    pulseOsc2.setFrequency(frequency);
+    sawOsc1.setFrequency(frequency);
+    sawOsc2.setFrequency(frequency);
+    morphOsc1.setFrequency(frequency);
+    morphOsc2.setFrequency(frequency);
+    morphOsc3.setFrequency(frequency);
+    lfo.setFrequency(morphOsc3.getFrequency() * 0.25 - 1.0);
+    lfo2.setFrequency(morphOsc3.getFrequency() * 0.25 - 2.0);
+    lfo3.setFrequency(morphOsc3.getFrequency() * 0.25 - 3.0);
 }
 
 void MonophonicSynthesizer::pushNote(unsigned char midiNoteNumber)
 {
     midiNoteNumbers.push(midiNoteNumber);
     frequencies.push(computeFrequencyFromMidiNoteNumber(midiNoteNumber));
-    oscillator.setFrequency(frequencies.top());
+    setFrequency(frequencies.top());
     // (re-)trigger the ADSR envelope:
     envelope.noteOn();
 }
@@ -26,7 +69,7 @@ void MonophonicSynthesizer::popNote(unsigned char midiNoteNumber)
                 // enter the release phase:
                 envelope.noteOff();
             } else {
-                oscillator.setFrequency(frequencies.top());
+                setFrequency(frequencies.top());
                 // retrigger the ADSR envelope:
                 envelope.noteOn();
             }
@@ -46,10 +89,12 @@ double MonophonicSynthesizer::nextSample()
 {
     // get level from ADSR envelope:
     double envelopeLevel = envelope.nextSample();
-    if (envelopeLevel == 0.0) {
-        oscillator.reset();
+    if (envelopeLevel) {
+        morphOsc1.setMorph(0.5 * lfo.nextSample() + 0.5);
+        morphOsc2.setMorph(0.5 * lfo2.nextSample() + 0.5);
+        morphOsc3.setMorph(0.5 * lfo3.nextSample() + 0.5);
     }
-    double oscillatorLevel = oscillator.nextSample();
+    double oscillatorLevel = morphOsc3.nextSample();
     return filter.filter(envelopeLevel * oscillatorLevel);
 }
 

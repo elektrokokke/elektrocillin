@@ -20,7 +20,11 @@ SOURCES += main.cpp\
     pulseoscillator.cpp \
     simplelowpassfilter.cpp \
     adsrenvelope.cpp \
-    audiosource.cpp
+    audiosource.cpp \
+    piecewiselinearoscillator.cpp \
+    sawtoothoscillator.cpp \
+    morphingpiecewiselinearoscillator.cpp \
+    distortionfilter.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -31,7 +35,11 @@ HEADERS  += mainwindow.h \
     pulseoscillator.h \
     simplelowpassfilter.h \
     adsrenvelope.h \
-    audiosource.h
+    audiosource.h \
+    piecewiselinearoscillator.h \
+    sawtoothoscillator.h \
+    morphingpiecewiselinearoscillator.h \
+    distortionfilter.h
 
 FORMS    += mainwindow.ui
 

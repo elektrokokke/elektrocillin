@@ -7,7 +7,7 @@
 class Oscillator : public AudioSource
 {
 public:
-    Oscillator();
+    Oscillator(bool quantizeFrequency = true);
 
     virtual void setSampleRate(double sampleRate);
 
@@ -22,6 +22,7 @@ protected:
     virtual double valueAtPhase(double phase);
 
 private:
+    bool quantizeFrequency;
     double frequency, phase, phaseIncrement;
     SimpleLowpassFilter filter;
 

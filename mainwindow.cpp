@@ -31,14 +31,10 @@ void MainWindow::on_actionSimple_monophonic_triggered()
 
 void MainWindow::on_actionADSR_envelope_test_triggered()
 {
-    AdsrEnvelope envelope(0.05, 0.1, 0.75, 1.0);
-    envelope.setSampleRate(100.0);
-    envelope.noteOn();
-    for (int sample = 0; sample < 200; sample++) {
-        double level = envelope.nextSample();
-        qDebug() << "sample" << sample << "level" << level;
-        if (sample % 20 == 0) {
-            envelope.noteOn();
-        }
+    PulseOscillator osc;
+    osc.setSampleRate(10);
+    osc.setFrequency(4);
+    for (int sample = 0; sample < 100; sample++) {
+        qDebug() << "sample" << sample << "value" << osc.nextSample();
     }
 }

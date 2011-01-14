@@ -1,15 +1,13 @@
 #ifndef PULSEOSCILLATOR_H
 #define PULSEOSCILLATOR_H
 
-#include "oscillator.h"
+#include "piecewiselinearoscillator.h"
+#include <cmath>
 
-class PulseOscillator : public Oscillator
+class PulseOscillator : public PiecewiseLinearOscillator
 {
 public:
-    PulseOscillator();
-
-protected:
-    virtual double valueAtPhase(double phase);
+    PulseOscillator(double pulseWidth = M_PI);
 };
 
 #endif // PULSEOSCILLATOR_H

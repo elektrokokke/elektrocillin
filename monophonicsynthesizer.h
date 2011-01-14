@@ -1,8 +1,10 @@
 #ifndef MONOPHONICSYNTHESIZER_H
 #define MONOPHONICSYNTHESIZER_H
 
-#include "pulseoscillator.h"
+#include "morphingpiecewiselinearoscillator.h"
 #include "simplelowpassfilter.h"
+#include "sawtoothoscillator.h"
+#include "pulseoscillator.h"
 #include "adsrenvelope.h"
 #include <QStack>
 
@@ -16,8 +18,14 @@ public:
 
     double nextSample();
 
+    virtual void setSampleRate(double sampleRate);
+    void setFrequency(double frequency);
+
 private:
-    PulseOscillator oscillator;
+    PulseOscillator pulseOsc1, pulseOsc2;
+    SawtoothOscillator sawOsc1, sawOsc2;
+    MorphingPiecewiseLinearOscillator morphOsc1, morphOsc2, morphOsc3;
+    Oscillator lfo, lfo2, lfo3;
     AdsrEnvelope envelope;
     SimpleLowpassFilter filter;
     QStack<double> frequencies;

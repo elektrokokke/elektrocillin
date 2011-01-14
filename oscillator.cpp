@@ -2,7 +2,8 @@
 #include <cmath>
 #include <QtGlobal>
 
-Oscillator::Oscillator() :
+Oscillator::Oscillator(bool quantizeFrequency_) :
+    quantizeFrequency(quantizeFrequency_),
     phase(0.0),
     filter(0.01, 0.99)
 {
@@ -18,7 +19,7 @@ void Oscillator::setSampleRate(double sampleRate)
 void Oscillator::setFrequency(double frequency)
 {
     // the frequency is rounded to integer fractions of the sample rate to avoid jitter:
-    this->frequency = getSampleRate() / (double)qRound(getSampleRate() / frequency);
+    this->frequency = (quantizeFrequency ? getSampleRate() / (double)qRound(getSampleRate() / frequency) : frequency);
     // recompute phase increment:
     computePhaseIncrement();
 }
