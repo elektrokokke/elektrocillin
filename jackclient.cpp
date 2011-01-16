@@ -6,14 +6,11 @@ JackClient::JackClient(const QString &clientName) :
 {
 }
 
-JackClient::~JackClient()
-{
-    // close the Jack client:
-    jack_client_close(client);
-}
-
 bool JackClient::activate()
 {
+    if (isActive()) {
+        return false;
+    }
     // register as a Jack client:
     client = jack_client_open(name.toAscii().data(), JackNullOption, 0);
     if (client == 0) {
@@ -41,6 +38,28 @@ bool JackClient::activate()
         return false;
     }
     return true;
+}
+
+void JackClient::close()
+{
+    // close the Jack client:
+    jack_client_close(client);
+    client = 0;
+}
+
+bool JackClient::isActive() const
+{
+    return client;
+}
+
+jack_nframes_t JackClient::getLastFrameTime()
+{
+    return jack_last_frame_time(client);
+}
+
+jack_nframes_t JackClient::getEstimatedCurrentTime()
+{
+    return jack_frame_time(client);
 }
 
 jack_port_t * JackClient::registerAudioPort(const QString &name, unsigned long flags)

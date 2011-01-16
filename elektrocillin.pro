@@ -24,7 +24,11 @@ SOURCES += main.cpp\
     piecewiselinearoscillator.cpp \
     sawtoothoscillator.cpp \
     morphingpiecewiselinearoscillator.cpp \
-    distortionfilter.cpp
+    distortionfilter.cpp \
+    midi2signalclient.cpp \
+    midicontrollerslider.cpp \
+    midicontrollercheckbox.cpp \
+    midisplitter.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -39,9 +43,13 @@ HEADERS  += mainwindow.h \
     piecewiselinearoscillator.h \
     sawtoothoscillator.h \
     morphingpiecewiselinearoscillator.h \
-    distortionfilter.h
+    distortionfilter.h \
+    midi2signalclient.h \
+    midicontrollerslider.h \
+    midicontrollercheckbox.h \
+    midisplitter.h
 
 FORMS    += mainwindow.ui
 
 win32:INCLUDEPATH += "C:\Program Files\Jack v1.9.6\includes"
-win32:LIBS += $$quote(c:\Program Files\Jack v1.9.6\lib\libjack.a)
+win32:LIBS += $$quote(c:\Program Files\Jack v1.9.6\lib\libjack.a) $$quote(c:\Program Files\Jack v1.9.6\lib\libjackserver.a)
