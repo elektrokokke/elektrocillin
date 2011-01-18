@@ -19,7 +19,6 @@ class MidiSplitter : public QObject
     Q_OBJECT
 public:
     explicit MidiSplitter(QObject *parent = 0);
-    ~MidiSplitter();
 
     ControlChange * getControlChangeSink(unsigned char controller);
 

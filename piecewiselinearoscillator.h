@@ -3,25 +3,24 @@
 
 #include "oscillator.h"
 #include <QList>
+#include <QPointF>
 
 class PiecewiseLinearOscillator : public Oscillator
 {
 public:
-    PiecewiseLinearOscillator();
-
-    const QList<double> & getTimes() const;
-    const QList<double> & getValues() const;
+    const QList<QPointF> & getNodes() const;
+    QPointF getNode(int index) const;
 
 protected:
     double valueAtPhase(double phase);
-    void addNode(double time, double value);
+    void addNode(const QPointF &node);
 
-    QList<double> & getTimes();
-    QList<double> & getValues();
+    QList<QPointF> & getNodes();
 
 private:
-    QList<double> times, values;
-    int from, to;
+    QList<QPointF> nodes;
+
+    static double interpolate(const QPointF &n0, const QPointF &n1, double x);
 };
 
 #endif // PIECEWISELINEAROSCILLATOR_H

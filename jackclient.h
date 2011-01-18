@@ -15,6 +15,8 @@ public:
     void close();
 
     bool isActive() const;
+    bool connectPorts(const QString &sourcePortName, const QString &destPortName);
+    bool disconnectPorts(const QString &sourcePortName, const QString &destPortName);
 
 protected:
     /**

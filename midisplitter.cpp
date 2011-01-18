@@ -15,19 +15,11 @@ MidiSplitter::MidiSplitter(QObject *parent) :
 {
 }
 
-MidiSplitter::~MidiSplitter()
-{
-    // delete all ControlChange objects:
-    for (QList<ControlChange*>::const_iterator it = mapControllerToControlChange.values().begin(); it != mapControllerToControlChange.values().end(); it++) {
-        delete *it;
-    }
-}
-
 ControlChange * MidiSplitter::getControlChangeSink(unsigned char controller)
 {
     // create a new sink, if necessary:
     if (!mapControllerToControlChange.contains(controller)) {
-        mapControllerToControlChange.insert(controller, new ControlChange());
+        mapControllerToControlChange.insert(controller, new ControlChange(this));
     }
     return mapControllerToControlChange.value(controller);
 }

@@ -28,7 +28,11 @@ SOURCES += main.cpp\
     midi2signalclient.cpp \
     midicontrollerslider.cpp \
     midicontrollercheckbox.cpp \
-    midisplitter.cpp
+    midisplitter.cpp \
+    graphview.cpp \
+    floattablemodel.cpp \
+    jackaudiomodel.cpp \
+    record2memoryclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -47,7 +51,11 @@ HEADERS  += mainwindow.h \
     midi2signalclient.h \
     midicontrollerslider.h \
     midicontrollercheckbox.h \
-    midisplitter.h
+    midisplitter.h \
+    graphview.h \
+    floattablemodel.h \
+    jackaudiomodel.h \
+    record2memoryclient.h
 
 FORMS    += mainwindow.ui
 

@@ -1,11 +1,12 @@
 #include "oscillator.h"
 #include <cmath>
-#include <QtGlobal>
+#include <QDebug>
 
-Oscillator::Oscillator(bool quantizeFrequency_) :
-    quantizeFrequency(quantizeFrequency_),
+Oscillator::Oscillator() :
+    frequency(0.0),
     phase(0.0),
-    filter(0.01, 0.99)
+    phaseIncrement(0.0),
+    sampleNr(0)
 {
 }
 
@@ -18,10 +19,14 @@ void Oscillator::setSampleRate(double sampleRate)
 
 void Oscillator::setFrequency(double frequency)
 {
-    // the frequency is rounded to integer fractions of the sample rate to avoid jitter:
-    this->frequency = (quantizeFrequency ? getSampleRate() / (double)qRound(getSampleRate() / frequency) : frequency);
+    this->frequency = frequency;
     // recompute phase increment:
     computePhaseIncrement();
+}
+
+double Oscillator::getPhaseIncrement() const
+{
+    return phaseIncrement;
 }
 
 double Oscillator::getFrequency() const
@@ -32,17 +37,17 @@ double Oscillator::getFrequency() const
 void Oscillator::reset()
 {
     phase = 0.0;
-    filter.reset();
 }
 
 double Oscillator::nextSample()
 {
     double value = valueAtPhase(phase);
     // advance phase:
-    phase += filter.filter(phaseIncrement);
+    phase += phaseIncrement;
     if (phase >= 2.0 * M_PI) {
         phase -= 2.0 * M_PI;
     }
+    sampleNr++;
     return value;
 }
 

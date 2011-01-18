@@ -4,8 +4,8 @@
 SawtoothOscillator::SawtoothOscillator(double peak)
 {
     Q_ASSERT((peak >= 0.0) && (peak <= M_PI));
-    addNode(0.0, 0.0);
-    addNode(peak, -1.0);
-    addNode(2.0 * M_PI - peak, 1.0);
-    addNode(2.0 * M_PI, 0.0);
+    addNode(QPointF(peak, -1.0));
+    addNode(QPointF(peak, -1.0));
+    addNode(QPointF(2.0 * M_PI - peak, 1.0));
+    addNode(QPointF(2.0 * M_PI - peak, 1.0));
 }

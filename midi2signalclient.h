@@ -9,6 +9,12 @@
 #include "jack/ringbuffer.h"
 #include "jack/midiport.h"
 
+struct MidiMessage {
+    jack_nframes_t time;
+    size_t size;
+    jack_midi_data_t message[3];
+};
+
 class Midi2SignalClient : public QThread, public JackClient
 {
     Q_OBJECT
@@ -44,7 +50,7 @@ public slots:
     void sendPitchWheel(unsigned char channel, int pitchCentered);
 
 private:
-    // use a lock-free ring buffers for communication with the Jack process thread:
+    // use lock-free ring buffers for communication with the Jack process thread:
     jack_ringbuffer_t *ringBufferIn, *ringBufferOut;
     // provide one midi in- and output:
     jack_port_t *midiIn, *midiOut;
@@ -54,12 +60,6 @@ private:
     QMutex mutexForMidi;
 
     static const size_t ringBufferSize;
-
-    struct MidiMessage {
-        jack_nframes_t time;
-        size_t size;
-        jack_midi_data_t message[3];
-    };
 
     void writeMidiEventToOutputRingBuffer(const MidiMessage &message);
 };

@@ -5,7 +5,6 @@ AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustain
     decayTime(decayTime_),
     sustainLevel(sustainLevel_),
     releaseTime(releaseTime_),
-    preAttackTime(0.02),
     currentSegmentTime(0.0),
     previousLevel(0.0),
     previousSegmentLevel(0.0),
@@ -21,8 +20,8 @@ double AdsrEnvelope::nextSample()
             currentSegmentTime = 0.0;
             currentSegment = DECAY;
         } else {
-            // fade from previous segment level to 1:
-            level = previousSegmentLevel + (1.0 - previousSegmentLevel) * currentSegmentTime / attackTime;
+            // fade from 0 to 1:
+            level = currentSegmentTime / attackTime;
         }
     }
     if (currentSegment == DECAY) {
@@ -54,7 +53,6 @@ double AdsrEnvelope::nextSample()
 void AdsrEnvelope::noteOn()
 {
     currentSegmentTime = 0.0;
-    previousSegmentLevel = previousLevel;
     currentSegment = ATTACK;
 }
 

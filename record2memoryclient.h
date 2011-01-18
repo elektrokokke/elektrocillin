@@ -1,0 +1,56 @@
+#ifndef RECORD2MEMORYCLIENT_H
+#define RECORD2MEMORYCLIENT_H
+
+#include <QThread>
+#include <QVector>
+#include <QWaitCondition>
+#include <QMutex>
+#include "jackclient.h"
+#include "jackaudiomodel.h"
+#include "jack/ringbuffer.h"
+
+class Record2MemoryClient : public QThread, public JackClient
+{
+    Q_OBJECT
+public:
+    Record2MemoryClient(const QString &clientName, QObject *parent = 0);
+    virtual ~Record2MemoryClient();
+
+    int getNrOfAudioModels();
+    JackAudioModel * removeAudioModel(int i);
+    JackAudioModel * popAudioModel();
+
+signals:
+    void recordingStarted();
+    void recordingFinished();
+
+protected:
+    // reimplemented methods from JackClient:
+    virtual bool setup();
+    virtual bool process(jack_nframes_t nframes);
+    // reimplemented methods from QThread:
+    virtual void run();
+
+private:
+    // use a lock-free ring buffer for communication with the Jack process thread:
+    jack_ringbuffer_t *ringBuffer;
+    // provide an audio and a midi input port:
+    jack_port_t *audioIn, *midiIn;
+    // wait condition to wait for audio to record:
+    QWaitCondition waitForAudio;
+    // corresponding mutex:
+    QMutex mutexForAudio;
+    // this variable is accessed only from the process() method!
+    bool isRecordingProcess;
+    // this variable is only access from the QThread run() method, until recording is finished!
+    JackAudioModel *audioModelRun;
+    // this variable is accessed from anywhere, but only by using the below mutex for synchronization:
+    QVector<JackAudioModel*> audioModels;
+    // mutex for accessing the vector of audio models:
+    QMutex audioModelsMutex;
+
+    static const size_t ringBufferSize;
+
+};
+
+#endif // RECORD2MEMORYCLIENT_H

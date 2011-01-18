@@ -23,7 +23,7 @@ public:
 
 private:
     // all times are in seconds, all levels between 0 and 1:
-    double attackTime, decayTime, sustainLevel, releaseTime, preAttackTime;
+    double attackTime, decayTime, sustainLevel, releaseTime;
     double currentSegmentTime, previousLevel, previousSegmentLevel;
     CurrentSegment currentSegment;
 };

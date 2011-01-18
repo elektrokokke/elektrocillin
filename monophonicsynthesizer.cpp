@@ -9,19 +9,14 @@ MonophonicSynthesizer::MonophonicSynthesizer() :
     morphOsc1(&pulseOsc1, &pulseOsc2),
     morphOsc2(&sawOsc1, &sawOsc2),
     morphOsc3(&morphOsc1, &morphOsc2),
-    lfo(false),
-    lfo2(false),
-    lfo3(false),
     envelope(0.001, 0.01, 0.5, 0.5)
 {
-    lfo.setFrequency(99.0);
-    lfo2.setFrequency(99.1);
-    lfo3.setFrequency(99.2);
 }
 
 void MonophonicSynthesizer::setSampleRate(double sampleRate)
 {
     AudioSource::setSampleRate(sampleRate);
+    osc.setSampleRate(sampleRate);
     pulseOsc1.setSampleRate(sampleRate);
     pulseOsc2.setSampleRate(sampleRate);
     sawOsc1.setSampleRate(sampleRate);
@@ -37,6 +32,7 @@ void MonophonicSynthesizer::setSampleRate(double sampleRate)
 
 void MonophonicSynthesizer::setFrequency(double frequency)
 {
+    osc.setFrequency(frequency);
     pulseOsc1.setFrequency(frequency);
     pulseOsc2.setFrequency(frequency);
     sawOsc1.setFrequency(frequency);
@@ -44,9 +40,9 @@ void MonophonicSynthesizer::setFrequency(double frequency)
     morphOsc1.setFrequency(frequency);
     morphOsc2.setFrequency(frequency);
     morphOsc3.setFrequency(frequency);
-    lfo.setFrequency(morphOsc3.getFrequency() * 0.25 - 1.0);
-    lfo2.setFrequency(morphOsc3.getFrequency() * 0.25 - 2.0);
-    lfo3.setFrequency(morphOsc3.getFrequency() * 0.25 - 3.0);
+    lfo.setFrequency(morphOsc3.getFrequency() * 0.25);
+    lfo2.setFrequency(morphOsc3.getFrequency() * 0.251);
+    lfo3.setFrequency(morphOsc3.getFrequency() * 0.1251);
 }
 
 void MonophonicSynthesizer::pushNote(unsigned char midiNoteNumber)
@@ -95,7 +91,7 @@ double MonophonicSynthesizer::nextSample()
         morphOsc3.setMorph(0.5 * lfo3.nextSample() + 0.5);
     }
     double oscillatorLevel = morphOsc3.nextSample();
-    return filter.filter(envelopeLevel * oscillatorLevel);
+    return envelopeLevel * oscillatorLevel;
 }
 
 double MonophonicSynthesizer::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)

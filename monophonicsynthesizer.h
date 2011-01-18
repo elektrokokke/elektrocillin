@@ -22,12 +22,12 @@ public:
     void setFrequency(double frequency);
 
 private:
+    PulseOscillator osc;
     PulseOscillator pulseOsc1, pulseOsc2;
     SawtoothOscillator sawOsc1, sawOsc2;
     MorphingPiecewiseLinearOscillator morphOsc1, morphOsc2, morphOsc3;
     Oscillator lfo, lfo2, lfo3;
     AdsrEnvelope envelope;
-    SimpleLowpassFilter filter;
     QStack<double> frequencies;
     QStack<unsigned char> midiNoteNumbers;
 

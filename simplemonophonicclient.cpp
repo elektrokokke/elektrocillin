@@ -27,9 +27,10 @@ bool SimpleMonophonicClient::process(jack_nframes_t nframes)
     jack_nframes_t currentFrame = 0;
     jack_nframes_t currentMidiEventIndex = 0;
     jack_nframes_t midiEventCount = jack_midi_get_event_count(midiInputBuffer);
-    for (; currentFrame < nframes;) {
+    for (; currentFrame < nframes; ) {
         // get the next midi event, if there is any:
         if (currentMidiEventIndex < midiEventCount) {
+            //qDebug() << "(currentMidiEventIndex < midiEventCount) == true";
             jack_midi_event_t midiEvent;
             jack_midi_event_get(&midiEvent, midiInputBuffer, currentMidiEventIndex);
             // produce audio until the event happens:

@@ -7,7 +7,7 @@ Midi2SignalClient::Midi2SignalClient(const QString &clientName, QObject *parent)
     QThread(parent),
     JackClient(clientName)
 {
-    // create the ring buffer:
+    // create the ring buffers:
     ringBufferIn = jack_ringbuffer_create(ringBufferSize);
     ringBufferOut = jack_ringbuffer_create(ringBufferSize);
 }

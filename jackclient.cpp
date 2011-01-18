@@ -77,6 +77,17 @@ jack_nframes_t JackClient::getSampleRate() const
     return jack_get_sample_rate(client);
 }
 
+bool JackClient::connectPorts(const QString &sourcePortName, const QString &destPortName)
+{
+    int connect = jack_connect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data());
+    return (connect == 0) || (connect == EEXIST);
+}
+
+bool JackClient::disconnectPorts(const QString &sourcePortName, const QString &destPortName)
+{
+    return (jack_disconnect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data()) == 0);
+}
+
 int JackClient::process(jack_nframes_t nframes, void *arg)
 {
     // convert the void* argument to a JackClient object pointer:
