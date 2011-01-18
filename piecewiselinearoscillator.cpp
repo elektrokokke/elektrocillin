@@ -1,6 +1,29 @@
 #include "piecewiselinearoscillator.h"
 #include <cmath>
 
+QPointF PiecewiseLinearOscillator::getNode(int index) const
+{
+    if (nodes.size()) {
+        double phaseOffset = 0.0;
+        for (; index < 0; ) {
+            index += nodes.size();
+            phaseOffset -= 2.0 * M_PI;
+        }
+        for (; index >= nodes.size(); ) {
+            index -= nodes.size();
+            phaseOffset += 2.0 * M_PI;
+        }
+        return QPointF(nodes[index].x() + phaseOffset, nodes[index].y());
+    } else {
+        return QPointF(index * 2.0 * M_PI, 0.0);
+    }
+}
+
+int PiecewiseLinearOscillator::size() const
+{
+    return nodes.size();
+}
+
 double PiecewiseLinearOscillator::valueAtPhase(double phase)
 {
     Q_ASSERT(phase >= 0.0);
@@ -46,34 +69,6 @@ void PiecewiseLinearOscillator::addNode(const QPointF &node)
     Q_ASSERT(nodes.isEmpty() || (node.x() >= nodes.last().x()));
     Q_ASSERT((node.y() >= -1.0) && (node.y() <= 1.0));
     nodes.append(node);
-}
-
-const QList<QPointF> & PiecewiseLinearOscillator::getNodes() const
-{
-    return nodes;
-}
-
-QList<QPointF> & PiecewiseLinearOscillator::getNodes()
-{
-    return nodes;
-}
-
-QPointF PiecewiseLinearOscillator::getNode(int index) const
-{
-    if (nodes.size()) {
-        double phaseOffset = 0.0;
-        for (; index < 0; ) {
-            index += nodes.size();
-            phaseOffset -= 2.0 * M_PI;
-        }
-        for (; index >= nodes.size(); ) {
-            index -= nodes.size();
-            phaseOffset += 2.0 * M_PI;
-        }
-        return QPointF(nodes[index].x() + phaseOffset, nodes[index].y());
-    } else {
-        return QPointF(index * 2.0 * M_PI, 0.0);
-    }
 }
 
 double PiecewiseLinearOscillator::interpolate(const QPointF &n0, const QPointF &n1, double x)

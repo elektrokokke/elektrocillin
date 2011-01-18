@@ -41,6 +41,13 @@
        </widget>
       </item>
       <item>
+       <widget class="MidiPitchSlider" name="horizontalSlider">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -100,6 +107,11 @@
    <extends>QFrame</extends>
    <header>graphview.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MidiPitchSlider</class>
+   <extends>QSlider</extends>
+   <header>midipitchslider.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

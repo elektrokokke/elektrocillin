@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "simplemonophonicclient.h"
 #include "record2memoryclient.h"
+#include "midi2signalclient.h"
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -28,6 +29,11 @@ MainWindow::MainWindow(QWidget *parent) :
         qDebug() << "client could not be acivated...";
     }
 
+    Midi2SignalClient *midiClient = new Midi2SignalClient("signals/slots", this);
+    midiClient->activate();
+
+    QObject::connect(ui->horizontalSlider, SIGNAL(pitchWheel(unsigned char,uint)), midiClient, SLOT(sendPitchWheel(unsigned char,uint)));
+    QObject::connect(midiClient, SIGNAL(receivedPitchWheel(unsigned char,uint)), ui->horizontalSlider, SLOT(onPitchWheel(unsigned char,uint)));
 }
 
 MainWindow::~MainWindow()

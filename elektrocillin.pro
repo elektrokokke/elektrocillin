@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     graphview.cpp \
     floattablemodel.cpp \
     jackaudiomodel.cpp \
-    record2memoryclient.cpp
+    record2memoryclient.cpp \
+    midipitchslider.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -55,7 +56,8 @@ HEADERS  += mainwindow.h \
     graphview.h \
     floattablemodel.h \
     jackaudiomodel.h \
-    record2memoryclient.h
+    record2memoryclient.h \
+    midipitchslider.h
 
 FORMS    += mainwindow.ui
 

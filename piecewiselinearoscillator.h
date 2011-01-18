@@ -8,14 +8,12 @@
 class PiecewiseLinearOscillator : public Oscillator
 {
 public:
-    const QList<QPointF> & getNodes() const;
-    QPointF getNode(int index) const;
+    virtual QPointF getNode(int index) const;
+    virtual int size() const;
 
 protected:
     double valueAtPhase(double phase);
     void addNode(const QPointF &node);
-
-    QList<QPointF> & getNodes();
 
 private:
     QList<QPointF> nodes;
