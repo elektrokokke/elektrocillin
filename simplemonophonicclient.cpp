@@ -54,6 +54,12 @@ bool SimpleMonophonicClient::process(jack_nframes_t nframes)
                     // note off event:
                     synthesizer.popNote(noteNumber);
                 }
+            } else if (highNibble == 0x0E) {
+                // pitch wheel:
+                unsigned char low = midiEvent.buffer[1];
+                unsigned char high = midiEvent.buffer[2];
+                unsigned int pitch = (high << 7) + low;
+                synthesizer.setMidiPitch(pitch);
             }
         } else {
             // produce audio until the end of the buffer:

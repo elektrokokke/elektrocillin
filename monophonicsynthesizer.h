@@ -16,12 +16,16 @@ public:
     void pushNote(unsigned char midiNoteNumber);
     void popNote(unsigned char midiNoteNumber);
 
+    void setMidiPitch(unsigned int pitch);
+
     double nextSample();
 
     virtual void setSampleRate(double sampleRate);
-    void setFrequency(double frequency);
 
+protected:
+    void setFrequency(double frequency, double pitchBendFactor);
 private:
+    double frequency, pitchBendFactor;
     PulseOscillator osc;
     PulseOscillator pulseOsc1, pulseOsc2;
     SawtoothOscillator sawOsc1, sawOsc2;
@@ -32,6 +36,7 @@ private:
     QStack<unsigned char> midiNoteNumbers;
 
     double computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber);
+    double computePitchBendFactorFromMidiPitch(unsigned int pitch);
 };
 
 #endif // MONOPHONICSYNTHESIZER_H

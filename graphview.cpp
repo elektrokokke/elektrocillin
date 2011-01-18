@@ -166,7 +166,7 @@ QModelIndex GraphView::indexAt(const QPoint &point) const
     return model()->index(row, col);
 }
 
-QModelIndex GraphView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
+QModelIndex GraphView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers)
 {
     // get the current index:
     QModelIndex index = selectionModel()->currentIndex();
@@ -197,7 +197,7 @@ int GraphView::verticalOffset() const
     return verticalScrollBar()->value();
 }
 
-bool GraphView::isIndexHidden(const QModelIndex &index) const
+bool GraphView::isIndexHidden(const QModelIndex &) const
 {
     // no items can be hidden in this view:
     return false;
@@ -385,25 +385,25 @@ void GraphView::getStatistics(int row, int col, float &mean, float &variance)
     variance = (count ? sumOfSquaredDifferences / (float)count : 0.0f);
 }
 
-void GraphView::rowsInserted ( const QModelIndex & parent, int start, int end )
+void GraphView::rowsInserted ( const QModelIndex &, int, int )
 {
     updateGeometries();
     viewport()->update();
 }
 
-void GraphView::rowsRemoved ( const QModelIndex & parent, int start, int end )
+void GraphView::rowsRemoved ( const QModelIndex &, int, int )
 {
     updateGeometries();
     viewport()->update();
 }
 
-void GraphView::columnsInserted ( const QModelIndex & parent, int start, int end )
+void GraphView::columnsInserted ( const QModelIndex &, int, int )
 {
     updateGeometries();
     viewport()->update();
 }
 
-void GraphView::columnsRemoved ( const QModelIndex & parent, int start, int end )
+void GraphView::columnsRemoved ( const QModelIndex &, int, int )
 {
     updateGeometries();
     viewport()->update();

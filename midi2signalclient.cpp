@@ -161,9 +161,8 @@ void Midi2SignalClient::run()
                         // pitch wheel:
                         unsigned char low = message.message[1];
                         unsigned char high = message.message[2];
-                        int pitchNonCentered = (high << 7) + low;
-                        // 0x2000 is the center:
-                        receivedPitchWheel(channel, pitchNonCentered - 0x2000);
+                        unsigned int pitch = (high << 7) + low;
+                        receivedPitchWheel(channel, pitch);
                     }
                 }
             }
@@ -269,16 +268,14 @@ void Midi2SignalClient::sendChannelPressure(unsigned char channel, unsigned char
     writeMidiEventToOutputRingBuffer(message);
 }
 
-void Midi2SignalClient::sendPitchWheel(unsigned char channel, int pitchCentered)
+void Midi2SignalClient::sendPitchWheel(unsigned char channel, unsigned int pitch)
 {
-    // un-center the pitch:
-    unsigned int pitchUncentered = pitchCentered + 0x2000;
     // create the midi message:
     MidiMessage message;
     message.size = 3;
     message.message[0] = 0xE0 + channel;
-    message.message[1] = pitchUncentered & 0x0F;
-    message.message[2] = pitchUncentered >> 7;
+    message.message[1] = pitch & 0x0F;
+    message.message[2] = pitch >> 7;
     // get estimated current time:
     message.time = getEstimatedCurrentTime();
     // send the midi message:

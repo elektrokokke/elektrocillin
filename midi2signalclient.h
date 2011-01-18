@@ -37,7 +37,7 @@ signals:
     void receivedControlChange(unsigned char channel, unsigned char controller, unsigned char value);
     void receivedProgramChange(unsigned char channel, unsigned char program);
     void receivedChannelPressure(unsigned char channel, unsigned char pressure);
-    void receivedPitchWheel(unsigned char channel, int pitchCentered);
+    void receivedPitchWheel(unsigned char channel, unsigned int pitch);
 
 public slots:
     // "voice" message slots:
@@ -47,7 +47,7 @@ public slots:
     void sendControlChange(unsigned char channel, unsigned char controller, unsigned char value);
     void sendProgramChange(unsigned char channel, unsigned char program);
     void sendChannelPressure(unsigned char channel, unsigned char pressure);
-    void sendPitchWheel(unsigned char channel, int pitchCentered);
+    void sendPitchWheel(unsigned char channel, unsigned int pitch);
 
 private:
     // use lock-free ring buffers for communication with the Jack process thread:

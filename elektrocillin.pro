@@ -61,3 +61,4 @@ FORMS    += mainwindow.ui
 
 win32:INCLUDEPATH += "C:\Program Files\Jack v1.9.6\includes"
 win32:LIBS += $$quote(c:\Program Files\Jack v1.9.6\lib\libjack.a) $$quote(c:\Program Files\Jack v1.9.6\lib\libjackserver.a)
+unix:LIBS += -ljack -lsndfile

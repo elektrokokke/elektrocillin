@@ -80,7 +80,7 @@ jack_nframes_t JackClient::getSampleRate() const
 bool JackClient::connectPorts(const QString &sourcePortName, const QString &destPortName)
 {
     int connect = jack_connect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data());
-    return (connect == 0) || (connect == EEXIST);
+    return (connect == 0);// || (connect == EEXIST);
 }
 
 bool JackClient::disconnectPorts(const QString &sourcePortName, const QString &destPortName)

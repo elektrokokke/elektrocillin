@@ -2,6 +2,8 @@
 #include <cmath>
 
 MonophonicSynthesizer::MonophonicSynthesizer() :
+    frequency(0.0),
+    pitchBendFactor(1.0),
     pulseOsc1(0.1),
     pulseOsc2(2.0 * M_PI - 0.1),
     sawOsc1(0.1),
@@ -30,16 +32,18 @@ void MonophonicSynthesizer::setSampleRate(double sampleRate)
     envelope.setSampleRate(sampleRate);
 }
 
-void MonophonicSynthesizer::setFrequency(double frequency)
+void MonophonicSynthesizer::setFrequency(double frequency, double pitchBendFactor)
 {
-    osc.setFrequency(frequency);
-    pulseOsc1.setFrequency(frequency);
-    pulseOsc2.setFrequency(frequency);
-    sawOsc1.setFrequency(frequency);
-    sawOsc2.setFrequency(frequency);
-    morphOsc1.setFrequency(frequency);
-    morphOsc2.setFrequency(frequency);
-    morphOsc3.setFrequency(frequency);
+    this->frequency = frequency;
+    this->pitchBendFactor = pitchBendFactor;
+    osc.setFrequency(frequency * pitchBendFactor);
+    pulseOsc1.setFrequency(frequency * pitchBendFactor);
+    pulseOsc2.setFrequency(frequency * pitchBendFactor);
+    sawOsc1.setFrequency(frequency * pitchBendFactor);
+    sawOsc2.setFrequency(frequency * pitchBendFactor);
+    morphOsc1.setFrequency(frequency * pitchBendFactor);
+    morphOsc2.setFrequency(frequency * pitchBendFactor);
+    morphOsc3.setFrequency(frequency * pitchBendFactor);
     lfo.setFrequency(morphOsc3.getFrequency() * 0.25);
     lfo2.setFrequency(morphOsc3.getFrequency() * 0.251);
     lfo3.setFrequency(morphOsc3.getFrequency() * 0.1251);
@@ -49,7 +53,7 @@ void MonophonicSynthesizer::pushNote(unsigned char midiNoteNumber)
 {
     midiNoteNumbers.push(midiNoteNumber);
     frequencies.push(computeFrequencyFromMidiNoteNumber(midiNoteNumber));
-    setFrequency(frequencies.top());
+    setFrequency(frequencies.top(), pitchBendFactor);
     // (re-)trigger the ADSR envelope:
     envelope.noteOn();
 }
@@ -65,7 +69,7 @@ void MonophonicSynthesizer::popNote(unsigned char midiNoteNumber)
                 // enter the release phase:
                 envelope.noteOff();
             } else {
-                setFrequency(frequencies.top());
+                setFrequency(frequencies.top(), pitchBendFactor);
                 // retrigger the ADSR envelope:
                 envelope.noteOn();
             }
@@ -79,6 +83,11 @@ void MonophonicSynthesizer::popNote(unsigned char midiNoteNumber)
             }
         }
     }
+}
+
+void MonophonicSynthesizer::setMidiPitch(unsigned int pitch)
+{
+    setFrequency(frequency, computePitchBendFactorFromMidiPitch(pitch));
 }
 
 double MonophonicSynthesizer::nextSample()
@@ -100,4 +109,13 @@ double MonophonicSynthesizer::computeFrequencyFromMidiNoteNumber(unsigned char m
     double octave = ((double)midiNoteNumber - 69.0) / 12.0;
     double frequency = 440.0 * pow(2.0, octave);
     return frequency;
+}
+
+double MonophonicSynthesizer::computePitchBendFactorFromMidiPitch(unsigned int pitch)
+{
+    // center it around 0x2000:
+    int pitchCentered = (int)pitch - 0x2000;
+    // -8192 means minus two half tones => -49152 is one octave => factor 2^(-1)
+    // +8192 means plus two half tones => +49152 is one octave => factor 2^1
+    return pow(2.0, (double)pitchCentered / 49152.0);
 }
