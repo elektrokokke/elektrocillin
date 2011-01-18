@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 class Record2MemoryClient;
+class SimpleMonophonicClient;
 
 namespace Ui {
     class MainWindow;
@@ -27,6 +28,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     Record2MemoryClient *recordClient;
+    SimpleMonophonicClient *simpleMonophonicClient;
 };
 
 #endif // MAINWINDOW_H

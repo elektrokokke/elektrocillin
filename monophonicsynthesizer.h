@@ -17,6 +17,7 @@ public:
     void popNote(unsigned char midiNoteNumber);
 
     void setMidiPitch(unsigned int pitch);
+    void setController(unsigned char controller, unsigned char value);
 
     double nextSample();
 
@@ -26,11 +27,8 @@ protected:
     void setFrequency(double frequency, double pitchBendFactor);
 private:
     double frequency, pitchBendFactor;
-    PulseOscillator osc;
     PulseOscillator pulseOsc1, pulseOsc2;
-    SawtoothOscillator sawOsc1, sawOsc2;
-    MorphingPiecewiseLinearOscillator morphOsc1, morphOsc2, morphOsc3;
-    Oscillator lfo, lfo2, lfo3;
+    MorphingPiecewiseLinearOscillator morphOsc1;
     AdsrEnvelope envelope;
     QStack<double> frequencies;
     QStack<unsigned char> midiNoteNumbers;

@@ -6,11 +6,7 @@ MonophonicSynthesizer::MonophonicSynthesizer() :
     pitchBendFactor(1.0),
     pulseOsc1(0.1),
     pulseOsc2(2.0 * M_PI - 0.1),
-    sawOsc1(0.1),
-    sawOsc2(M_PI - 0.1),
     morphOsc1(&pulseOsc1, &pulseOsc2),
-    morphOsc2(&sawOsc1, &sawOsc2),
-    morphOsc3(&morphOsc1, &morphOsc2),
     envelope(0.001, 0.01, 0.5, 0.5)
 {
 }
@@ -18,17 +14,9 @@ MonophonicSynthesizer::MonophonicSynthesizer() :
 void MonophonicSynthesizer::setSampleRate(double sampleRate)
 {
     AudioSource::setSampleRate(sampleRate);
-    osc.setSampleRate(sampleRate);
     pulseOsc1.setSampleRate(sampleRate);
     pulseOsc2.setSampleRate(sampleRate);
-    sawOsc1.setSampleRate(sampleRate);
-    sawOsc2.setSampleRate(sampleRate);
     morphOsc1.setSampleRate(sampleRate);
-    morphOsc2.setSampleRate(sampleRate);
-    morphOsc3.setSampleRate(sampleRate);
-    lfo.setSampleRate(sampleRate);
-    lfo2.setSampleRate(sampleRate);
-    lfo3.setSampleRate(sampleRate);
     envelope.setSampleRate(sampleRate);
 }
 
@@ -36,17 +24,9 @@ void MonophonicSynthesizer::setFrequency(double frequency, double pitchBendFacto
 {
     this->frequency = frequency;
     this->pitchBendFactor = pitchBendFactor;
-    osc.setFrequency(frequency * pitchBendFactor);
     pulseOsc1.setFrequency(frequency * pitchBendFactor);
     pulseOsc2.setFrequency(frequency * pitchBendFactor);
-    sawOsc1.setFrequency(frequency * pitchBendFactor);
-    sawOsc2.setFrequency(frequency * pitchBendFactor);
     morphOsc1.setFrequency(frequency * pitchBendFactor);
-    morphOsc2.setFrequency(frequency * pitchBendFactor);
-    morphOsc3.setFrequency(frequency * pitchBendFactor);
-    lfo.setFrequency(morphOsc3.getFrequency() * 0.25);
-    lfo2.setFrequency(morphOsc3.getFrequency() * 0.251);
-    lfo3.setFrequency(morphOsc3.getFrequency() * 0.1251);
 }
 
 void MonophonicSynthesizer::pushNote(unsigned char midiNoteNumber)
@@ -90,16 +70,16 @@ void MonophonicSynthesizer::setMidiPitch(unsigned int pitch)
     setFrequency(frequency, computePitchBendFactorFromMidiPitch(pitch));
 }
 
+void MonophonicSynthesizer::setController(unsigned char controller, unsigned char value)
+{
+    morphOsc1.setMorph((double)value / 127.0);
+}
+
 double MonophonicSynthesizer::nextSample()
 {
     // get level from ADSR envelope:
     double envelopeLevel = envelope.nextSample();
-    if (envelopeLevel) {
-        morphOsc1.setMorph(0.5 * lfo.nextSample() + 0.5);
-        morphOsc2.setMorph(0.5 * lfo2.nextSample() + 0.5);
-        morphOsc3.setMorph(0.5 * lfo3.nextSample() + 0.5);
-    }
-    double oscillatorLevel = morphOsc3.nextSample();
+    double oscillatorLevel = morphOsc1.nextSample();
     return envelopeLevel * oscillatorLevel;
 }
 

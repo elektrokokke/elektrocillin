@@ -14,7 +14,7 @@ Midi2AudioClient::Midi2AudioClient(const QString &clientName, const QString &inp
 {
 }
 
-bool Midi2AudioClient::setup()
+bool Midi2AudioClient::init()
 {
     // register input and output ports:
     midiInputPort = registerMidiPort(midiInputPortName, JackPortIsInput);

@@ -1,6 +1,7 @@
 #include "record2memoryclient.h"
 #include "jack/midiport.h"
 #include <QApplication>
+#include <QDebug>
 
 const size_t Record2MemoryClient::ringBufferSize = 2 << 20;
 
@@ -10,12 +11,14 @@ Record2MemoryClient::Record2MemoryClient(const QString &clientName, QObject *par
     isRecordingProcess(false),
     audioModelRun(0)
 {
-    // create the ring buffer:
+    // create the ring buffers:
     ringBuffer = jack_ringbuffer_create(ringBufferSize);
+    ringBufferStopThread = jack_ringbuffer_create(1);
 }
 
 Record2MemoryClient::~Record2MemoryClient()
 {
+    close();
     // delete the ring buffer:
     if (ringBuffer) {
         jack_ringbuffer_free(ringBuffer);
@@ -64,7 +67,7 @@ JackAudioModel * Record2MemoryClient::popAudioModel()
     return model;
 }
 
-bool Record2MemoryClient::setup()
+bool Record2MemoryClient::init()
 {
     // start the QThread:
     if (!isRunning()) {
@@ -74,6 +77,16 @@ bool Record2MemoryClient::setup()
     audioIn = registerAudioPort("audio in", JackPortIsInput);
     midiIn = registerMidiPort("midi in", JackPortIsInput);
     return (ringBuffer && audioIn && midiIn);
+}
+
+void Record2MemoryClient::deinit()
+{
+    // tell the QThread to shut down:
+    char dummy = 0;
+    jack_ringbuffer_write(ringBufferStopThread, &dummy, 1);
+    waitForAudio.wakeOne();
+    // wait for the thread:
+    wait();
 }
 
 bool Record2MemoryClient::process(jack_nframes_t nframes)
@@ -134,9 +147,10 @@ bool Record2MemoryClient::process(jack_nframes_t nframes)
 
 void Record2MemoryClient::run()
 {
+    qDebug() << "Record2MemoryClient::run() : starting thread";
     // mutex has to be locked to be used for the wait condition:
     mutexForAudio.lock();
-    for (; true; ) {
+    for (; jack_ringbuffer_read_space(ringBufferStopThread) == 0; ) {
         // wait for audio to record:
         waitForAudio.wait(&mutexForAudio);
         // read how many frames there are in the ring buffer:
@@ -173,4 +187,7 @@ void Record2MemoryClient::run()
             }
         }
     }
+    qDebug() << "Record2MemoryClient::run() : shutting down thread";
+    char dummy;
+    jack_ringbuffer_read(ringBufferStopThread, &dummy, 1);
 }

@@ -8,9 +8,9 @@ SimpleMonophonicClient::SimpleMonophonicClient(const QString &clientName) :
 {
 }
 
-bool SimpleMonophonicClient::setup()
+bool SimpleMonophonicClient::init()
 {
-    if (!Midi2AudioClient::setup()) {
+    if (!Midi2AudioClient::init()) {
         return false;
     }
     // initialize the oscillator with the current sample rate:
@@ -54,6 +54,11 @@ bool SimpleMonophonicClient::process(jack_nframes_t nframes)
                     // note off event:
                     synthesizer.popNote(noteNumber);
                 }
+            } else if (highNibble == 0x0B) {
+                // control change:
+                unsigned char controller = midiEvent.buffer[1];
+                unsigned char value = midiEvent.buffer[2];
+                synthesizer.setController(controller, value);
             } else if (highNibble == 0x0E) {
                 // pitch wheel:
                 unsigned char low = midiEvent.buffer[1];

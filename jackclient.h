@@ -23,7 +23,11 @@ protected:
       This is called before the jack client is activated.
       You should register the input and output ports here.
       */
-    virtual bool setup() = 0;
+    virtual bool init() = 0;
+    /**
+      This is called after the jack client is closed.
+      */
+    virtual void deinit();
     /**
       This is called in the jack process thread.
       It must not use any locks, e.g., allocate memory, access

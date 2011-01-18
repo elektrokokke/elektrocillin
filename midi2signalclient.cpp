@@ -10,10 +10,12 @@ Midi2SignalClient::Midi2SignalClient(const QString &clientName, QObject *parent)
     // create the ring buffers:
     ringBufferIn = jack_ringbuffer_create(ringBufferSize);
     ringBufferOut = jack_ringbuffer_create(ringBufferSize);
+    ringBufferStopThread = jack_ringbuffer_create(1);
 }
 
 Midi2SignalClient::~Midi2SignalClient()
 {
+    close();
     if (ringBufferIn) {
         jack_ringbuffer_free(ringBufferIn);
     }
@@ -22,7 +24,7 @@ Midi2SignalClient::~Midi2SignalClient()
     }
 }
 
-bool Midi2SignalClient::setup()
+bool Midi2SignalClient::init()
 {
     // start the QThread:
     if (!isRunning()) {
@@ -32,6 +34,16 @@ bool Midi2SignalClient::setup()
     midiIn = registerMidiPort("midi in", JackPortIsInput);
     midiOut = registerMidiPort("midi out", JackPortIsOutput);
     return (ringBufferIn && ringBufferOut && midiIn && midiOut);
+}
+
+void Midi2SignalClient::deinit()
+{
+    // tell the QThread to shut down:
+    char dummy = 0;
+    jack_ringbuffer_write(ringBufferStopThread, &dummy, 1);
+    waitForMidi.wakeOne();
+    // wait for the thread:
+    wait();
 }
 
 bool Midi2SignalClient::process(jack_nframes_t nframes)
@@ -103,9 +115,10 @@ bool Midi2SignalClient::process(jack_nframes_t nframes)
 
 void Midi2SignalClient::run()
 {
+    qDebug() << "Midi2SignalClient::run() : starting thread";
     // mutex has to be locked to be used for the wait condition:
     mutexForMidi.lock();
-    for (; true; ) {
+    for (; jack_ringbuffer_read_space(ringBufferStopThread) == 0; ) {
         // wait for midi input:
         waitForMidi.wait(&mutexForMidi);
         // read midi input from the ring buffer:
@@ -168,6 +181,9 @@ void Midi2SignalClient::run()
             }
         }
     }
+    qDebug() << "Midi2SignalClient::run() : shutting down thread";
+    char dummy;
+    jack_ringbuffer_read(ringBufferStopThread, &dummy, 1);
 }
 
 void Midi2SignalClient::writeMidiEventToOutputRingBuffer(const MidiMessage &message)

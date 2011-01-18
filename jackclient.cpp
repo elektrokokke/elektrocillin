@@ -25,7 +25,7 @@ bool JackClient::activate()
         return false;
     }
     // setup input and output ports:
-    if (!setup()) {
+    if (!init()) {
         jack_client_close(client);
         client = 0;
         return false;
@@ -42,9 +42,17 @@ bool JackClient::activate()
 
 void JackClient::close()
 {
-    // close the Jack client:
-    jack_client_close(client);
-    client = 0;
+    if (isActive()) {
+        // close the Jack client:
+        jack_client_close(client);
+        client = 0;
+        // notify subclasses:
+        deinit();
+    }
+}
+
+void JackClient::deinit()
+{
 }
 
 bool JackClient::isActive() const

@@ -24,7 +24,8 @@ public:
 
 protected:
     // reimplemented methods from JackClient:
-    virtual bool setup();
+    virtual bool init();
+    virtual void deinit();
     virtual bool process(jack_nframes_t nframes);
     // reimplemented methods from QThread:
     virtual void run();
@@ -50,8 +51,8 @@ public slots:
     void sendPitchWheel(unsigned char channel, unsigned int pitch);
 
 private:
-    // use lock-free ring buffers for communication with the Jack process thread:
-    jack_ringbuffer_t *ringBufferIn, *ringBufferOut;
+    // use lock-free ring buffers for communication between threads:
+    jack_ringbuffer_t *ringBufferIn, *ringBufferOut, *ringBufferStopThread;
     // provide one midi in- and output:
     jack_port_t *midiIn, *midiOut;
     // wait condition to wait for midi input:

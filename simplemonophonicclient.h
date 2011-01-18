@@ -10,7 +10,7 @@ public:
     SimpleMonophonicClient(const QString &clientName);
 
 protected:
-    virtual bool setup();
+    virtual bool init();
     virtual bool process(jack_nframes_t nframes);
 
 private:

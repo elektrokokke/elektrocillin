@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(recordClient, SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
     QObject::connect(recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
 
-    SimpleMonophonicClient *simpleMonophonicClient = new SimpleMonophonicClient("synthesizer");
+    simpleMonophonicClient = new SimpleMonophonicClient("synthesizer");
     simpleMonophonicClient->activate();
     if (simpleMonophonicClient->isActive()) {
         simpleMonophonicClient->connectPorts("system_midi:capture_4", "synthesizer:midi in");
@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    simpleMonophonicClient->close();
     delete ui;
 }
 

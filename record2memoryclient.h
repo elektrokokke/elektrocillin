@@ -26,14 +26,15 @@ signals:
 
 protected:
     // reimplemented methods from JackClient:
-    virtual bool setup();
+    virtual bool init();
+    virtual void deinit();
     virtual bool process(jack_nframes_t nframes);
     // reimplemented methods from QThread:
     virtual void run();
 
 private:
-    // use a lock-free ring buffer for communication with the Jack process thread:
-    jack_ringbuffer_t *ringBuffer;
+    // use a lock-free ring buffer for communication between threads:
+    jack_ringbuffer_t *ringBuffer, *ringBufferStopThread;
     // provide an audio and a midi input port:
     jack_port_t *audioIn, *midiIn;
     // wait condition to wait for audio to record:
