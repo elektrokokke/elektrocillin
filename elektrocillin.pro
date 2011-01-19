@@ -33,7 +33,10 @@ SOURCES += main.cpp\
     floattablemodel.cpp \
     jackaudiomodel.cpp \
     record2memoryclient.cpp \
-    midipitchslider.cpp
+    midipitchslider.cpp \
+    graphicsnodeitem.cpp \
+    graphicsloglineitem.cpp \
+    graphicslineitem.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -57,7 +60,10 @@ HEADERS  += mainwindow.h \
     floattablemodel.h \
     jackaudiomodel.h \
     record2memoryclient.h \
-    midipitchslider.h
+    midipitchslider.h \
+    graphicsnodeitem.h \
+    graphicsloglineitem.h \
+    graphicslineitem.h
 
 FORMS    += mainwindow.ui
 
