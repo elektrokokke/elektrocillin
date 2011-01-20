@@ -1,8 +1,10 @@
 #include "zplanefilter.h"
 #include "polynomial.h"
 #include <cmath>
+#include <QDebug>
 
-ZPlaneFilter::ZPlaneFilter()
+ZPlaneFilter::ZPlaneFilter() :
+    gainFactor(1.0)
 {
 }
 
@@ -23,8 +25,9 @@ double ZPlaneFilter::filter(double x0)
         y[0] += x[i] * feedforwardCoefficients[i];
     }
     for (size_t i = 1; i < feedbackCoefficients.size(); i++) {
-        y[0] += y[i] * feedbackCoefficients[i];
+        y[0] -= y[i] * feedbackCoefficients[i];
     }
+    y[0] *= gainFactor;
     return y[0].real();
 }
 
@@ -38,6 +41,16 @@ void ZPlaneFilter::addZero(const std::complex<double> &zero)
     zeros.push_back(zero);
 }
 
+size_t ZPlaneFilter::poleCount() const
+{
+    return poles.size();
+}
+
+size_t ZPlaneFilter::zeroCount() const
+{
+    return zeros.size();
+}
+
 std::complex<double> & ZPlaneFilter::pole(size_t i)
 {
     return poles[i];
@@ -46,6 +59,16 @@ std::complex<double> & ZPlaneFilter::pole(size_t i)
 std::complex<double> & ZPlaneFilter::zero(size_t i)
 {
     return zeros[i];
+}
+
+void ZPlaneFilter::setGainFactor(double gainFactor)
+{
+    this->gainFactor = gainFactor;
+}
+
+double ZPlaneFilter::getGainFactor() const
+{
+    return gainFactor;
 }
 
 double ZPlaneFilter::squaredAmplitudeResponse(double frequencyInRadians)
@@ -70,7 +93,7 @@ std::complex<double> ZPlaneFilter::frequencyResponse(const std::complex<double> 
     for (size_t i = 0; i < poles.size(); i++) {
         denominator *= (z - poles[i]);
     }
-    return numerator / denominator;
+    return gainFactor * numerator / denominator;
 }
 
 void ZPlaneFilter::computeCoefficients()
@@ -79,17 +102,27 @@ void ZPlaneFilter::computeCoefficients()
     // compute numerator and denominator:
     Polynomial<std::complex<double> > numerator(one);
     for (size_t i = 0; i < zeros.size(); i++) {
-        numerator *= Polynomial<std::complex<double> >(one, -zeros[i]);
+        Polynomial<std::complex<double> > zero(one, -zeros[i]);
+        qDebug() << "(" << zero[0].real() << "," << zero[0].imag() << "* i) + (" << zero[1].real() << "," << zero[1].imag() << "* i) * z^-1";
+        numerator *= zero;
     }
     Polynomial<std::complex<double> > denominator(one);
     for (size_t i = 0; i < poles.size(); i++) {
-        denominator *= Polynomial<std::complex<double> >(one, -poles[i]);
+        Polynomial<std::complex<double> > pole(one, -poles[i]);
+        qDebug() << "(" << pole[0].real() << "," << pole[0].imag() << "* i) + (" << pole[1].real() << "," << pole[1].imag() << "* i) * z^-1";
+        denominator *= pole;
     }
-    // normalize by the constant in the denominator polynomial:
-    numerator *= one / denominator[0];
-    denominator *= one / denominator[0];
+    // note: feedforwardCoefficients[0] and feedbackCoefficients[0] will always be 1
     feedforwardCoefficients = numerator;
     feedbackCoefficients = denominator;
+    qDebug() << "numerator";
+    for (size_t i = 0; i < feedforwardCoefficients.size(); i++) {
+        qDebug() << feedforwardCoefficients[i].real();
+    }
+    qDebug() << "denominator";
+    for (size_t i = 0; i < feedbackCoefficients.size(); i++) {
+        qDebug() << feedbackCoefficients[i].real();
+    }
 }
 
 double ZPlaneFilter::convertPowerToDecibel(double power)

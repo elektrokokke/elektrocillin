@@ -57,14 +57,17 @@ public:
     // multiply with another polynomial:
     Polynomial<T>& operator*=(const Polynomial<T> &tomultiply)
     {
-        size_t oldSize = std::vector<T>::size();
-        resize(degree() + tomultiply.degree() + 1);
-        for (size_t i = oldSize; i != 0; ) {
+        std::vector<T> product(degree() + tomultiply.degree() + 1);
+        for (size_t i = std::vector<T>::size(); i != 0; ) {
             i--;
             for (size_t j = tomultiply.size(); j != 0; ) {
                 j--;
-                std::vector<T>::at(i + j) = std::vector<T>::at(i) * tomultiply.at(j);
+                product.at(i + j) += std::vector<T>::at(i) * tomultiply.at(j);
             }
+        }
+        resize(product.size());
+        for (size_t i = 0; i < std::vector<T>::size(); i++) {
+            std::vector<T>::at(i) = product.at(i);
         }
         return *this;
     }

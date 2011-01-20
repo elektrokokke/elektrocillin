@@ -10,6 +10,10 @@ namespace Ui {
     class ZPlaneWidget;
 }
 
+class QGraphicsEllipseItem;
+class QGraphicsRectItem;
+class QGraphicsScene;
+
 class ZPlaneWidget : public QWidget
 {
     Q_OBJECT
@@ -21,13 +25,17 @@ public:
 private:
     Ui::ZPlaneWidget *ui;
     int xscale, yscale;
-    ZPlaneFilter filter2pole, filter4pole;
-    QVector<double> squaredAmplitudeResponse2pole, squaredAmplitudeResponse4pole;
-    QVector<QGraphicsLineItem*> lines2pole, lines4pole;
+    ZPlaneFilter filter2pole;
+    QVector<double> squaredAmplitudeResponse2pole;
+    QGraphicsScene *scene;
+    QVector<QGraphicsLineItem*> lines2pole;
+    QVector<QGraphicsEllipseItem*> zeroItems;
+    QVector<QGraphicsRectItem*> poleItems;
+
+    void drawButterworthPoleTrail();
 
 private slots:
     void updateFrequencyResponse2pole();
-    void updateFrequencyResponse4pole();
 };
 
 #endif // ZPLANEWIDGET_H

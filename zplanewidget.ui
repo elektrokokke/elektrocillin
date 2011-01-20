@@ -19,7 +19,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox2Pole">
        <property name="title">
-        <string>2-pole filter parameters</string>
+        <string>2-pole butterworth filter</string>
        </property>
        <layout class="QFormLayout" name="formLayout">
         <property name="fieldGrowthPolicy">
@@ -28,7 +28,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="labelFrequency">
           <property name="text">
-           <string>Frequency in radians</string>
+           <string>Normalized frequency</string>
           </property>
          </widget>
         </item>
@@ -38,27 +38,7 @@
            <number>2</number>
           </property>
           <property name="maximum">
-           <double>3.140000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.570000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="labelQFactor">
-          <property name="text">
-           <string>Q factor</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="spinBoxQFactor">
-          <property name="maximum">
-           <double>0.990000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="singleStep">
            <double>0.010000000000000</double>
