@@ -36,7 +36,10 @@ SOURCES += main.cpp\
     midipitchslider.cpp \
     graphicsnodeitem.cpp \
     graphicsloglineitem.cpp \
-    graphicslineitem.cpp
+    graphicslineitem.cpp \
+    zplanefilter.cpp \
+    polynomial.cpp \
+    zplanewidget.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -63,9 +66,13 @@ HEADERS  += mainwindow.h \
     midipitchslider.h \
     graphicsnodeitem.h \
     graphicsloglineitem.h \
-    graphicslineitem.h
+    graphicslineitem.h \
+    zplanefilter.h \
+    polynomial.h \
+    zplanewidget.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    zplanewidget.ui
 
 win32:INCLUDEPATH += "C:\Program Files\Jack v1.9.6\includes"
 win32:LIBS += $$quote(c:\Program Files\Jack v1.9.6\lib\libjack.a) $$quote(c:\Program Files\Jack v1.9.6\lib\libjackserver.a)
