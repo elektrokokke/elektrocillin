@@ -1,4 +1,5 @@
 #include "midicontrollerslider.h"
+#include <QDebug>
 
 MidiControllerSlider::MidiControllerSlider(QWidget *parent) :
     QSlider(parent),
@@ -36,6 +37,7 @@ void MidiControllerSlider::onControlChange(unsigned char channel, unsigned char 
 {
     // check if the control change has the right channel and controller number:
     if ((channel == this->channel) && (controller == this->controller)) {
+        //qDebug() << "controller value changed to" << value;
         // set the slider accordingly:
         changingValue = true;
         setValue(value);

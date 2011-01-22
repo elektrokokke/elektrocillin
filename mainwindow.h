@@ -5,6 +5,7 @@
 
 class Record2MemoryClient;
 class SimpleMonophonicClient;
+class MidiController2AudioClient;
 
 namespace Ui {
     class MainWindow;
@@ -29,6 +30,7 @@ private:
     Ui::MainWindow *ui;
     Record2MemoryClient *recordClient;
     SimpleMonophonicClient *simpleMonophonicClient;
+    MidiController2AudioClient *midiControllerClient;
 };
 
 #endif // MAINWINDOW_H

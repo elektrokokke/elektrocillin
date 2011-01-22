@@ -39,7 +39,8 @@ SOURCES += main.cpp\
     graphicslineitem.cpp \
     zplanefilter.cpp \
     polynomial.cpp \
-    zplanewidget.cpp
+    zplanewidget.cpp \
+    midicontroller2audioclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -69,7 +70,8 @@ HEADERS  += mainwindow.h \
     graphicslineitem.h \
     zplanefilter.h \
     polynomial.h \
-    zplanewidget.h
+    zplanewidget.h \
+    midicontroller2audioclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

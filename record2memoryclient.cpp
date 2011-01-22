@@ -8,8 +8,8 @@ const size_t Record2MemoryClient::ringBufferSize = 2 << 20;
 Record2MemoryClient::Record2MemoryClient(const QString &clientName, QObject *parent) :
     QThread(parent),
     JackClient(clientName),
-    isRecordingProcess(false),
-    audioModelRun(0)
+    isRecording_process(false),
+    audioModel_run(0)
 {
     // create the ring buffers:
     ringBuffer = jack_ringbuffer_create(ringBufferSize);
@@ -73,6 +73,7 @@ bool Record2MemoryClient::init()
     if (!isRunning()) {
         start();
     }
+    isRecording_process = false;
     // setup the audio and midi input ports:
     audioIn = registerAudioPort("audio in", JackPortIsInput);
     midiIn = registerMidiPort("midi in", JackPortIsInput);
@@ -94,44 +95,59 @@ bool Record2MemoryClient::process(jack_nframes_t nframes)
     // get port buffers:
     jack_default_audio_sample_t *audioBuffer = (jack_default_audio_sample_t*)jack_port_get_buffer(audioIn, nframes);
     void *midiInputBuffer = jack_port_get_buffer(midiIn, nframes);
-    jack_nframes_t recordingStart = 0;
-    // test if all frames are zero (then recording will stop):
-    if (isRecordingProcess) {
-        bool stopRecording = true;
-        for (jack_nframes_t i = 0; stopRecording && (i < nframes); i++) {
-            stopRecording = (audioBuffer[i] == 0);
-        }
-        if (stopRecording) {
-            // tell the QThread that recording has stopped:
-            jack_nframes_t framesToWrite = 0;
-            if (jack_ringbuffer_write_space(ringBuffer) >= sizeof(jack_nframes_t)) {
-                jack_ringbuffer_write(ringBuffer, (const char*)&framesToWrite, sizeof(jack_nframes_t));
-                isRecordingProcess = false;
-                // tell the QThread that recording has finished:
-                waitForAudio.wakeOne();
+    jack_nframes_t recordingStart = 0, recordingStop = nframes;
+    jack_nframes_t midiInCount = jack_midi_get_event_count(midiInputBuffer);
+    for (jack_nframes_t midiInIndex = 0; midiInIndex < midiInCount; midiInIndex++) {
+        // read from midi input port and wait for record signals (note on or off):
+        jack_midi_event_t midiEvent;
+        jack_midi_event_get(&midiEvent, midiInputBuffer, midiInIndex);
+        // look explicitly for note on and off messages:
+        if (midiEvent.size == 3) {
+            bool noteOn = false, noteOff = false;
+            if ((midiEvent.buffer[0] >> 4) == 0x09) {
+                noteOn = midiEvent.buffer[2];
+                noteOff = !noteOn;
+            } else if ((midiEvent.buffer[0] >> 4) == 0x08) {
+                noteOff = true;
             }
-        }
-    } else {
-        // read from midi input port and wait for the record signal (note on):
-        jack_nframes_t midiInCount = jack_midi_get_event_count(midiInputBuffer);
-        for (jack_nframes_t midiInIndex = 0; !isRecordingProcess && (midiInIndex < midiInCount); midiInIndex++) {
-            jack_midi_event_t midiEvent;
-            jack_midi_event_get(&midiEvent, midiInputBuffer, midiInIndex);
-            // look explicitly for note on messages:
-            if (midiEvent.size == 3) {
-                if ((midiEvent.buffer[0] >> 4) == 0x09) {
-                    isRecordingProcess = true;
+            if (!isRecording_process) {
+                // if we are not recording we look for note on messages with non-zero velocity:
+                if (noteOn) {
+                    isRecording_process = true;
                     recordingStart = midiEvent.time;
+                    // remember on which channel and which note the trigger was:
+                    channelRecordTrigger_process = midiEvent.buffer[0] & 0x0F;
+                    noteRecordTrigger_process = midiEvent.buffer[1];
+                }
+            } else {
+                // otherwise we look for note off messages or note on messages with zero velocity:
+                // also we look only for the trigger channel and note number...
+                if (noteOff && ((midiEvent.buffer[0] & 0x0F) == channelRecordTrigger_process) && (midiEvent.buffer[1] == noteRecordTrigger_process)) {
+                    isRecording_process = false;
+                    recordingStop = midiEvent.time;
+                    // do the recording for the given segment:
+                    // (record starting with frame at recordingStart, and ends with recordingStop)
+                    // i.e., put all frames starting with that into the ring buffer:
+                    jack_nframes_t framesToWrite = recordingStop - recordingStart;
+                    size_t bytesToWrite = framesToWrite * sizeof(jack_default_audio_sample_t);
+                    if (jack_ringbuffer_write_space(ringBuffer) >= sizeof(jack_nframes_t) + bytesToWrite + sizeof(jack_nframes_t)) {
+                        // tell the QThread how many frames there are:
+                        jack_ringbuffer_write(ringBuffer, (const char*)&framesToWrite, sizeof(jack_nframes_t));
+                        // write the frames:
+                        jack_ringbuffer_write(ringBuffer, (const char*)(audioBuffer + recordingStart), bytesToWrite);
+                        // tell the QThread to also stop recording:
+                        framesToWrite = 0;
+                        jack_ringbuffer_write(ringBuffer, (const char*)&framesToWrite, sizeof(jack_nframes_t));
+                        // tell the QThread to wake up and read from the ring buffer:
+                        waitForAudio.wakeOne();
+                    }
                 }
             }
         }
-
     }
-    // so, are we recording?
-    if (isRecordingProcess) {
-        // record starting with frame at recordingStart,
-        // i.e., put all frames starting with that into the ring buffer:
-        jack_nframes_t framesToWrite = nframes - recordingStart;
+    // do all recording that isn't done yet:
+    if (isRecording_process) {
+        jack_nframes_t framesToWrite = recordingStop - recordingStart;
         size_t bytesToWrite = framesToWrite * sizeof(jack_default_audio_sample_t);
         if (jack_ringbuffer_write_space(ringBuffer) >= sizeof(jack_nframes_t) + bytesToWrite) {
             // tell the QThread how many frames there are:
@@ -160,30 +176,30 @@ void Record2MemoryClient::run()
             if (framesToRead == 0) {
                 jack_ringbuffer_read_advance(ringBuffer, sizeof(jack_nframes_t));
                 // recording has stopped:
-                if (audioModelRun) {
+                if (audioModel_run) {
                     // push the model into the application thread:
-                    audioModelRun->moveToThread(qApp->thread());
+                    audioModel_run->moveToThread(qApp->thread());
                     // lock the mutex first:
                     audioModelsMutex.lock();
                     // put the model in the vector:
-                    audioModels.append(audioModelRun);
+                    audioModels.append(audioModel_run);
                     // free the mutex:
                     audioModelsMutex.unlock();
-                    audioModelRun = 0;
+                    audioModel_run = 0;
                     // invoke the corresponding signal:
                     recordingFinished();
                 }
             } else if (jack_ringbuffer_read_space(ringBuffer) >= sizeof(jack_nframes_t) + framesToRead * sizeof(jack_default_audio_sample_t)) {
-                if (!audioModelRun) {
+                if (!audioModel_run) {
                     recordingStarted();
                     // create the audio model:
-                    audioModelRun = new JackAudioModel();
+                    audioModel_run = new JackAudioModel();
                     // create a column in the audio model:
-                    audioModelRun->insertColumn(0);
+                    audioModel_run->insertColumn(0);
                 }
                 jack_ringbuffer_read_advance(ringBuffer, sizeof(jack_nframes_t));
                 // read audio data from the ring buffer and put it into our audio model:
-                audioModelRun->appendRowsFromRingBuffer(framesToRead, ringBuffer);
+                audioModel_run->appendRowsFromRingBuffer(framesToRead, ringBuffer);
             }
         }
     }

@@ -42,9 +42,11 @@ private:
     // corresponding mutex:
     QMutex mutexForAudio;
     // this variable is accessed only from the process() method!
-    bool isRecordingProcess;
+    bool isRecording_process;
+    // these, too:
+    unsigned char channelRecordTrigger_process, noteRecordTrigger_process;
     // this variable is only access from the QThread run() method, until recording is finished!
-    JackAudioModel *audioModelRun;
+    JackAudioModel *audioModel_run;
     // this variable is accessed from anywhere, but only by using the below mutex for synchronization:
     QVector<JackAudioModel*> audioModels;
     // mutex for accessing the vector of audio models:

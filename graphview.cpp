@@ -257,7 +257,7 @@ void GraphView::paintEvent(QPaintEvent *p_event)
             if (endRow >= model()->rowCount())
                 endRow = model()->rowCount() - 1;
 
-            int heightWithoutSpacing = height() - spacing() * (bars() - 1);
+            int heightWithoutSpacing = viewport()->height() - spacing() * (bars() - 1);
             int barHeight = heightWithoutSpacing / bars();
             for (int col = model()->columnCount() - 1; col >= 0; col--) {
                 QPen penLight = pens[(col / bars()) % pens.size()];

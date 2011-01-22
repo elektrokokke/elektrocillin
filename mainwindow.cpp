@@ -6,6 +6,7 @@
 #include "graphicslineitem.h"
 #include "graphicsloglineitem.h"
 #include "graphicsnodeitem.h"
+#include "midicontroller2audioclient.h"
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -13,30 +14,34 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->horizontalSlider_2->setController(1);
     QObject::connect(ui->spinBoxZoom, SIGNAL(valueChanged(int)), ui->audioView, SLOT(setHorizontalScale(int)));
 
-//    recordClient = new Record2MemoryClient("record");
-//    recordClient->activate();
-//    QObject::connect(recordClient, SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
-//    QObject::connect(recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
+    recordClient = new Record2MemoryClient("record");
+    recordClient->activate();
+    recordClient->connectPorts("system_midi:capture_4", "record:midi in");
+    QObject::connect(recordClient, SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
+    QObject::connect(recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
 
 //    simpleMonophonicClient = new SimpleMonophonicClient("synthesizer");
 //    simpleMonophonicClient->activate();
-//    if (simpleMonophonicClient->isActive()) {
-//        simpleMonophonicClient->connectPorts("system_midi:capture_4", "synthesizer:midi in");
-//        simpleMonophonicClient->connectPorts("synthesizer:audio out", "system:playback_1");
-//        simpleMonophonicClient->connectPorts("synthesizer:audio out", "system:playback_2");
-//        simpleMonophonicClient->connectPorts("synthesizer:audio out", "record:audio in");
-//        simpleMonophonicClient->connectPorts("system_midi:capture_4", "record:midi in");
-//    } else {
-//        qDebug() << "client could not be acivated...";
-//    }
+//    simpleMonophonicClient->connectPorts("system_midi:capture_4", "synthesizer:midi in");
+//    simpleMonophonicClient->connectPorts("synthesizer:audio out", "system:playback_1");
+//    simpleMonophonicClient->connectPorts("synthesizer:audio out", "system:playback_2");
+//    simpleMonophonicClient->connectPorts("synthesizer:audio out", "record:audio in");
+//    simpleMonophonicClient->connectPorts("system_midi:capture_4", "record:midi in");
 
-//    Midi2SignalClient *midiClient = new Midi2SignalClient("signals/slots", this);
-//    midiClient->activate();
+    midiControllerClient = new MidiController2AudioClient("controller", 0, 1);
+    midiControllerClient->activate();
+    midiControllerClient->connectPorts("system_midi:capture_4", "controller:midi in");
+    midiControllerClient->connectPorts("controller:audio out", "record:audio in");
 
-//    QObject::connect(ui->horizontalSlider, SIGNAL(pitchWheel(unsigned char,uint)), midiClient, SLOT(sendPitchWheel(unsigned char,uint)));
-//    QObject::connect(midiClient, SIGNAL(receivedPitchWheel(unsigned char,uint)), ui->horizontalSlider, SLOT(onPitchWheel(unsigned char,uint)));
+    Midi2SignalClient *midiClient = new Midi2SignalClient("signals/slots", this);
+    midiClient->activate();
+    midiClient->connectPorts("system_midi:capture_4", "signals/slots:midi in");
+    //QObject::connect(midiClient, SIGNAL(receivedControlChange(unsigned char,unsigned char,unsigned char)), this, SLOT(onMidiMessage(unsigned char,unsigned char,unsigned char)));
+    QObject::connect(midiClient, SIGNAL(receivedControlChange(unsigned char,unsigned char,unsigned char)), ui->horizontalSlider_2, SLOT(onControlChange(unsigned char,unsigned char,unsigned char)));
+    QObject::connect(midiClient, SIGNAL(receivedPitchWheel(unsigned char,uint)), ui->horizontalSlider, SLOT(onPitchWheel(unsigned char,uint)));
 
 //    // add a GraphicsNodeItem to the graphics scene:
 //    QGraphicsScene * scene = new QGraphicsScene();
@@ -93,6 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     //simpleMonophonicClient->close();
+    midiControllerClient->close();
     delete ui;
 }
 
@@ -115,7 +121,7 @@ void MainWindow::onRecordingFinished()
     }
 }
 
-void MainWindow::onMidiMessage(unsigned char, unsigned char, unsigned char)
+void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char m3)
 {
-    qDebug() << "received midi message";
+    qDebug() << "received midi message" << m1 << m2 << m3;
 }
