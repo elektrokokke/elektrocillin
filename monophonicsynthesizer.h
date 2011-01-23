@@ -6,6 +6,7 @@
 #include "sawtoothoscillator.h"
 #include "pulseoscillator.h"
 #include "adsrenvelope.h"
+#include "butterworth2polefilter.h"
 #include <QStack>
 
 class MonophonicSynthesizer : public AudioSource
@@ -30,6 +31,7 @@ private:
     PulseOscillator pulseOsc1, pulseOsc2;
     MorphingPiecewiseLinearOscillator morphOsc1;
     AdsrEnvelope envelope;
+    Butterworth2PoleFilter filter;
     QStack<double> frequencies;
     QStack<unsigned char> midiNoteNumbers;
 

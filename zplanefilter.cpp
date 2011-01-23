@@ -4,31 +4,39 @@
 #include <QDebug>
 
 ZPlaneFilter::ZPlaneFilter() :
-    gainFactor(1.0)
+    tx(0),
+    ty(0)
 {
 }
 
 double ZPlaneFilter::filter(double x0)
 {
-    // move previous x and y values one step back:
-    x.insert(x.begin(), 1, std::complex<double>(x0, 0.0));
-    y.insert(y.begin(), 1, std::complex<double>(0.0, 0.0));
-    // we just need as many previous values/results as we have coefficients:
-    if (x.size() != feedforwardCoefficients.size()) {
-        x.resize(feedforwardCoefficients.size());
+    // set the current x:
+    x[tx] = x0;
+    // compute current y:
+    y[ty] = 0.0;
+    for (size_t i = 0; i < x.size(); i++) {
+        y[ty] += x[(tx + i) % x.size()] * feedforwardCoefficients[i];
     }
-    if (y.size() != feedbackCoefficients.size()) {
-        y.resize(feedbackCoefficients.size());
+    for (size_t i = 1; i < y.size(); i++) {
+        y[ty] -= y[(ty + i) % y.size()] * feedbackCoefficients[i];
     }
-    // compute the current value:
-    for (size_t i = 0; i < feedforwardCoefficients.size(); i++) {
-        y[0] += x[i] * feedforwardCoefficients[i];
+    double result = y[ty];
+    // advance the position for previous results:
+    tx = (tx + x.size() - 1) % x.size();
+    ty = (ty + y.size() - 1) % y.size();
+    return result;
+}
+
+void ZPlaneFilter::reset()
+{
+    for (size_t i = 0; i < x.size(); i++) {
+        x[i] = 0.0;
     }
-    for (size_t i = 1; i < feedbackCoefficients.size(); i++) {
-        y[0] -= y[i] * feedbackCoefficients[i];
+    for (size_t i = 0; i < y.size(); i++) {
+        y[i] = 0.0;
     }
-    y[0] *= gainFactor;
-    return y[0].real();
+    tx = ty = 0;
 }
 
 void ZPlaneFilter::addPole(const std::complex<double> &pole)
@@ -61,16 +69,6 @@ std::complex<double> & ZPlaneFilter::zero(size_t i)
     return zeros[i];
 }
 
-void ZPlaneFilter::setGainFactor(double gainFactor)
-{
-    this->gainFactor = gainFactor;
-}
-
-double ZPlaneFilter::getGainFactor() const
-{
-    return gainFactor;
-}
-
 double ZPlaneFilter::squaredAmplitudeResponse(double frequencyInRadians)
 {
     // compute the squared amplitude response (power) from the frequency response:
@@ -86,42 +84,90 @@ std::complex<double> ZPlaneFilter::frequencyResponse(double frequencyInRadians)
 std::complex<double> ZPlaneFilter::frequencyResponse(const std::complex<double> z)
 {
     // evaluate based on the pole/zero representation:
-    std::complex<double> numerator(1.0, 0.0), denominator(1.0, 0.0);
-    for (size_t i = 0; i < zeros.size(); i++) {
-        numerator *= (z - zeros[i]);
+    std::complex<double> result = 0.0;
+    {
+        std::complex<double> n(1.0, 0.0), d(1.0, 0.0);
+        for (size_t i = 0; i < zeros.size(); i++) {
+            n *= (z - zeros[i]);
+        }
+        for (size_t i = 0; i < poles.size(); i++) {
+            d *= (z - poles[i]);
+        }
+        //qDebug() << "simple computation" << n.real() << n.imag() << "/" << d.real() << d.imag();
+        result = n/d;
     }
-    for (size_t i = 0; i < poles.size(); i++) {
-        denominator *= (z - poles[i]);
+    {
+        // compute numerator and denominator:
+        Polynomial<std::complex<double> > numerator(1.0);
+        for (size_t i = 0; i < zeros.size(); i++) {
+            Polynomial<std::complex<double> > zero(1.0, -zeros[i]);
+            numerator *= zero;
+        }
+        Polynomial<std::complex<double> > denominator(1.0);
+        for (size_t i = 0; i < poles.size(); i++) {
+            Polynomial<std::complex<double> > pole(1.0, -poles[i]);
+            denominator *= pole;
+        }
+        std::complex<double> n = numerator.evaluate(1.0/z);
+        std::complex<double> d = denominator.evaluate(1.0/z);
+        //qDebug() << "computation by polynomials" << n.real() << n.imag() << "/" << d.real() << d.imag();
     }
-    return gainFactor * numerator / denominator;
+    return result;
 }
 
 void ZPlaneFilter::computeCoefficients()
 {
-    std::complex<double> one(1.0, 0.0);
+    x.clear();
+    y.clear();
     // compute numerator and denominator:
-    Polynomial<std::complex<double> > numerator(one);
+    Polynomial<std::complex<double> > numerator(1.0);
     for (size_t i = 0; i < zeros.size(); i++) {
-        Polynomial<std::complex<double> > zero(one, -zeros[i]);
-        qDebug() << "(" << zero[0].real() << "," << zero[0].imag() << "* i) + (" << zero[1].real() << "," << zero[1].imag() << "* i) * z^-1";
+        //qDebug() << "zero" << i;
+        for (size_t j = 0; j < numerator.size(); j++) {
+            //qDebug() << "(" << numerator[j].real() << "," << numerator[j].imag() << "i )" << "* x^" << j;
+        }
+        //qDebug() << "*";
+        Polynomial<std::complex<double> > zero(1.0, -zeros[i]);
+        for (size_t j = 0; j < zero.size(); j++) {
+            //qDebug() << "(" << zero[j].real() << "," << zero[j].imag() << "i )" << "* x^" << j;
+        }
+        //qDebug() << "=";
         numerator *= zero;
+        for (size_t j = 0; j < numerator.size(); j++) {
+            //qDebug() << "(" << numerator[j].real() << "," << numerator[j].imag() << "i )" << "* x^" << j;
+        }
     }
-    Polynomial<std::complex<double> > denominator(one);
+    Polynomial<std::complex<double> > denominator(1.0);
     for (size_t i = 0; i < poles.size(); i++) {
-        Polynomial<std::complex<double> > pole(one, -poles[i]);
-        qDebug() << "(" << pole[0].real() << "," << pole[0].imag() << "* i) + (" << pole[1].real() << "," << pole[1].imag() << "* i) * z^-1";
+        //qDebug() << "pole" << i;
+        for (size_t j = 0; j < denominator.size(); j++) {
+            //qDebug() << "(" << denominator[j].real() << "," << denominator[j].imag() << "i )" << "* x^" << j;
+        }
+        //qDebug() << "*";
+        Polynomial<std::complex<double> > pole(1.0, -poles[i]);
+        for (size_t j = 0; j < pole.size(); j++) {
+            //qDebug() << "(" << pole[j].real() << "," << pole[j].imag() << "i )" << "* x^" << j;
+        }
+        //qDebug() << "=";
         denominator *= pole;
+        for (size_t j = 0; j < denominator.size(); j++) {
+            //qDebug() << "(" << denominator[j].real() << "," << denominator[j].imag() << "i )" << "* x^" << j;
+        }
     }
-    // note: feedforwardCoefficients[0] and feedbackCoefficients[0] will always be 1
-    feedforwardCoefficients = numerator;
-    feedbackCoefficients = denominator;
-    qDebug() << "numerator";
-    for (size_t i = 0; i < feedforwardCoefficients.size(); i++) {
-        qDebug() << feedforwardCoefficients[i].real();
+    // let DC always be 1, i.e., scale feed forward coefficients accordingly:
+    double dc = sqrt(squaredAmplitudeResponse(0.0));
+    numerator *= 1.0 / dc;
+    //qDebug() << "numerator";
+    for (size_t i = 0; i < numerator.size(); i++) {
+        //qDebug() << numerator[i].real() << numerator[i].imag();
+        feedforwardCoefficients.push_back(numerator[i].real());
+        x.push_back(0.0);
     }
-    qDebug() << "denominator";
-    for (size_t i = 0; i < feedbackCoefficients.size(); i++) {
-        qDebug() << feedbackCoefficients[i].real();
+    //qDebug() << "denominator";
+    for (size_t i = 0; i < denominator.size(); i++) {
+        //qDebug() << denominator[i].real() << denominator[i].imag();
+        feedbackCoefficients.push_back(denominator[i].real());
+        y.push_back(0.0);
     }
 }
 

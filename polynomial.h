@@ -2,6 +2,7 @@
 #define POLYNOMIAL_H
 
 #include <vector>
+#include <iostream>
 
 template<class T> class Polynomial : public std::vector<T>
 {
@@ -23,6 +24,17 @@ public:
     size_t degree() const
     {
         return std::vector<T>::size() - 1;
+    }
+
+    T evaluate(const T &at)
+    {
+        T result = this->at(0);
+        T x = at;
+        for (size_t i = 1; i < this->size(); i++) {
+            result += this->at(i) * x;
+            x *= at;
+        }
+        return result;
     }
 
     // add another polynomial:

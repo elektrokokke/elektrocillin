@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     zplanefilter.cpp \
     polynomial.cpp \
     zplanewidget.cpp \
-    midicontroller2audioclient.cpp
+    midicontroller2audioclient.cpp \
+    butterworth2polefilter.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -71,7 +72,8 @@ HEADERS  += mainwindow.h \
     zplanefilter.h \
     polynomial.h \
     zplanewidget.h \
-    midicontroller2audioclient.h
+    midicontroller2audioclient.h \
+    butterworth2polefilter.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

@@ -72,9 +72,6 @@ void ZPlaneWidget::updateFrequencyResponse2pole()
     //    qDebug() << filter2pole.pole(1).real() << filter2pole.pole(1).imag();
     //    qDebug() << filter2pole.zero(0).real() << filter2pole.zero(0).imag();
     //    qDebug() << filter2pole.zero(1).real() << filter2pole.zero(1).imag();
-        // set filter gain such that DC is normalized to 1:
-        filter2pole.setGainFactor(1.0);
-        filter2pole.setGainFactor(1.0 / sqrt(filter2pole.squaredAmplitudeResponse(0.0)));
 
         for (size_t i = 0; i < filter2pole.poleCount(); i++) {
             poleItems[i]->setPos(350 + 250 * filter2pole.pole(i).real(), 350 - 250 * filter2pole.pole(i).imag());
@@ -103,7 +100,7 @@ void ZPlaneWidget::updateFrequencyResponse2pole()
 void ZPlaneWidget::drawButterworthPoleTrail()
 {
     QVector<std::complex<double> > poles;
-    for (int i = 1; i < 100; i++) {
+    for (int i = 1; i < 99; i++) {
         double frequencyInRadians = M_PI * (double)i * 0.01;
         double c = cos(frequencyInRadians * 0.5) / sin(frequencyInRadians * 0.5);
         // butterworth 2-pole-filter coefficients:

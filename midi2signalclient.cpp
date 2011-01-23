@@ -67,8 +67,7 @@ bool Midi2SignalClient::process(jack_nframes_t nframes)
             if (jack_ringbuffer_write_space(ringBufferIn) >= sizeof(MidiMessage)) {
                 MidiMessage message;
                 // convert the time from current frame base to "global" time:
-                //message.time = lastFrameTime + midiEvent.time;
-                message.time = midiEvent.time;
+                message.time = lastFrameTime + midiEvent.time;
                 message.size = midiEvent.size;
                 memcpy(message.message, midiEvent.buffer, message.size);
                 jack_ringbuffer_write(ringBufferIn, (const char*)&message, sizeof(MidiMessage));
@@ -116,7 +115,7 @@ bool Midi2SignalClient::process(jack_nframes_t nframes)
 
 void Midi2SignalClient::run()
 {
-    qDebug() << "Midi2SignalClient::run() : starting thread";
+    //qDebug() << "Midi2SignalClient::run() : starting thread";
     // mutex has to be locked to be used for the wait condition:
     mutexForMidi.lock();
     for (; jack_ringbuffer_read_space(ringBufferStopThread) == 0; ) {
@@ -163,7 +162,7 @@ void Midi2SignalClient::run()
                         unsigned char controller = message.message[1];
                         unsigned char value = message.message[2];
                         receivedControlChange(channel, controller, value);
-                        qDebug() << "receivedControlChange(channel, controller, value);" << value << "at time" << message.time;
+                        //qDebug() << "receivedControlChange(channel, controller, value);" << value << "at time" << message.time;
                     } else if (highNibble == 0x0C) {
                         // program change:
                         unsigned char program = message.message[1];
@@ -178,12 +177,13 @@ void Midi2SignalClient::run()
                         unsigned char high = message.message[2];
                         unsigned int pitch = (high << 7) + low;
                         receivedPitchWheel(channel, pitch);
+                        //qDebug() << "receivedPitchWheel(channel, pitch);" << pitch << "at time" << message.time;
                     }
                 }
             }
         }
     }
-    qDebug() << "Midi2SignalClient::run() : shutting down thread";
+    //qDebug() << "Midi2SignalClient::run() : shutting down thread";
     char dummy;
     jack_ringbuffer_read(ringBufferStopThread, &dummy, 1);
 }

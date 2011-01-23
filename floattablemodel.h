@@ -17,6 +17,7 @@ public:
     void clear();
 
     virtual QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
+    virtual bool setData ( const QModelIndex &index, const QVariant &value, int role );
 //    virtual QVariant headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
     virtual int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
     virtual int columnCount ( const QModelIndex & parent = QModelIndex() ) const;

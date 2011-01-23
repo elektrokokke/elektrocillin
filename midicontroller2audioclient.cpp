@@ -7,7 +7,9 @@ MidiController2AudioClient::MidiController2AudioClient(const QString &clientName
     channel(channel_),
     controller(controller_),
     min(min_),
-    max(max_)
+    max(max_),
+    value(0.0),
+    filter(0.05)
 {
 }
 
@@ -25,6 +27,8 @@ bool MidiController2AudioClient::init()
 {
     // reset the controller value:
     value = 0;
+    // reset the filter:
+    filter.reset();
     return Midi2AudioClient::init();
 }
 
@@ -45,7 +49,8 @@ bool MidiController2AudioClient::process(jack_nframes_t nframes)
             jack_midi_event_get(&midiEvent, midiInputBuffer, currentMidiEventIndex);
             // produce audio until the event happens:
             for (; currentFrame < midiEvent.time; currentFrame++) {
-                audioOutputBuffer[currentFrame] = (jack_default_audio_sample_t)value * (max - min) / 127.0f + min;
+                audioOutputBuffer[currentFrame] = filter.filter(value);
+                //audioOutputBuffer[currentFrame] = value;
             }
             currentMidiEventIndex++;
             // interpret the midi event:
@@ -53,13 +58,14 @@ bool MidiController2AudioClient::process(jack_nframes_t nframes)
             unsigned char highNibble = statusByte >> 4;
             unsigned char channel = statusByte & 0x0F;
             if ((getChannel() == channel) && (highNibble == 0x0B) && midiEvent.buffer[1] == getController()) {
-                value = midiEvent.buffer[2];
-                //qDebug() << (jack_default_audio_sample_t)value * (max - min) / 127.0f + min;
+                value = (jack_default_audio_sample_t)midiEvent.buffer[2] * (max - min) / 127.0f + min;
+                //qDebug() << value;
             }
         } else {
             // produce audio until the end of the buffer:
             for (; currentFrame < nframes; currentFrame++) {
-                audioOutputBuffer[currentFrame] = (jack_default_audio_sample_t)value * (max - min) / 127.0f + min;
+                audioOutputBuffer[currentFrame] = filter.filter(value);
+                //audioOutputBuffer[currentFrame] = value;
             }
         }
     }

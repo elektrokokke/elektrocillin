@@ -301,22 +301,6 @@ void GraphView::paintEvent(QPaintEvent *p_event)
                         minPointFrom = minPointTo;
                         maxPointFrom = maxPointTo;
                     }
-//                    if (row == startRow) {
-//                        minPointFrom = QPoint(row / rowsPerPixel, qRound((1.0f - min) * 0.5f * (float)(barHeight - 1)) + (barHeight + spacing()) * bar);
-//                        maxPointFrom = QPoint(row / rowsPerPixel, qRound((1.0f - max) * 0.5f * (float)(barHeight - 1)) + (barHeight + spacing()) * bar);
-//                        painter.setPen(penLight);
-//                        painter.drawLine(minPointFrom, maxPointFrom);
-//                    } else {
-//                        QPoint minPointTo(row / rowsPerPixel, qRound((1.0f - min) * 0.5f * (float)(barHeight - 1)) + (barHeight + spacing()) * bar);
-//                        QPoint maxPointTo(row / rowsPerPixel, qRound((1.0f - max) * 0.5f * (float)(barHeight - 1)) + (barHeight + spacing()) * bar);
-//                        painter.setPen(penLight);
-//                        painter.drawLine(minPointTo - offset, maxPointTo - offset);
-//                        painter.setPen(pen);
-//                        painter.drawLine(minPointFrom - offset, minPointTo - offset);
-//                        painter.drawLine(maxPointFrom - offset, maxPointTo - offset);
-//                        minPointFrom = minPointTo;
-//                        maxPointFrom = maxPointTo;
-//                    }
                 }
             }
         }

@@ -2,6 +2,7 @@
 #define MIDICONTROLLER2AUDIOCLIENT_H
 
 #include "midi2audioclient.h"
+#include "butterworth2polefilter.h"
 
 class MidiController2AudioClient : public Midi2AudioClient
 {
@@ -16,8 +17,9 @@ protected:
     virtual bool process(jack_nframes_t nframes);
 
 private:
-    unsigned char channel, controller, value;
-    jack_default_audio_sample_t min, max;
+    unsigned char channel, controller;
+    jack_default_audio_sample_t min, max, value;
+    Butterworth2PoleFilter filter;
 };
 
 #endif // MIDICONTROLLER2AUDIOCLIENT_H

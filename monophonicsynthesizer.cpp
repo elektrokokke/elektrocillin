@@ -7,8 +7,10 @@ MonophonicSynthesizer::MonophonicSynthesizer() :
     pulseOsc1(0.1),
     pulseOsc2(2.0 * M_PI - 0.1),
     morphOsc1(&pulseOsc1, &pulseOsc2),
-    envelope(0.001, 0.01, 0.5, 0.5)
+    envelope(0.01, 0.01, 0.75, 0.5),
+    filter(0.01)
 {
+    morphOsc1.setMorph(0.5);
 }
 
 void MonophonicSynthesizer::setSampleRate(double sampleRate)
@@ -79,8 +81,9 @@ double MonophonicSynthesizer::nextSample()
 {
     // get level from ADSR envelope:
     double envelopeLevel = envelope.nextSample();
+    //morphOsc1.setMorph(envelopeLevel);
     double oscillatorLevel = morphOsc1.nextSample();
-    return envelopeLevel * oscillatorLevel;
+    return filter.filter(envelopeLevel * oscillatorLevel);
 }
 
 double MonophonicSynthesizer::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)

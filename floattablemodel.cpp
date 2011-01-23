@@ -39,6 +39,18 @@ QVariant FloatTableModel::data ( const QModelIndex & index, int role ) const
     return QVariant();
 }
 
+bool FloatTableModel::setData ( const QModelIndex &index, const QVariant &value, int role )
+{
+    Q_ASSERT(index.column() < columnCount());
+    Q_ASSERT(index.row() < rowCount());
+    Q_ASSERT(index.row() < audioBuffers[index.column()]->size());
+    if (role == Qt::DisplayRole) {
+        (*audioBuffers[index.column()])[index.row()] = value.toFloat();
+        return true;
+    }
+    return false;
+}
+
 //QVariant AudioBufferModel::headerData ( int section, Qt::Orientation orientation, int role ) const
 //{
 //    if (role == Qt::DisplayRole) {
