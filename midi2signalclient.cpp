@@ -115,6 +115,7 @@ bool Midi2SignalClient::process(jack_nframes_t nframes)
 
 void Midi2SignalClient::run()
 {
+    jack_nframes_t lastTime = 0;
     //qDebug() << "Midi2SignalClient::run() : starting thread";
     // mutex has to be locked to be used for the wait condition:
     mutexForMidi.lock();
@@ -162,7 +163,8 @@ void Midi2SignalClient::run()
                         unsigned char controller = message.message[1];
                         unsigned char value = message.message[2];
                         receivedControlChange(channel, controller, value);
-                        //qDebug() << "receivedControlChange(channel, controller, value);" << value << "at time" << message.time;
+                        //qDebug() << "receivedControlChange(" << channel << "," << controller << "," << value << ");" "at time" << message.time << "time diff" << (message.time - lastTime);
+                        lastTime = message.time;
                     } else if (highNibble == 0x0C) {
                         // program change:
                         unsigned char program = message.message[1];

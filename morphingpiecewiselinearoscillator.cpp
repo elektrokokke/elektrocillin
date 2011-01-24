@@ -21,7 +21,11 @@ int MorphingPiecewiseLinearOscillator::size() const
 
 void MorphingPiecewiseLinearOscillator::setMorph(double morph)
 {
-    Q_ASSERT((morph >= 0.0) && (morph <= 1.0));
+    if (morph < 0.0) {
+        morph = 0.0;
+    } else if (morph > 1.0) {
+        morph = 1.0;
+    }
     this->morph = morph;
 }
 

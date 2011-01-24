@@ -9,7 +9,7 @@ MidiController2AudioClient::MidiController2AudioClient(const QString &clientName
     min(min_),
     max(max_),
     value(0.0),
-    filter(0.05)
+    filter(0.001)
 {
 }
 

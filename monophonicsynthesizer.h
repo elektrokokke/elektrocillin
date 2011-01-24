@@ -27,11 +27,12 @@ public:
 protected:
     void setFrequency(double frequency, double pitchBendFactor);
 private:
-    double frequency, pitchBendFactor;
-    PulseOscillator pulseOsc1, pulseOsc2;
+    double frequency, pitchBendFactor, morph;
+    PulseOscillator osc1;
+    SawtoothOscillator osc2;
     MorphingPiecewiseLinearOscillator morphOsc1;
     AdsrEnvelope envelope;
-    Butterworth2PoleFilter filter;
+    Butterworth2PoleFilter filterAudio, filterMorph;
     QStack<double> frequencies;
     QStack<unsigned char> midiNoteNumbers;
 

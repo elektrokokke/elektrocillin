@@ -4,11 +4,13 @@
 MonophonicSynthesizer::MonophonicSynthesizer() :
     frequency(0.0),
     pitchBendFactor(1.0),
-    pulseOsc1(0.1),
-    pulseOsc2(2.0 * M_PI - 0.1),
-    morphOsc1(&pulseOsc1, &pulseOsc2),
+    morph(0.0),
+    osc1(M_PI),
+    osc2(0.1),
+    morphOsc1(&osc1, &osc2),
     envelope(0.01, 0.01, 0.75, 0.5),
-    filter(0.01)
+    filterAudio(0.5),
+    filterMorph(0.001)
 {
     morphOsc1.setMorph(0.5);
 }
@@ -16,8 +18,8 @@ MonophonicSynthesizer::MonophonicSynthesizer() :
 void MonophonicSynthesizer::setSampleRate(double sampleRate)
 {
     AudioSource::setSampleRate(sampleRate);
-    pulseOsc1.setSampleRate(sampleRate);
-    pulseOsc2.setSampleRate(sampleRate);
+    osc1.setSampleRate(sampleRate);
+    osc2.setSampleRate(sampleRate);
     morphOsc1.setSampleRate(sampleRate);
     envelope.setSampleRate(sampleRate);
 }
@@ -26,8 +28,8 @@ void MonophonicSynthesizer::setFrequency(double frequency, double pitchBendFacto
 {
     this->frequency = frequency;
     this->pitchBendFactor = pitchBendFactor;
-    pulseOsc1.setFrequency(frequency * pitchBendFactor);
-    pulseOsc2.setFrequency(frequency * pitchBendFactor);
+    osc1.setFrequency(frequency * pitchBendFactor);
+    osc2.setFrequency(frequency * pitchBendFactor);
     morphOsc1.setFrequency(frequency * pitchBendFactor);
 }
 
@@ -72,18 +74,18 @@ void MonophonicSynthesizer::setMidiPitch(unsigned int pitch)
     setFrequency(frequency, computePitchBendFactorFromMidiPitch(pitch));
 }
 
-void MonophonicSynthesizer::setController(unsigned char controller, unsigned char value)
+void MonophonicSynthesizer::setController(unsigned char, unsigned char value)
 {
-    morphOsc1.setMorph((double)value / 127.0);
+    morph = (double)value / 127.0;
 }
 
 double MonophonicSynthesizer::nextSample()
 {
     // get level from ADSR envelope:
     double envelopeLevel = envelope.nextSample();
-    //morphOsc1.setMorph(envelopeLevel);
+    morphOsc1.setMorph(filterMorph.filter(morph));
     double oscillatorLevel = morphOsc1.nextSample();
-    return filter.filter(envelopeLevel * oscillatorLevel);
+    return filterAudio.filter(envelopeLevel * oscillatorLevel);
 }
 
 double MonophonicSynthesizer::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)
