@@ -874,7 +874,7 @@ HTML_FOOTER            =
 # the style sheet file to the HTML output directory, so don't put your own 
 # stylesheet in the HTML output directory as well, or it will be erased!
 
-HTML_STYLESHEET        = 
+HTML_STYLESHEET        = documentation/doxygen.css
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. 
 # Doxygen will adjust the colors in the stylesheet and background images 
@@ -1007,19 +1007,19 @@ TOC_EXPAND             = NO
 # that can be used as input for Qt's qhelpgenerator to generate a 
 # Qt Compressed Help (.qch) of the generated HTML documentation.
 
-GENERATE_QHP           = NO
+GENERATE_QHP           = YES
 
 # If the QHG_LOCATION tag is specified, the QCH_FILE tag can 
 # be used to specify the file name of the resulting .qch file. 
 # The path specified is relative to the HTML output folder.
 
-QCH_FILE               = helpfile.qch
+QCH_FILE               = C:/Users/jarne/elektrocillin/documentation/elektrocillin.qch
 
 # The QHP_NAMESPACE tag specifies the namespace to use when generating 
 # Qt Help Project output. For more information please see 
 # http://doc.trolltech.com/qthelpproject.html#namespace
 
-QHP_NAMESPACE          = org.doxygen.Project
+QHP_NAMESPACE          = de.jarne.elektrocillin
 
 # The QHP_VIRTUAL_FOLDER tag specifies the namespace to use when generating 
 # Qt Help Project output. For more information please see 
@@ -1166,16 +1166,6 @@ SEARCHENGINE           = YES
 # and does not have live searching capabilities.
 
 SERVER_BASED_SEARCH    = NO
-
-#---------------------------------------------------------------------------
-# configuration options related Qt help (.qch) output
-#---------------------------------------------------------------------------
-
-GENERATE_QHP           = YES
-QCH_FILE               = C:/Users/jarne/elektrocillin/documentation/elektrocillin.qch
-QHP_NAMESPACE          = de.jarne.elektrocillin
-QHP_VIRTUAL_FOLDER     = doc
-QHG_LOCATION           = C:/Qt/2010.02.1/qt/bin/qhelpgenerator.exe
 
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
