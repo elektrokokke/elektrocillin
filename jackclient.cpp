@@ -6,6 +6,11 @@ JackClient::JackClient(const QString &clientName) :
 {
 }
 
+const QString & JackClient::getClientName() const
+{
+    return name;
+}
+
 bool JackClient::activate()
 {
     if (isActive()) {

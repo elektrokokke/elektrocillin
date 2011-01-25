@@ -11,6 +11,8 @@ class JackClient
 public:
     JackClient(const QString &clientName);
 
+    const QString & getClientName() const;
+
     bool activate();
     void close();
 

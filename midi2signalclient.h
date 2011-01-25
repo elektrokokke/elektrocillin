@@ -22,6 +22,9 @@ public:
     explicit Midi2SignalClient(const QString &clientName, QObject *parent = 0);
     virtual ~Midi2SignalClient();
 
+    const QString & getMidiInputPortName() const;
+    const QString & getMidiOutputPortName() const;
+
 protected:
     // reimplemented methods from JackClient:
     virtual bool init();
@@ -51,6 +54,7 @@ public slots:
     void sendPitchWheel(unsigned char channel, unsigned int pitch);
 
 private:
+    QString midiInputPortName, midiOutputPortName;
     // use lock-free ring buffers for communication between threads:
     jack_ringbuffer_t *ringBufferIn, *ringBufferOut, *ringBufferStopThread;
     // provide one midi in- and output:

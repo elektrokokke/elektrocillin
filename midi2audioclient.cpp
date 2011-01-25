@@ -14,6 +14,16 @@ Midi2AudioClient::Midi2AudioClient(const QString &clientName, const QString &inp
 {
 }
 
+const QString & Midi2AudioClient::getMidiInputPortName() const
+{
+    return midiInputPortName;
+}
+
+const QString & Midi2AudioClient::getAudioOutputPortName() const
+{
+    return audioOutputPortName;
+}
+
 bool Midi2AudioClient::init()
 {
     // register input and output ports:
@@ -31,4 +41,3 @@ jack_port_t * Midi2AudioClient::getAudioOutputPort() const
 {
     return audioOutputPort;
 }
-

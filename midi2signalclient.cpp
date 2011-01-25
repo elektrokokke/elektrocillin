@@ -5,7 +5,9 @@ const size_t Midi2SignalClient::ringBufferSize = 4096;
 
 Midi2SignalClient::Midi2SignalClient(const QString &clientName, QObject *parent) :
     QThread(parent),
-    JackClient(clientName)
+    JackClient(clientName),
+    midiInputPortName("midi in"),
+    midiOutputPortName("midi out")
 {
     // create the ring buffers:
     ringBufferIn = jack_ringbuffer_create(ringBufferSize);
@@ -24,6 +26,16 @@ Midi2SignalClient::~Midi2SignalClient()
     }
 }
 
+const QString & Midi2SignalClient::getMidiInputPortName() const
+{
+    return midiInputPortName;
+}
+
+const QString & Midi2SignalClient::getMidiOutputPortName() const
+{
+    return midiOutputPortName;
+}
+
 bool Midi2SignalClient::init()
 {
     // start the QThread:
@@ -31,8 +43,8 @@ bool Midi2SignalClient::init()
         start();
     }
     // setup the input and output midi ports:
-    midiIn = registerMidiPort("midi in", JackPortIsInput);
-    midiOut = registerMidiPort("midi out", JackPortIsOutput);
+    midiIn = registerMidiPort(midiInputPortName, JackPortIsInput);
+    midiOut = registerMidiPort(midiOutputPortName, JackPortIsOutput);
     return (ringBufferIn && ringBufferOut && midiIn && midiOut);
 }
 
@@ -185,6 +197,7 @@ void Midi2SignalClient::run()
             }
         }
     }
+    mutexForMidi.unlock();
     //qDebug() << "Midi2SignalClient::run() : shutting down thread";
     char dummy;
     jack_ringbuffer_read(ringBufferStopThread, &dummy, 1);

@@ -9,6 +9,9 @@ public:
     Midi2AudioClient(const QString &clientName);
     Midi2AudioClient(const QString &clientName, const QString &inputPortName, const QString &outputPortName);
 
+    const QString & getMidiInputPortName() const;
+    const QString & getAudioOutputPortName() const;
+
 protected:
     virtual bool init();
 

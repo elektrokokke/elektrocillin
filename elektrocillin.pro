@@ -41,7 +41,9 @@ SOURCES += main.cpp\
     polynomial.cpp \
     zplanewidget.cpp \
     midicontroller2audioclient.cpp \
-    butterworth2polefilter.cpp
+    butterworth2polefilter.cpp \
+    midiclientwidget.cpp \
+    testmidiclientwidget.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -73,10 +75,13 @@ HEADERS  += mainwindow.h \
     polynomial.h \
     zplanewidget.h \
     midicontroller2audioclient.h \
-    butterworth2polefilter.h
+    butterworth2polefilter.h \
+    midiclientwidget.h \
+    testmidiclientwidget.h
 
 FORMS    += mainwindow.ui \
-    zplanewidget.ui
+    zplanewidget.ui \
+    testmidiclientwidget.ui
 
 win32:INCLUDEPATH += "C:\Program Files\Jack v1.9.6\includes"
 win32:LIBS += $$quote(c:\Program Files\Jack v1.9.6\lib\libjack.a) $$quote(c:\Program Files\Jack v1.9.6\lib\libjackserver.a)
