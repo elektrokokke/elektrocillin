@@ -43,7 +43,10 @@ SOURCES += main.cpp\
     midicontroller2audioclient.cpp \
     butterworth2polefilter.cpp \
     midiclientwidget.cpp \
-    testmidiclientwidget.cpp
+    testmidiclientwidget.cpp \
+    jackringbuffer.cpp \
+    jackthread.cpp \
+    jackclientwithdeferredprocessing.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -77,7 +80,10 @@ HEADERS  += mainwindow.h \
     midicontroller2audioclient.h \
     butterworth2polefilter.h \
     midiclientwidget.h \
-    testmidiclientwidget.h
+    testmidiclientwidget.h \
+    jackringbuffer.h \
+    jackthread.h \
+    jackclientwithdeferredprocessing.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui \

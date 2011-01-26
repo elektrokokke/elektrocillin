@@ -1,0 +1,76 @@
+#ifndef JACKTHREAD_H
+#define JACKTHREAD_H
+
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+#include "jackringbuffer.h"
+
+/**
+  This is a utility class to be used together with a JackClient subclass.
+  It simplifies deferred processing, i.e. putting those processing steps into
+  a separate thread, which cannot be put into the Jack process() function, e.g.
+  because they involve locking etc. and thus aren't real-time capable.
+
+  The general idea is the following: this thread waits until wake() is called
+  from outside (i.e., from the Jack process() function). It then calls processDeferred()
+  to do any necessary processing. If done, it waits again. This is repeated until
+  stop() is called from outside (i.e., from the Jack thread, usually from the deinit()
+  function).
+
+  For communication between this thread and the Jack process thread you should use
+  JackRingBuffer.
+
+  The following general procedure is recommended:
+  1.) Always associate a JackThread object with a JackClient object.
+  2.) Initialize all necessary ring buffers for communication between the Jack thread
+  and this thread, and be sure that both objects have access to them. For each one-way
+  communication use one ring buffer. E.g., if you need data to be communicated between threads
+  in BOTH ways, use TWO ring buffers.
+  3.) From JackClient's init() function, call JackThread's start() method. Also reset all ring buffers.
+  4.) In JackClient's process() function, read all data from the JackThread->JackClient ring buffers,
+  if there is any. Write data for deferred processing to the JackClient->JackThread ring buffers
+  and call JackThread's wake() function.
+  5.) In JackThread's processDeferred() function, read data from the JackClient->JackThread ring buffers
+  and write data to the JackThread->JackClient ring buffers. You do not need to call any additional
+  method after writing, as the Jack process() function will be called regularly to read from the
+  ring buffers.
+  6.) In JackClient's deinit() function, call JackThread's stop() method. After that you may want
+  to reset the ring buffers.
+  */
+
+class JackThread : public QThread
+{
+    Q_OBJECT
+public:
+    explicit JackThread(QObject *parent = 0);
+
+public slots:
+    /**
+      Sends a stop signal to the thread. When the thread leaves processDeferred()
+      the thread is stopped.
+      This function is blocking, i.e., it waits for the thread to finish
+      processDeferred() (if it's currently running) before returning.
+      */
+    void stop();
+    /**
+      Wakes the thread to resume processing (i.e., call processDeferred()) or to
+      end (if called by stop()).
+      */
+    void wake();
+
+protected:
+    /**
+      Override this method to implement deferred processing in a separate thread.
+      */
+    virtual void processDeferred() = 0;
+
+    void run();
+
+private:
+    JackRingBuffer<bool> stopRingBuffer;
+    QMutex mutex;
+    QWaitCondition waitCondition;
+};
+
+#endif // JACKTHREAD_H
