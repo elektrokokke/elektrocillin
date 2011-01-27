@@ -1,0 +1,782 @@
+<QtHelpProject version="1.0">
+  <namespace>de.jarne.elektrocillin</namespace>
+  <virtualFolder>doc</virtualFolder>
+  <filterSection>
+    <filterAttribute>doxygen</filterAttribute>
+    <toc>
+      <section title="elektrocillin" ref="index.html">
+        <section title="Class List" ref="annotated.html">
+          <section title="AdsrEnvelope" ref="class_adsr_envelope.html" />
+          <section title="AudioSource" ref="class_audio_source.html" />
+          <section title="Butterworth2PoleFilter" ref="class_butterworth2_pole_filter.html" />
+          <section title="ControlChange" ref="class_control_change.html" />
+          <section title="DistortionFilter" ref="class_distortion_filter.html" />
+          <section title="FloatTableModel" ref="class_float_table_model.html" />
+          <section title="GraphicsLineItem" ref="class_graphics_line_item.html" />
+          <section title="GraphicsLogLineItem" ref="class_graphics_log_line_item.html" />
+          <section title="GraphicsNodeItem" ref="class_graphics_node_item.html" />
+          <section title="GraphView" ref="class_graph_view.html" />
+          <section title="JackAudioModel" ref="class_jack_audio_model.html" />
+          <section title="JackClient" ref="class_jack_client.html" />
+          <section title="JackClientWithDeferredProcessing" ref="class_jack_client_with_deferred_processing.html" />
+          <section title="JackRingBuffer&lt; T &gt;" ref="class_jack_ring_buffer.html" />
+          <section title="JackThread" ref="class_jack_thread.html" />
+          <section title="MainWindow" ref="class_main_window.html" />
+          <section title="Midi2AudioClient" ref="class_midi2_audio_client.html" />
+          <section title="Midi2SignalClient" ref="class_midi2_signal_client.html" />
+          <section title="MidiClientWidget" ref="class_midi_client_widget.html" />
+          <section title="MidiController2AudioClient" ref="class_midi_controller2_audio_client.html" />
+          <section title="MidiControllerCheckBox" ref="class_midi_controller_check_box.html" />
+          <section title="MidiControllerSlider" ref="class_midi_controller_slider.html" />
+          <section title="MidiMessage" ref="struct_midi_message.html" />
+          <section title="MidiPitchSlider" ref="class_midi_pitch_slider.html" />
+          <section title="MidiSplitter" ref="class_midi_splitter.html" />
+          <section title="MonophonicSynthesizer" ref="class_monophonic_synthesizer.html" />
+          <section title="MorphingPiecewiseLinearOscillator" ref="class_morphing_piecewise_linear_oscillator.html" />
+          <section title="Oscillator" ref="class_oscillator.html" />
+          <section title="PiecewiseLinearOscillator" ref="class_piecewise_linear_oscillator.html" />
+          <section title="Polynomial&lt; T &gt;" ref="class_polynomial.html" />
+          <section title="PulseOscillator" ref="class_pulse_oscillator.html" />
+          <section title="Record2MemoryClient" ref="class_record2_memory_client.html" />
+          <section title="SawtoothOscillator" ref="class_sawtooth_oscillator.html" />
+          <section title="SimpleLowpassFilter" ref="class_simple_lowpass_filter.html" />
+          <section title="SimpleMonophonicClient" ref="class_simple_monophonic_client.html" />
+          <section title="TestMidiClientWidget" ref="class_test_midi_client_widget.html" />
+          <section title="ZPlaneFilter" ref="class_z_plane_filter.html" />
+          <section title="ZPlaneWidget" ref="class_z_plane_widget.html" />
+        </section>
+        <section title="Class Index" ref="classes.html" />
+        <section title="Class Hierarchy" ref="hierarchy.html">
+          <section title="AudioSource" ref="class_audio_source.html">
+            <section title="AdsrEnvelope" ref="class_adsr_envelope.html" />
+            <section title="MonophonicSynthesizer" ref="class_monophonic_synthesizer.html" />
+            <section title="Oscillator" ref="class_oscillator.html">
+              <section title="PiecewiseLinearOscillator" ref="class_piecewise_linear_oscillator.html">
+                <section title="MorphingPiecewiseLinearOscillator" ref="class_morphing_piecewise_linear_oscillator.html" />
+                <section title="PulseOscillator" ref="class_pulse_oscillator.html" />
+                <section title="SawtoothOscillator" ref="class_sawtooth_oscillator.html" />
+              </section>
+            </section>
+          </section>
+          <section title="ControlChange" ref="class_control_change.html" />
+          <section title="DistortionFilter" ref="class_distortion_filter.html" />
+          <section title="FloatTableModel" ref="class_float_table_model.html">
+            <section title="JackAudioModel" ref="class_jack_audio_model.html" />
+          </section>
+          <section title="GraphicsLineItem" ref="class_graphics_line_item.html" />
+          <section title="GraphicsLogLineItem" ref="class_graphics_log_line_item.html" />
+          <section title="GraphicsNodeItem" ref="class_graphics_node_item.html" />
+          <section title="GraphView" ref="class_graph_view.html" />
+          <section title="JackClient" ref="class_jack_client.html">
+            <section title="JackClientWithDeferredProcessing" ref="class_jack_client_with_deferred_processing.html" />
+            <section title="Midi2AudioClient" ref="class_midi2_audio_client.html">
+              <section title="MidiController2AudioClient" ref="class_midi_controller2_audio_client.html" />
+              <section title="SimpleMonophonicClient" ref="class_simple_monophonic_client.html" />
+            </section>
+            <section title="Midi2SignalClient" ref="class_midi2_signal_client.html" />
+            <section title="Record2MemoryClient" ref="class_record2_memory_client.html" />
+          </section>
+          <section title="JackRingBuffer&lt; T &gt;" ref="class_jack_ring_buffer.html" />
+          <section title="JackThread" ref="class_jack_thread.html" />
+          <section title="MainWindow" ref="class_main_window.html" />
+          <section title="MidiClientWidget" ref="class_midi_client_widget.html">
+            <section title="TestMidiClientWidget" ref="class_test_midi_client_widget.html" />
+          </section>
+          <section title="MidiControllerCheckBox" ref="class_midi_controller_check_box.html" />
+          <section title="MidiControllerSlider" ref="class_midi_controller_slider.html" />
+          <section title="MidiMessage" ref="struct_midi_message.html" />
+          <section title="MidiPitchSlider" ref="class_midi_pitch_slider.html" />
+          <section title="MidiSplitter" ref="class_midi_splitter.html" />
+          <section title="Polynomial&lt; T &gt;" ref="class_polynomial.html" />
+          <section title="SimpleLowpassFilter" ref="class_simple_lowpass_filter.html" />
+          <section title="ZPlaneFilter" ref="class_z_plane_filter.html">
+            <section title="Butterworth2PoleFilter" ref="class_butterworth2_pole_filter.html" />
+          </section>
+          <section title="ZPlaneWidget" ref="class_z_plane_widget.html" />
+        </section>
+        <section title="Class Members" ref="functions.html" />
+        <section title="Namespace List" ref="namespaces.html">
+          <section title="Ui" ref="namespace_ui.html" />
+        </section>
+        <section title="File List" ref="files.html">
+          <section title="adsrenvelope.cpp" ref="adsrenvelope_8cpp.html" />
+          <section title="adsrenvelope.h" ref="adsrenvelope_8h.html" />
+          <section title="audiosource.cpp" ref="audiosource_8cpp.html" />
+          <section title="audiosource.h" ref="audiosource_8h.html" />
+          <section title="butterworth2polefilter.cpp" ref="butterworth2polefilter_8cpp.html" />
+          <section title="butterworth2polefilter.h" ref="butterworth2polefilter_8h.html" />
+          <section title="distortionfilter.cpp" ref="distortionfilter_8cpp.html" />
+          <section title="distortionfilter.h" ref="distortionfilter_8h.html" />
+          <section title="floattablemodel.cpp" ref="floattablemodel_8cpp.html" />
+          <section title="floattablemodel.h" ref="floattablemodel_8h.html" />
+          <section title="graphicslineitem.cpp" ref="graphicslineitem_8cpp.html" />
+          <section title="graphicslineitem.h" ref="graphicslineitem_8h.html" />
+          <section title="graphicsloglineitem.cpp" ref="graphicsloglineitem_8cpp.html" />
+          <section title="graphicsloglineitem.h" ref="graphicsloglineitem_8h.html" />
+          <section title="graphicsnodeitem.cpp" ref="graphicsnodeitem_8cpp.html" />
+          <section title="graphicsnodeitem.h" ref="graphicsnodeitem_8h.html" />
+          <section title="graphview.cpp" ref="graphview_8cpp.html" />
+          <section title="graphview.h" ref="graphview_8h.html" />
+          <section title="jackaudiomodel.cpp" ref="jackaudiomodel_8cpp.html" />
+          <section title="jackaudiomodel.h" ref="jackaudiomodel_8h.html" />
+          <section title="jackclient.cpp" ref="jackclient_8cpp.html" />
+          <section title="jackclient.h" ref="jackclient_8h.html" />
+          <section title="jackclientwithdeferredprocessing.cpp" ref="jackclientwithdeferredprocessing_8cpp.html" />
+          <section title="jackclientwithdeferredprocessing.h" ref="jackclientwithdeferredprocessing_8h.html" />
+          <section title="jackringbuffer.cpp" ref="jackringbuffer_8cpp.html" />
+          <section title="jackringbuffer.h" ref="jackringbuffer_8h.html" />
+          <section title="jackthread.cpp" ref="jackthread_8cpp.html" />
+          <section title="jackthread.h" ref="jackthread_8h.html" />
+          <section title="main.cpp" ref="main_8cpp.html" />
+          <section title="mainwindow.cpp" ref="mainwindow_8cpp.html" />
+          <section title="mainwindow.h" ref="mainwindow_8h.html" />
+          <section title="midi2audioclient.cpp" ref="midi2audioclient_8cpp.html" />
+          <section title="midi2audioclient.h" ref="midi2audioclient_8h.html" />
+          <section title="midi2signalclient.cpp" ref="midi2signalclient_8cpp.html" />
+          <section title="midi2signalclient.h" ref="midi2signalclient_8h.html" />
+          <section title="midiclientwidget.cpp" ref="midiclientwidget_8cpp.html" />
+          <section title="midiclientwidget.h" ref="midiclientwidget_8h.html" />
+          <section title="midicontroller2audioclient.cpp" ref="midicontroller2audioclient_8cpp.html" />
+          <section title="midicontroller2audioclient.h" ref="midicontroller2audioclient_8h.html" />
+          <section title="midicontrollercheckbox.cpp" ref="midicontrollercheckbox_8cpp.html" />
+          <section title="midicontrollercheckbox.h" ref="midicontrollercheckbox_8h.html" />
+          <section title="midicontrollerslider.cpp" ref="midicontrollerslider_8cpp.html" />
+          <section title="midicontrollerslider.h" ref="midicontrollerslider_8h.html" />
+          <section title="midipitchslider.cpp" ref="midipitchslider_8cpp.html" />
+          <section title="midipitchslider.h" ref="midipitchslider_8h.html" />
+          <section title="midisplitter.cpp" ref="midisplitter_8cpp.html" />
+          <section title="midisplitter.h" ref="midisplitter_8h.html" />
+          <section title="monophonicsynthesizer.cpp" ref="monophonicsynthesizer_8cpp.html" />
+          <section title="monophonicsynthesizer.h" ref="monophonicsynthesizer_8h.html" />
+          <section title="morphingpiecewiselinearoscillator.cpp" ref="morphingpiecewiselinearoscillator_8cpp.html" />
+          <section title="morphingpiecewiselinearoscillator.h" ref="morphingpiecewiselinearoscillator_8h.html" />
+          <section title="oscillator.cpp" ref="oscillator_8cpp.html" />
+          <section title="oscillator.h" ref="oscillator_8h.html" />
+          <section title="piecewiselinearoscillator.cpp" ref="piecewiselinearoscillator_8cpp.html" />
+          <section title="piecewiselinearoscillator.h" ref="piecewiselinearoscillator_8h.html" />
+          <section title="polynomial.cpp" ref="polynomial_8cpp.html" />
+          <section title="polynomial.h" ref="polynomial_8h.html" />
+          <section title="pulseoscillator.cpp" ref="pulseoscillator_8cpp.html" />
+          <section title="pulseoscillator.h" ref="pulseoscillator_8h.html" />
+          <section title="record2memoryclient.cpp" ref="record2memoryclient_8cpp.html" />
+          <section title="record2memoryclient.h" ref="record2memoryclient_8h.html" />
+          <section title="sawtoothoscillator.cpp" ref="sawtoothoscillator_8cpp.html" />
+          <section title="sawtoothoscillator.h" ref="sawtoothoscillator_8h.html" />
+          <section title="simplelowpassfilter.cpp" ref="simplelowpassfilter_8cpp.html" />
+          <section title="simplelowpassfilter.h" ref="simplelowpassfilter_8h.html" />
+          <section title="simplemonophonicclient.cpp" ref="simplemonophonicclient_8cpp.html" />
+          <section title="simplemonophonicclient.h" ref="simplemonophonicclient_8h.html" />
+          <section title="testmidiclientwidget.cpp" ref="testmidiclientwidget_8cpp.html" />
+          <section title="testmidiclientwidget.h" ref="testmidiclientwidget_8h.html" />
+          <section title="zplanefilter.cpp" ref="zplanefilter_8cpp.html" />
+          <section title="zplanefilter.h" ref="zplanefilter_8h.html" />
+          <section title="zplanewidget.cpp" ref="zplanewidget_8cpp.html" />
+          <section title="zplanewidget.h" ref="zplanewidget_8h.html" />
+        </section>
+        <section title="File Members" ref="globals.html" />
+      </section>
+    </toc>
+    <keywords>
+      <keyword name="main" id="main.cpp::main" ref="main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97" />
+      <keyword name="AdsrEnvelope" id="AdsrEnvelope" ref="class_adsr_envelope.html" />
+      <keyword name="AdsrEnvelope" id="AdsrEnvelope::AdsrEnvelope" ref="class_adsr_envelope.html#a72899eafa8df38bd5630126b31b6bf62" />
+      <keyword name="nextSample" id="AdsrEnvelope::nextSample" ref="class_adsr_envelope.html#a5a3bae15c0a18373b92109489ce1a557" />
+      <keyword name="noteOn" id="AdsrEnvelope::noteOn" ref="class_adsr_envelope.html#a4d980511c05ef702e633df14ce12c9d8" />
+      <keyword name="noteOff" id="AdsrEnvelope::noteOff" ref="class_adsr_envelope.html#a909f79dd0f0ad6d2c81ac0b7583ff96a" />
+      <keyword name="NONE" id="AdsrEnvelope::NONE" ref="class_adsr_envelope.html#a4057156f3204542b691f8cc6ab31c726a59310175d860a62eeb144ef6ccb843d8" />
+      <keyword name="ATTACK" id="AdsrEnvelope::ATTACK" ref="class_adsr_envelope.html#a4057156f3204542b691f8cc6ab31c726ae99914a638e7c9ab2255d85eecd3c871" />
+      <keyword name="DECAY" id="AdsrEnvelope::DECAY" ref="class_adsr_envelope.html#a4057156f3204542b691f8cc6ab31c726a8cf8a6fef64b37908c65ec810d6e221f" />
+      <keyword name="SUSTAIN" id="AdsrEnvelope::SUSTAIN" ref="class_adsr_envelope.html#a4057156f3204542b691f8cc6ab31c726a266fb33584dfc8bfec0ffa2fcf4fad70" />
+      <keyword name="RELEASE" id="AdsrEnvelope::RELEASE" ref="class_adsr_envelope.html#a4057156f3204542b691f8cc6ab31c726a5a13d43d08a17f0e2a67045959add9aa" />
+      <keyword name="AudioSource" id="AudioSource" ref="class_audio_source.html" />
+      <keyword name="AudioSource" id="AudioSource::AudioSource" ref="class_audio_source.html#a58ad52e32668f022d45fa6239e56a85c" />
+      <keyword name="setSampleRate" id="AudioSource::setSampleRate" ref="class_audio_source.html#a131c25d54d84dd565c70f8167922018a" />
+      <keyword name="getSampleRate" id="AudioSource::getSampleRate" ref="class_audio_source.html#af39de49b375d0e475ae091fcf4067ace" />
+      <keyword name="getSampleDuration" id="AudioSource::getSampleDuration" ref="class_audio_source.html#aaced4e235300cfab50e1474177c9b95f" />
+      <keyword name="nextSample" id="AudioSource::nextSample" ref="class_audio_source.html#ace7f1d3d3a4d25a793c94af2c2256509" />
+      <keyword name="Butterworth2PoleFilter" id="Butterworth2PoleFilter" ref="class_butterworth2_pole_filter.html" />
+      <keyword name="Butterworth2PoleFilter" id="Butterworth2PoleFilter::Butterworth2PoleFilter" ref="class_butterworth2_pole_filter.html#ade18e5638d12236b1d5db73bfacd8b2b" />
+      <keyword name="ControlChange" id="ControlChange" ref="class_control_change.html" />
+      <keyword name="onControlChange" id="ControlChange::onControlChange" ref="class_control_change.html#a4d573029739d5738c51872d4a5c08832" />
+      <keyword name="receivedControlChange" id="ControlChange::receivedControlChange" ref="class_control_change.html#a3358e3ec564aae03dd9d8c1d6b71811d" />
+      <keyword name="ControlChange" id="ControlChange::ControlChange" ref="class_control_change.html#a1c8a6f4286061a54b46693b3e8075074" />
+      <keyword name="DistortionFilter" id="DistortionFilter" ref="class_distortion_filter.html" />
+      <keyword name="DistortionFilter" id="DistortionFilter::DistortionFilter" ref="class_distortion_filter.html#a95167e8dc9c17fd9ccd273f6b04601e3" />
+      <keyword name="filter" id="DistortionFilter::filter" ref="class_distortion_filter.html#a14397f61572760bef7d2ae2c5b9adcc4" />
+      <keyword name="setDistortion" id="DistortionFilter::setDistortion" ref="class_distortion_filter.html#a5bc560da9ecc8222276bc2ba82ee25bb" />
+      <keyword name="FloatTableModel" id="FloatTableModel" ref="class_float_table_model.html" />
+      <keyword name="FloatTableModel" id="FloatTableModel::FloatTableModel" ref="class_float_table_model.html#aefcf8d7876b892f88d1f656d455345f1" />
+      <keyword name="~FloatTableModel" id="FloatTableModel::~FloatTableModel" ref="class_float_table_model.html#a4c710b7e2fc4639e78499fd85186acd8" />
+      <keyword name="loadSawTooth" id="FloatTableModel::loadSawTooth" ref="class_float_table_model.html#a8152025859b6792588d388f91a311397" />
+      <keyword name="getErrorString" id="FloatTableModel::getErrorString" ref="class_float_table_model.html#ae1c0e1afdc3ce41a8479a91221752d5e" />
+      <keyword name="clear" id="FloatTableModel::clear" ref="class_float_table_model.html#a6118be810c8e5ed2e02583174fa61cc4" />
+      <keyword name="data" id="FloatTableModel::data" ref="class_float_table_model.html#a942c9351ae29f54e0726b1da631edf25" />
+      <keyword name="setData" id="FloatTableModel::setData" ref="class_float_table_model.html#ab869b8ddc43cefadbc8c5fdd50e25f8f" />
+      <keyword name="rowCount" id="FloatTableModel::rowCount" ref="class_float_table_model.html#a34ae58ffb4fb37b016c502d076e2bb13" />
+      <keyword name="columnCount" id="FloatTableModel::columnCount" ref="class_float_table_model.html#a7151a39a603dd3cc63e736f673105d65" />
+      <keyword name="insertRows" id="FloatTableModel::insertRows" ref="class_float_table_model.html#a7645c54161d994b374df99a0c288c362" />
+      <keyword name="removeRows" id="FloatTableModel::removeRows" ref="class_float_table_model.html#aba6d2d18f41d7de8c7d5dc0f2283fe33" />
+      <keyword name="insertColumns" id="FloatTableModel::insertColumns" ref="class_float_table_model.html#ae197dd815bdffd8279bc2429942b0766" />
+      <keyword name="removeColumns" id="FloatTableModel::removeColumns" ref="class_float_table_model.html#a7160be628eff80de907575f757f93c3e" />
+      <keyword name="audioBuffers" id="FloatTableModel::audioBuffers" ref="class_float_table_model.html#a52227c295ece8e13c6a298c381188d28" />
+      <keyword name="GraphicsLineItem" id="GraphicsLineItem" ref="class_graphics_line_item.html" />
+      <keyword name="setP1" id="GraphicsLineItem::setP1" ref="class_graphics_line_item.html#a7531678b1cad4a673817663340511ed6" />
+      <keyword name="setP2" id="GraphicsLineItem::setP2" ref="class_graphics_line_item.html#aeefa80c5e906de13f3a70f0a927c0e64" />
+      <keyword name="GraphicsLineItem" id="GraphicsLineItem::GraphicsLineItem" ref="class_graphics_line_item.html#ac857f07bf86fdd5d4bccb6587ed49802" />
+      <keyword name="GraphicsLineItem" id="GraphicsLineItem::GraphicsLineItem" ref="class_graphics_line_item.html#ac03a124d14d375b0b5a61410bed03535" />
+      <keyword name="GraphicsLineItem" id="GraphicsLineItem::GraphicsLineItem" ref="class_graphics_line_item.html#ad0814f444ba8675a45f8271db27040fe" />
+      <keyword name="P1" id="GraphicsLineItem::P1" ref="class_graphics_line_item.html#a3e457cac252d7e96ae23b7f5573754bfa99fae08da04882f39ddae9024d08d018" />
+      <keyword name="P2" id="GraphicsLineItem::P2" ref="class_graphics_line_item.html#a3e457cac252d7e96ae23b7f5573754bfafa7f46bf4d3f23f1b0a0db7ac8b83fc8" />
+      <keyword name="GraphicsLogLineItem" id="GraphicsLogLineItem" ref="class_graphics_log_line_item.html" />
+      <keyword name="setP1" id="GraphicsLogLineItem::setP1" ref="class_graphics_log_line_item.html#a23239610c828f3e3181a9b683afc8273" />
+      <keyword name="setP2" id="GraphicsLogLineItem::setP2" ref="class_graphics_log_line_item.html#a6320b6b9379b768345d3759e83c4ff0b" />
+      <keyword name="setLogarithmic" id="GraphicsLogLineItem::setLogarithmic" ref="class_graphics_log_line_item.html#a6fbc574e17d8d00606dd4c359dddea20" />
+      <keyword name="GraphicsLogLineItem" id="GraphicsLogLineItem::GraphicsLogLineItem" ref="class_graphics_log_line_item.html#a65ef69f82191c932a4e87adf39c98d94" />
+      <keyword name="GraphicsLogLineItem" id="GraphicsLogLineItem::GraphicsLogLineItem" ref="class_graphics_log_line_item.html#a3be789900c10f4be42e9edb05a25a26f" />
+      <keyword name="GraphicsNodeItem" id="GraphicsNodeItem" ref="class_graphics_node_item.html" />
+      <keyword name="setX" id="GraphicsNodeItem::setX" ref="class_graphics_node_item.html#abcf3ae54b009e72d37dbb3c22e8e9dee" />
+      <keyword name="setY" id="GraphicsNodeItem::setY" ref="class_graphics_node_item.html#a9d62861646e7977ae706e931e2c2fc7e" />
+      <keyword name="setBoundsLeft" id="GraphicsNodeItem::setBoundsLeft" ref="class_graphics_node_item.html#a9259fbd9887232c0588de653e0ecf603" />
+      <keyword name="setBoundsRight" id="GraphicsNodeItem::setBoundsRight" ref="class_graphics_node_item.html#af5f8c2ea1fd624a4563ae36958fe7e34" />
+      <keyword name="positionChanged" id="GraphicsNodeItem::positionChanged" ref="class_graphics_node_item.html#adb1788f77be9257df2fd44d19c6d2b8a" />
+      <keyword name="xChanged" id="GraphicsNodeItem::xChanged" ref="class_graphics_node_item.html#ad944254b2a7d85cc63e4e4308a586620" />
+      <keyword name="yChanged" id="GraphicsNodeItem::yChanged" ref="class_graphics_node_item.html#a2c3089e1079b11cb0365fbd5c7c097a0" />
+      <keyword name="GraphicsNodeItem" id="GraphicsNodeItem::GraphicsNodeItem" ref="class_graphics_node_item.html#a48e5af25fe949cf2ebb70d86100fb8d0" />
+      <keyword name="GraphicsNodeItem" id="GraphicsNodeItem::GraphicsNodeItem" ref="class_graphics_node_item.html#a9d0e6fa0f9479a9f151770db25f732f2" />
+      <keyword name="GraphicsNodeItem" id="GraphicsNodeItem::GraphicsNodeItem" ref="class_graphics_node_item.html#ac84ba227bb03e8d44c7242e6bcc31189" />
+      <keyword name="setBounds" id="GraphicsNodeItem::setBounds" ref="class_graphics_node_item.html#ab26ade7887b0d0e148585763f3100916" />
+      <keyword name="resetBounds" id="GraphicsNodeItem::resetBounds" ref="class_graphics_node_item.html#a3d503ac4bdcd6ea3db8d01647f4672fd" />
+      <keyword name="connectLine" id="GraphicsNodeItem::connectLine" ref="class_graphics_node_item.html#afe639a1f1739533649c5bc5ea8579055" />
+      <keyword name="connectLine" id="GraphicsNodeItem::connectLine" ref="class_graphics_node_item.html#ac39fd1df5c2b6613f3be63c5c78c8e01" />
+      <keyword name="hoverEnterEvent" id="GraphicsNodeItem::hoverEnterEvent" ref="class_graphics_node_item.html#a4b5c3c57c98357bbd60de2548180e6a5" />
+      <keyword name="hoverLeaveEvent" id="GraphicsNodeItem::hoverLeaveEvent" ref="class_graphics_node_item.html#a67459e906e89e8b6cc5894624bbea7d1" />
+      <keyword name="itemChange" id="GraphicsNodeItem::itemChange" ref="class_graphics_node_item.html#a9391dd9a1334c71a1627de2a03dfeb33" />
+      <keyword name="GraphView" id="GraphView" ref="class_graph_view.html" />
+      <keyword name="setBars" id="GraphView::setBars" ref="class_graph_view.html#a523d4a8bbed437fa6fe82cd36ba2f992" />
+      <keyword name="setSpacing" id="GraphView::setSpacing" ref="class_graph_view.html#a1242b050a7899e80c0846568abf80719" />
+      <keyword name="setHorizontalScale" id="GraphView::setHorizontalScale" ref="class_graph_view.html#a5c46dddabecc2a7a98f7306a9d60b7a3" />
+      <keyword name="setSelectionBrush" id="GraphView::setSelectionBrush" ref="class_graph_view.html#af2df985acfc0f5d3e54f64226bad5578" />
+      <keyword name="GraphView" id="GraphView::GraphView" ref="class_graph_view.html#a5ea67d2f2d98206a03c0bbb4c639d478" />
+      <keyword name="bars" id="GraphView::bars" ref="class_graph_view.html#a140ad939820432f096befc2801c1efc8" />
+      <keyword name="spacing" id="GraphView::spacing" ref="class_graph_view.html#a9315a12b7c6f1751f8e2396171b4963a" />
+      <keyword name="horizontalScale" id="GraphView::horizontalScale" ref="class_graph_view.html#a7c7f361fffe5d725eba6ffda559a2966" />
+      <keyword name="selectionBrush" id="GraphView::selectionBrush" ref="class_graph_view.html#a7af0bde519b713bc267dfb44781fcd52" />
+      <keyword name="setModel" id="GraphView::setModel" ref="class_graph_view.html#a6b6333d0c5fc42ab6375add7d84d4cac" />
+      <keyword name="visualRect" id="GraphView::visualRect" ref="class_graph_view.html#a5c06cf034b029c36b89e446473726812" />
+      <keyword name="scrollTo" id="GraphView::scrollTo" ref="class_graph_view.html#a4acf5caf0ebebd9e4f463ef7d6e7dc97" />
+      <keyword name="indexAt" id="GraphView::indexAt" ref="class_graph_view.html#a464770dff2f39c62ea44f20da7dce324" />
+      <keyword name="rowsInserted" id="GraphView::rowsInserted" ref="class_graph_view.html#aab8a2bd032b39aca8457280a5e564936" />
+      <keyword name="rowsRemoved" id="GraphView::rowsRemoved" ref="class_graph_view.html#ac5715d83f902d8b17889faffe5acfad2" />
+      <keyword name="columnsInserted" id="GraphView::columnsInserted" ref="class_graph_view.html#ac61062d4e7fadefc6b9c1fe8e2b15bcd" />
+      <keyword name="columnsRemoved" id="GraphView::columnsRemoved" ref="class_graph_view.html#a898a15a39f5d8180526690480d1a5d5b" />
+      <keyword name="moveCursor" id="GraphView::moveCursor" ref="class_graph_view.html#a48a4e500334883130f551b44f90640ad" />
+      <keyword name="horizontalOffset" id="GraphView::horizontalOffset" ref="class_graph_view.html#ab01f1b5c6cbef0774f6b39fdb6f983ad" />
+      <keyword name="verticalOffset" id="GraphView::verticalOffset" ref="class_graph_view.html#aeb208cb66d5ed5f3786dfb871c69764e" />
+      <keyword name="isIndexHidden" id="GraphView::isIndexHidden" ref="class_graph_view.html#a42ea34b4c61492833d2d60d8f5f6b69e" />
+      <keyword name="setSelection" id="GraphView::setSelection" ref="class_graph_view.html#a169ba7333923ff9e7e03fe1cab637646" />
+      <keyword name="visualRegionForSelection" id="GraphView::visualRegionForSelection" ref="class_graph_view.html#ad9c507aa9bbc198d0bb5a366c44dd360" />
+      <keyword name="paintEvent" id="GraphView::paintEvent" ref="class_graph_view.html#aa99c349b7106d474a8d3416984db42f4" />
+      <keyword name="updateGeometries" id="GraphView::updateGeometries" ref="class_graph_view.html#a30acb3f324944b438eb57bb5d4f1bcc9" />
+      <keyword name="getBounds" id="GraphView::getBounds" ref="class_graph_view.html#a88773a0ce00bd95de1f301cf9696a190" />
+      <keyword name="getStatistics" id="GraphView::getStatistics" ref="class_graph_view.html#a36f23dd627db842f43a5bb435105f0b9" />
+      <keyword name="bars" id="GraphView::bars" ref="class_graph_view.html#aae38f08a2b69bc1164d7b6e460dad9a5" />
+      <keyword name="spacing" id="GraphView::spacing" ref="class_graph_view.html#a95e865f1210ddaa0afda568a9184cdb0" />
+      <keyword name="horizontalScale" id="GraphView::horizontalScale" ref="class_graph_view.html#aa501fb64b5e25d2d21b43d1f5375e0a7" />
+      <keyword name="selectionBrush" id="GraphView::selectionBrush" ref="class_graph_view.html#ad654a122441b8638d5a0e32ac7ea8fd7" />
+      <keyword name="JackAudioModel" id="JackAudioModel" ref="class_jack_audio_model.html" />
+      <keyword name="JackAudioModel" id="JackAudioModel::JackAudioModel" ref="class_jack_audio_model.html#aed83285a41905b5d06014280e7e589a0" />
+      <keyword name="appendRowsFromRingBuffer" id="JackAudioModel::appendRowsFromRingBuffer" ref="class_jack_audio_model.html#ad02890b2f16135bd6f43f28ebd9f467c" />
+      <keyword name="JackClient" id="JackClient" ref="class_jack_client.html" />
+      <keyword name="JackClient" id="JackClient::JackClient" ref="class_jack_client.html#a9d9b1367a8952a070fe99ea9d64f1eea" />
+      <keyword name="getClientName" id="JackClient::getClientName" ref="class_jack_client.html#aa42635ae4087c7b85d08d41b59e1c04a" />
+      <keyword name="activate" id="JackClient::activate" ref="class_jack_client.html#acbec603ddb7d93ff98391778c37132e3" />
+      <keyword name="close" id="JackClient::close" ref="class_jack_client.html#a3eecad2f4262592775bdc91b6c2d7755" />
+      <keyword name="isActive" id="JackClient::isActive" ref="class_jack_client.html#a92eb307c641928598674b142bfb793e6" />
+      <keyword name="connectPorts" id="JackClient::connectPorts" ref="class_jack_client.html#af894afa4224500d2a19623b97f0297e2" />
+      <keyword name="disconnectPorts" id="JackClient::disconnectPorts" ref="class_jack_client.html#a7e4a110970510da37f7d05b33c5fce02" />
+      <keyword name="init" id="JackClient::init" ref="class_jack_client.html#ab5be759094af1257451ec7b0dff6e8c1" />
+      <keyword name="deinit" id="JackClient::deinit" ref="class_jack_client.html#af674367a86c7cd99fcc73a20bc23d3f4" />
+      <keyword name="process" id="JackClient::process" ref="class_jack_client.html#a4947618ea236895dcaea18918b36c337" />
+      <keyword name="getLastFrameTime" id="JackClient::getLastFrameTime" ref="class_jack_client.html#a38dd613fab5da6175c3f90e2aafc0579" />
+      <keyword name="getEstimatedCurrentTime" id="JackClient::getEstimatedCurrentTime" ref="class_jack_client.html#a6e6fb8d13329a68f5c1efa99877f8d63" />
+      <keyword name="registerAudioPort" id="JackClient::registerAudioPort" ref="class_jack_client.html#a79a83a70981ec6685d65f3087a07416f" />
+      <keyword name="registerMidiPort" id="JackClient::registerMidiPort" ref="class_jack_client.html#ad1303daad27308053a539c97d697ee3a" />
+      <keyword name="getSampleRate" id="JackClient::getSampleRate" ref="class_jack_client.html#a3ec8996b20798e0d641657f38ac9d6b2" />
+      <keyword name="JackClientWithDeferredProcessing" id="JackClientWithDeferredProcessing" ref="class_jack_client_with_deferred_processing.html" />
+      <keyword name="JackClientWithDeferredProcessing" id="JackClientWithDeferredProcessing::JackClientWithDeferredProcessing" ref="class_jack_client_with_deferred_processing.html#a3de705d4a519b5511cd85657766d60ca" />
+      <keyword name="getJackThread" id="JackClientWithDeferredProcessing::getJackThread" ref="class_jack_client_with_deferred_processing.html#ad151e5f6d67facc39dd5025c8605a6a5" />
+      <keyword name="init" id="JackClientWithDeferredProcessing::init" ref="class_jack_client_with_deferred_processing.html#a29ec50739a84694c72f885b2f52a6ca4" />
+      <keyword name="deinit" id="JackClientWithDeferredProcessing::deinit" ref="class_jack_client_with_deferred_processing.html#afa34cd7d725ed147043a98b185bccf67" />
+      <keyword name="JackRingBuffer" id="JackRingBuffer" ref="class_jack_ring_buffer.html" />
+      <keyword name="JackRingBuffer" id="JackRingBuffer::JackRingBuffer" ref="class_jack_ring_buffer.html#afb7791b0240a450e6667252fbd84cdff" />
+      <keyword name="~JackRingBuffer" id="JackRingBuffer::~JackRingBuffer" ref="class_jack_ring_buffer.html#af982485ad1624ab38f650161736c71f1" />
+      <keyword name="readSpace" id="JackRingBuffer::readSpace" ref="class_jack_ring_buffer.html#a61910bc985a83f3b0571e4d4cf7c290b" />
+      <keyword name="writeSpace" id="JackRingBuffer::writeSpace" ref="class_jack_ring_buffer.html#a79f3de05b5af075883b77498ba60bd66" />
+      <keyword name="peek" id="JackRingBuffer::peek" ref="class_jack_ring_buffer.html#a33244550671f623b09d03f31c198c1e7" />
+      <keyword name="read" id="JackRingBuffer::read" ref="class_jack_ring_buffer.html#aabe650091e8e8440b55291fd06e0dcab" />
+      <keyword name="readAdvance" id="JackRingBuffer::readAdvance" ref="class_jack_ring_buffer.html#ab69c5db5a3b6fe99ad7c4ab24c16c48b" />
+      <keyword name="write" id="JackRingBuffer::write" ref="class_jack_ring_buffer.html#a0cd9b311910bb9c3b1006d215f845be2" />
+      <keyword name="writeAdvance" id="JackRingBuffer::writeAdvance" ref="class_jack_ring_buffer.html#ae25acc38e0f5360be14303f4e54c29aa" />
+      <keyword name="reset" id="JackRingBuffer::reset" ref="class_jack_ring_buffer.html#a16aa0c4c484575528459928ee3b4fca2" />
+      <keyword name="JackThread" id="JackThread" ref="class_jack_thread.html" />
+      <keyword name="stop" id="JackThread::stop" ref="class_jack_thread.html#aa0112f11896777381fb0fedf28b1baf4" />
+      <keyword name="wake" id="JackThread::wake" ref="class_jack_thread.html#aa5f12c8f0e7eef5311d19d9b80d5cae0" />
+      <keyword name="JackThread" id="JackThread::JackThread" ref="class_jack_thread.html#ae4a145845f0f6552edb45524c862861d" />
+      <keyword name="processDeferred" id="JackThread::processDeferred" ref="class_jack_thread.html#a259ff4765b37fc10c31801ddc4ad62a3" />
+      <keyword name="run" id="JackThread::run" ref="class_jack_thread.html#ad4b3134d66ac6582d4887ab20a62d77a" />
+      <keyword name="MainWindow" id="MainWindow" ref="class_main_window.html" />
+      <keyword name="MainWindow" id="MainWindow::MainWindow" ref="class_main_window.html#a8b244be8b7b7db1b08de2a2acb9409db" />
+      <keyword name="~MainWindow" id="MainWindow::~MainWindow" ref="class_main_window.html#ae98d00a93bc118200eeef9f9bba1dba7" />
+      <keyword name="Midi2AudioClient" id="Midi2AudioClient" ref="class_midi2_audio_client.html" />
+      <keyword name="Midi2AudioClient" id="Midi2AudioClient::Midi2AudioClient" ref="class_midi2_audio_client.html#a40ac1492f4c519ca65ccd08aa4594e91" />
+      <keyword name="Midi2AudioClient" id="Midi2AudioClient::Midi2AudioClient" ref="class_midi2_audio_client.html#a3ec8d73cc5507695f9805c8c8edda186" />
+      <keyword name="getMidiInputPortName" id="Midi2AudioClient::getMidiInputPortName" ref="class_midi2_audio_client.html#a4dfc64a1bacaa69cd6d804c9d0877b29" />
+      <keyword name="getAudioOutputPortName" id="Midi2AudioClient::getAudioOutputPortName" ref="class_midi2_audio_client.html#a2b98e064d5910acf659a754e221b35d6" />
+      <keyword name="init" id="Midi2AudioClient::init" ref="class_midi2_audio_client.html#a7a39acae15e4fe2d835d3790727816df" />
+      <keyword name="getMidiInputPort" id="Midi2AudioClient::getMidiInputPort" ref="class_midi2_audio_client.html#a4092a95a78ac0ce6d10ab64de0d7b007" />
+      <keyword name="getAudioOutputPort" id="Midi2AudioClient::getAudioOutputPort" ref="class_midi2_audio_client.html#aadd6916aeb5092debe64144e33c5f22f" />
+      <keyword name="Midi2SignalClient" id="Midi2SignalClient" ref="class_midi2_signal_client.html" />
+      <keyword name="sendNoteOff" id="Midi2SignalClient::sendNoteOff" ref="class_midi2_signal_client.html#ac4ca4da5f1102732986d0f76bca9b126" />
+      <keyword name="sendNoteOn" id="Midi2SignalClient::sendNoteOn" ref="class_midi2_signal_client.html#ada56eef8e67dee3280677a99229d6adc" />
+      <keyword name="sendAfterTouch" id="Midi2SignalClient::sendAfterTouch" ref="class_midi2_signal_client.html#ab6140cc7dcac0fa9a89512321ee92012" />
+      <keyword name="sendControlChange" id="Midi2SignalClient::sendControlChange" ref="class_midi2_signal_client.html#a1783cd148b2535bdb2ccaeba126f2425" />
+      <keyword name="sendProgramChange" id="Midi2SignalClient::sendProgramChange" ref="class_midi2_signal_client.html#ab04722fcf70145bb5cb1bdeaf7adcf13" />
+      <keyword name="sendChannelPressure" id="Midi2SignalClient::sendChannelPressure" ref="class_midi2_signal_client.html#a7d589a5af8b5fd00fd3eb9e4531cb950" />
+      <keyword name="sendPitchWheel" id="Midi2SignalClient::sendPitchWheel" ref="class_midi2_signal_client.html#a4fee65e8361867f4b1b9214043e86141" />
+      <keyword name="receivedNoteOff" id="Midi2SignalClient::receivedNoteOff" ref="class_midi2_signal_client.html#a15725f791edff619fc6a464b2c79dcd3" />
+      <keyword name="receivedNoteOn" id="Midi2SignalClient::receivedNoteOn" ref="class_midi2_signal_client.html#a885d6d2a2a9ff4d09c5b5938fde7eb7b" />
+      <keyword name="receivedAfterTouch" id="Midi2SignalClient::receivedAfterTouch" ref="class_midi2_signal_client.html#a78bf1ca475a4cd3c1bcfa2dd908fabfd" />
+      <keyword name="receivedControlChange" id="Midi2SignalClient::receivedControlChange" ref="class_midi2_signal_client.html#a98a9d12f341b5b8dfe14744171fbb76f" />
+      <keyword name="receivedProgramChange" id="Midi2SignalClient::receivedProgramChange" ref="class_midi2_signal_client.html#a09020dec9922366592b7e601b2e3c8dd" />
+      <keyword name="receivedChannelPressure" id="Midi2SignalClient::receivedChannelPressure" ref="class_midi2_signal_client.html#a4716660362d3c224d62da62a2fdac65c" />
+      <keyword name="receivedPitchWheel" id="Midi2SignalClient::receivedPitchWheel" ref="class_midi2_signal_client.html#ab089643c01c1f3765bc365465c1e9f06" />
+      <keyword name="Midi2SignalClient" id="Midi2SignalClient::Midi2SignalClient" ref="class_midi2_signal_client.html#aa478c3193d69ae1cd92a087d30c66b80" />
+      <keyword name="~Midi2SignalClient" id="Midi2SignalClient::~Midi2SignalClient" ref="class_midi2_signal_client.html#ac3f28e23cc7c2ec1e09c742bfeb2303e" />
+      <keyword name="getMidiInputPortName" id="Midi2SignalClient::getMidiInputPortName" ref="class_midi2_signal_client.html#a69c4e732c39d612168b5c8978852bfcd" />
+      <keyword name="getMidiOutputPortName" id="Midi2SignalClient::getMidiOutputPortName" ref="class_midi2_signal_client.html#a63653a3fa5defbf889b56dab105e8813" />
+      <keyword name="init" id="Midi2SignalClient::init" ref="class_midi2_signal_client.html#ac80aa571b25acd3ca16b76e8953d524c" />
+      <keyword name="deinit" id="Midi2SignalClient::deinit" ref="class_midi2_signal_client.html#a394e004401011876ae0218489d5a8a9f" />
+      <keyword name="process" id="Midi2SignalClient::process" ref="class_midi2_signal_client.html#a8e085247f7e21192551dc7ea296220d1" />
+      <keyword name="run" id="Midi2SignalClient::run" ref="class_midi2_signal_client.html#ad9f37912093bae2391e69ceeb6b53393" />
+      <keyword name="MidiClientWidget" id="MidiClientWidget" ref="class_midi_client_widget.html" />
+      <keyword name="activate" id="MidiClientWidget::activate" ref="class_midi_client_widget.html#a16c2f57dafaed6356d089c3976135efb" />
+      <keyword name="close" id="MidiClientWidget::close" ref="class_midi_client_widget.html#ab103180f3f22f986f94f2f762a58d74f" />
+      <keyword name="MidiClientWidget" id="MidiClientWidget::MidiClientWidget" ref="class_midi_client_widget.html#a7e652dd74e851b0e4243eb9054ed842b" />
+      <keyword name="~MidiClientWidget" id="MidiClientWidget::~MidiClientWidget" ref="class_midi_client_widget.html#a6a32f76e55498b6aae5a55212a5e2294" />
+      <keyword name="MidiController2AudioClient" id="MidiController2AudioClient" ref="class_midi_controller2_audio_client.html" />
+      <keyword name="MidiController2AudioClient" id="MidiController2AudioClient::MidiController2AudioClient" ref="class_midi_controller2_audio_client.html#a0bddea4ecadca17ac64260eaaaff6d86" />
+      <keyword name="getChannel" id="MidiController2AudioClient::getChannel" ref="class_midi_controller2_audio_client.html#a4fcd8e3d171d5799fe5ad0d2aba4d3df" />
+      <keyword name="getController" id="MidiController2AudioClient::getController" ref="class_midi_controller2_audio_client.html#a9b577e916a41ca0c52900c6d35898986" />
+      <keyword name="init" id="MidiController2AudioClient::init" ref="class_midi_controller2_audio_client.html#aeaa2cd0b5ffe50c336a0032674f2bc6a" />
+      <keyword name="process" id="MidiController2AudioClient::process" ref="class_midi_controller2_audio_client.html#a7bc37f5a2b33830f95cf2cffe08cf0f8" />
+      <keyword name="MidiControllerCheckBox" id="MidiControllerCheckBox" ref="class_midi_controller_check_box.html" />
+      <keyword name="setChannel" id="MidiControllerCheckBox::setChannel" ref="class_midi_controller_check_box.html#a1bdbbed82857449592d36c24550c655c" />
+      <keyword name="setController" id="MidiControllerCheckBox::setController" ref="class_midi_controller_check_box.html#a386e504023f65e066ad7c9f7aceff713" />
+      <keyword name="onControlChange" id="MidiControllerCheckBox::onControlChange" ref="class_midi_controller_check_box.html#a5dbc155d772f9d1595deb71ffc98061d" />
+      <keyword name="controlChanged" id="MidiControllerCheckBox::controlChanged" ref="class_midi_controller_check_box.html#a7561e3c0e74aabda11754374cfdd63f0" />
+      <keyword name="MidiControllerCheckBox" id="MidiControllerCheckBox::MidiControllerCheckBox" ref="class_midi_controller_check_box.html#aed0ae3e6db26fec3b9332bd07af77f0c" />
+      <keyword name="getChannel" id="MidiControllerCheckBox::getChannel" ref="class_midi_controller_check_box.html#ac41a35ab472a976b21efcf398fdb31da" />
+      <keyword name="getController" id="MidiControllerCheckBox::getController" ref="class_midi_controller_check_box.html#a447d62e6aabf73be40d84a3c96bf4f17" />
+      <keyword name="char" id="MidiControllerCheckBox::char" ref="class_midi_controller_check_box.html#a5e62ff63f94fb8ceb14a06a83bb9ee85" />
+      <keyword name="MidiControllerSlider" id="MidiControllerSlider" ref="class_midi_controller_slider.html" />
+      <keyword name="setChannel" id="MidiControllerSlider::setChannel" ref="class_midi_controller_slider.html#a179ef3f3db59a9036bd6a948217cd3e2" />
+      <keyword name="setController" id="MidiControllerSlider::setController" ref="class_midi_controller_slider.html#ac3b22b832f6500b5e7d821b8ae847793" />
+      <keyword name="onControlChange" id="MidiControllerSlider::onControlChange" ref="class_midi_controller_slider.html#af90699fc5c63fa7c720ee2bcde80ac79" />
+      <keyword name="controlChanged" id="MidiControllerSlider::controlChanged" ref="class_midi_controller_slider.html#a3a7bf5f64c4ae2213b875bac0034f893" />
+      <keyword name="MidiControllerSlider" id="MidiControllerSlider::MidiControllerSlider" ref="class_midi_controller_slider.html#a14dc6f7191d162039371f21ddfec42c4" />
+      <keyword name="getChannel" id="MidiControllerSlider::getChannel" ref="class_midi_controller_slider.html#a743d7fbe5dd02dc822feb177a950e384" />
+      <keyword name="getController" id="MidiControllerSlider::getController" ref="class_midi_controller_slider.html#ad9f0700d215e9035f8271aa4a8cd9aa8" />
+      <keyword name="char" id="MidiControllerSlider::char" ref="class_midi_controller_slider.html#ad40f2c0c2905adce0e62157029386846" />
+      <keyword name="MidiMessage" id="MidiMessage" ref="struct_midi_message.html" />
+      <keyword name="time" id="MidiMessage::time" ref="struct_midi_message.html#ab1b8f7ec5580ecd7c45202b6c79123bb" />
+      <keyword name="size" id="MidiMessage::size" ref="struct_midi_message.html#a52a35aab0b3be299bd4d14729debb3e4" />
+      <keyword name="message" id="MidiMessage::message" ref="struct_midi_message.html#a4132563f6fb8a0033c2dd1a6c64ccb22" />
+      <keyword name="MidiPitchSlider" id="MidiPitchSlider" ref="class_midi_pitch_slider.html" />
+      <keyword name="setChannel" id="MidiPitchSlider::setChannel" ref="class_midi_pitch_slider.html#a582f69a3ab9d4603ee251ba6a999ade2" />
+      <keyword name="onPitchWheel" id="MidiPitchSlider::onPitchWheel" ref="class_midi_pitch_slider.html#a8ab06ac48876150993bac61b4f1cd0f4" />
+      <keyword name="pitchWheel" id="MidiPitchSlider::pitchWheel" ref="class_midi_pitch_slider.html#a20a9e7ed95c1346d34813bb5b4f8c73b" />
+      <keyword name="MidiPitchSlider" id="MidiPitchSlider::MidiPitchSlider" ref="class_midi_pitch_slider.html#a69024ca9258a915df8e3a1534d41d996" />
+      <keyword name="getChannel" id="MidiPitchSlider::getChannel" ref="class_midi_pitch_slider.html#a27c73a45c866c98b0726e54bf7970c71" />
+      <keyword name="mouseReleaseEvent" id="MidiPitchSlider::mouseReleaseEvent" ref="class_midi_pitch_slider.html#a73d874565ee7a32969de52da8fc33c96" />
+      <keyword name="char" id="MidiPitchSlider::char" ref="class_midi_pitch_slider.html#a02064ab214e37e4f06a524eeba78fb2d" />
+      <keyword name="MidiSplitter" id="MidiSplitter" ref="class_midi_splitter.html" />
+      <keyword name="splitControlChangeByController" id="MidiSplitter::splitControlChangeByController" ref="class_midi_splitter.html#ae1588153521f5300750580a42e6b396a" />
+      <keyword name="MidiSplitter" id="MidiSplitter::MidiSplitter" ref="class_midi_splitter.html#a32e06c18392caf765b56b3de7c186956" />
+      <keyword name="getControlChangeSink" id="MidiSplitter::getControlChangeSink" ref="class_midi_splitter.html#ac3b7ba312f1af3f97d8f6f3dd2d1a42a" />
+      <keyword name="MonophonicSynthesizer" id="MonophonicSynthesizer" ref="class_monophonic_synthesizer.html" />
+      <keyword name="MonophonicSynthesizer" id="MonophonicSynthesizer::MonophonicSynthesizer" ref="class_monophonic_synthesizer.html#afd9779c79a52bc3a278814d2feffaf49" />
+      <keyword name="pushNote" id="MonophonicSynthesizer::pushNote" ref="class_monophonic_synthesizer.html#a5e7cf8d7b54692a0d89fdcae838cfddb" />
+      <keyword name="popNote" id="MonophonicSynthesizer::popNote" ref="class_monophonic_synthesizer.html#ab3e32a85dd717bfa684d637ff64a7354" />
+      <keyword name="setMidiPitch" id="MonophonicSynthesizer::setMidiPitch" ref="class_monophonic_synthesizer.html#a7be6b16d0ccb206e9053faf80fd95a51" />
+      <keyword name="setController" id="MonophonicSynthesizer::setController" ref="class_monophonic_synthesizer.html#af1e2763279a14ffd3e9b21bfa9655cbc" />
+      <keyword name="nextSample" id="MonophonicSynthesizer::nextSample" ref="class_monophonic_synthesizer.html#a372881397d719133d0e360d7d3d652c5" />
+      <keyword name="setSampleRate" id="MonophonicSynthesizer::setSampleRate" ref="class_monophonic_synthesizer.html#a740233cce05b660a79b86cac9b54cbfb" />
+      <keyword name="setFrequency" id="MonophonicSynthesizer::setFrequency" ref="class_monophonic_synthesizer.html#a3f4cfabd1d6d11cf79e8113fdeaa7108" />
+      <keyword name="MorphingPiecewiseLinearOscillator" id="MorphingPiecewiseLinearOscillator" ref="class_morphing_piecewise_linear_oscillator.html" />
+      <keyword name="MorphingPiecewiseLinearOscillator" id="MorphingPiecewiseLinearOscillator::MorphingPiecewiseLinearOscillator" ref="class_morphing_piecewise_linear_oscillator.html#a6a1912585137dc7b8f9f345abe35a57d" />
+      <keyword name="getNode" id="MorphingPiecewiseLinearOscillator::getNode" ref="class_morphing_piecewise_linear_oscillator.html#af9dd3f9a048d9d0ede195b72cc67b566" />
+      <keyword name="size" id="MorphingPiecewiseLinearOscillator::size" ref="class_morphing_piecewise_linear_oscillator.html#aa6b09beedcd7d35a6cf70468a7cae210" />
+      <keyword name="setMorph" id="MorphingPiecewiseLinearOscillator::setMorph" ref="class_morphing_piecewise_linear_oscillator.html#a309e69bd4459359ad4bf0dca844ca431" />
+      <keyword name="getMorph" id="MorphingPiecewiseLinearOscillator::getMorph" ref="class_morphing_piecewise_linear_oscillator.html#a61d583265ad5a8dc4980c7453bfaf5ac" />
+      <keyword name="Oscillator" id="Oscillator" ref="class_oscillator.html" />
+      <keyword name="Oscillator" id="Oscillator::Oscillator" ref="class_oscillator.html#a99fd3a4a9ef26a4f8025ac7a519d900b" />
+      <keyword name="setSampleRate" id="Oscillator::setSampleRate" ref="class_oscillator.html#a0364f332bda7e8c04557745683d6eb6d" />
+      <keyword name="setFrequency" id="Oscillator::setFrequency" ref="class_oscillator.html#a0945f42669a71cb6536918db1d0f8abc" />
+      <keyword name="getFrequency" id="Oscillator::getFrequency" ref="class_oscillator.html#a743a55e2352ff051e516993c863a7787" />
+      <keyword name="getPhaseIncrement" id="Oscillator::getPhaseIncrement" ref="class_oscillator.html#a1075bb4baf998077eb37923ab2f9faab" />
+      <keyword name="nextSample" id="Oscillator::nextSample" ref="class_oscillator.html#a251d230ce176ffcaa6f030f5c2f30dcc" />
+      <keyword name="reset" id="Oscillator::reset" ref="class_oscillator.html#aa948fd93ed91ffedd873c6d50bba3898" />
+      <keyword name="valueAtPhase" id="Oscillator::valueAtPhase" ref="class_oscillator.html#a46b2709c17aa86351f3010b0a419fb30" />
+      <keyword name="PiecewiseLinearOscillator" id="PiecewiseLinearOscillator" ref="class_piecewise_linear_oscillator.html" />
+      <keyword name="getNode" id="PiecewiseLinearOscillator::getNode" ref="class_piecewise_linear_oscillator.html#a01dbe5bc60da7b1cf2d96c5a95c60f7d" />
+      <keyword name="size" id="PiecewiseLinearOscillator::size" ref="class_piecewise_linear_oscillator.html#a1ce0f9894bf1b7432c964d34ac127f58" />
+      <keyword name="valueAtPhase" id="PiecewiseLinearOscillator::valueAtPhase" ref="class_piecewise_linear_oscillator.html#a20411c1295f892d6f1b4c841bea68249" />
+      <keyword name="addNode" id="PiecewiseLinearOscillator::addNode" ref="class_piecewise_linear_oscillator.html#a622ffeadfd74e2cd09985c998f8422ec" />
+      <keyword name="Polynomial" id="Polynomial" ref="class_polynomial.html" />
+      <keyword name="Polynomial" id="Polynomial::Polynomial" ref="class_polynomial.html#a9e95d37dabd4cd5969298e2b4118808d" />
+      <keyword name="Polynomial" id="Polynomial::Polynomial" ref="class_polynomial.html#aa97f277703515e8003f778f8081415b9" />
+      <keyword name="Polynomial" id="Polynomial::Polynomial" ref="class_polynomial.html#a9a62ac00a1b3eac7dc4951209695a0a6" />
+      <keyword name="degree" id="Polynomial::degree" ref="class_polynomial.html#ae37cd87520cadc7178d055c2a8148280" />
+      <keyword name="evaluate" id="Polynomial::evaluate" ref="class_polynomial.html#a0631142cfc0976db04e1254b0e99c974" />
+      <keyword name="operator+=" id="Polynomial::operator+=" ref="class_polynomial.html#a8a1d907e258f8898cd3326583f345051" />
+      <keyword name="operator*=" id="Polynomial::operator*=" ref="class_polynomial.html#a0efb2c386b717eccf0f653ca8c3bfab6" />
+      <keyword name="operator*=" id="Polynomial::operator*=" ref="class_polynomial.html#a7f35b103641bfbefbb506f48e5a596bf" />
+      <keyword name="PulseOscillator" id="PulseOscillator" ref="class_pulse_oscillator.html" />
+      <keyword name="PulseOscillator" id="PulseOscillator::PulseOscillator" ref="class_pulse_oscillator.html#a2e83b1d4a9f89cb69195f0ce361bffde" />
+      <keyword name="Record2MemoryClient" id="Record2MemoryClient" ref="class_record2_memory_client.html" />
+      <keyword name="recordingStarted" id="Record2MemoryClient::recordingStarted" ref="class_record2_memory_client.html#affab5f77db3d69331b0d77739397c1b2" />
+      <keyword name="recordingFinished" id="Record2MemoryClient::recordingFinished" ref="class_record2_memory_client.html#af830604e5a7b450fde4d1fa409e47136" />
+      <keyword name="Record2MemoryClient" id="Record2MemoryClient::Record2MemoryClient" ref="class_record2_memory_client.html#ae1a6643b4db2d80c4427bb03f1d05f09" />
+      <keyword name="~Record2MemoryClient" id="Record2MemoryClient::~Record2MemoryClient" ref="class_record2_memory_client.html#a84bbe2aefe115d01b4202fde03ecc7f7" />
+      <keyword name="getNrOfAudioModels" id="Record2MemoryClient::getNrOfAudioModels" ref="class_record2_memory_client.html#a3d1e96157b85b7dc8a78feaa54d66f9a" />
+      <keyword name="removeAudioModel" id="Record2MemoryClient::removeAudioModel" ref="class_record2_memory_client.html#ae5486a72f0e304188f9ec481f42685aa" />
+      <keyword name="popAudioModel" id="Record2MemoryClient::popAudioModel" ref="class_record2_memory_client.html#abdc3181b09fedc7913190764c0138ab6" />
+      <keyword name="init" id="Record2MemoryClient::init" ref="class_record2_memory_client.html#a42c78828334b131d8720a7104cd0e3aa" />
+      <keyword name="deinit" id="Record2MemoryClient::deinit" ref="class_record2_memory_client.html#a15f698d305ae5b47edece4fa8d8515f3" />
+      <keyword name="process" id="Record2MemoryClient::process" ref="class_record2_memory_client.html#a028f60266b1d3bc9d4ab032c6e0059e4" />
+      <keyword name="run" id="Record2MemoryClient::run" ref="class_record2_memory_client.html#a08af170867758efafd11cfddb1b4f1c4" />
+      <keyword name="SawtoothOscillator" id="SawtoothOscillator" ref="class_sawtooth_oscillator.html" />
+      <keyword name="SawtoothOscillator" id="SawtoothOscillator::SawtoothOscillator" ref="class_sawtooth_oscillator.html#a48758a9435753a683ea7baeb010cd932" />
+      <keyword name="SimpleLowpassFilter" id="SimpleLowpassFilter" ref="class_simple_lowpass_filter.html" />
+      <keyword name="SimpleLowpassFilter" id="SimpleLowpassFilter::SimpleLowpassFilter" ref="class_simple_lowpass_filter.html#aaf29490ce1523d061441d64ea54f64f6" />
+      <keyword name="filter" id="SimpleLowpassFilter::filter" ref="class_simple_lowpass_filter.html#a3401d9af0044c913359468896a43a559" />
+      <keyword name="reset" id="SimpleLowpassFilter::reset" ref="class_simple_lowpass_filter.html#ada7bcd6414ae91fb0d5204bf5deca58a" />
+      <keyword name="SimpleMonophonicClient" id="SimpleMonophonicClient" ref="class_simple_monophonic_client.html" />
+      <keyword name="SimpleMonophonicClient" id="SimpleMonophonicClient::SimpleMonophonicClient" ref="class_simple_monophonic_client.html#aa68104a7063ed5e17c9970f437ab8080" />
+      <keyword name="init" id="SimpleMonophonicClient::init" ref="class_simple_monophonic_client.html#a5f0c0f2cdc38c75f13afcc4df8d2da20" />
+      <keyword name="process" id="SimpleMonophonicClient::process" ref="class_simple_monophonic_client.html#a0b9fbddf1011790b33294a667a54c7d3" />
+      <keyword name="TestMidiClientWidget" id="TestMidiClientWidget" ref="class_test_midi_client_widget.html" />
+      <keyword name="TestMidiClientWidget" id="TestMidiClientWidget::TestMidiClientWidget" ref="class_test_midi_client_widget.html#a1c5e6a38268a52f2cfaa72ba6a49e417" />
+      <keyword name="~TestMidiClientWidget" id="TestMidiClientWidget::~TestMidiClientWidget" ref="class_test_midi_client_widget.html#a26ffef4e28b4d44b543722eca3b07c98" />
+      <keyword name="ZPlaneFilter" id="ZPlaneFilter" ref="class_z_plane_filter.html" />
+      <keyword name="ZPlaneFilter" id="ZPlaneFilter::ZPlaneFilter" ref="class_z_plane_filter.html#ac1cac41bf77d18ebf8f2c41bd16f75c9" />
+      <keyword name="filter" id="ZPlaneFilter::filter" ref="class_z_plane_filter.html#a2158894e005a712ab41be4e1bc0ea887" />
+      <keyword name="reset" id="ZPlaneFilter::reset" ref="class_z_plane_filter.html#a611dde6406a8f84563274b7e06ba91a1" />
+      <keyword name="addPole" id="ZPlaneFilter::addPole" ref="class_z_plane_filter.html#aca5262a704d55188e2c01f6f6cad392b" />
+      <keyword name="addZero" id="ZPlaneFilter::addZero" ref="class_z_plane_filter.html#a33d9b5b33792e3faca430f82908319d8" />
+      <keyword name="poleCount" id="ZPlaneFilter::poleCount" ref="class_z_plane_filter.html#a8de090362810669300deb28bffd3cd4e" />
+      <keyword name="zeroCount" id="ZPlaneFilter::zeroCount" ref="class_z_plane_filter.html#a003b1bdabd47d58ee13223275a74730b" />
+      <keyword name="pole" id="ZPlaneFilter::pole" ref="class_z_plane_filter.html#aac38d8ab9090580557615da2790d062e" />
+      <keyword name="zero" id="ZPlaneFilter::zero" ref="class_z_plane_filter.html#a9d8186c2a23dd51ac0769c06ced64dd4" />
+      <keyword name="squaredAmplitudeResponse" id="ZPlaneFilter::squaredAmplitudeResponse" ref="class_z_plane_filter.html#ac45592d20776864d12b24b758e6213ca" />
+      <keyword name="frequencyResponse" id="ZPlaneFilter::frequencyResponse" ref="class_z_plane_filter.html#a0bff4cf2cf0a2afe5772777d624aa4f6" />
+      <keyword name="frequencyResponse" id="ZPlaneFilter::frequencyResponse" ref="class_z_plane_filter.html#aa1cc8fca65778a0f3a7dbaa66853f645" />
+      <keyword name="computeCoefficients" id="ZPlaneFilter::computeCoefficients" ref="class_z_plane_filter.html#a1a6932f732f19e3bbeb4b85f55c0f98b" />
+      <keyword name="convertPowerToDecibel" id="ZPlaneFilter::convertPowerToDecibel" ref="class_z_plane_filter.html#ade428a69378ca521e8c42fa3ec172b86" />
+      <keyword name="ZPlaneWidget" id="ZPlaneWidget" ref="class_z_plane_widget.html" />
+      <keyword name="ZPlaneWidget" id="ZPlaneWidget::ZPlaneWidget" ref="class_z_plane_widget.html#a17efa38c69868f0008054c6b4b9bdf8f" />
+      <keyword name="~ZPlaneWidget" id="ZPlaneWidget::~ZPlaneWidget" ref="class_z_plane_widget.html#ab11a3e2ef9f86c8ebfe89699b2372b61" />
+      <keyword name="Ui" id="Ui" ref="namespace_ui.html" />
+    </keywords>
+    <files>
+      <file>tabs.css</file>
+      <file>tab_a.png</file>
+      <file>tab_b.png</file>
+      <file>tab_h.png</file>
+      <file>tab_s.png</file>
+      <file>nav_h.png</file>
+      <file>nav_f.png</file>
+      <file>bc_s.png</file>
+      <file>doxygen.png</file>
+      <file>closed.png</file>
+      <file>open.png</file>
+      <file>doxygen.css</file>
+      <file>/search/mag_sel.png</file>
+      <file>/search/search_l.png</file>
+      <file>/search/search_m.png</file>
+      <file>/search/search_r.png</file>
+      <file>/search/close.png</file>
+      <file>search/search.css</file>
+      <file>search/search.js</file>
+      <file>index.html</file>
+      <file>adsrenvelope_8h_source.html</file>
+      <file>audiosource_8h_source.html</file>
+      <file>butterworth2polefilter_8h_source.html</file>
+      <file>distortionfilter_8h_source.html</file>
+      <file>floattablemodel_8h_source.html</file>
+      <file>graphicslineitem_8h_source.html</file>
+      <file>graphicsloglineitem_8h_source.html</file>
+      <file>graphicsnodeitem_8h_source.html</file>
+      <file>graphview_8h_source.html</file>
+      <file>jackaudiomodel_8h_source.html</file>
+      <file>jackclient_8h_source.html</file>
+      <file>jackclientwithdeferredprocessing_8h_source.html</file>
+      <file>jackringbuffer_8h_source.html</file>
+      <file>jackthread_8h_source.html</file>
+      <file>mainwindow_8h_source.html</file>
+      <file>midi2audioclient_8h_source.html</file>
+      <file>midi2signalclient_8h_source.html</file>
+      <file>midiclientwidget_8h_source.html</file>
+      <file>midicontroller2audioclient_8h_source.html</file>
+      <file>midicontrollercheckbox_8h_source.html</file>
+      <file>midicontrollerslider_8h_source.html</file>
+      <file>midipitchslider_8h_source.html</file>
+      <file>midisplitter_8h_source.html</file>
+      <file>monophonicsynthesizer_8h_source.html</file>
+      <file>morphingpiecewiselinearoscillator_8h_source.html</file>
+      <file>oscillator_8h_source.html</file>
+      <file>piecewiselinearoscillator_8h_source.html</file>
+      <file>polynomial_8h_source.html</file>
+      <file>pulseoscillator_8h_source.html</file>
+      <file>record2memoryclient_8h_source.html</file>
+      <file>sawtoothoscillator_8h_source.html</file>
+      <file>simplelowpassfilter_8h_source.html</file>
+      <file>simplemonophonicclient_8h_source.html</file>
+      <file>testmidiclientwidget_8h_source.html</file>
+      <file>zplanefilter_8h_source.html</file>
+      <file>zplanewidget_8h_source.html</file>
+      <file>adsrenvelope_8cpp.html</file>
+      <file>adsrenvelope_8h.html</file>
+      <file>audiosource_8cpp.html</file>
+      <file>audiosource_8h.html</file>
+      <file>butterworth2polefilter_8cpp.html</file>
+      <file>butterworth2polefilter_8h.html</file>
+      <file>distortionfilter_8cpp.html</file>
+      <file>distortionfilter_8h.html</file>
+      <file>floattablemodel_8cpp.html</file>
+      <file>floattablemodel_8h.html</file>
+      <file>graphicslineitem_8cpp.html</file>
+      <file>graphicslineitem_8h.html</file>
+      <file>graphicsloglineitem_8cpp.html</file>
+      <file>graphicsloglineitem_8h.html</file>
+      <file>graphicsnodeitem_8cpp.html</file>
+      <file>graphicsnodeitem_8h.html</file>
+      <file>graphview_8cpp.html</file>
+      <file>graphview_8h.html</file>
+      <file>jackaudiomodel_8cpp.html</file>
+      <file>jackaudiomodel_8h.html</file>
+      <file>jackclient_8cpp.html</file>
+      <file>jackclient_8h.html</file>
+      <file>jackclientwithdeferredprocessing_8cpp.html</file>
+      <file>jackclientwithdeferredprocessing_8h.html</file>
+      <file>jackringbuffer_8cpp.html</file>
+      <file>jackringbuffer_8h.html</file>
+      <file>jackthread_8cpp.html</file>
+      <file>jackthread_8h.html</file>
+      <file>main_8cpp.html</file>
+      <file>mainwindow_8cpp.html</file>
+      <file>mainwindow_8h.html</file>
+      <file>midi2audioclient_8cpp.html</file>
+      <file>midi2audioclient_8h.html</file>
+      <file>midi2signalclient_8cpp.html</file>
+      <file>midi2signalclient_8h.html</file>
+      <file>midiclientwidget_8cpp.html</file>
+      <file>midiclientwidget_8h.html</file>
+      <file>midicontroller2audioclient_8cpp.html</file>
+      <file>midicontroller2audioclient_8h.html</file>
+      <file>midicontrollercheckbox_8cpp.html</file>
+      <file>midicontrollercheckbox_8h.html</file>
+      <file>midicontrollerslider_8cpp.html</file>
+      <file>midicontrollerslider_8h.html</file>
+      <file>midipitchslider_8cpp.html</file>
+      <file>midipitchslider_8h.html</file>
+      <file>midisplitter_8cpp.html</file>
+      <file>midisplitter_8h.html</file>
+      <file>monophonicsynthesizer_8cpp.html</file>
+      <file>monophonicsynthesizer_8h.html</file>
+      <file>morphingpiecewiselinearoscillator_8cpp.html</file>
+      <file>morphingpiecewiselinearoscillator_8h.html</file>
+      <file>oscillator_8cpp.html</file>
+      <file>oscillator_8h.html</file>
+      <file>piecewiselinearoscillator_8cpp.html</file>
+      <file>piecewiselinearoscillator_8h.html</file>
+      <file>polynomial_8cpp.html</file>
+      <file>polynomial_8h.html</file>
+      <file>pulseoscillator_8cpp.html</file>
+      <file>pulseoscillator_8h.html</file>
+      <file>record2memoryclient_8cpp.html</file>
+      <file>record2memoryclient_8h.html</file>
+      <file>sawtoothoscillator_8cpp.html</file>
+      <file>sawtoothoscillator_8h.html</file>
+      <file>simplelowpassfilter_8cpp.html</file>
+      <file>simplelowpassfilter_8h.html</file>
+      <file>simplemonophonicclient_8cpp.html</file>
+      <file>simplemonophonicclient_8h.html</file>
+      <file>testmidiclientwidget_8cpp.html</file>
+      <file>testmidiclientwidget_8h.html</file>
+      <file>zplanefilter_8cpp.html</file>
+      <file>zplanefilter_8h.html</file>
+      <file>zplanewidget_8cpp.html</file>
+      <file>zplanewidget_8h.html</file>
+      <file>annotated.html</file>
+      <file>classes.html</file>
+      <file>hierarchy.html</file>
+      <file>functions.html</file>
+      <file>functions_0x62.html</file>
+      <file>functions_0x63.html</file>
+      <file>functions_0x64.html</file>
+      <file>functions_0x65.html</file>
+      <file>functions_0x66.html</file>
+      <file>functions_0x67.html</file>
+      <file>functions_0x68.html</file>
+      <file>functions_0x69.html</file>
+      <file>functions_0x6a.html</file>
+      <file>functions_0x6c.html</file>
+      <file>functions_0x6d.html</file>
+      <file>functions_0x6e.html</file>
+      <file>functions_0x6f.html</file>
+      <file>functions_0x70.html</file>
+      <file>functions_0x72.html</file>
+      <file>functions_0x73.html</file>
+      <file>functions_0x74.html</file>
+      <file>functions_0x75.html</file>
+      <file>functions_0x76.html</file>
+      <file>functions_0x77.html</file>
+      <file>functions_0x78.html</file>
+      <file>functions_0x79.html</file>
+      <file>functions_0x7a.html</file>
+      <file>functions_0x7e.html</file>
+      <file>functions_func.html</file>
+      <file>functions_func_0x62.html</file>
+      <file>functions_func_0x63.html</file>
+      <file>functions_func_0x64.html</file>
+      <file>functions_func_0x65.html</file>
+      <file>functions_func_0x66.html</file>
+      <file>functions_func_0x67.html</file>
+      <file>functions_func_0x68.html</file>
+      <file>functions_func_0x69.html</file>
+      <file>functions_func_0x6a.html</file>
+      <file>functions_func_0x6c.html</file>
+      <file>functions_func_0x6d.html</file>
+      <file>functions_func_0x6e.html</file>
+      <file>functions_func_0x6f.html</file>
+      <file>functions_func_0x70.html</file>
+      <file>functions_func_0x72.html</file>
+      <file>functions_func_0x73.html</file>
+      <file>functions_func_0x74.html</file>
+      <file>functions_func_0x75.html</file>
+      <file>functions_func_0x76.html</file>
+      <file>functions_func_0x77.html</file>
+      <file>functions_func_0x78.html</file>
+      <file>functions_func_0x79.html</file>
+      <file>functions_func_0x7a.html</file>
+      <file>functions_func_0x7e.html</file>
+      <file>functions_vars.html</file>
+      <file>functions_enum.html</file>
+      <file>functions_eval.html</file>
+      <file>functions_prop.html</file>
+      <file>class_adsr_envelope.html</file>
+      <file>class_adsr_envelope.png</file>
+      <file>class_adsr_envelope-members.html</file>
+      <file>class_audio_source.html</file>
+      <file>class_audio_source.png</file>
+      <file>class_audio_source-members.html</file>
+      <file>class_butterworth2_pole_filter.html</file>
+      <file>class_butterworth2_pole_filter.png</file>
+      <file>class_butterworth2_pole_filter-members.html</file>
+      <file>class_control_change.html</file>
+      <file>class_control_change-members.html</file>
+      <file>class_distortion_filter.html</file>
+      <file>class_distortion_filter-members.html</file>
+      <file>class_float_table_model.html</file>
+      <file>class_float_table_model.png</file>
+      <file>class_float_table_model-members.html</file>
+      <file>class_graphics_line_item.html</file>
+      <file>class_graphics_line_item-members.html</file>
+      <file>class_graphics_log_line_item.html</file>
+      <file>class_graphics_log_line_item-members.html</file>
+      <file>class_graphics_node_item.html</file>
+      <file>class_graphics_node_item-members.html</file>
+      <file>class_graph_view.html</file>
+      <file>class_graph_view-members.html</file>
+      <file>class_jack_audio_model.html</file>
+      <file>class_jack_audio_model.png</file>
+      <file>class_jack_audio_model-members.html</file>
+      <file>class_jack_client.html</file>
+      <file>class_jack_client.png</file>
+      <file>class_jack_client-members.html</file>
+      <file>class_jack_client_with_deferred_processing.html</file>
+      <file>class_jack_client_with_deferred_processing.png</file>
+      <file>class_jack_client_with_deferred_processing-members.html</file>
+      <file>class_jack_ring_buffer.html</file>
+      <file>class_jack_ring_buffer-members.html</file>
+      <file>class_jack_thread.html</file>
+      <file>class_jack_thread-members.html</file>
+      <file>class_main_window.html</file>
+      <file>class_main_window-members.html</file>
+      <file>class_midi2_audio_client.html</file>
+      <file>class_midi2_audio_client.png</file>
+      <file>class_midi2_audio_client-members.html</file>
+      <file>class_midi2_signal_client.html</file>
+      <file>class_midi2_signal_client.png</file>
+      <file>class_midi2_signal_client-members.html</file>
+      <file>class_midi_client_widget.html</file>
+      <file>class_midi_client_widget.png</file>
+      <file>class_midi_client_widget-members.html</file>
+      <file>class_midi_controller2_audio_client.html</file>
+      <file>class_midi_controller2_audio_client.png</file>
+      <file>class_midi_controller2_audio_client-members.html</file>
+      <file>class_midi_controller_check_box.html</file>
+      <file>class_midi_controller_check_box-members.html</file>
+      <file>class_midi_controller_slider.html</file>
+      <file>class_midi_controller_slider-members.html</file>
+      <file>struct_midi_message.html</file>
+      <file>struct_midi_message-members.html</file>
+      <file>class_midi_pitch_slider.html</file>
+      <file>class_midi_pitch_slider-members.html</file>
+      <file>class_midi_splitter.html</file>
+      <file>class_midi_splitter-members.html</file>
+      <file>class_monophonic_synthesizer.html</file>
+      <file>class_monophonic_synthesizer.png</file>
+      <file>class_monophonic_synthesizer-members.html</file>
+      <file>class_morphing_piecewise_linear_oscillator.html</file>
+      <file>class_morphing_piecewise_linear_oscillator.png</file>
+      <file>class_morphing_piecewise_linear_oscillator-members.html</file>
+      <file>class_oscillator.html</file>
+      <file>class_oscillator.png</file>
+      <file>class_oscillator-members.html</file>
+      <file>class_piecewise_linear_oscillator.html</file>
+      <file>class_piecewise_linear_oscillator.png</file>
+      <file>class_piecewise_linear_oscillator-members.html</file>
+      <file>class_polynomial.html</file>
+      <file>class_polynomial-members.html</file>
+      <file>class_pulse_oscillator.html</file>
+      <file>class_pulse_oscillator.png</file>
+      <file>class_pulse_oscillator-members.html</file>
+      <file>class_record2_memory_client.html</file>
+      <file>class_record2_memory_client.png</file>
+      <file>class_record2_memory_client-members.html</file>
+      <file>class_sawtooth_oscillator.html</file>
+      <file>class_sawtooth_oscillator.png</file>
+      <file>class_sawtooth_oscillator-members.html</file>
+      <file>class_simple_lowpass_filter.html</file>
+      <file>class_simple_lowpass_filter-members.html</file>
+      <file>class_simple_monophonic_client.html</file>
+      <file>class_simple_monophonic_client.png</file>
+      <file>class_simple_monophonic_client-members.html</file>
+      <file>class_test_midi_client_widget.html</file>
+      <file>class_test_midi_client_widget.png</file>
+      <file>class_test_midi_client_widget-members.html</file>
+      <file>class_z_plane_filter.html</file>
+      <file>class_z_plane_filter.png</file>
+      <file>class_z_plane_filter-members.html</file>
+      <file>class_z_plane_widget.html</file>
+      <file>class_z_plane_widget-members.html</file>
+      <file>namespaces.html</file>
+      <file>namespace_ui.html</file>
+      <file>files.html</file>
+      <file>globals.html</file>
+      <file>globals_func.html</file>
+    </files>
+  </filterSection>
+</QtHelpProject>
