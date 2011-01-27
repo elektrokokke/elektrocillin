@@ -22,21 +22,23 @@
   JackRingBuffer.
 
   The following general procedure is recommended:
-  1.) Always associate a JackThread object with a JackClient object.
-  2.) Initialize all necessary ring buffers for communication between the Jack thread
+  <ol>
+  <li>Always associate a JackThread object with a JackClient object.
+  <li>Initialize all necessary ring buffers for communication between the Jack thread
   and this thread, and be sure that both objects have access to them. For each one-way
   communication use one ring buffer. E.g., if you need data to be communicated between threads
   in BOTH ways, use TWO ring buffers.
-  3.) From JackClient's init() function, call JackThread's start() method. Also reset all ring buffers.
-  4.) In JackClient's process() function, read all data from the JackThread->JackClient ring buffers,
+  <li>From JackClient's init() function, call JackThread's start() method. Also reset all ring buffers.
+  <li>In JackClient's process() function, read all data from the JackThread->JackClient ring buffers,
   if there is any. Write data for deferred processing to the JackClient->JackThread ring buffers
   and call JackThread's wake() function.
-  5.) In JackThread's processDeferred() function, read data from the JackClient->JackThread ring buffers
+  <li>In JackThread's processDeferred() function, read data from the JackClient->JackThread ring buffers
   and write data to the JackThread->JackClient ring buffers. You do not need to call any additional
   method after writing, as the Jack process() function will be called regularly to read from the
   ring buffers.
-  6.) In JackClient's deinit() function, call JackThread's stop() method. After that you may want
+  <li>In JackClient's deinit() function, call JackThread's stop() method. After that you may want
   to reset the ring buffers.
+  </ol>
   */
 
 class JackThread : public QThread
