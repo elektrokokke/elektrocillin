@@ -51,7 +51,7 @@ PROJECT_LOGO           =
 # If a relative path is entered, it will be relative to the location 
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = C:/Users/jarne/elektrocillin/documentation
+OUTPUT_DIRECTORY       = C:/Users/jarne/elektrocillin-doc
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 
 # 4096 sub-directories (in 2 levels) under the output directory of each output 
@@ -1013,7 +1013,7 @@ GENERATE_QHP           = YES
 # be used to specify the file name of the resulting .qch file. 
 # The path specified is relative to the HTML output folder.
 
-QCH_FILE               = C:/Users/jarne/elektrocillin/documentation/elektrocillin.qch
+QCH_FILE               = C:/Users/jarne/elektrocillin-doc/elektrocillin.qch
 
 # The QHP_NAMESPACE tag specifies the namespace to use when generating 
 # Qt Help Project output. For more information please see 
