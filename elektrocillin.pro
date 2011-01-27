@@ -44,7 +44,6 @@ SOURCES += main.cpp\
     butterworth2polefilter.cpp \
     midiclientwidget.cpp \
     testmidiclientwidget.cpp \
-    jackringbuffer.cpp \
     jackthread.cpp \
     jackclientwithdeferredprocessing.cpp
 

@@ -39,6 +39,7 @@ public:
         return jack_ringbuffer_write_space(ringBuffer) / sizeof(T);
     }
     /**
+      Reads a number of entries from the ring buffer.
       Calling this method does not advance the read pointer, i.e.,
       calling this multiple times successively always returns the same.
       Note: this method involves copying the data from the ring buffer
@@ -52,8 +53,26 @@ public:
         jack_ringbuffer_peek(ringBuffer, (char*)buffer, n * sizeof(T));
     }
     /**
+      Takes a look at the next element in the ring buffer.
+      This is a shortcut for peek(T *buffer, size_t n) with n=1.
+      The compiler can optimize this to not copy from the ring buffer
+      twice, i.e., it will directly copy the head of the ring buffer
+      to the caller. Note that it will still be copied once, thus
+      as with peek(T *buffer, size_t n) do not use it more often than
+      necessary.
+      @return the first entry in the ring buffer.
+      */
+    T peek()
+    {
+        T element;
+        jack_ringbuffer_peek(ringBuffer, (char*)&element, sizeof(T));
+        return p;
+    }
+
+    /**
+      Reads a number of entries from the ring buffer.
       This is similar to peek(), but it advances the read pointer after
-      returning the data.
+      reading.
       @param buffer pointer to a buffer of type T where data will be copied to.
         has to be large enough for at least n elements of type T.
       @param n the number of elements to be copied to the given buffer.
@@ -62,6 +81,21 @@ public:
     {
         jack_ringbuffer_read(ringBuffer, (char*)buffer, n * sizeof(T));
     }
+    /**
+      Reads one element from the ring buffer.
+      This is a shortcut for read(T *buffer, size_t n) with n=1.
+      The compiler can optimize this to not copy from the ring buffer
+      twice, i.e., it will directly copy the first element in the ring buffer
+      to the caller. After reading the read pointer will be advanced by one step.
+      @return the first entry in the ring buffer.
+      */
+    T read()
+    {
+        T element;
+        jack_ringbuffer_read(ringBuffer, (char*)&element, sizeof(T));
+        return p;
+    }
+
     /**
       Advances the read pointer of the ring buffer without reading from it.
       Use this, e.g., if you have used peek before.
@@ -83,6 +117,17 @@ public:
     {
         jack_ringbuffer_write(ringBuffer, (const char*)buffer, n * sizeof(T));
     }
+    /**
+      Writes one element to the ring buffer.
+      This is a shortcut for write(const T *buffer, size_t n) with n=1.
+      After writing the read pointer will be advanced by one step.
+      @param element the element to write to the ring buffer.
+      */
+    void write(const T &element)
+    {
+        jack_ringbuffer_write(ringBuffer, (const char*)&element, sizeof(T));
+    }
+
     /**
       Advances the write pointer of the ring buffer without writing something to it.
       @param n the number of elements by which the write pointer should be advanced.
