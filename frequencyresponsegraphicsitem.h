@@ -20,6 +20,9 @@ public:
     double getLowestHertz() const;
     double getHighestHertz() const;
 
+    const QRectF & getFrequencyResponseRectangle() const;
+    qreal getZeroDecibelY() const;
+
 private:
     double lowestHertz, highestHertz, lowestDecibel, highestDecibel;
     QRectF innerRectangle;

@@ -72,6 +72,18 @@ double FrequencyResponseGraphicsItem::getHighestHertz() const
     return highestHertz;
 }
 
+const QRectF & FrequencyResponseGraphicsItem::getFrequencyResponseRectangle() const
+{
+    return innerRectangle;
+}
+
+qreal FrequencyResponseGraphicsItem::getZeroDecibelY() const
+{
+    qreal innerTop = innerRectangle.top();
+    qreal innerBottom = innerRectangle.bottom();
+    return - lowestDecibel / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
+}
+
 void FrequencyResponseGraphicsItem::initialize()
 {
     frequencyResponsePens.append(QPen(QBrush(Qt::black), 2));

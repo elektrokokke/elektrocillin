@@ -30,9 +30,8 @@ private slots:
 
     void onMidiMessage(unsigned char, unsigned char, unsigned char);
 
-    void on_horizontalSliderCutoff_valueChanged(int value);
-
-    void on_horizontalSliderResonance_valueChanged(int value);
+    void onChangeCutoff(qreal hertz);
+    void onChangeResonance(qreal resonance);
 
 private:
     Ui::MainWindow *ui;

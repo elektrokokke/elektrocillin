@@ -10,6 +10,7 @@
 #include "testmidiclientwidget.h"
 #include "frequencyresponsegraphicsitem.h"
 #include "iirbutterworthfilter.h"
+#include "graphicsnodeitem.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
@@ -39,6 +40,17 @@ MainWindow::MainWindow(QWidget *parent) :
     frequencyResponse->addFrequencyResponse(&filter5);
     frequencyResponse->addFrequencyResponse(&filter6);
     frequencyResponse->addFrequencyResponse(&filter7);
+
+    GraphicsNodeItem *cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
+    cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
+    cutoffResonanceNode->setBrush(QBrush(qRgb(52, 101, 164)));
+    cutoffResonanceNode->setZValue(10);
+    cutoffResonanceNode->setBounds(QRectF(frequencyResponse->getFrequencyResponseRectangle().topLeft(), QPointF(frequencyResponse->getFrequencyResponseRectangle().right(), frequencyResponse->getZeroDecibelY())));
+    cutoffResonanceNode->setBoundsScaled(QRectF(QPointF(frequencyResponse->getLowestHertz(), 1), QPointF(frequencyResponse->getHighestHertz(), 0)));
+    cutoffResonanceNode->setPos(frequencyResponse->getFrequencyResponseRectangle().left(), frequencyResponse->getZeroDecibelY());
+    QObject::connect(cutoffResonanceNode, SIGNAL(xChangedScaled(qreal)), this, SLOT(onChangeCutoff(qreal)));
+    QObject::connect(cutoffResonanceNode, SIGNAL(yChangedScaled(qreal)), this, SLOT(onChangeResonance(qreal)));
+
     scene->addItem(frequencyResponse);
     frequencyResponse->updateFrequencyResponses();
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
@@ -175,18 +187,14 @@ void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char
     qDebug() << "received midi message" << m1 << m2 << m3;
 }
 
-void MainWindow::on_horizontalSliderCutoff_valueChanged(int value)
+void MainWindow::onChangeCutoff(qreal hertz)
 {
-    // change cutoff frequency of the IIR Moog filter:
-    double cutoff = frequencyResponse->getLowestHertz() * exp(log(frequencyResponse->getHighestHertz() / frequencyResponse->getLowestHertz()) / 100.0 * value);
-    filter1.setCutoffFrequency(cutoff);
+    filter1.setCutoffFrequency(hertz);
     frequencyResponse->updateFrequencyResponse(1);
 }
 
-void MainWindow::on_horizontalSliderResonance_valueChanged(int value)
+void MainWindow::onChangeResonance(qreal resonance)
 {
-    // change the resonance of the IIR Moog filter:
-    double resonance = value * 0.01;
     filter1.setResonance(resonance);
     frequencyResponse->updateFrequencyResponse(1);
 }
