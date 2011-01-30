@@ -8,7 +8,7 @@
 #include "graphicsnodeitem.h"
 #include "midicontroller2audioclient.h"
 #include "testmidiclientwidget.h"
-#include "iirfilterfrequencyresponsegraphicsitem.h"
+#include "frequencyresponsegraphicsitem.h"
 #include "iirbutterworthfilter.h"
 #include <QDebug>
 #include <QDialog>
@@ -18,17 +18,29 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    filter1(0.5),
-    filter2(11025, 44100),
-    filter3(22050.0 / 8192.0, 0, 44100)
+    filter0(22050.0 / 4096.0, 44100),
+    filter1(22050.0 / 8192.0, 0, 44100),
+    filter2(22050.0 / 4096.0, 0.1, 44100),
+    filter3(22050.0 / 2048.0, 0.2, 44100),
+    filter4(22050.0 / 1024.0, 0.3, 44100),
+    filter5(22050.0 / 512.0, 0.4, 44100),
+    filter6(22050.0 / 256.0, 0.5, 44100),
+    filter7(22050.0 / 128.0, 0.6, 44100)
 {
     ui->setupUi(this);
 
     QGraphicsScene * scene = new QGraphicsScene();
-    filter2.debug();
-    frequencyResponse = new IIRFilterFrequencyResponseGraphicsItem(&filter3, QRectF(0, 0, 1300, 800), 22050.0 / 8192.0, 22050);
+    frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 1300, 800), 22050.0 / 8192.0, 22050, -60, 20);
+    frequencyResponse->addFrequencyResponse(&filter0);
+    frequencyResponse->addFrequencyResponse(&filter1);
+    frequencyResponse->addFrequencyResponse(&filter2);
+    frequencyResponse->addFrequencyResponse(&filter3);
+    frequencyResponse->addFrequencyResponse(&filter4);
+    frequencyResponse->addFrequencyResponse(&filter5);
+    frequencyResponse->addFrequencyResponse(&filter6);
+    frequencyResponse->addFrequencyResponse(&filter7);
     scene->addItem(frequencyResponse);
-    frequencyResponse->updateFrequencyResponse();
+    frequencyResponse->updateFrequencyResponses();
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
 
@@ -167,14 +179,14 @@ void MainWindow::on_horizontalSliderCutoff_valueChanged(int value)
 {
     // change cutoff frequency of the IIR Moog filter:
     double cutoff = frequencyResponse->getLowestHertz() * exp(log(frequencyResponse->getHighestHertz() / frequencyResponse->getLowestHertz()) / 100.0 * value);
-    filter3.setCutoffFrequency(cutoff);
-    frequencyResponse->updateFrequencyResponse();
+    filter1.setCutoffFrequency(cutoff);
+    frequencyResponse->updateFrequencyResponse(1);
 }
 
 void MainWindow::on_horizontalSliderResonance_valueChanged(int value)
 {
     // change the resonance of the IIR Moog filter:
     double resonance = value * 0.01;
-    filter3.setResonance(resonance);
-    frequencyResponse->updateFrequencyResponse();
+    filter1.setResonance(resonance);
+    frequencyResponse->updateFrequencyResponse(1);
 }

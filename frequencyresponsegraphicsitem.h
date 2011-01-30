@@ -2,9 +2,10 @@
 #define FREQUENCYRESPONSEGRAPHICSITEM_H
 
 #include <QGraphicsRectItem>
-#include <QColor>
+#include <QPen>
 
-class QGraphicsLineItem;
+class QGraphicsPathItem;
+class FrequencyResponse;
 
 class FrequencyResponseGraphicsItem : public QGraphicsRectItem
 {
@@ -12,13 +13,12 @@ public:
     FrequencyResponseGraphicsItem(const QRectF &rect, double lowestHertz, double highestHertz, double lowestDecibel = -40, double highestDecibel = 40, QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
     FrequencyResponseGraphicsItem(qreal x, qreal y, qreal w, qreal h, double lowestHertz, double highestHertz, double lowestDecibel = -40, double highestDecibel = 40, QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
 
-    void updateFrequencyResponse();
+    int addFrequencyResponse(FrequencyResponse *response);
+    void updateFrequencyResponse(int index);
+    void updateFrequencyResponses();
 
     double getLowestHertz() const;
     double getHighestHertz() const;
-
-protected:
-    virtual double getSquaredAmplitudeResponse(double frequencyInHertz);
 
 private:
     double lowestHertz, highestHertz, lowestDecibel, highestDecibel;
@@ -26,9 +26,11 @@ private:
     qreal tickSize;
     double frequencyTickFactor;
     double frequencyResponseFactor;
-    QColor frequencyResponseColor;
+    QVector<QPen> frequencyResponsePens;
     QVector<double> frequencies;
-    QVector<QGraphicsLineItem*> frequencyResponseLines;
+    QVector<qreal> xPositions;
+    QVector<FrequencyResponse*> frequencyResponses;
+    QVector<QGraphicsPathItem*> frequencyResponseLines;
 
     void initialize();
 };

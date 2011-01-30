@@ -49,7 +49,6 @@ SOURCES += main.cpp\
     frequencyresponsegraphicsitem.cpp \
     iirfilter.cpp \
     iirbutterworthfilter.cpp \
-    iirfilterfrequencyresponsegraphicsitem.cpp \
     iirmoogfilter.cpp
 
 HEADERS  += mainwindow.h \
@@ -91,8 +90,8 @@ HEADERS  += mainwindow.h \
     frequencyresponsegraphicsitem.h \
     iirfilter.h \
     iirbutterworthfilter.h \
-    iirfilterfrequencyresponsegraphicsitem.h \
-    iirmoogfilter.h
+    iirmoogfilter.h \
+    frequencyresponse.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui \

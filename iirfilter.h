@@ -2,8 +2,9 @@
 #define IIRFILTER_H
 
 #include <QVector>
+#include "frequencyresponse.h"
 
-class IIRFilter
+class IIRFilter : public FrequencyResponse
 {
 public:
     IIRFilter(double sampleRate);

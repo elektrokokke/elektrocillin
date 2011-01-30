@@ -1,4 +1,5 @@
 #include "frequencyresponsegraphicsitem.h"
+#include "frequencyresponse.h"
 #include <QGraphicsSimpleTextItem>
 #include <QPen>
 #include <QtGlobal>
@@ -9,8 +10,7 @@ FrequencyResponseGraphicsItem::FrequencyResponseGraphicsItem(const QRectF &rect,
     lowestHertz(lowestHertz_),
     highestHertz(highestHertz_),
     lowestDecibel(lowestDecibel_),
-    highestDecibel(highestDecibel_),
-    frequencyResponseColor(Qt::red)
+    highestDecibel(highestDecibel_)
 {
     initialize();
 }
@@ -20,29 +20,45 @@ FrequencyResponseGraphicsItem::FrequencyResponseGraphicsItem(qreal x, qreal y, q
     lowestHertz(lowestHertz_),
     highestHertz(highestHertz_),
     lowestDecibel(lowestDecibel_),
-    highestDecibel(highestDecibel_),
-    frequencyResponseColor(Qt::red)
+    highestDecibel(highestDecibel_)
 {
     initialize();
 }
 
-void FrequencyResponseGraphicsItem::updateFrequencyResponse()
+int FrequencyResponseGraphicsItem::addFrequencyResponse(FrequencyResponse *response)
 {
+    int index = frequencyResponses.size();
+    frequencyResponses.append(response);
+    frequencyResponseLines.append(new QGraphicsPathItem(this));
+    frequencyResponseLines[index]->setPen(frequencyResponsePens[index % frequencyResponsePens.size()]);
+    updateFrequencyResponse(index);
+    return index;
+}
+
+void FrequencyResponseGraphicsItem::updateFrequencyResponse(int responseIndex)
+{
+    QPainterPath path;
     qreal innerTop = innerRectangle.top();
     qreal innerBottom = innerRectangle.bottom();
     for (int i = 0; i < frequencies.size(); i++) {
-        double squaredAmplitudeResponse = getSquaredAmplitudeResponse(frequencies[i]);
+        double squaredAmplitudeResponse = frequencyResponses[responseIndex]->getSquaredAmplitudeResponse(frequencies[i]);
         // follow the 10 * log10 rule:
         double decibel = (squaredAmplitudeResponse == 0 ? lowestDecibel : qMax(lowestDecibel, qMin(highestDecibel, 10.0 * log(squaredAmplitudeResponse) / log(10.0))));
+        qreal x = xPositions[i];
         qreal y = (decibel - lowestDecibel) / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
-        if (i > 0) {
-            QLineF line = frequencyResponseLines[i - 1]->line();
-            frequencyResponseLines[i - 1]->setLine(line.p1().x(), line.p1().y(), line.p2().x(), y);
+        if (i == 0) {
+            path.moveTo(x, y);
+        } else {
+            path.lineTo(x, y);
         }
-        if (i < frequencyResponseLines.size()) {
-            QLineF line = frequencyResponseLines[i]->line();
-            frequencyResponseLines[i]->setLine(line.p1().x(), y, line.p2().x(), line.p2().y());
-        }
+    }
+    frequencyResponseLines[responseIndex]->setPath(path);
+}
+
+void FrequencyResponseGraphicsItem::updateFrequencyResponses()
+{
+    for (int responseIndex = 0; responseIndex < frequencyResponses.size(); responseIndex++) {
+        updateFrequencyResponse(responseIndex);
     }
 }
 
@@ -56,13 +72,17 @@ double FrequencyResponseGraphicsItem::getHighestHertz() const
     return highestHertz;
 }
 
-double FrequencyResponseGraphicsItem::getSquaredAmplitudeResponse(double frequencyInHertz)
-{
-    return 1.0;
-}
-
 void FrequencyResponseGraphicsItem::initialize()
 {
+    frequencyResponsePens.append(QPen(QBrush(Qt::black), 2));
+    frequencyResponsePens.append(QPen(QBrush(Qt::darkRed), 2));
+    frequencyResponsePens.append(QPen(QBrush(Qt::darkGreen), 2));
+    frequencyResponsePens.append(QPen(QBrush(Qt::darkBlue), 2));
+    frequencyResponsePens.append(QPen(QBrush(Qt::gray), 2, Qt::DashLine));
+    frequencyResponsePens.append(QPen(QBrush(Qt::darkRed), 2, Qt::DashLine));
+    frequencyResponsePens.append(QPen(QBrush(Qt::darkGreen), 2, Qt::DashLine));
+    frequencyResponsePens.append(QPen(QBrush(Qt::darkBlue), 2, Qt::DashLine));
+
     qreal tickSize = 10;
     double frequencyTickFactor = 2.0;
     double frequencyResponseFactor = pow(2.0, 1.0 / 24.0);
@@ -133,19 +153,12 @@ void FrequencyResponseGraphicsItem::initialize()
             delete label;
         }
     }
-    // create the lines showing the frequency response:
+    // compute the frequencies at which the responses are evaluated:
     for (double hertz = lowestHertz; hertz < highestHertz; hertz *= frequencyResponseFactor) {
         frequencies.append(hertz);
+        qreal x = log(hertz / lowestHertz) / log(highestHertz / lowestHertz) * (innerRight - innerLeft) + innerLeft;
+        xPositions.append(x);
     }
     frequencies.append(highestHertz);
-    qreal xPrevious = innerLeft;
-    for (int i = 1; i < frequencies.size(); i++) {
-        qreal x = log(frequencies[i] / lowestHertz) / log(highestHertz / lowestHertz) * (innerRight - innerLeft) + innerLeft;
-        qreal y = - lowestDecibel / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
-        QGraphicsLineItem *frequencyResponseLine = new QGraphicsLineItem(xPrevious, y, x, y, this);
-        frequencyResponseLine->setPen(QPen(QBrush(frequencyResponseColor), 2));
-        frequencyResponseLine->setZValue(1);
-        frequencyResponseLines.append(frequencyResponseLine);
-        xPrevious = x;
-    }
+    xPositions.append(innerRight);
 }
