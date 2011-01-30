@@ -2,8 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "iirbutterworthfilter.h"
-#include "butterworth2polefilter.h"
 #include "frequencyresponsegraphicsitem.h"
 #include "iirmoogfilter.h"
 
@@ -39,8 +37,7 @@ private:
     SimpleMonophonicClient *simpleMonophonicClient;
     MidiController2AudioClient *midiControllerClient;
     FrequencyResponseGraphicsItem *frequencyResponse;
-    IIRButterworthFilter filter0;
-    IIRMoogFilter filter1, filter2, filter3, filter4, filter5, filter6, filter7;
+    IIRMoogFilter filter;
 };
 
 #endif // MAINWINDOW_H

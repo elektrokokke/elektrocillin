@@ -19,27 +19,14 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    filter0(22050.0 / 4096.0, 44100),
-    filter1(22050.0 / 8192.0, 0, 44100),
-    filter2(22050.0 / 4096.0, 0.1, 44100),
-    filter3(22050.0 / 2048.0, 0.2, 44100),
-    filter4(22050.0 / 1024.0, 0.3, 44100),
-    filter5(22050.0 / 512.0, 0.4, 44100),
-    filter6(22050.0 / 256.0, 0.5, 44100),
-    filter7(22050.0 / 128.0, 0.6, 44100)
+    filter(0, 0, 44100)
 {
     ui->setupUi(this);
 
     QGraphicsScene * scene = new QGraphicsScene();
-    frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 1300, 800), 22050.0 / 8192.0, 22050, -60, 20);
-    frequencyResponse->addFrequencyResponse(&filter0);
-    frequencyResponse->addFrequencyResponse(&filter1);
-    frequencyResponse->addFrequencyResponse(&filter2);
-    frequencyResponse->addFrequencyResponse(&filter3);
-    frequencyResponse->addFrequencyResponse(&filter4);
-    frequencyResponse->addFrequencyResponse(&filter5);
-    frequencyResponse->addFrequencyResponse(&filter6);
-    frequencyResponse->addFrequencyResponse(&filter7);
+    frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
+    filter.setCutoffFrequency(frequencyResponse->getLowestHertz());
+    frequencyResponse->addFrequencyResponse(&filter);
 
     GraphicsNodeItem *cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
     cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
@@ -189,12 +176,12 @@ void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char
 
 void MainWindow::onChangeCutoff(qreal hertz)
 {
-    filter1.setCutoffFrequency(hertz);
-    frequencyResponse->updateFrequencyResponse(1);
+    filter.setCutoffFrequency(hertz);
+    frequencyResponse->updateFrequencyResponses();
 }
 
 void MainWindow::onChangeResonance(qreal resonance)
 {
-    filter1.setResonance(resonance);
-    frequencyResponse->updateFrequencyResponse(1);
+    filter.setResonance(resonance);
+    frequencyResponse->updateFrequencyResponses();
 }
