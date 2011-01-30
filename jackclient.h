@@ -50,7 +50,7 @@ protected:
     jack_nframes_t getSampleRate() const;
 
 private:
-    QString name;
+    QString requestedName, actualName;
     jack_client_t *client;
 
     static int process(jack_nframes_t nframes, void *arg);

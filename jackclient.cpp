@@ -1,14 +1,15 @@
 #include "jackclient.h"
 
 JackClient::JackClient(const QString &clientName) :
-    name(clientName),
+    requestedName(clientName),
+    actualName(clientName),
     client(0)
 {
 }
 
 const QString & JackClient::getClientName() const
 {
-    return name;
+    return actualName;
 }
 
 bool JackClient::activate()
@@ -17,7 +18,7 @@ bool JackClient::activate()
         return false;
     }
     // register as a Jack client:
-    client = jack_client_open(name.toAscii().data(), JackNullOption, 0);
+    client = jack_client_open(requestedName.toAscii().data(), JackNullOption, 0);
     if (client == 0) {
         // opening client failed:
         return false;
@@ -42,6 +43,8 @@ bool JackClient::activate()
         client = 0;
         return false;
     }
+    // get the actual client name:
+    actualName = jack_get_client_name (client);
     return true;
 }
 
@@ -51,6 +54,7 @@ void JackClient::close()
         // close the Jack client:
         jack_client_close(client);
         client = 0;
+        actualName = requestedName;
         // notify subclasses:
         deinit();
     }
