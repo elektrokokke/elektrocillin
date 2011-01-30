@@ -157,15 +157,15 @@ void ZPlaneFilter::computeCoefficients()
     // let DC always be 1, i.e., scale feed forward coefficients accordingly:
     double dc = sqrt(squaredAmplitudeResponse(0.0));
     numerator *= 1.0 / dc;
-    //qDebug() << "numerator";
+    qDebug() << "numerator";
     for (size_t i = 0; i < numerator.size(); i++) {
-        //qDebug() << numerator[i].real() << numerator[i].imag();
+        qDebug() << numerator[i].real() << numerator[i].imag();
         feedforwardCoefficients.push_back(numerator[i].real());
         x.push_back(0.0);
     }
-    //qDebug() << "denominator";
+    qDebug() << "denominator";
     for (size_t i = 0; i < denominator.size(); i++) {
-        //qDebug() << denominator[i].real() << denominator[i].imag();
+        qDebug() << denominator[i].real() << denominator[i].imag();
         feedbackCoefficients.push_back(denominator[i].real());
         y.push_back(0.0);
     }

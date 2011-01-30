@@ -66,7 +66,7 @@ public:
     {
         T element;
         jack_ringbuffer_peek(ringBuffer, (char*)&element, sizeof(T));
-        return p;
+        return element;
     }
 
     /**
@@ -93,7 +93,7 @@ public:
     {
         T element;
         jack_ringbuffer_read(ringBuffer, (char*)&element, sizeof(T));
-        return p;
+        return element;
     }
 
     /**

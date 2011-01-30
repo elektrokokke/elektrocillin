@@ -8,20 +8,34 @@
 #include "graphicsnodeitem.h"
 #include "midicontroller2audioclient.h"
 #include "testmidiclientwidget.h"
+#include "iirfilterfrequencyresponsegraphicsitem.h"
+#include "iirbutterworthfilter.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
+#include <QGraphicsScene>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    filter1(0.5),
+    filter2(11025, 44100),
+    filter3(22050.0 / 8192.0, 0, 44100)
 {
     ui->setupUi(this);
 
-    QDialog *dialog = new QDialog(this);
-    dialog->setLayout(new QHBoxLayout(dialog));
-    dialog->layout()->addWidget(new TestMidiClientWidget(dialog));
-    dialog->show();
+    QGraphicsScene * scene = new QGraphicsScene();
+    filter2.debug();
+    frequencyResponse = new IIRFilterFrequencyResponseGraphicsItem(&filter3, QRectF(0, 0, 1300, 800), 22050.0 / 8192.0, 22050);
+    scene->addItem(frequencyResponse);
+    frequencyResponse->updateFrequencyResponse();
+    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+    ui->graphicsView->setScene(scene);
+
+//    QDialog *dialog = new QDialog(this);
+//    dialog->setLayout(new QHBoxLayout(dialog));
+//    dialog->layout()->addWidget(new TestMidiClientWidget(dialog));
+//    dialog->show();
 
 //    QObject::connect(ui->spinBoxZoom, SIGNAL(valueChanged(int)), ui->audioView, SLOT(setHorizontalScale(int)));
 
@@ -133,18 +147,34 @@ void MainWindow::onRecordingStarted()
 void MainWindow::onRecordingFinished()
 {
     qDebug() << "onRecordingFinished()";
-    // get the new audio model and show it:
-    JackAudioModel *audioModel = recordClient->popAudioModel();
-    if (audioModel) {
-        if (ui->audioView->model()) {
-            ui->audioView->model()->deleteLater();
-        }
-        audioModel->setParent(ui->audioView);
-        ui->audioView->setModel(audioModel);
-    }
+//    // get the new audio model and show it:
+//    JackAudioModel *audioModel = recordClient->popAudioModel();
+//    if (audioModel) {
+//        if (ui->audioView->model()) {
+//            ui->audioView->model()->deleteLater();
+//        }
+//        audioModel->setParent(ui->audioView);
+//        ui->audioView->setModel(audioModel);
+//    }
 }
 
 void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char m3)
 {
     qDebug() << "received midi message" << m1 << m2 << m3;
+}
+
+void MainWindow::on_horizontalSliderCutoff_valueChanged(int value)
+{
+    // change cutoff frequency of the IIR Moog filter:
+    double cutoff = frequencyResponse->getLowestHertz() * exp(log(frequencyResponse->getHighestHertz() / frequencyResponse->getLowestHertz()) / 100.0 * value);
+    filter3.setCutoffFrequency(cutoff);
+    frequencyResponse->updateFrequencyResponse();
+}
+
+void MainWindow::on_horizontalSliderResonance_valueChanged(int value)
+{
+    // change the resonance of the IIR Moog filter:
+    double resonance = value * 0.01;
+    filter3.setResonance(resonance);
+    frequencyResponse->updateFrequencyResponse();
 }

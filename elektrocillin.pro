@@ -45,7 +45,12 @@ SOURCES += main.cpp\
     midiclientwidget.cpp \
     testmidiclientwidget.cpp \
     jackthread.cpp \
-    jackclientwithdeferredprocessing.cpp
+    jackclientwithdeferredprocessing.cpp \
+    frequencyresponsegraphicsitem.cpp \
+    iirfilter.cpp \
+    iirbutterworthfilter.cpp \
+    iirfilterfrequencyresponsegraphicsitem.cpp \
+    iirmoogfilter.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -82,7 +87,12 @@ HEADERS  += mainwindow.h \
     testmidiclientwidget.h \
     jackringbuffer.h \
     jackthread.h \
-    jackclientwithdeferredprocessing.h
+    jackclientwithdeferredprocessing.h \
+    frequencyresponsegraphicsitem.h \
+    iirfilter.h \
+    iirbutterworthfilter.h \
+    iirfilterfrequencyresponsegraphicsitem.h \
+    iirmoogfilter.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui \

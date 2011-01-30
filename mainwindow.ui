@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>274</width>
-    <height>314</height>
+    <width>731</width>
+    <height>518</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,14 +41,23 @@
        </widget>
       </item>
       <item>
-       <widget class="MidiPitchSlider" name="horizontalSlider">
+       <widget class="QSlider" name="horizontalSliderCutoff">
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="MidiControllerSlider" name="horizontalSlider_2">
+       <widget class="QSlider" name="horizontalSliderResonance">
+        <property name="maximum">
+         <number>100</number>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -70,35 +79,7 @@
      </layout>
     </item>
     <item>
-     <widget class="QSplitter" name="splitter">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <widget class="GraphView" name="audioView">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-      </widget>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="checkBoxLogarithmic">
-      <property name="text">
-       <string>Logarithmic</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <widget class="QGraphicsView" name="graphicsView"/>
     </item>
    </layout>
   </widget>
@@ -116,31 +97,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>274</width>
+     <width>731</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>GraphView</class>
-   <extends>QFrame</extends>
-   <header>graphview.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MidiPitchSlider</class>
-   <extends>QSlider</extends>
-   <header>midipitchslider.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MidiControllerSlider</class>
-   <extends>QSlider</extends>
-   <header>midicontrollerslider.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
