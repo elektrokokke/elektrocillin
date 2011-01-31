@@ -6,11 +6,23 @@
 class IIRButterworthFilter : public IIRFilter
 {
 public:
-    IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate);
+    enum Type {
+        LOW_PASS,
+        HIGH_PASS
+    };
+
+    IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate, Type type = LOW_PASS, int zeros = 2);
 
     void setCutoffFrequency(double cutoffFrequencyInHertz);
+    void setCutoffFrequency(double cutoffFrequencyInHertz, Type type);
+    void setType(Type type);
+
+    double getCutoffFrequency() const;
+    Type getType() const;
 
 private:
+    double cutoffFrequency;
+    Type type;
 };
 
 #endif // IIRBUTTERWORTHFILTER_H

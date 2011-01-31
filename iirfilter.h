@@ -2,7 +2,9 @@
 #define IIRFILTER_H
 
 #include <QVector>
+#include <complex>
 #include "frequencyresponse.h"
+#include "polynomial.h"
 
 class IIRFilter : public FrequencyResponse
 {
@@ -17,8 +19,16 @@ public:
     double filter(double x);
     void reset();
     double getSquaredAmplitudeResponse(double hertz);
+
     void addFeedForwardCoefficient(double c);
     void addFeedBackCoefficient(double c);
+
+    int getFeedForwardCoefficientCount() const;
+    int getFeedBackCoefficientCount() const;
+
+    void invert();
+
+    static int computeBinomialCoefficient(int n, int k);
 
 protected:
     void setFeedForwardCoefficient(int index, double c);
@@ -29,6 +39,9 @@ protected:
 private:
     double sampleRate;
     QVector<double> feedForward, feedBack, x, y;
+
+    Polynomial<std::complex<double> > getNumeratorPolynomial() const;
+    Polynomial<std::complex<double> > getDenominatorPolynomial() const;
 };
 
 #endif // IIRFILTER_H

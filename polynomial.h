@@ -17,7 +17,7 @@ public:
         std::vector<T>::at(1) = firstDegree;
     }
 
-    Polynomial(const Polynomial<T> &tocopy) :
+    Polynomial(const std::vector<T> &tocopy) :
         std::vector<T>(tocopy)
     {}
 

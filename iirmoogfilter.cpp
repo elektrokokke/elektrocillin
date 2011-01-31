@@ -1,15 +1,15 @@
 #include "iirmoogfilter.h"
 #include <cmath>
 
-IIRMoogFilter::IIRMoogFilter(double cutoffFrequencyInHertz, double resonance, double sampleRate) :
-    IIRFilter(1, 4, sampleRate)
+IIRMoogFilter::IIRMoogFilter(double cutoffFrequencyInHertz, double resonance, double sampleRate, int zeros) :
+    IIRFilter(1 + zeros, 4, sampleRate)
 {
     setCutoffFrequency(cutoffFrequencyInHertz, resonance);
 }
 
 void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
 {
-    setCutoffFrequency(cutoffFrequencyInHertz, resonance);
+    setCutoffFrequency(cutoffFrequencyInHertz, getResonance());
 }
 
 void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double resonance)
@@ -27,10 +27,29 @@ void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double res
     setFeedBackCoefficient(1, 6.0 * a1 * a1);
     setFeedBackCoefficient(2, 4.0 * a1 * a1 * a1);
     setFeedBackCoefficient(3, a1 * a1 * a1 * a1);
-    setFeedForwardCoefficient(0, 1.0 + getFeedBackCoefficient(0) + getFeedBackCoefficient(1) + getFeedBackCoefficient(2) + getFeedBackCoefficient(3));
+
+    int n = getFeedForwardCoefficientCount() - 1;
+    double feedBackSum = 1.0 + getFeedBackCoefficient(0) + getFeedBackCoefficient(1) + getFeedBackCoefficient(2) + getFeedBackCoefficient(3);
+    int powerOfTwo = 1 << n;
+    double factor = 1.0 / powerOfTwo;
+    for (int k = 0; k < (n + 2) / 2; k++) {
+        setFeedForwardCoefficient(k, factor * IIRFilter::computeBinomialCoefficient(n, k) * feedBackSum);
+    }
+    for (int k = (n + 2) / 2; k <= n; k++) {
+        setFeedForwardCoefficient(k, getFeedForwardCoefficient(n - k));
+    }
 }
 
 void IIRMoogFilter::setResonance(double resonance)
 {
-    setCutoffFrequency(cutoffFrequencyInHertz, resonance);
+    setCutoffFrequency(getCutoffFrequency(), resonance);
+}
+
+double IIRMoogFilter::getCutoffFrequency() const
+{
+    return cutoffFrequencyInHertz;
+}
+double IIRMoogFilter::getResonance() const
+{
+    return resonance;
 }

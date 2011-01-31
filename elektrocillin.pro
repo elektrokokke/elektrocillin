@@ -38,7 +38,6 @@ SOURCES += main.cpp\
     graphicsloglineitem.cpp \
     graphicslineitem.cpp \
     zplanefilter.cpp \
-    polynomial.cpp \
     zplanewidget.cpp \
     midicontroller2audioclient.cpp \
     butterworth2polefilter.cpp \

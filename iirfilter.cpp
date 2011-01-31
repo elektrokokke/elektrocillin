@@ -1,5 +1,4 @@
 #include "iirfilter.h"
-#include <complex>
 #include <QDebug>
 
 IIRFilter::IIRFilter(double sampleRate_) :
@@ -71,16 +70,10 @@ void IIRFilter::reset()
 
 double IIRFilter::getSquaredAmplitudeResponse(double hertz)
 {
-    std::complex<double> z = std::exp(std::complex<double>(0.0, getFrequencyInRadians(hertz)));
-    std::complex<double> numerator(0);
-    for (int i = 0; i < feedForward.size(); i++) {
-        numerator += feedForward[i] * std::pow(z, -i);
-    }
-    std::complex<double> denominator(1);
-    for (int i = 0; i < feedBack.size(); i++) {
-        denominator += feedBack[i] * std::pow(z, -(i + 1));
-    }
-    return std::norm(numerator / denominator);
+    std::complex<double> z_inv = 1.0 / std::exp(std::complex<double>(0.0, getFrequencyInRadians(hertz)));
+    Polynomial<std::complex<double> > numerator = getNumeratorPolynomial();
+    Polynomial<std::complex<double> > denominator = getDenominatorPolynomial();
+    return std::norm(numerator.evaluate(z_inv) / denominator.evaluate(z_inv));
 }
 
 void IIRFilter::addFeedForwardCoefficient(double c)
@@ -93,6 +86,16 @@ void IIRFilter::addFeedBackCoefficient(double c)
 {
     feedBack.append(c);
     y.append(0);
+}
+
+int IIRFilter::getFeedForwardCoefficientCount() const
+{
+    return feedForward.size();
+}
+
+int IIRFilter::getFeedBackCoefficientCount() const
+{
+    return feedBack.size();
 }
 
 void IIRFilter::setFeedForwardCoefficient(int index, double c)
@@ -113,4 +116,49 @@ double IIRFilter::getFeedForwardCoefficient(int index) const
 double IIRFilter::getFeedBackCoefficient(int index) const
 {
     return feedBack[index];
+}
+
+void IIRFilter::invert()
+{
+    // negate all coefficients with odd exponent:
+    for (int i = 1; i < feedForward.size(); i += 2) {
+        feedForward[i] = -feedForward[i];
+    }
+    for (int i = 0; i < feedBack.size(); i += 2) {
+        feedBack[i] = -feedBack[i];
+    }
+}
+
+int IIRFilter::computeBinomialCoefficient(int n, int k)
+{
+    if (k == 0) {
+        return 1;
+    } else if (2 * k > n) {
+        return computeBinomialCoefficient(n, n - k);
+    } else {
+        int result = n;
+        for (int i = 2; i <= k; i++) {
+            result *= n + 1 - i;
+            result /= i;
+        }
+        return result;
+    }
+}
+
+Polynomial<std::complex<double> > IIRFilter::getNumeratorPolynomial() const
+{
+    Polynomial<std::complex<double> > numerator(feedForward.size() ? feedForward[0] : 0);
+    for (int i = 1; i < feedForward.size(); i++) {
+        numerator.push_back(feedForward[i]);
+    }
+    return numerator;
+}
+
+Polynomial<std::complex<double> > IIRFilter::getDenominatorPolynomial() const
+{
+    Polynomial<std::complex<double> > denominator(1);
+    for (int i = 0; i < feedBack.size(); i++) {
+        denominator.push_back(feedBack[i]);
+    }
+    return denominator;
 }

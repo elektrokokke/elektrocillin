@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "frequencyresponsegraphicsitem.h"
 #include "iirmoogfilter.h"
+#include "iirbutterworthfilter.h"
 
 class Record2MemoryClient;
 class SimpleMonophonicClient;
@@ -39,6 +40,7 @@ private:
     MidiController2AudioClient *midiControllerClient;
     FrequencyResponseGraphicsItem *frequencyResponse;
     IIRMoogFilter filter;
+    IIRButterworthFilter filter2;
 };
 
 #endif // MAINWINDOW_H

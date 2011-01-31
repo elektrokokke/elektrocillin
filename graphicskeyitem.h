@@ -19,10 +19,6 @@ public:
     void pressKey();
     void releaseKey();
 
-protected:
-    virtual void hoverEnterEvent( QGraphicsSceneHoverEvent * event );
-    virtual void hoverLeaveEvent( QGraphicsSceneHoverEvent * event );
-
 private:
     unsigned char noteNumber;
     QSizeF whiteKeySize, blackKeySize;

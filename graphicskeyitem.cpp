@@ -1,7 +1,6 @@
 #include "graphicskeyitem.h"
 #include <QPen>
 #include <QGraphicsSceneMouseEvent>
-#include <QDebug>
 
 GraphicsKeyItem::GraphicsKeyItem(unsigned char noteNumber_, const QSizeF &keySize, QGraphicsItem *parent) :
     QGraphicsPolygonItem(parent),
@@ -50,16 +49,6 @@ void GraphicsKeyItem::releaseKey()
     if (!oldBrushes.isEmpty()) {
         setBrush(oldBrushes.pop());
     }
-}
-
-void GraphicsKeyItem::hoverEnterEvent( QGraphicsSceneHoverEvent * event )
-{
-    qDebug() << "void GraphicsKeyItem::hoverEnterEvent( QGraphicsSceneHoverEvent * event )";
-}
-
-void GraphicsKeyItem::hoverLeaveEvent( QGraphicsSceneHoverEvent * event )
-{
-    qDebug() << "void GraphicsKeyItem::hoverLeaveEvent( QGraphicsSceneHoverEvent * event )";
 }
 
 QRectF GraphicsKeyItem::getBoundingRectangle(unsigned char noteNumber, bool *isBlack)
