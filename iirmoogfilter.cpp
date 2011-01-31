@@ -7,11 +7,6 @@ IIRMoogFilter::IIRMoogFilter(double cutoffFrequencyInHertz, double resonance, do
     setCutoffFrequency(cutoffFrequencyInHertz, resonance);
 }
 
-void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
-{
-    setCutoffFrequency(cutoffFrequencyInHertz, getResonance());
-}
-
 void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double resonance)
 {
     this->cutoffFrequencyInHertz = cutoffFrequencyInHertz;
@@ -38,6 +33,11 @@ void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double res
     for (int k = (n + 2) / 2; k <= n; k++) {
         setFeedForwardCoefficient(k, getFeedForwardCoefficient(n - k));
     }
+}
+
+void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
+{
+    setCutoffFrequency(cutoffFrequencyInHertz, getResonance());
 }
 
 void IIRMoogFilter::setResonance(double resonance)

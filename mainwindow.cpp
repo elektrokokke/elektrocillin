@@ -20,18 +20,24 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    filter(0, 0, 44100),
-    filter2(0, 44100, IIRButterworthFilter::LOW_PASS)
+    filterMoog(0, 0, 44100),
+    filterButterworth1(0, 44100, IIRButterworthFilter::LOW_PASS),
+    filterButterworth2(0, 44100, IIRButterworthFilter::HIGH_PASS),
+    filterParallel(0, 44100),
+    filterSerial(0, 44100)
 {
     ui->setupUi(this);
 
     QGraphicsScene * scene = new QGraphicsScene();
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
-    filter.setCutoffFrequency(frequencyResponse->getLowestHertz());
-    filter2.setCutoffFrequency(frequencyResponse->getLowestHertz());
-    frequencyResponse->addFrequencyResponse(&filter);
-    frequencyResponse->addFrequencyResponse(&filter2);
-    frequencyResponse->updateFrequencyResponses();
+    filterMoog.setCutoffFrequency(frequencyResponse->getLowestHertz());
+    frequencyResponse->addFrequencyResponse(&filterMoog);
+    frequencyResponse->addFrequencyResponse(&filterButterworth1);
+    frequencyResponse->addFrequencyResponse(&filterButterworth2);
+    frequencyResponse->addFrequencyResponse(&filterParallel);
+    frequencyResponse->addFrequencyResponse(&filterSerial);
+
+    onKeyPressed(0);
 
     GraphicsNodeItem *cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
     cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
@@ -187,13 +193,13 @@ void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char
 
 void MainWindow::onChangeCutoff(qreal hertz)
 {
-    filter.setCutoffFrequency(hertz);
+    filterMoog.setCutoffFrequency(hertz);
     frequencyResponse->updateFrequencyResponse(0);
 }
 
 void MainWindow::onChangeResonance(qreal resonance)
 {
-    filter.setResonance(resonance);
+    filterMoog.setResonance(resonance);
     frequencyResponse->updateFrequencyResponse(0);
 }
 
@@ -203,6 +209,11 @@ void MainWindow::onKeyPressed(unsigned char noteNumber)
     // 440 Hz is note number 69:
     double octave = ((double)noteNumber - 69.0) / 12.0;
     double frequency = 440.0 * pow(2.0, octave);
-    filter2.setCutoffFrequency(frequency);
-    frequencyResponse->updateFrequencyResponse(1);
+    filterButterworth1.setCutoffFrequency(frequency * 0.25);
+    filterButterworth2.setCutoffFrequency(frequency);
+    filterParallel = filterButterworth1;
+    filterParallel += filterButterworth2;
+    filterSerial = filterButterworth1;
+    filterSerial *= filterButterworth1;
+    frequencyResponse->updateFrequencyResponses();
 }

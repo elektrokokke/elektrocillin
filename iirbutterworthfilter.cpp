@@ -3,14 +3,10 @@
 
 IIRButterworthFilter::IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate, Type type_, int zeros) :
     IIRFilter(1 + zeros, 2, sampleRate),
+//    IIRFilter(1 + zeros, 0, sampleRate),
     type(type_)
 {
     setCutoffFrequency(cutoffFrequencyInHertz);
-}
-
-void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
-{
-    setCutoffFrequency(cutoffFrequencyInHertz, getType());
 }
 
 void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz, Type type)
@@ -26,6 +22,7 @@ void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz, Typ
     int n = getFeedForwardCoefficientCount() - 1;
     int powerOfTwo = 1 << n;
     factor *= 4.0 / powerOfTwo;
+//    double factor = 1.0 / powerOfTwo;
     for (int k = 0; k < (n + 2) / 2; k++) {
         setFeedForwardCoefficient(k, factor * IIRFilter::computeBinomialCoefficient(n, k));
     }
@@ -36,6 +33,11 @@ void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz, Typ
     if (type == HIGH_PASS) {
         invert();
     }
+}
+
+void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
+{
+    setCutoffFrequency(cutoffFrequencyInHertz, getType());
 }
 
 void IIRButterworthFilter::setType(Type type)

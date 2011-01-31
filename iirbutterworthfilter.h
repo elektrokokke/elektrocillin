@@ -13,8 +13,9 @@ public:
 
     IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate, Type type = LOW_PASS, int zeros = 2);
 
+    virtual void setCutoffFrequency(double cutoffFrequencyInHertz, Type type);
+
     void setCutoffFrequency(double cutoffFrequencyInHertz);
-    void setCutoffFrequency(double cutoffFrequencyInHertz, Type type);
     void setType(Type type);
 
     double getCutoffFrequency() const;

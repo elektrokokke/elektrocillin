@@ -39,8 +39,8 @@ private:
     SimpleMonophonicClient *simpleMonophonicClient;
     MidiController2AudioClient *midiControllerClient;
     FrequencyResponseGraphicsItem *frequencyResponse;
-    IIRMoogFilter filter;
-    IIRButterworthFilter filter2;
+    IIRMoogFilter filterMoog;
+    IIRButterworthFilter filterButterworth1, filterButterworth2, filterParallel, filterSerial;
 };
 
 #endif // MAINWINDOW_H

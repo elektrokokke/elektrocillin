@@ -12,7 +12,7 @@ public:
     IIRFilter(double sampleRate);
     IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate);
 
-    void debug();
+    QString toString() const;
 
     double getSampleRate() const;
     double getFrequencyInRadians(double frequencyInHertz) const;
@@ -29,6 +29,11 @@ public:
     void invert();
 
     static int computeBinomialCoefficient(int n, int k);
+
+    // add another IIRFilter (which means parallel operation):
+    IIRFilter& operator+=(const IIRFilter &b);
+    // multiply with another IIRFilter (which means serial operation):
+    IIRFilter& operator*=(const IIRFilter &b);
 
 protected:
     void setFeedForwardCoefficient(int index, double c);

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <QString>
 
 template<class T> class Polynomial : public std::vector<T>
 {
@@ -82,6 +83,18 @@ public:
             std::vector<T>::at(i) = product.at(i);
         }
         return *this;
+    }
+
+    QString toString() const
+    {
+        QString string;
+        for (size_t i = 0; i < this->size(); i++) {
+            string += QString("(%1,%2i)*x^%3").arg(this->at(i).real()).arg(this->at(i).imag()).arg(i);
+            if (i < this->size() - 1) {
+                string += "+";
+            }
+        }
+        return string;
     }
 };
 

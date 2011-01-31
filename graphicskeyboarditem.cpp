@@ -2,7 +2,6 @@
 #include "graphicskeyitem.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPen>
-#include <QDebug>
 
 GraphicsKeyboardItem::GraphicsKeyboardItem(QGraphicsItem *parent) :
     QGraphicsRectItem(parent),
@@ -29,7 +28,6 @@ void GraphicsKeyboardItem::releaseKey(unsigned char noteNumber)
 
 void GraphicsKeyboardItem::mousePressEvent ( QGraphicsSceneMouseEvent *event )
 {
-    qDebug() << "void GraphicsKeyboardItem::mousePressEvent ( QGraphicsSceneMouseEvent * )";
     Q_ASSERT(!activeKey);
     for (int i = 0; i < keys.size(); i++) {
         if (keys[i]->contains(event->pos())) {
@@ -45,7 +43,6 @@ void GraphicsKeyboardItem::mousePressEvent ( QGraphicsSceneMouseEvent *event )
 
 void GraphicsKeyboardItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * )
 {
-    qDebug() << "void GraphicsKeyboardItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * )";
     if (activeKey) {
         activeKey->releaseKey();
         keyReleased(activeKeyIndex);
@@ -55,7 +52,6 @@ void GraphicsKeyboardItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * )
 
 void GraphicsKeyboardItem::mouseMoveEvent ( QGraphicsSceneMouseEvent *event )
 {
-    qDebug() << "void GraphicsKeyboardItem::mouseMoveEvent ( QGraphicsSceneMouseEvent *event )";
     if (activeKey && !activeKey->contains(event->pos())) {
         mouseReleaseEvent(event);
         mousePressEvent(event);

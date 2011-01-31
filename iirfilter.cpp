@@ -9,20 +9,16 @@ IIRFilter::IIRFilter(double sampleRate_) :
 IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate_) :
     sampleRate(sampleRate_),
     feedForward(feedForwardCoefficients),
-    feedBack(feedBackCoefficients)
+    feedBack(feedBackCoefficients),
+    x(feedForwardCoefficients),
+    y(feedBackCoefficients)
 {
+    reset();
 }
 
-void IIRFilter::debug()
+QString IIRFilter::toString() const
 {
-    qDebug() << "feedForward";
-    for (int i = 0; i < feedForward.size(); i++) {
-        qDebug() << feedForward[i];
-    }
-    qDebug() << "feedBack";
-    for (int i = 0; i < feedBack.size(); i++) {
-        qDebug() << feedBack[i];
-    }
+    return getNumeratorPolynomial().toString() + " / " + getDenominatorPolynomial().toString();
 }
 
 double IIRFilter::getSampleRate() const
@@ -143,6 +139,59 @@ int IIRFilter::computeBinomialCoefficient(int n, int k)
         }
         return result;
     }
+}
+
+IIRFilter& IIRFilter::operator+=(const IIRFilter &b)
+{
+    // get numerators and denominators:
+    Polynomial<std::complex<double> > numerator1 = getNumeratorPolynomial();
+    Polynomial<std::complex<double> > numerator2 = b.getNumeratorPolynomial();
+    Polynomial<std::complex<double> > denominator1 = getDenominatorPolynomial();
+    Polynomial<std::complex<double> > denominator2 = b.getDenominatorPolynomial();
+    // multiply the denominators:
+    Polynomial<std::complex<double> > denominator = denominator1;
+    denominator *= denominator2;
+    // multiply the numerators with the other filter's denominator:
+    numerator1 *= denominator2;
+    numerator2 *= denominator1;
+    // add them:
+    Polynomial<std::complex<double> > numerator = numerator1;
+    numerator += numerator2;
+    // set the feed forward coefficients from the new numerator:
+    feedForward.resize(numerator.size());
+    x.resize(numerator.size());
+    for (int i = 0; i < feedForward.size(); i++) {
+        feedForward[i] = numerator[i].real();
+    }
+    // set the feedback coefficients from the new denominator:
+    feedBack.resize(denominator.size() - 1);
+    y.resize(denominator.size() - 1);
+    for (int i = 0; i < feedBack.size(); i++) {
+        feedBack[i] = denominator[i + 1].real();
+    }
+    return *this;
+}
+
+IIRFilter& IIRFilter::operator*=(const IIRFilter &b)
+{
+    // multiply numerators and denominators:
+    Polynomial<std::complex<double> > numerator = getNumeratorPolynomial();
+    numerator *= b.getNumeratorPolynomial();
+    Polynomial<std::complex<double> > denominator = getDenominatorPolynomial();
+    denominator *= b.getDenominatorPolynomial();
+    // set the feed forward coefficients from the new numerator:
+    feedForward.resize(numerator.size());
+    x.resize(numerator.size());
+    for (int i = 0; i < feedForward.size(); i++) {
+        feedForward[i] = numerator[i].real();
+    }
+    // set the feedback coefficients from the new denominator:
+    feedBack.resize(denominator.size() - 1);
+    y.resize(denominator.size() - 1);
+    for (int i = 0; i < feedBack.size(); i++) {
+        feedBack[i] = denominator[i + 1].real();
+    }
+    return *this;
 }
 
 Polynomial<std::complex<double> > IIRFilter::getNumeratorPolynomial() const
