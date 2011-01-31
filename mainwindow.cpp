@@ -11,6 +11,7 @@
 #include "frequencyresponsegraphicsitem.h"
 #include "iirbutterworthfilter.h"
 #include "graphicsnodeitem.h"
+#include "graphicskeyboarditem.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
@@ -27,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
     filter.setCutoffFrequency(frequencyResponse->getLowestHertz());
     frequencyResponse->addFrequencyResponse(&filter);
+    frequencyResponse->updateFrequencyResponses();
 
     GraphicsNodeItem *cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
     cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
@@ -39,7 +41,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(cutoffResonanceNode, SIGNAL(yChangedScaled(qreal)), this, SLOT(onChangeResonance(qreal)));
 
     scene->addItem(frequencyResponse);
-    frequencyResponse->updateFrequencyResponses();
+
+    GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem();
+    scene->addItem(keyboard);
+    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char)), this, SLOT(onKeyPressed(unsigned char)));
+    keyboard->setScale(frequencyResponse->boundingRect().width() / keyboard->sceneBoundingRect().width());
+    keyboard->setPos(0, -keyboard->sceneBoundingRect().height() - 10);
+
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
 
@@ -183,5 +191,15 @@ void MainWindow::onChangeCutoff(qreal hertz)
 void MainWindow::onChangeResonance(qreal resonance)
 {
     filter.setResonance(resonance);
+    frequencyResponse->updateFrequencyResponses();
+}
+
+void MainWindow::onKeyPressed(unsigned char noteNumber)
+{
+    // compute the frequency of the note:
+    // 440 Hz is note number 69:
+    double octave = ((double)noteNumber - 69.0) / 12.0;
+    double frequency = 440.0 * pow(2.0, octave);
+    filter.setCutoffFrequency(frequency);
     frequencyResponse->updateFrequencyResponses();
 }

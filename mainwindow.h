@@ -30,6 +30,7 @@ private slots:
 
     void onChangeCutoff(qreal hertz);
     void onChangeResonance(qreal resonance);
+    void onKeyPressed(unsigned char noteNumber);
 
 private:
     Ui::MainWindow *ui;

@@ -49,7 +49,9 @@ SOURCES += main.cpp\
     frequencyresponsegraphicsitem.cpp \
     iirfilter.cpp \
     iirbutterworthfilter.cpp \
-    iirmoogfilter.cpp
+    iirmoogfilter.cpp \
+    graphicskeyitem.cpp \
+    graphicskeyboarditem.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -91,7 +93,9 @@ HEADERS  += mainwindow.h \
     iirfilter.h \
     iirbutterworthfilter.h \
     iirmoogfilter.h \
-    frequencyresponse.h
+    frequencyresponse.h \
+    graphicskeyitem.h \
+    graphicskeyboarditem.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui \
