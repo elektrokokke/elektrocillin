@@ -6,7 +6,6 @@
 #include <QMutex>
 #include <QByteArray>
 #include "jackthread.h"
-#include "jackringbuffer.h"
 #include "jackclientwithdeferredprocessing.h"
 #include "jack/midiport.h"
 
@@ -16,13 +15,11 @@ struct MidiMessage {
     jack_midi_data_t message[3];
 };
 
-class MidiClient;
-
 class MidiThread : public JackThread
 {
     Q_OBJECT
 public:
-    explicit MidiThread(MidiClient *client, QObject *parent = 0);
+    explicit MidiThread(JackClientWithDeferredProcessing *client, QObject *parent = 0);
 
     JackRingBuffer<MidiMessage> * getInputRingBuffer();
     JackRingBuffer<MidiMessage> * getOutputRingBuffer();

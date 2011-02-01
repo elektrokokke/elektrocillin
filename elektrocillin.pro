@@ -51,7 +51,8 @@ SOURCES += main.cpp\
     iirmoogfilter.cpp \
     graphicskeyitem.cpp \
     graphicskeyboarditem.cpp \
-    midiclient.cpp
+    midiclient.cpp \
+    iirmoogfilterclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -96,7 +97,8 @@ HEADERS  += mainwindow.h \
     frequencyresponse.h \
     graphicskeyitem.h \
     graphicskeyboarditem.h \
-    midiclient.h
+    midiclient.h \
+    iirmoogfilterclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui \

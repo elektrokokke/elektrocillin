@@ -21,6 +21,11 @@ QString IIRFilter::toString() const
     return getNumeratorPolynomial().toString() + " / " + getDenominatorPolynomial().toString();
 }
 
+void IIRFilter::setSampleRate(double sampleRate)
+{
+    this->sampleRate = sampleRate;
+}
+
 double IIRFilter::getSampleRate() const
 {
     return sampleRate;

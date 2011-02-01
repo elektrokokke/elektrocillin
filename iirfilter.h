@@ -14,6 +14,7 @@ public:
 
     QString toString() const;
 
+    virtual void setSampleRate(double sampleRate);
     double getSampleRate() const;
     double getFrequencyInRadians(double frequencyInHertz) const;
     double filter(double x);

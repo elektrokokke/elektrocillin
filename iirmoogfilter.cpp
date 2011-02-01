@@ -35,6 +35,13 @@ void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double res
     }
 }
 
+void IIRMoogFilter::setSampleRate(double sampleRate)
+{
+    IIRFilter::setSampleRate(sampleRate);
+    // recompute coefficients:
+    setCutoffFrequency(getCutoffFrequency(), getResonance());
+}
+
 void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
 {
     setCutoffFrequency(cutoffFrequencyInHertz, getResonance());

@@ -8,6 +8,7 @@ class IIRMoogFilter : public IIRFilter
 public:
     IIRMoogFilter(double cutoffFrequencyInHertz, double resonance, double sampleRate, int zeros = 0);
 
+    virtual void setSampleRate(double sampleRate);
     void setCutoffFrequency(double cutoffFrequencyInHertz, double resonance);
 
     void setCutoffFrequency(double cutoffFrequencyInHertz);

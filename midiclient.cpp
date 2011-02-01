@@ -1,6 +1,6 @@
 #include "midiclient.h"
 
-MidiThread::MidiThread(MidiClient *client, QObject *parent) :
+MidiThread::MidiThread(JackClientWithDeferredProcessing *client, QObject *parent) :
         JackThread(client, parent),
         ringBufferFromClient(1024),
         ringBufferToClient(1024)
