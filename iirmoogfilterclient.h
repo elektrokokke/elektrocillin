@@ -6,6 +6,7 @@
 #include "iirmoogfilter.h"
 
 struct IIRMoogFilterControl {
+    jack_nframes_t time;
     double cutoffFrequency;
     double resonance;
 };
@@ -16,6 +17,9 @@ public:
     IIRMoogFilterControlThread(JackClientWithDeferredProcessing *client, QObject *parent = 0);
 
     JackRingBuffer<IIRMoogFilterControl> * getOutputRingBuffer();
+
+public slots:
+    void setParameters(double cutoffFrequency, double resonance);
 
 protected:
     virtual void processDeferred();
@@ -39,6 +43,8 @@ protected:
 private:
     IIRMoogFilterControlThread thread;
     IIRMoogFilter filter;
+    QString audioInputPortName, audioOutputPortName;
+    jack_port_t *audioInputPort, *audioOutputPort;
 };
 
 #endif // IIRMOOGFILTERCLIENT_H
