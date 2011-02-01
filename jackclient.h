@@ -20,6 +20,10 @@ public:
     bool connectPorts(const QString &sourcePortName, const QString &destPortName);
     bool disconnectPorts(const QString &sourcePortName, const QString &destPortName);
 
+    /**
+      This function may be called from anyhwere.
+      */
+    jack_nframes_t getEstimatedCurrentTime();
 protected:
     /**
       This is called before the jack client is activated.
@@ -40,10 +44,6 @@ protected:
       This function must not be called from outside of process()!
       */
     jack_nframes_t getLastFrameTime();
-    /**
-      This function may be called from anyhwere.
-      */
-    jack_nframes_t getEstimatedCurrentTime();
 
     jack_port_t * registerAudioPort(const QString &name, unsigned long flags);
     jack_port_t * registerMidiPort(const QString &name, unsigned long flags);

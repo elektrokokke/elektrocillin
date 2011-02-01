@@ -17,6 +17,7 @@ public:
     JackClientWithDeferredProcessing(const QString &clienNname, JackThread *deferTo);
 
     JackThread * getJackThread();
+    void wakeJackThread();
 
 protected:
     /**

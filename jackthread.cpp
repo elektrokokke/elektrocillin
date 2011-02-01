@@ -1,9 +1,15 @@
 #include "jackthread.h"
 
-JackThread::JackThread(QObject *parent) :
+JackThread::JackThread(JackClient *client_, QObject *parent) :
     QThread(parent),
+    client(client_),
     stopRingBuffer(1)
 {
+}
+
+JackClient * JackThread::getClient()
+{
+    return client;
 }
 
 void JackThread::stop()

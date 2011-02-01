@@ -11,6 +11,11 @@ JackThread * JackClientWithDeferredProcessing::getJackThread()
     return jackThread;
 }
 
+void JackClientWithDeferredProcessing::wakeJackThread()
+{
+    getJackThread()->wake();
+}
+
 bool JackClientWithDeferredProcessing::init()
 {
     jackThread->start();

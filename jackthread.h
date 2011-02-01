@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include "jackringbuffer.h"
+#include "jackclient.h"
 
 /**
   This is a utility class to be used together with a JackClient subclass.
@@ -45,7 +46,9 @@ class JackThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit JackThread(QObject *parent = 0);
+    explicit JackThread(JackClient *client, QObject *parent = 0);
+
+    JackClient * getClient();
 
 public slots:
     /**
@@ -70,6 +73,7 @@ protected:
     void run();
 
 private:
+    JackClient *client;
     JackRingBuffer<bool> stopRingBuffer;
     QMutex mutex;
     QWaitCondition waitCondition;

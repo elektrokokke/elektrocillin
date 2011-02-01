@@ -76,6 +76,7 @@ jack_nframes_t JackClient::getLastFrameTime()
 
 jack_nframes_t JackClient::getEstimatedCurrentTime()
 {
+    Q_ASSERT(isActive());
     return jack_frame_time(client);
 }
 
