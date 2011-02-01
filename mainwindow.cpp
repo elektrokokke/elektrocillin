@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     frequencyResponse->addFrequencyResponse(&filterParallel);
     frequencyResponse->addFrequencyResponse(&filterSerial);
 
-    onKeyPressed(0);
+    onKeyPressed(1, 127, 0);
 
     GraphicsNodeItem *cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
     cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
@@ -51,9 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     scene->addItem(frequencyResponse);
 
-    GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem();
+    GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
     scene->addItem(keyboard);
-    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char)), this, SLOT(onKeyPressed(unsigned char)));
+    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char, unsigned char, unsigned char)), this, SLOT(onKeyPressed(unsigned char, unsigned char, unsigned char)));
     keyboard->setScale(frequencyResponse->boundingRect().width() / keyboard->sceneBoundingRect().width());
     keyboard->setPos(0, -keyboard->sceneBoundingRect().height() - 10);
 
@@ -203,7 +203,7 @@ void MainWindow::onChangeResonance(qreal resonance)
     frequencyResponse->updateFrequencyResponse(0);
 }
 
-void MainWindow::onKeyPressed(unsigned char noteNumber)
+void MainWindow::onKeyPressed(unsigned char, unsigned char, unsigned char noteNumber)
 {
     // compute the frequency of the note:
     // 440 Hz is note number 69:

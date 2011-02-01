@@ -3,8 +3,9 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPen>
 
-GraphicsKeyboardItem::GraphicsKeyboardItem(QGraphicsItem *parent) :
+GraphicsKeyboardItem::GraphicsKeyboardItem(unsigned char channel_, QGraphicsItem *parent) :
     QGraphicsRectItem(parent),
+    channel(channel_),
     activeKey(0)
 {
     QSizeF whiteKeySize(20, 100);
@@ -16,14 +17,23 @@ GraphicsKeyboardItem::GraphicsKeyboardItem(QGraphicsItem *parent) :
     setPen(QPen(Qt::NoPen));
 }
 
-void GraphicsKeyboardItem::pressKey(unsigned char noteNumber)
+unsigned char GraphicsKeyboardItem::getChannel() const
 {
-    keys[noteNumber]->pressKey();
+    return channel;
 }
 
-void GraphicsKeyboardItem::releaseKey(unsigned char noteNumber)
+void GraphicsKeyboardItem::pressKey(unsigned char channel, unsigned char, unsigned char noteNumber)
 {
-    keys[noteNumber]->releaseKey();
+    if (channel == getChannel()) {
+        keys[noteNumber]->pressKey();
+    }
+}
+
+void GraphicsKeyboardItem::releaseKey(unsigned char channel, unsigned char, unsigned char noteNumber)
+{
+    if (channel == getChannel()) {
+        keys[noteNumber]->releaseKey();
+    }
 }
 
 void GraphicsKeyboardItem::mousePressEvent ( QGraphicsSceneMouseEvent *event )
@@ -34,7 +44,7 @@ void GraphicsKeyboardItem::mousePressEvent ( QGraphicsSceneMouseEvent *event )
             activeKey = keys[i];
             activeKey->pressKey();
             activeKeyIndex = i;
-            keyPressed(activeKeyIndex);
+            keyPressed(getChannel(), 127, activeKeyIndex);
             return;
         }
     }
@@ -45,7 +55,7 @@ void GraphicsKeyboardItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * )
 {
     if (activeKey) {
         activeKey->releaseKey();
-        keyReleased(activeKeyIndex);
+        keyReleased(getChannel(), 127, activeKeyIndex);
         activeKey = 0;
     }
 }
