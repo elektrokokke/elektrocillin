@@ -40,15 +40,13 @@ double IIRFilter::filter(double x0)
 {
     if (x.size()) {
         x[0] = x0;
-        double nominator = 0.0;
+        double result = 0.0;
         for (int i = 0; i < x.size(); i++) {
-            nominator += x[i] * feedForward[i];
+            result += x[i] * feedForward[i];
         }
-        double denumerator = 1.0;
         for (int i = 0; i < y.size(); i++) {
-            denumerator += y[i] * feedBack[i];
+            result -= y[i] * feedBack[i];
         }
-        double result = nominator / denumerator;
         // remember x and y values for next calls:
         for (int i = x.size() - 1; i > 0; i--) {
             x[i] = x[i - 1];
@@ -59,7 +57,7 @@ double IIRFilter::filter(double x0)
         y[0] = result;
         return result;
     } else {
-        return 0.0;
+        return 0;
     }
 }
 

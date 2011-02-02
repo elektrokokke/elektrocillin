@@ -8,6 +8,7 @@ class SimpleMonophonicClient : public Midi2AudioClient
 {
 public:
     SimpleMonophonicClient(const QString &clientName);
+    virtual ~SimpleMonophonicClient();
 
 protected:
     virtual bool init();

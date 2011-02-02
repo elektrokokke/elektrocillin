@@ -15,12 +15,12 @@ public:
     unsigned char getChannel() const;
 
 signals:
-    void keyPressed(unsigned char channel, unsigned char velocity, unsigned char noteNumber);
-    void keyReleased(unsigned char channel, unsigned char velocity, unsigned char noteNumber);
+    void keyPressed(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void keyReleased(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
 
 public slots:
-    void pressKey(unsigned char channel, unsigned char velocity, unsigned char noteNumber);
-    void releaseKey(unsigned char channel, unsigned char velocity, unsigned char noteNumber);
+    void pressKey(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void releaseKey(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
 
 protected:
     virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );

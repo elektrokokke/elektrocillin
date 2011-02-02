@@ -22,14 +22,14 @@ unsigned char GraphicsKeyboardItem::getChannel() const
     return channel;
 }
 
-void GraphicsKeyboardItem::pressKey(unsigned char channel, unsigned char, unsigned char noteNumber)
+void GraphicsKeyboardItem::pressKey(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
 {
     if (channel == getChannel()) {
         keys[noteNumber]->pressKey();
     }
 }
 
-void GraphicsKeyboardItem::releaseKey(unsigned char channel, unsigned char, unsigned char noteNumber)
+void GraphicsKeyboardItem::releaseKey(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
 {
     if (channel == getChannel()) {
         keys[noteNumber]->releaseKey();
@@ -44,7 +44,7 @@ void GraphicsKeyboardItem::mousePressEvent ( QGraphicsSceneMouseEvent *event )
             activeKey = keys[i];
             activeKey->pressKey();
             activeKeyIndex = i;
-            keyPressed(getChannel(), 127, activeKeyIndex);
+            keyPressed(getChannel(), activeKeyIndex, 127);
             return;
         }
     }
@@ -55,7 +55,7 @@ void GraphicsKeyboardItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * )
 {
     if (activeKey) {
         activeKey->releaseKey();
-        keyReleased(getChannel(), 127, activeKeyIndex);
+        keyReleased(getChannel(), activeKeyIndex, 127);
         activeKey = 0;
     }
 }

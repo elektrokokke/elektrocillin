@@ -3,12 +3,12 @@
 
 #include <QMainWindow>
 #include "frequencyresponsegraphicsitem.h"
-#include "iirmoogfilter.h"
+#include "iirmoogfilterclient.h"
 #include "iirbutterworthfilter.h"
+#include "simplemonophonicclient.h"
 #include "midiclient.h"
 
 class Record2MemoryClient;
-class SimpleMonophonicClient;
 class MidiController2AudioClient;
 
 namespace Ui {
@@ -30,19 +30,19 @@ private slots:
 
     void onMidiMessage(unsigned char, unsigned char, unsigned char);
 
-    void onChangeCutoff(qreal hertz);
-    void onChangeResonance(qreal resonance);
+    void onChangeCutoff(QPointF cutoffResonance);
     void onKeyPressed(unsigned char channel, unsigned char velocity, unsigned char noteNumber);
 
 private:
     Ui::MainWindow *ui;
     Record2MemoryClient *recordClient;
-    SimpleMonophonicClient *simpleMonophonicClient;
     MidiController2AudioClient *midiControllerClient;
     FrequencyResponseGraphicsItem *frequencyResponse;
     IIRMoogFilter filterMoog;
     IIRButterworthFilter filterButterworth1, filterButterworth2, filterParallel, filterSerial;
     MidiClient midiClient;
+    SimpleMonophonicClient simpleMonophonicClient;
+    IIRMoogFilterClient moogFilterClient;
 };
 
 #endif // MAINWINDOW_H

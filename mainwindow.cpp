@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "simplemonophonicclient.h"
 #include "record2memoryclient.h"
 #include "graphicslineitem.h"
 #include "graphicsloglineitem.h"
@@ -18,12 +17,14 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    filterMoog(0, 0, 44100),
+    filterMoog(0, 0, 44100, 1),
     filterButterworth1(0, 44100, IIRButterworthFilter::LOW_PASS),
     filterButterworth2(0, 44100, IIRButterworthFilter::HIGH_PASS),
     filterParallel(0, 44100),
     filterSerial(0, 44100),
-    midiClient("midi client")
+    midiClient("midi client"),
+    simpleMonophonicClient("synthesizer"),
+    moogFilterClient("moog filter")
 {
     ui->setupUi(this);
 
@@ -45,14 +46,19 @@ MainWindow::MainWindow(QWidget *parent) :
     cutoffResonanceNode->setBounds(QRectF(frequencyResponse->getFrequencyResponseRectangle().topLeft(), QPointF(frequencyResponse->getFrequencyResponseRectangle().right(), frequencyResponse->getZeroDecibelY())));
     cutoffResonanceNode->setBoundsScaled(QRectF(QPointF(frequencyResponse->getLowestHertz(), 1), QPointF(frequencyResponse->getHighestHertz(), 0)));
     cutoffResonanceNode->setPos(frequencyResponse->getFrequencyResponseRectangle().left(), frequencyResponse->getZeroDecibelY());
-    QObject::connect(cutoffResonanceNode, SIGNAL(xChangedScaled(qreal)), this, SLOT(onChangeCutoff(qreal)));
-    QObject::connect(cutoffResonanceNode, SIGNAL(yChangedScaled(qreal)), this, SLOT(onChangeResonance(qreal)));
+    QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onChangeCutoff(QPointF)));
 
     scene->addItem(frequencyResponse);
 
+    midiClient.activate();
+    simpleMonophonicClient.activate();
+    moogFilterClient.activate();
+
     GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
     scene->addItem(keyboard);
-    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char, unsigned char, unsigned char)), this, SLOT(onKeyPressed(unsigned char, unsigned char, unsigned char)));
+    //QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char, unsigned char, unsigned char)), this, SLOT(onKeyPressed(unsigned char, unsigned char, unsigned char)));
+    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), midiClient.getMidiThread(), SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
+    QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), midiClient.getMidiThread(), SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
     keyboard->setScale(frequencyResponse->boundingRect().width() / keyboard->sceneBoundingRect().width());
     keyboard->setPos(0, -keyboard->sceneBoundingRect().height() - 10);
 
@@ -190,29 +196,24 @@ void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char
     qDebug() << "received midi message" << m1 << m2 << m3;
 }
 
-void MainWindow::onChangeCutoff(qreal hertz)
+void MainWindow::onChangeCutoff(QPointF cutoffResonance)
 {
-    filterMoog.setCutoffFrequency(hertz);
-    frequencyResponse->updateFrequencyResponse(0);
-}
-
-void MainWindow::onChangeResonance(qreal resonance)
-{
-    filterMoog.setResonance(resonance);
+    moogFilterClient.setParameters(cutoffResonance.x(), cutoffResonance.y());
+    filterMoog.setCutoffFrequency(cutoffResonance.x(), cutoffResonance.y());
     frequencyResponse->updateFrequencyResponse(0);
 }
 
 void MainWindow::onKeyPressed(unsigned char, unsigned char, unsigned char noteNumber)
 {
-//    // compute the frequency of the note:
-//    // 440 Hz is note number 69:
-//    double octave = ((double)noteNumber - 69.0) / 12.0;
-//    double frequency = 440.0 * pow(2.0, octave);
-//    filterButterworth1.setCutoffFrequency(frequency * 0.25);
-//    filterButterworth2.setCutoffFrequency(frequency);
-//    filterParallel = filterButterworth1;
-//    filterParallel += filterButterworth2;
-//    filterSerial = filterButterworth1;
-//    filterSerial *= filterButterworth1;
-//    frequencyResponse->updateFrequencyResponses();
+    // compute the frequency of the note:
+    // 440 Hz is note number 69:
+    double octave = ((double)noteNumber - 69.0) / 12.0;
+    double frequency = 440.0 * pow(2.0, octave);
+    filterButterworth1.setCutoffFrequency(frequency * 0.25);
+    filterButterworth2.setCutoffFrequency(frequency);
+    filterParallel = filterButterworth1;
+    filterParallel += filterButterworth2;
+    filterSerial = filterButterworth1;
+    filterSerial *= filterButterworth1;
+    frequencyResponse->updateFrequencyResponses();
 }

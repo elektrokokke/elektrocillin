@@ -42,6 +42,7 @@ void MidiThread::processDeferred()
                 if (velocity) {
                     // note on event:
                     receivedNoteOn(channel, note, velocity);
+//                    qDebug() << "receivedNoteOn(" << channel << "," << note << "," << velocity << ") at time" << message.time << "(buffer time" << message.bufferTime << ")";
                 } else {
                     // note off event:
                     receivedNoteOff(channel, note, velocity);
@@ -56,6 +57,7 @@ void MidiThread::processDeferred()
                 unsigned char controller = message.message[1];
                 unsigned char value = message.message[2];
                 receivedControlChange(channel, controller, value);
+//                qDebug() << "receivedControlChange(" << channel << "," << controller << "," << value << ") at time" << message.time << "(buffer time" << message.bufferTime << ")";
             } else if (highNibble == 0x0C) {
                 // program change:
                 unsigned char program = message.message[1];
@@ -91,21 +93,17 @@ void MidiThread::sendNoteOff(unsigned char channel, unsigned char note, unsigned
 
 void MidiThread::sendNoteOn(unsigned char channel, unsigned char note, unsigned char velocity)
 {
-    // note on with velocity 0 is actually a note off:
-    if (velocity == 0) {
-        sendNoteOff(channel, note, velocity);
-    } else {
-        // create the midi message:
-        MidiMessage message;
-        message.size = 3;
-        message.message[0] = 0x90 + channel;
-        message.message[1] = note;
-        message.message[2] = velocity;
-        // get estimated current time:
-        message.time = getClient()->getEstimatedCurrentTime();
-        // send the midi message:
-        getOutputRingBuffer()->write(message);
-    }
+    // create the midi message:
+    MidiMessage message;
+    message.size = 3;
+    message.message[0] = 0x90 + channel;
+    message.message[1] = note;
+    message.message[2] = velocity;
+    // get estimated current time:
+    message.time = getClient()->getEstimatedCurrentTime();
+    // send the midi message:
+    getOutputRingBuffer()->write(message);
+//    qDebug() << "sendNoteOn(" << channel << "," << note << "," << velocity << ") at time" << message.time;
 }
 
 void MidiThread::sendAfterTouch(unsigned char channel, unsigned char note, unsigned char pressure)
@@ -244,6 +242,7 @@ bool MidiClient::process(jack_nframes_t nframes)
             MidiMessage message;
             // convert the time from current frame base to "global" time:
             message.time = lastFrameTime + midiEvent.time;
+            message.bufferTime = midiEvent.time;
             message.size = midiEvent.size;
             memcpy(message.message, midiEvent.buffer, message.size);
             getOutputRingBuffer()->write(message);

@@ -29,10 +29,10 @@ protected:
 private:
     double frequency, pitchBendFactor, morph;
     PulseOscillator osc1;
-    SawtoothOscillator osc2;
-    MorphingPiecewiseLinearOscillator morphOsc1;
+//    SawtoothOscillator osc2;
+//    MorphingPiecewiseLinearOscillator morphOsc1;
     AdsrEnvelope envelope;
-    Butterworth2PoleFilter filterAudio, filterMorph;
+//    Butterworth2PoleFilter filterAudio, filterMorph;
     QStack<double> frequencies;
     QStack<unsigned char> midiNoteNumbers;
 

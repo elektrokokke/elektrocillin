@@ -4,10 +4,15 @@ IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, QObject *par
     QObject(parent),
     JackClient(clientName),
     controlRingBuffer(1024),
-    filter(440, 0, 1),
+    filter(440, 0, 1, 1),
     audioInputPortName("audio in"),
     audioOutputPortName("audio out")
 {
+}
+
+IIRMoogFilterClient::~IIRMoogFilterClient()
+{
+    close();
 }
 
 void IIRMoogFilterClient::setParameters(double cutoffFrequency, double resonance)

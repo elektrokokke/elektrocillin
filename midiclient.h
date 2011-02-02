@@ -10,7 +10,7 @@
 #include "jack/midiport.h"
 
 struct MidiMessage {
-    jack_nframes_t time;
+    jack_nframes_t time, bufferTime;
     size_t size;
     jack_midi_data_t message[3];
 };
@@ -61,9 +61,9 @@ public:
 
     const QString & getMidiInputPortName() const;
     const QString & getMidiOutputPortName() const;
+    MidiThread * getMidiThread();
 
 protected:
-    MidiThread * getMidiThread();
     JackRingBuffer<MidiMessage> * getInputRingBuffer();
     JackRingBuffer<MidiMessage> * getOutputRingBuffer();
     // reimplemented methods from JackClient:

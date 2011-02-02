@@ -16,6 +16,7 @@ class IIRMoogFilterClient : public QObject, public JackClient
     Q_OBJECT
 public:
     IIRMoogFilterClient(const QString &clientName, QObject *parent = 0);
+    virtual ~IIRMoogFilterClient();
 
 public slots:
     void setParameters(double cutoffFrequency, double resonance);

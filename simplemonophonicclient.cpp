@@ -8,6 +8,11 @@ SimpleMonophonicClient::SimpleMonophonicClient(const QString &clientName) :
 {
 }
 
+SimpleMonophonicClient::~SimpleMonophonicClient()
+{
+    close();
+}
+
 bool SimpleMonophonicClient::init()
 {
     if (!Midi2AudioClient::init()) {
