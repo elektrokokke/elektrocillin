@@ -5,6 +5,7 @@
 #include "frequencyresponsegraphicsitem.h"
 #include "iirmoogfilter.h"
 #include "iirbutterworthfilter.h"
+#include "midiclient.h"
 
 class Record2MemoryClient;
 class SimpleMonophonicClient;
@@ -41,6 +42,7 @@ private:
     FrequencyResponseGraphicsItem *frequencyResponse;
     IIRMoogFilter filterMoog;
     IIRButterworthFilter filterButterworth1, filterButterworth2, filterParallel, filterSerial;
+    MidiClient midiClient;
 };
 
 #endif // MAINWINDOW_H

@@ -2,12 +2,10 @@
 #include "ui_mainwindow.h"
 #include "simplemonophonicclient.h"
 #include "record2memoryclient.h"
-#include "midi2signalclient.h"
 #include "graphicslineitem.h"
 #include "graphicsloglineitem.h"
 #include "graphicsnodeitem.h"
 #include "midicontroller2audioclient.h"
-#include "testmidiclientwidget.h"
 #include "frequencyresponsegraphicsitem.h"
 #include "iirbutterworthfilter.h"
 #include "graphicsnodeitem.h"
@@ -24,7 +22,8 @@ MainWindow::MainWindow(QWidget *parent) :
     filterButterworth1(0, 44100, IIRButterworthFilter::LOW_PASS),
     filterButterworth2(0, 44100, IIRButterworthFilter::HIGH_PASS),
     filterParallel(0, 44100),
-    filterSerial(0, 44100)
+    filterSerial(0, 44100),
+    midiClient("midi client")
 {
     ui->setupUi(this);
 
@@ -205,15 +204,15 @@ void MainWindow::onChangeResonance(qreal resonance)
 
 void MainWindow::onKeyPressed(unsigned char, unsigned char, unsigned char noteNumber)
 {
-    // compute the frequency of the note:
-    // 440 Hz is note number 69:
-    double octave = ((double)noteNumber - 69.0) / 12.0;
-    double frequency = 440.0 * pow(2.0, octave);
-    filterButterworth1.setCutoffFrequency(frequency * 0.25);
-    filterButterworth2.setCutoffFrequency(frequency);
-    filterParallel = filterButterworth1;
-    filterParallel += filterButterworth2;
-    filterSerial = filterButterworth1;
-    filterSerial *= filterButterworth1;
-    frequencyResponse->updateFrequencyResponses();
+//    // compute the frequency of the note:
+//    // 440 Hz is note number 69:
+//    double octave = ((double)noteNumber - 69.0) / 12.0;
+//    double frequency = 440.0 * pow(2.0, octave);
+//    filterButterworth1.setCutoffFrequency(frequency * 0.25);
+//    filterButterworth2.setCutoffFrequency(frequency);
+//    filterParallel = filterButterworth1;
+//    filterParallel += filterButterworth2;
+//    filterSerial = filterButterworth1;
+//    filterSerial *= filterButterworth1;
+//    frequencyResponse->updateFrequencyResponses();
 }
