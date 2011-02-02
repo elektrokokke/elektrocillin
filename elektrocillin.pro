@@ -51,7 +51,8 @@ SOURCES += main.cpp\
     audioprocessor.cpp \
     audioprocessorclient.cpp \
     midiprocessor.cpp \
-    midiprocessorclient.cpp
+    midiprocessorclient.cpp \
+    iircutoffcontrolmoogfilter.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -96,7 +97,8 @@ HEADERS  += mainwindow.h \
     audioprocessor.h \
     audioprocessorclient.h \
     midiprocessor.h \
-    midiprocessorclient.h
+    midiprocessorclient.h \
+    iircutoffcontrolmoogfilter.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

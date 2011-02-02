@@ -10,10 +10,9 @@
 class IIRFilter : public AudioProcessor, public FrequencyResponse
 {
 public:
-    IIRFilter(double sampleRate = 44100);
-    IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate = 44100);
+    IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs = 1, double sampleRate = 44100);
 
-    // reimplemented from Sampled:
+    // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs);
     // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);

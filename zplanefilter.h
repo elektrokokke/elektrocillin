@@ -11,7 +11,7 @@ class ZPlaneFilter : public AudioProcessor, public FrequencyResponse
 public:
     ZPlaneFilter(double sampleRate = 44100);
 
-    // reimplemented from Sampled:
+    // reimplemented from AudioProcessor:
     void processAudio(const double *inputs, double *outputs);
     // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);

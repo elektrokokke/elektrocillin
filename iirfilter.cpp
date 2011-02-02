@@ -1,13 +1,8 @@
 #include "iirfilter.h"
 #include <QDebug>
 
-IIRFilter::IIRFilter(double sampleRate) :
-    AudioProcessor(1, 1, sampleRate)
-{
-}
-
-IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate) :
-    AudioProcessor(1, 1, sampleRate),
+IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs, double sampleRate) :
+    AudioProcessor(nrOfInputs, 1, sampleRate),
     feedForward(feedForwardCoefficients),
     feedBack(feedBackCoefficients),
     x(feedForwardCoefficients),

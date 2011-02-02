@@ -1,10 +1,17 @@
 #include "iirmoogfilter.h"
 #include <cmath>
 
-IIRMoogFilter::IIRMoogFilter(double cutoffFrequencyInHertz, double resonance, double sampleRate, int zeros) :
-    IIRFilter(1 + zeros, 4, sampleRate)
+IIRMoogFilter::IIRMoogFilter(double cutoffFrequencyInHertz, double resonance, int nrOfInputs, double sampleRate, int zeros) :
+    IIRFilter(1 + zeros, 4, nrOfInputs, sampleRate)
 {
     setCutoffFrequency(cutoffFrequencyInHertz, resonance);
+}
+
+void IIRMoogFilter::setSampleRate(double sampleRate)
+{
+    IIRFilter::setSampleRate(sampleRate);
+    // recompute coefficients:
+    setCutoffFrequency(getCutoffFrequency(), getResonance());
 }
 
 void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double resonance)
@@ -34,13 +41,6 @@ void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double res
     for (int k = (n + 2) / 2; k <= n; k++) {
         getFeedForwardCoefficients()[k] = getFeedForwardCoefficients()[n - k];
     }
-}
-
-void IIRMoogFilter::setSampleRate(double sampleRate)
-{
-    IIRFilter::setSampleRate(sampleRate);
-    // recompute coefficients:
-    setCutoffFrequency(getCutoffFrequency(), getResonance());
 }
 
 void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
