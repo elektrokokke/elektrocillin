@@ -25,7 +25,6 @@ SOURCES += main.cpp\
     sawtoothoscillator.cpp \
     morphingpiecewiselinearoscillator.cpp \
     distortionfilter.cpp \
-    midi2signalclient.cpp \
     midicontrollerslider.cpp \
     midicontrollercheckbox.cpp \
     midisplitter.cpp \
@@ -68,7 +67,6 @@ HEADERS  += mainwindow.h \
     sawtoothoscillator.h \
     morphingpiecewiselinearoscillator.h \
     distortionfilter.h \
-    midi2signalclient.h \
     midicontrollerslider.h \
     midicontrollercheckbox.h \
     midisplitter.h \
