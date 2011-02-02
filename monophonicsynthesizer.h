@@ -24,7 +24,7 @@ public:
 
 private:
     double morph;
-    PulseOscillator osc1;
+    SawtoothOscillator osc1;
 //    SawtoothOscillator osc2;
 //    MorphingPiecewiseLinearOscillator morphOsc1;
     AdsrEnvelope envelope;
