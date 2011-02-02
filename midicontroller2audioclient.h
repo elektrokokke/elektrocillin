@@ -8,6 +8,7 @@ class MidiController2AudioClient : public Midi2AudioClient
 {
 public:
     MidiController2AudioClient(const QString &clientName, unsigned char channel, unsigned char controller, jack_default_audio_sample_t min = -1.0f, jack_default_audio_sample_t max = 1.0f);
+    ~MidiController2AudioClient();
 
     unsigned char getChannel() const;
     unsigned char getController() const;

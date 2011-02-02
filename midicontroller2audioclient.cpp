@@ -13,6 +13,11 @@ MidiController2AudioClient::MidiController2AudioClient(const QString &clientName
 {
 }
 
+MidiController2AudioClient::~MidiController2AudioClient()
+{
+    close();
+}
+
 unsigned char MidiController2AudioClient::getChannel() const
 {
     return channel;
