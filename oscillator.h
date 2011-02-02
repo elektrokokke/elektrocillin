@@ -1,18 +1,18 @@
 #ifndef OSCILLATOR_H
 #define OSCILLATOR_H
 
-#include "notetriggered.h"
+#include "midiprocessor.h"
 
-class Oscillator : public NoteTriggered
+class Oscillator : public MidiProcessor
 {
 public:
     Oscillator(double sampleRate = 44100);
 
     virtual void setSampleRate(double sampleRate);
-    virtual void noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    virtual void noteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    virtual void pitchBend(unsigned char channel, unsigned int value);
-    virtual void process(const double *inputs, double *outputs);
+    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    virtual void processPitchBend(unsigned char channel, unsigned int value);
+    virtual void processAudio(const double *inputs, double *outputs);
 
     double getPhaseIncrement() const;
 
@@ -26,7 +26,7 @@ private:
 
     void computePhaseIncrement();
     static double computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber);
-    static double computePitchBendFactorFromMidiPitch(unsigned int pitchBend);
+    static double computePitchBendFactorFromMidiPitch(unsigned int processPitchBend);
 };
 
 #endif // OSCILLATOR_H

@@ -11,7 +11,7 @@ void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double res
 {
     this->cutoffFrequencyInHertz = cutoffFrequencyInHertz;
     this->resonance = resonance;
-    double radians = getFrequencyInRadians(cutoffFrequencyInHertz);
+    double radians = convertHertzToRadians(cutoffFrequencyInHertz);
     double s = sin(radians);
     double c = cos(radians);
     double t = tan((radians - M_PI) * 0.25);

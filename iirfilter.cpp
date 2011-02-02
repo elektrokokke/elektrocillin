@@ -2,12 +2,12 @@
 #include <QDebug>
 
 IIRFilter::IIRFilter(double sampleRate) :
-    Sampled(1, 1, sampleRate)
+    AudioProcessor(1, 1, sampleRate)
 {
 }
 
 IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate) :
-    Sampled(1, 1, sampleRate),
+    AudioProcessor(1, 1, sampleRate),
     feedForward(feedForwardCoefficients),
     feedBack(feedBackCoefficients),
     x(feedForwardCoefficients),
@@ -16,7 +16,7 @@ IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, doub
     reset();
 }
 
-void IIRFilter::process(const double *inputs, double *outputs)
+void IIRFilter::processAudio(const double *inputs, double *outputs)
 {
     if (x.size()) {
         x[0] = inputs[0];
@@ -42,7 +42,7 @@ void IIRFilter::process(const double *inputs, double *outputs)
 
 double IIRFilter::getSquaredAmplitudeResponse(double hertz)
 {
-    std::complex<double> z_inv = 1.0 / std::exp(std::complex<double>(0.0, getFrequencyInRadians(hertz)));
+    std::complex<double> z_inv = 1.0 / std::exp(std::complex<double>(0.0, convertHertzToRadians(hertz)));
     Polynomial<std::complex<double> > numerator = getNumeratorPolynomial();
     Polynomial<std::complex<double> > denominator = getDenominatorPolynomial();
     return std::norm(numerator.evaluate(z_inv) / denominator.evaluate(z_inv));

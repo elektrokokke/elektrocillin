@@ -3,7 +3,7 @@
 #include <QDebug>
 
 Oscillator::Oscillator(double sampleRate) :
-    NoteTriggered(0, 1, sampleRate),
+    MidiProcessor(0, 1, sampleRate),
     noteNumber(0),
     pitchBendValue(0),
     frequency(0.0),
@@ -14,30 +14,30 @@ Oscillator::Oscillator(double sampleRate) :
 
 void Oscillator::setSampleRate(double sampleRate)
 {
-    NoteTriggered::setSampleRate(sampleRate);
+    MidiProcessor::setSampleRate(sampleRate);
     // recompute phase increment:
     computePhaseIncrement();
 }
 
-void Oscillator::noteOn(unsigned char, unsigned char noteNumber, unsigned char)
+void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char)
 {
     this->noteNumber = noteNumber;
     frequency = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
     computePhaseIncrement();
 }
 
-void Oscillator::noteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void Oscillator::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
 {
 }
 
-void Oscillator::pitchBend(unsigned char channel, unsigned int value)
+void Oscillator::processPitchBend(unsigned char channel, unsigned int value)
 {
     pitchBendValue = value;
     frequency = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
     computePhaseIncrement();
 }
 
-void Oscillator::process(const double *inputs, double *outputs)
+void Oscillator::processAudio(const double *inputs, double *outputs)
 {
     outputs[0] = valueAtPhase(phase);
     // advance phase:

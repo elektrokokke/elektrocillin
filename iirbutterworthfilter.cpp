@@ -13,7 +13,7 @@ void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz, Typ
 {
     this->cutoffFrequency = cutoffFrequencyInHertz;
     this->type = type;
-    double radians = getFrequencyInRadians(type == LOW_PASS ? cutoffFrequency : getSampleRate() * 0.5 - cutoffFrequencyInHertz);
+    double radians = convertHertzToRadians(type == LOW_PASS ? cutoffFrequency : getSampleRate() * 0.5 - cutoffFrequencyInHertz);
     double c = cos(radians * 0.5) / sin(radians * 0.5);
     double factor = 1.0 / (c*c + c*sqrt(2.0) + 1.0);
     setFeedBackCoefficient(0, (-c*c*2.0 + 2.0) * factor);

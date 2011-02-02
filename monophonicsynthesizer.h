@@ -9,17 +9,17 @@
 #include "butterworth2polefilter.h"
 #include <QStack>
 
-class MonophonicSynthesizer : public NoteTriggered
+class MonophonicSynthesizer : public MidiProcessor
 {
 public:
     MonophonicSynthesizer(double sampleRate = 441000);
 
     void setSampleRate(double sampleRate);
-    void noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    void noteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    void pitchBend(unsigned char channel, unsigned int pitch);
-    void controller(unsigned char controller, unsigned char value);
-    void process(const double *inputs, double *outputs);
+    void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void processPitchBend(unsigned char channel, unsigned int pitch);
+    void processController(unsigned char processController, unsigned char value);
+    void processAudio(const double *inputs, double *outputs);
 
 
 private:

@@ -5,7 +5,7 @@
 #include "frequencyresponsegraphicsitem.h"
 #include "iirmoogfilterclient.h"
 #include "iirbutterworthfilter.h"
-#include "notetriggeredclient.h"
+#include "midiprocessorclient.h"
 #include "monophonicsynthesizer.h"
 #include "midisignalclient.h"
 
@@ -43,7 +43,7 @@ private:
     IIRButterworthFilter filterButterworth1, filterButterworth2, filterParallel, filterSerial;
     MidiSignalThread midiSignalThread;
     MonophonicSynthesizer synthesizer;
-    NoteTriggeredClient synthesizerClient;
+    MidiProcessorClient synthesizerClient;
     IIRMoogFilterClient moogFilterClient;
 };
 

@@ -2,30 +2,29 @@
 #define SAMPLEDCLIENT_H
 
 #include "jackclient.h"
-#include "sampled.h"
+#include "audioprocessor.h"
 #include "jack/jack.h"
 #include "jack/midiport.h"
 #include <QVector>
 
-class SampledClient : public JackClient
+class AudioProcessorClient : public JackClient
 {
 public:
-    SampledClient(const QString &clientName, Sampled *sampled, bool hasMidiInput = false);
-    virtual ~SampledClient();
+    AudioProcessorClient(const QString &clientName, AudioProcessor *audioProcessor);
+    virtual ~AudioProcessorClient();
 
 protected:
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);
+    virtual void processAudio(jack_nframes_t start, jack_nframes_t end);
 
-    virtual void processMidi(const jack_midi_event_t &event);
+    void getPortBuffers(jack_nframes_t nframes);
 
 private:
-    Sampled *sampled;
-    bool hasMidiInput;
+    AudioProcessor *audioProcessor;
     QVector<jack_port_t*> inputPorts, outputPorts;
     QVector<jack_default_audio_sample_t*> inputBuffers, outputBuffers;
     QVector<double> inputs, outputs;
-    jack_port_t * midiInputPort;
 };
 
 #endif // SAMPLEDCLIENT_H

@@ -1,7 +1,7 @@
 #include "adsrenvelope.h"
 
 AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustainLevel_, double releaseTime_, double sampleRate) :
-    NoteTriggered(0, 1, sampleRate),
+    MidiProcessor(0, 1, sampleRate),
     attackTime(attackTime_),
     decayTime(decayTime_),
     sustainLevel(sustainLevel_),
@@ -13,20 +13,20 @@ AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustain
 {
 }
 
-void AdsrEnvelope::noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void AdsrEnvelope::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
 {
     currentSegmentTime = 0.0;
     currentSegment = ATTACK;
 }
 
-void AdsrEnvelope::noteOff(unsigned char, unsigned char, unsigned char velocity)
+void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char velocity)
 {
     currentSegmentTime = 0.0;
     previousSegmentLevel = previousLevel;
     currentSegment = RELEASE;
 }
 
-void AdsrEnvelope::process(const double *, double *outputs)
+void AdsrEnvelope::processAudio(const double *, double *outputs)
 {
     double level = 0.0;
     if (currentSegment == ATTACK) {

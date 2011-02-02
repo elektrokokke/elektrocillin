@@ -54,7 +54,7 @@ bool MidiController2AudioClient::process(jack_nframes_t nframes)
             jack_midi_event_get(&midiEvent, midiInputBuffer, currentMidiEventIndex);
             // produce audio until the event happens:
             for (; currentFrame < midiEvent.time; currentFrame++) {
-                audioOutputBuffer[currentFrame] = filter.process1(value);
+                audioOutputBuffer[currentFrame] = filter.processAudio1(value);
                 //audioOutputBuffer[currentFrame] = value;
             }
             currentMidiEventIndex++;
@@ -69,7 +69,7 @@ bool MidiController2AudioClient::process(jack_nframes_t nframes)
         } else {
             // produce audio until the end of the buffer:
             for (; currentFrame < nframes; currentFrame++) {
-                audioOutputBuffer[currentFrame] = filter.process1(value);
+                audioOutputBuffer[currentFrame] = filter.processAudio1(value);
                 //audioOutputBuffer[currentFrame] = value;
             }
         }

@@ -3,16 +3,16 @@
 
 #include <vector>
 #include <complex>
-#include "sampled.h"
+#include "audioprocessor.h"
 #include "frequencyresponse.h"
 
-class ZPlaneFilter : public Sampled, public FrequencyResponse
+class ZPlaneFilter : public AudioProcessor, public FrequencyResponse
 {
 public:
     ZPlaneFilter(double sampleRate = 44100);
 
     // reimplemented from Sampled:
-    void process(const double *inputs, double *outputs);
+    void processAudio(const double *inputs, double *outputs);
     // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);
 

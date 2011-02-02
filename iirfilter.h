@@ -3,18 +3,18 @@
 
 #include <QVector>
 #include <complex>
-#include "sampled.h"
+#include "audioprocessor.h"
 #include "frequencyresponse.h"
 #include "polynomial.h"
 
-class IIRFilter : public Sampled, public FrequencyResponse
+class IIRFilter : public AudioProcessor, public FrequencyResponse
 {
 public:
     IIRFilter(double sampleRate = 44100);
     IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate = 44100);
 
     // reimplemented from Sampled:
-    void process(const double *inputs, double *outputs);
+    void processAudio(const double *inputs, double *outputs);
     // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);
 

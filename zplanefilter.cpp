@@ -4,14 +4,14 @@
 #include <QDebug>
 
 ZPlaneFilter::ZPlaneFilter(double sampleRate) :
-    Sampled(1, 1, sampleRate),
+    AudioProcessor(1, 1, sampleRate),
     tx(0),
     ty(0)
 {
 }
 
 // reimplenented from FrequencyResponse:
-void ZPlaneFilter::process(const double *inputs, double *outputs)
+void ZPlaneFilter::processAudio(const double *inputs, double *outputs)
 {
     // set the current x:
     x[tx] = inputs[0];
@@ -32,7 +32,7 @@ void ZPlaneFilter::process(const double *inputs, double *outputs)
 double ZPlaneFilter::getSquaredAmplitudeResponse(double hertz)
 {
     // compute the squared amplitude response (power) from the frequency response:
-    return std::norm(frequencyResponse(getFrequencyInRadians(hertz)));
+    return std::norm(frequencyResponse(convertHertzToRadians(hertz)));
 }
 
 void ZPlaneFilter::reset()

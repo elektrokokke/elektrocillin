@@ -47,11 +47,11 @@ SOURCES += main.cpp\
     graphicskeyitem.cpp \
     graphicskeyboarditem.cpp \
     iirmoogfilterclient.cpp \
-    notetriggered.cpp \
-    sampled.cpp \
-    sampledclient.cpp \
-    notetriggeredclient.cpp \
-    midisignalclient.cpp
+    midisignalclient.cpp \
+    audioprocessor.cpp \
+    audioprocessorclient.cpp \
+    midiprocessor.cpp \
+    midiprocessorclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -92,11 +92,11 @@ HEADERS  += mainwindow.h \
     graphicskeyitem.h \
     graphicskeyboarditem.h \
     iirmoogfilterclient.h \
-    notetriggered.h \
-    sampled.h \
-    sampledclient.h \
-    notetriggeredclient.h \
-    midisignalclient.h
+    midisignalclient.h \
+    audioprocessor.h \
+    audioprocessorclient.h \
+    midiprocessor.h \
+    midiprocessorclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

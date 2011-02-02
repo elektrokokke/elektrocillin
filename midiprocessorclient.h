@@ -1,17 +1,19 @@
 #ifndef NOTETRIGGEREDCLIENT_H
 #define NOTETRIGGEREDCLIENT_H
 
-#include "sampledclient.h"
-#include "notetriggered.h"
+#include "audioprocessorclient.h"
+#include "midiprocessor.h"
 
-class NoteTriggeredClient : public SampledClient
+class MidiProcessorClient : public AudioProcessorClient
 {
 public:
-    NoteTriggeredClient(const QString &clientName, NoteTriggered *noteTriggered);
-    virtual ~NoteTriggeredClient();
+    MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor);
+    virtual ~MidiProcessorClient();
 
 protected:
-    void processMidi(const jack_midi_event_t &midiEvent);
+    virtual bool init();
+    virtual bool process(jack_nframes_t nframes);
+    virtual void processMidi(const jack_midi_event_t &event);
 
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
     virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
@@ -19,7 +21,8 @@ protected:
     virtual void processPitchBend(unsigned char channel, unsigned int value);
 
 private:
-    NoteTriggered *noteTriggered;
+    MidiProcessor *midiProcessor;
+    jack_port_t * midiInputPort;
 };
 
 #endif // NOTETRIGGEREDCLIENT_H

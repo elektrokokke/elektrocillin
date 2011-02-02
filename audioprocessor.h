@@ -3,10 +3,10 @@
 
 #include <QVector>
 
-class Sampled
+class AudioProcessor
 {
 public:
-    Sampled(int nrOfInputs = 0, int nrOfOutputs = 0, double sampleRate = 44100);
+    AudioProcessor(int nrOfInputs = 0, int nrOfOutputs = 0, double sampleRate = 44100);
 
     int getNrOfInputs() const;
     int getNrOfOutputs() const;
@@ -14,11 +14,11 @@ public:
     virtual void setSampleRate(double sampleRate);
     double getSampleRate() const;
     double getSampleDuration() const;
-    double getFrequencyInRadians(double hertz) const;
+    double convertHertzToRadians(double hertz) const;
 
-    double process0();
-    double process1(double input);
-    virtual void process(const double *inputs, double *outputs) = 0;
+    double processAudio0();
+    double processAudio1(double input);
+    virtual void processAudio(const double *inputs, double *outputs) = 0;
 
 private:
     double sampleRate, sampleDuration;

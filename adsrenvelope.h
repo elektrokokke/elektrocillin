@@ -1,9 +1,9 @@
 #ifndef ADSRENVELOPE_H
 #define ADSRENVELOPE_H
 
-#include "notetriggered.h"
+#include "midiprocessor.h"
 
-class AdsrEnvelope : public NoteTriggered
+class AdsrEnvelope : public MidiProcessor
 {
 public:
     AdsrEnvelope(double attackTime, double decayTime, double sustainLevel, double releaseTime, double sampleRate = 44100);
@@ -16,9 +16,9 @@ public:
         RELEASE
     };
 
-    void noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    void noteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    void process(const double *inputs, double *outputs);
+    void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void processAudio(const double *inputs, double *outputs);
 
 private:
     // all times are in seconds, all levels between 0 and 1:

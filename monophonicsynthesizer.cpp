@@ -2,7 +2,7 @@
 #include <cmath>
 
 MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
-    NoteTriggered(0, 1, sampleRate),
+    MidiProcessor(0, 1, sampleRate),
 //    morph(0.0),
     osc1(M_PI),
 //    osc2(0.1),
@@ -17,35 +17,35 @@ MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
 
 void MonophonicSynthesizer::setSampleRate(double sampleRate)
 {
-    NoteTriggered::setSampleRate(sampleRate);
+    MidiProcessor::setSampleRate(sampleRate);
     osc1.setSampleRate(sampleRate);
 //    osc2.setSampleRate(sampleRate);
 //    morphOsc1.setSampleRate(sampleRate);
     envelope.setSampleRate(sampleRate);
 }
 
-void MonophonicSynthesizer::noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void MonophonicSynthesizer::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
 {
     midiNoteNumbers.push(noteNumber);
-    osc1.noteOn(channel, noteNumber, velocity);
+    osc1.processNoteOn(channel, noteNumber, velocity);
     // (re-)trigger the ADSR envelope:
-    envelope.noteOn(channel, noteNumber, velocity);
+    envelope.processNoteOn(channel, noteNumber, velocity);
 }
 
-void MonophonicSynthesizer::noteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void MonophonicSynthesizer::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
 {
     if (!midiNoteNumbers.isEmpty()) {
         // test if this is the topmost note:
         if (midiNoteNumbers.top() == noteNumber) {
             midiNoteNumbers.pop();
             if (midiNoteNumbers.isEmpty()) {
-                osc1.noteOff(channel, noteNumber, velocity);
+                osc1.processNoteOff(channel, noteNumber, velocity);
                 // enter the release phase:
-                envelope.noteOff(channel, noteNumber, velocity);
+                envelope.processNoteOff(channel, noteNumber, velocity);
             } else {
-                osc1.noteOn(channel, noteNumber, velocity);
+                osc1.processNoteOn(channel, noteNumber, velocity);
                 // retrigger the ADSR envelope:
-                envelope.noteOn(channel, noteNumber, velocity);
+                envelope.processNoteOn(channel, noteNumber, velocity);
             }
         } else {
             // the note has to be removed from somewhere in the stack
@@ -58,22 +58,22 @@ void MonophonicSynthesizer::noteOff(unsigned char channel, unsigned char noteNum
     }
 }
 
-void MonophonicSynthesizer::pitchBend(unsigned char channel, unsigned int pitch)
+void MonophonicSynthesizer::processPitchBend(unsigned char channel, unsigned int pitch)
 {
-    osc1.pitchBend(channel, pitch);
+    osc1.processPitchBend(channel, pitch);
 }
 
-void MonophonicSynthesizer::controller(unsigned char, unsigned char value)
+void MonophonicSynthesizer::processController(unsigned char, unsigned char value)
 {
     morph = (double)value / 127.0;
 }
 
-void MonophonicSynthesizer::process(const double *inputs, double *outputs)
+void MonophonicSynthesizer::processAudio(const double *inputs, double *outputs)
 {
     // get level from ADSR envelope:
 //    double envelopeLevel = envelope.nextSample();
 //    morphOsc1.setMorph(filterMorph.filter(morph));
 //    double oscillatorLevel = morphOsc1.nextSample();
 //    return filterAudio.filter(envelopeLevel * oscillatorLevel);
-    outputs[0] = envelope.process0() * osc1.process0();
+    outputs[0] = envelope.processAudio0() * osc1.processAudio0();
 }
