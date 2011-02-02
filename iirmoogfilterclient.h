@@ -11,37 +11,22 @@ struct IIRMoogFilterControl {
     double resonance;
 };
 
-class IIRMoogFilterControlThread : public JackThread
+class IIRMoogFilterClient : public QObject, public JackClient
 {
+    Q_OBJECT
 public:
-    IIRMoogFilterControlThread(JackClientWithDeferredProcessing *client, QObject *parent = 0);
-
-    JackRingBuffer<IIRMoogFilterControl> * getOutputRingBuffer();
+    IIRMoogFilterClient(const QString &clientName, QObject *parent = 0);
 
 public slots:
     void setParameters(double cutoffFrequency, double resonance);
 
 protected:
-    virtual void processDeferred();
-
-private:
-    JackRingBuffer<IIRMoogFilterControl> ringBufferToClient;
-};
-
-class IIRMoogFilterClient : public JackClientWithDeferredProcessing
-{
-public:
-    IIRMoogFilterClient(const QString &clientName);
-
-protected:
-    IIRMoogFilterControlThread * getControlThread();
-    JackRingBuffer<IIRMoogFilterControl> * getInputRingBuffer();
     // reimplemented methods from JackClient:
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);
 
 private:
-    IIRMoogFilterControlThread thread;
+    JackRingBuffer<IIRMoogFilterControl> controlRingBuffer;
     IIRMoogFilter filter;
     QString audioInputPortName, audioOutputPortName;
     jack_port_t *audioInputPort, *audioOutputPort;

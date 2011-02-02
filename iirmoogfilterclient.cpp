@@ -1,48 +1,22 @@
 #include "iirmoogfilterclient.h"
 
-IIRMoogFilterControlThread::IIRMoogFilterControlThread(JackClientWithDeferredProcessing *client, QObject *parent) :
-        JackThread(client, parent),
-        ringBufferToClient(1024)
-{
-}
-
-JackRingBuffer<IIRMoogFilterControl> * IIRMoogFilterControlThread::getOutputRingBuffer()
-{
-    return &ringBufferToClient;
-}
-
-void IIRMoogFilterControlThread::setParameters(double cutoffFrequency, double resonance)
-{
-    IIRMoogFilterControl parameters;
-    parameters.time = getClient()->getEstimatedCurrentTime();
-    parameters.cutoffFrequency = cutoffFrequency;
-    parameters.resonance = resonance;
-    getOutputRingBuffer()->write(parameters);
-}
-
-void IIRMoogFilterControlThread::processDeferred()
-{
-    // this thread does not reveice any messages from the associated Jack client,
-    // thus this method does nothing.
-}
-
-IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName) :
-    JackClientWithDeferredProcessing(clientName, &thread),
-    thread(this),
+IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, QObject *parent) :
+    QObject(parent),
+    JackClient(clientName),
+    controlRingBuffer(1024),
     filter(440, 0, 1),
     audioInputPortName("audio in"),
     audioOutputPortName("audio out")
 {
 }
 
-IIRMoogFilterControlThread * IIRMoogFilterClient::getControlThread()
+void IIRMoogFilterClient::setParameters(double cutoffFrequency, double resonance)
 {
-    return (IIRMoogFilterControlThread*)getJackThread();
-}
-
-JackRingBuffer<IIRMoogFilterControl> * IIRMoogFilterClient::getInputRingBuffer()
-{
-    return getControlThread()->getOutputRingBuffer();
+    IIRMoogFilterControl parameters;
+    parameters.time = getEstimatedCurrentTime();
+    parameters.cutoffFrequency = cutoffFrequency;
+    parameters.resonance = resonance;
+    controlRingBuffer.write(parameters);
 }
 
 bool IIRMoogFilterClient::init()
@@ -66,9 +40,9 @@ bool IIRMoogFilterClient::process(jack_nframes_t nframes)
     jack_nframes_t currentFrame = 0;
     for (bool hasEvents = true; hasEvents; ) {
         hasEvents = false;
-        if (getInputRingBuffer()->readSpace()) {
+        if (controlRingBuffer.readSpace()) {
             // get the message from the ring buffer:
-            IIRMoogFilterControl parameters = getInputRingBuffer()->peek();
+            IIRMoogFilterControl parameters = controlRingBuffer.peek();
             // adjust time relative to the beginning of this frame:
             if (parameters.time + nframes < lastFrameTime) {
                 // if time is too early, this is in the buffer for too long, adjust time accordingly:
@@ -84,7 +58,7 @@ bool IIRMoogFilterClient::process(jack_nframes_t nframes)
                 }
                 // adjust the filter parameters accordingly:
                 filter.setCutoffFrequency(parameters.cutoffFrequency, parameters.resonance);
-                getInputRingBuffer()->readAdvance(1);
+                controlRingBuffer.readAdvance(1);
                 hasEvents = true;
             }
         }
