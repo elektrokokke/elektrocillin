@@ -9,35 +9,27 @@
 #include "butterworth2polefilter.h"
 #include <QStack>
 
-class MonophonicSynthesizer : public AudioSource
+class MonophonicSynthesizer : public NoteTriggered
 {
 public:
-    MonophonicSynthesizer();
+    MonophonicSynthesizer(double sampleRate = 441000);
 
-    void pushNote(unsigned char midiNoteNumber);
-    void popNote(unsigned char midiNoteNumber);
+    void setSampleRate(double sampleRate);
+    void noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void noteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void pitchBend(unsigned char channel, unsigned int pitch);
+    void controller(unsigned char controller, unsigned char value);
+    void process(const double *inputs, double *outputs);
 
-    void setMidiPitch(unsigned int pitch);
-    void setController(unsigned char controller, unsigned char value);
 
-    double nextSample();
-
-    virtual void setSampleRate(double sampleRate);
-
-protected:
-    void setFrequency(double frequency, double pitchBendFactor);
 private:
-    double frequency, pitchBendFactor, morph;
+    double morph;
     PulseOscillator osc1;
 //    SawtoothOscillator osc2;
 //    MorphingPiecewiseLinearOscillator morphOsc1;
     AdsrEnvelope envelope;
 //    Butterworth2PoleFilter filterAudio, filterMorph;
-    QStack<double> frequencies;
     QStack<unsigned char> midiNoteNumbers;
-
-    double computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber);
-    double computePitchBendFactorFromMidiPitch(unsigned int pitch);
 };
 
 #endif // MONOPHONICSYNTHESIZER_H

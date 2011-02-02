@@ -3,22 +3,19 @@
 
 #include <QVector>
 #include <complex>
+#include "sampled.h"
 #include "frequencyresponse.h"
 #include "polynomial.h"
 
-class IIRFilter : public FrequencyResponse
+class IIRFilter : public Sampled, public FrequencyResponse
 {
 public:
-    IIRFilter(double sampleRate);
-    IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate);
+    IIRFilter(double sampleRate = 44100);
+    IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate = 44100);
 
-    QString toString() const;
-
-    virtual void setSampleRate(double sampleRate);
-    double getSampleRate() const;
-    double getFrequencyInRadians(double frequencyInHertz) const;
-    double filter(double x);
-    void reset();
+    // reimplemented from Sampled:
+    void process(const double *inputs, double *outputs);
+    // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);
 
     void addFeedForwardCoefficient(double c);
@@ -27,15 +24,18 @@ public:
     int getFeedForwardCoefficientCount() const;
     int getFeedBackCoefficientCount() const;
 
+    QString toString() const;
+
+    void reset();
+
+    // filter arithmetic:
     void invert();
-
-    static int computeBinomialCoefficient(int n, int k);
-
     // add another IIRFilter (which means parallel operation):
     IIRFilter& operator+=(const IIRFilter &b);
     // multiply with another IIRFilter (which means serial operation):
     IIRFilter& operator*=(const IIRFilter &b);
 
+    static int computeBinomialCoefficient(int n, int k);
 protected:
     void setFeedForwardCoefficient(int index, double c);
     void setFeedBackCoefficient(int index, double c);
@@ -43,7 +43,6 @@ protected:
     double getFeedBackCoefficient(int index) const;
 
 private:
-    double sampleRate;
     QVector<double> feedForward, feedBack, x, y;
 
     Polynomial<std::complex<double> > getNumeratorPolynomial() const;

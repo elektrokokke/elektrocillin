@@ -83,7 +83,7 @@ void ZPlaneWidget::updateFrequencyResponse2pole()
         // compute the frequency response:
         for (int i = 0; i < squaredAmplitudeResponse2pole.size(); i++) {
             double frequencyInRadians = (double)i * M_PI / (double)(squaredAmplitudeResponse2pole.size() - 1);
-            squaredAmplitudeResponse2pole[i] = filter2pole.squaredAmplitudeResponse(frequencyInRadians);
+            squaredAmplitudeResponse2pole[i] = std::norm(filter2pole.frequencyResponse(frequencyInRadians));
             if (squaredAmplitudeResponse2pole[i] == 0.0) {
                 squaredAmplitudeResponse2pole[i] = -80.0;
             } else {

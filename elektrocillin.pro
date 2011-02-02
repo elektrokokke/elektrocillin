@@ -15,12 +15,10 @@ SOURCES += main.cpp\
     midi2audioclient.cpp \
     jackclient.cpp \
     oscillator.cpp \
-    simplemonophonicclient.cpp \
     monophonicsynthesizer.cpp \
     pulseoscillator.cpp \
     simplelowpassfilter.cpp \
     adsrenvelope.cpp \
-    audiosource.cpp \
     piecewiselinearoscillator.cpp \
     sawtoothoscillator.cpp \
     morphingpiecewiselinearoscillator.cpp \
@@ -49,18 +47,20 @@ SOURCES += main.cpp\
     graphicskeyitem.cpp \
     graphicskeyboarditem.cpp \
     midiclient.cpp \
-    iirmoogfilterclient.cpp
+    iirmoogfilterclient.cpp \
+    notetriggered.cpp \
+    sampled.cpp \
+    sampledclient.cpp \
+    notetriggeredclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
     jackclient.h \
     oscillator.h \
-    simplemonophonicclient.h \
     monophonicsynthesizer.h \
     pulseoscillator.h \
     simplelowpassfilter.h \
     adsrenvelope.h \
-    audiosource.h \
     piecewiselinearoscillator.h \
     sawtoothoscillator.h \
     morphingpiecewiselinearoscillator.h \
@@ -92,7 +92,11 @@ HEADERS  += mainwindow.h \
     graphicskeyitem.h \
     graphicskeyboarditem.h \
     midiclient.h \
-    iirmoogfilterclient.h
+    iirmoogfilterclient.h \
+    notetriggered.h \
+    sampled.h \
+    sampledclient.h \
+    notetriggeredclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

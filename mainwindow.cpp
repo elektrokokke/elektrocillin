@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     filterParallel(0, 44100),
     filterSerial(0, 44100),
     midiClient("midi client"),
-    simpleMonophonicClient("synthesizer"),
+    synthesizerClient("synthesizer", &synthesizer),
     moogFilterClient("moog filter")
 {
     ui->setupUi(this);
@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     scene->addItem(frequencyResponse);
 
     midiClient.activate();
-    simpleMonophonicClient.activate();
+    synthesizerClient.activate();
     moogFilterClient.activate();
 
     GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);

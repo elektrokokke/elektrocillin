@@ -1,12 +1,12 @@
 #ifndef ADSRENVELOPE_H
 #define ADSRENVELOPE_H
 
-#include "audiosource.h"
+#include "notetriggered.h"
 
-class AdsrEnvelope : public AudioSource
+class AdsrEnvelope : public NoteTriggered
 {
 public:
-    AdsrEnvelope(double attackTime, double decayTime, double sustainLevel, double releaseTime);
+    AdsrEnvelope(double attackTime, double decayTime, double sustainLevel, double releaseTime, double sampleRate = 44100);
 
     enum CurrentSegment {
         NONE,
@@ -16,10 +16,9 @@ public:
         RELEASE
     };
 
-    double nextSample();
-
-    void noteOn();
-    void noteOff();
+    void noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void noteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void process(const double *inputs, double *outputs);
 
 private:
     // all times are in seconds, all levels between 0 and 1:

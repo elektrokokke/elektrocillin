@@ -1,9 +1,8 @@
 #include "monophonicsynthesizer.h"
 #include <cmath>
 
-MonophonicSynthesizer::MonophonicSynthesizer() :
-    frequency(0.0),
-    pitchBendFactor(1.0),
+MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
+    NoteTriggered(0, 1, sampleRate),
 //    morph(0.0),
     osc1(M_PI),
 //    osc2(0.1),
@@ -13,95 +12,68 @@ MonophonicSynthesizer::MonophonicSynthesizer() :
 //    filterMorph(0.001)
 {
 //    morphOsc1.setMorph(0.5);
+    setSampleRate(sampleRate);
 }
 
 void MonophonicSynthesizer::setSampleRate(double sampleRate)
 {
-    AudioSource::setSampleRate(sampleRate);
+    NoteTriggered::setSampleRate(sampleRate);
     osc1.setSampleRate(sampleRate);
 //    osc2.setSampleRate(sampleRate);
 //    morphOsc1.setSampleRate(sampleRate);
     envelope.setSampleRate(sampleRate);
 }
 
-void MonophonicSynthesizer::setFrequency(double frequency, double pitchBendFactor)
+void MonophonicSynthesizer::noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
 {
-    this->frequency = frequency;
-    this->pitchBendFactor = pitchBendFactor;
-    osc1.setFrequency(frequency * pitchBendFactor);
-//    osc2.setFrequency(frequency * pitchBendFactor);
-//    morphOsc1.setFrequency(frequency * pitchBendFactor);
-}
-
-void MonophonicSynthesizer::pushNote(unsigned char midiNoteNumber)
-{
-    midiNoteNumbers.push(midiNoteNumber);
-    frequencies.push(computeFrequencyFromMidiNoteNumber(midiNoteNumber));
-    setFrequency(frequencies.top(), pitchBendFactor);
+    midiNoteNumbers.push(noteNumber);
+    osc1.noteOn(channel, noteNumber, velocity);
     // (re-)trigger the ADSR envelope:
-    envelope.noteOn();
+    envelope.noteOn(channel, noteNumber, velocity);
 }
 
-void MonophonicSynthesizer::popNote(unsigned char midiNoteNumber)
+void MonophonicSynthesizer::noteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
 {
     if (!midiNoteNumbers.isEmpty()) {
         // test if this is the topmost note:
-        if (midiNoteNumbers.top() == midiNoteNumber) {
+        if (midiNoteNumbers.top() == noteNumber) {
             midiNoteNumbers.pop();
-            frequencies.pop();
             if (midiNoteNumbers.isEmpty()) {
+                osc1.noteOff(channel, noteNumber, velocity);
                 // enter the release phase:
-                envelope.noteOff();
+                envelope.noteOff(channel, noteNumber, velocity);
             } else {
-                setFrequency(frequencies.top(), pitchBendFactor);
+                osc1.noteOn(channel, noteNumber, velocity);
                 // retrigger the ADSR envelope:
-                envelope.noteOn();
+                envelope.noteOn(channel, noteNumber, velocity);
             }
         } else {
             // the note has to be removed from somewhere in the stack
             // (current playing note remains unchanged):
-            int index = midiNoteNumbers.lastIndexOf(midiNoteNumber);
+            int index = midiNoteNumbers.lastIndexOf(noteNumber);
             if (index != -1) {
                 midiNoteNumbers.remove(index);
-                frequencies.remove(index);
             }
         }
     }
 }
 
-void MonophonicSynthesizer::setMidiPitch(unsigned int pitch)
+void MonophonicSynthesizer::pitchBend(unsigned char channel, unsigned int pitch)
 {
-    setFrequency(frequency, computePitchBendFactorFromMidiPitch(pitch));
+    osc1.pitchBend(channel, pitch);
 }
 
-void MonophonicSynthesizer::setController(unsigned char, unsigned char value)
+void MonophonicSynthesizer::controller(unsigned char, unsigned char value)
 {
     morph = (double)value / 127.0;
 }
 
-double MonophonicSynthesizer::nextSample()
+void MonophonicSynthesizer::process(const double *inputs, double *outputs)
 {
     // get level from ADSR envelope:
 //    double envelopeLevel = envelope.nextSample();
 //    morphOsc1.setMorph(filterMorph.filter(morph));
 //    double oscillatorLevel = morphOsc1.nextSample();
 //    return filterAudio.filter(envelopeLevel * oscillatorLevel);
-    return envelope.nextSample() * osc1.nextSample();
-}
-
-double MonophonicSynthesizer::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)
-{
-    // 440 Hz is note number 69:
-    double octave = ((double)midiNoteNumber - 69.0) / 12.0;
-    double frequency = 440.0 * pow(2.0, octave);
-    return frequency;
-}
-
-double MonophonicSynthesizer::computePitchBendFactorFromMidiPitch(unsigned int pitch)
-{
-    // center it around 0x2000:
-    int pitchCentered = (int)pitch - 0x2000;
-    // -8192 means minus two half tones => -49152 is one octave => factor 2^(-1)
-    // +8192 means plus two half tones => +49152 is one octave => factor 2^1
-    return pow(2.0, (double)pitchCentered / 49152.0);
+    outputs[0] = envelope.process0() * osc1.process0();
 }

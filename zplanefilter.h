@@ -3,13 +3,19 @@
 
 #include <vector>
 #include <complex>
+#include "sampled.h"
+#include "frequencyresponse.h"
 
-class ZPlaneFilter
+class ZPlaneFilter : public Sampled, public FrequencyResponse
 {
 public:
-    ZPlaneFilter();
+    ZPlaneFilter(double sampleRate = 44100);
 
-    double filter(double x0);
+    // reimplemented from Sampled:
+    void process(const double *inputs, double *outputs);
+    // reimplenented from FrequencyResponse:
+    double getSquaredAmplitudeResponse(double hertz);
+
     void reset();
 
     void addPole(const std::complex<double> &pole);
@@ -21,7 +27,6 @@ public:
     std::complex<double> & pole(size_t i);
     std::complex<double> & zero(size_t i);
 
-    double squaredAmplitudeResponse(double frequencyInRadians);
     std::complex<double> frequencyResponse(double frequencyInRadians);
     std::complex<double> frequencyResponse(const std::complex<double> z);
 

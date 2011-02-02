@@ -3,16 +3,18 @@
 #include <cmath>
 #include <QDebug>
 
-ZPlaneFilter::ZPlaneFilter() :
+ZPlaneFilter::ZPlaneFilter(double sampleRate) :
+    Sampled(1, 1, sampleRate),
     tx(0),
     ty(0)
 {
 }
 
-double ZPlaneFilter::filter(double x0)
+// reimplenented from FrequencyResponse:
+void ZPlaneFilter::process(const double *inputs, double *outputs)
 {
     // set the current x:
-    x[tx] = x0;
+    x[tx] = inputs[0];
     // compute current y:
     y[ty] = 0.0;
     for (size_t i = 0; i < x.size(); i++) {
@@ -21,11 +23,16 @@ double ZPlaneFilter::filter(double x0)
     for (size_t i = 1; i < y.size(); i++) {
         y[ty] -= y[(ty + i) % y.size()] * feedbackCoefficients[i];
     }
-    double result = y[ty];
+    outputs[0] = y[ty];
     // advance the position for previous results:
     tx = (tx + x.size() - 1) % x.size();
     ty = (ty + y.size() - 1) % y.size();
-    return result;
+}
+
+double ZPlaneFilter::getSquaredAmplitudeResponse(double hertz)
+{
+    // compute the squared amplitude response (power) from the frequency response:
+    return std::norm(frequencyResponse(getFrequencyInRadians(hertz)));
 }
 
 void ZPlaneFilter::reset()
@@ -67,12 +74,6 @@ std::complex<double> & ZPlaneFilter::pole(size_t i)
 std::complex<double> & ZPlaneFilter::zero(size_t i)
 {
     return zeros[i];
-}
-
-double ZPlaneFilter::squaredAmplitudeResponse(double frequencyInRadians)
-{
-    // compute the squared amplitude response (power) from the frequency response:
-    return std::norm(frequencyResponse(frequencyInRadians));
 }
 
 std::complex<double> ZPlaneFilter::frequencyResponse(double frequencyInRadians)
@@ -155,7 +156,7 @@ void ZPlaneFilter::computeCoefficients()
         }
     }
     // let DC always be 1, i.e., scale feed forward coefficients accordingly:
-    double dc = sqrt(squaredAmplitudeResponse(0.0));
+    double dc = sqrt(getSquaredAmplitudeResponse(0.0));
     numerator *= 1.0 / dc;
     qDebug() << "numerator";
     for (size_t i = 0; i < numerator.size(); i++) {

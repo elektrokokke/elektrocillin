@@ -1,13 +1,13 @@
 #include "iirfilter.h"
 #include <QDebug>
 
-IIRFilter::IIRFilter(double sampleRate_) :
-    sampleRate(sampleRate_)
+IIRFilter::IIRFilter(double sampleRate) :
+    Sampled(1, 1, sampleRate)
 {
 }
 
-IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate_) :
-    sampleRate(sampleRate_),
+IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate) :
+    Sampled(1, 1, sampleRate),
     feedForward(feedForwardCoefficients),
     feedBack(feedBackCoefficients),
     x(feedForwardCoefficients),
@@ -16,30 +16,10 @@ IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, doub
     reset();
 }
 
-QString IIRFilter::toString() const
-{
-    return getNumeratorPolynomial().toString() + " / " + getDenominatorPolynomial().toString();
-}
-
-void IIRFilter::setSampleRate(double sampleRate)
-{
-    this->sampleRate = sampleRate;
-}
-
-double IIRFilter::getSampleRate() const
-{
-    return sampleRate;
-}
-
-double IIRFilter::getFrequencyInRadians(double frequencyInHertz) const
-{
-    return frequencyInHertz * 2.0 * M_PI / getSampleRate();
-}
-
-double IIRFilter::filter(double x0)
+void IIRFilter::process(const double *inputs, double *outputs)
 {
     if (x.size()) {
-        x[0] = x0;
+        x[0] = inputs[0];
         double result = 0.0;
         for (int i = 0; i < x.size(); i++) {
             result += x[i] * feedForward[i];
@@ -54,17 +34,10 @@ double IIRFilter::filter(double x0)
         for (int i = y.size() - 1; i > 0; i--) {
             y[i] = y[i - 1];
         }
-        y[0] = result;
-        return result;
+        outputs[0] = y[0] = result;
     } else {
-        return 0;
+        outputs[0] = 0.0;
     }
-}
-
-void IIRFilter::reset()
-{
-    x.fill(0.0);
-    y.fill(0.0);
 }
 
 double IIRFilter::getSquaredAmplitudeResponse(double hertz)
@@ -97,24 +70,15 @@ int IIRFilter::getFeedBackCoefficientCount() const
     return feedBack.size();
 }
 
-void IIRFilter::setFeedForwardCoefficient(int index, double c)
+QString IIRFilter::toString() const
 {
-    feedForward[index] = c;
+    return getNumeratorPolynomial().toString() + " / " + getDenominatorPolynomial().toString();
 }
 
-void IIRFilter::setFeedBackCoefficient(int index, double c)
+void IIRFilter::reset()
 {
-    feedBack[index] = c;
-}
-
-double IIRFilter::getFeedForwardCoefficient(int index) const
-{
-    return feedForward[index];
-}
-
-double IIRFilter::getFeedBackCoefficient(int index) const
-{
-    return feedBack[index];
+    x.fill(0.0);
+    y.fill(0.0);
 }
 
 void IIRFilter::invert()
@@ -125,22 +89,6 @@ void IIRFilter::invert()
     }
     for (int i = 0; i < feedBack.size(); i += 2) {
         feedBack[i] = -feedBack[i];
-    }
-}
-
-int IIRFilter::computeBinomialCoefficient(int n, int k)
-{
-    if (k == 0) {
-        return 1;
-    } else if (2 * k > n) {
-        return computeBinomialCoefficient(n, n - k);
-    } else {
-        int result = n;
-        for (int i = 2; i <= k; i++) {
-            result *= n + 1 - i;
-            result /= i;
-        }
-        return result;
     }
 }
 
@@ -195,6 +143,42 @@ IIRFilter& IIRFilter::operator*=(const IIRFilter &b)
         feedBack[i] = denominator[i + 1].real();
     }
     return *this;
+}
+
+int IIRFilter::computeBinomialCoefficient(int n, int k)
+{
+    if (k == 0) {
+        return 1;
+    } else if (2 * k > n) {
+        return computeBinomialCoefficient(n, n - k);
+    } else {
+        int result = n;
+        for (int i = 2; i <= k; i++) {
+            result *= n + 1 - i;
+            result /= i;
+        }
+        return result;
+    }
+}
+
+void IIRFilter::setFeedForwardCoefficient(int index, double c)
+{
+    feedForward[index] = c;
+}
+
+void IIRFilter::setFeedBackCoefficient(int index, double c)
+{
+    feedBack[index] = c;
+}
+
+double IIRFilter::getFeedForwardCoefficient(int index) const
+{
+    return feedForward[index];
+}
+
+double IIRFilter::getFeedBackCoefficient(int index) const
+{
+    return feedBack[index];
 }
 
 Polynomial<std::complex<double> > IIRFilter::getNumeratorPolynomial() const

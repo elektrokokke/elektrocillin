@@ -59,7 +59,7 @@ bool IIRMoogFilterClient::process(jack_nframes_t nframes)
             if (parameters.time < nframes) {
                 // do the filtering up to the given time:
                 for (; currentFrame < parameters.time; currentFrame++) {
-                    audioOutputBuffer[currentFrame] = filter.filter(audioInputBuffer[currentFrame]);
+                    audioOutputBuffer[currentFrame] = filter.process1(audioInputBuffer[currentFrame]);
                 }
                 // adjust the filter parameters accordingly:
                 filter.setCutoffFrequency(parameters.cutoffFrequency, parameters.resonance);
@@ -70,7 +70,7 @@ bool IIRMoogFilterClient::process(jack_nframes_t nframes)
     }
     // filter till the end of the buffer is reached:
     for (; currentFrame < nframes; currentFrame++) {
-        audioOutputBuffer[currentFrame] = filter.filter(audioInputBuffer[currentFrame]);
+        audioOutputBuffer[currentFrame] = filter.process1(audioInputBuffer[currentFrame]);
     }
     return true;
 }

@@ -1,6 +1,7 @@
 #include "adsrenvelope.h"
 
-AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustainLevel_, double releaseTime_) :
+AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustainLevel_, double releaseTime_, double sampleRate) :
+    NoteTriggered(0, 1, sampleRate),
     attackTime(attackTime_),
     decayTime(decayTime_),
     sustainLevel(sustainLevel_),
@@ -12,7 +13,20 @@ AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustain
 {
 }
 
-double AdsrEnvelope::nextSample()
+void AdsrEnvelope::noteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+{
+    currentSegmentTime = 0.0;
+    currentSegment = ATTACK;
+}
+
+void AdsrEnvelope::noteOff(unsigned char, unsigned char, unsigned char velocity)
+{
+    currentSegmentTime = 0.0;
+    previousSegmentLevel = previousLevel;
+    currentSegment = RELEASE;
+}
+
+void AdsrEnvelope::process(const double *, double *outputs)
 {
     double level = 0.0;
     if (currentSegment == ATTACK) {
@@ -47,18 +61,5 @@ double AdsrEnvelope::nextSample()
     }
     currentSegmentTime += getSampleDuration();
     previousLevel = level;
-    return level;
-}
-
-void AdsrEnvelope::noteOn()
-{
-    currentSegmentTime = 0.0;
-    currentSegment = ATTACK;
-}
-
-void AdsrEnvelope::noteOff()
-{
-    currentSegmentTime = 0.0;
-    previousSegmentLevel = previousLevel;
-    currentSegment = RELEASE;
+    outputs[0] = level;
 }

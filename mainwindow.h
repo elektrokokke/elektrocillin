@@ -5,7 +5,8 @@
 #include "frequencyresponsegraphicsitem.h"
 #include "iirmoogfilterclient.h"
 #include "iirbutterworthfilter.h"
-#include "simplemonophonicclient.h"
+#include "notetriggeredclient.h"
+#include "monophonicsynthesizer.h"
 #include "midiclient.h"
 
 class Record2MemoryClient;
@@ -41,7 +42,8 @@ private:
     IIRMoogFilter filterMoog;
     IIRButterworthFilter filterButterworth1, filterButterworth2, filterParallel, filterSerial;
     MidiClient midiClient;
-    SimpleMonophonicClient simpleMonophonicClient;
+    MonophonicSynthesizer synthesizer;
+    NoteTriggeredClient synthesizerClient;
     IIRMoogFilterClient moogFilterClient;
 };
 
