@@ -6,7 +6,7 @@
 #include "sawtoothoscillator.h"
 #include "pulseoscillator.h"
 #include "adsrenvelope.h"
-#include "butterworth2polefilter.h"
+#include "iirbutterworthfilter.h"
 #include <QStack>
 
 class MonophonicSynthesizer : public MidiProcessor
@@ -24,11 +24,11 @@ public:
 
 private:
     double morph;
-    SawtoothOscillator osc1;
-//    SawtoothOscillator osc2;
-//    MorphingPiecewiseLinearOscillator morphOsc1;
+    PulseOscillator osc1;
+    SawtoothOscillator osc2;
+    MorphingPiecewiseLinearOscillator morphOsc1;
     AdsrEnvelope envelope;
-//    Butterworth2PoleFilter filterAudio, filterMorph;
+    IIRButterworthFilter filterAudio, filterMorph;
     QStack<unsigned char> midiNoteNumbers;
 };
 
