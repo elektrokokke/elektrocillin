@@ -4,7 +4,7 @@ IIRCutoffControlMoogFilter::IIRCutoffControlMoogFilter(double cutoffFrequencyInH
     IIRMoogFilter(cutoffFrequencyInHertz, resonance, 2, sampleRate, zeros),
     baseFrequency(cutoffFrequencyInHertz),
     modulation(0),
-    modulationIntensity(1)
+    intensityInOctaves(1)
 {
 }
 
@@ -18,7 +18,7 @@ void IIRCutoffControlMoogFilter::processAudio(const double *inputs, double *outp
 void IIRCutoffControlMoogFilter::setBaseCutoffFrequency(double baseFrequency)
 {
     this->baseFrequency = baseFrequency;
-    IIRMoogFilter::setCutoffFrequency(baseFrequency * (1 + modulation * modulationIntensity));
+    IIRMoogFilter::setCutoffFrequency(baseFrequency * pow(1 + intensityInOctaves, modulation));
 }
 
 double IIRCutoffControlMoogFilter::getBaseCutoffFrequency() const
@@ -29,7 +29,7 @@ double IIRCutoffControlMoogFilter::getBaseCutoffFrequency() const
 void IIRCutoffControlMoogFilter::setCutoffModulation(double modulation)
 {
     this->modulation = modulation;
-    IIRMoogFilter::setCutoffFrequency(baseFrequency * (1 + modulation * modulationIntensity));
+    IIRMoogFilter::setCutoffFrequency(baseFrequency * pow(1 + intensityInOctaves, modulation));
 }
 
 double IIRCutoffControlMoogFilter::getCutoffModulation() const
@@ -37,13 +37,13 @@ double IIRCutoffControlMoogFilter::getCutoffModulation() const
     return modulation;
 }
 
-void IIRCutoffControlMoogFilter::setModulationIntensity(double modulationIntensity)
+void IIRCutoffControlMoogFilter::setModulationIntensity(double intensityInOctaves)
 {
-    this->modulationIntensity = modulationIntensity;
-    IIRMoogFilter::setCutoffFrequency(baseFrequency * (1 + modulation * modulationIntensity));
+    this->intensityInOctaves = intensityInOctaves;
+    IIRMoogFilter::setCutoffFrequency(baseFrequency * (1 + modulation * intensityInOctaves));
 }
 
 double IIRCutoffControlMoogFilter::getModulationIntensity() const
 {
-    return modulationIntensity;
+    return intensityInOctaves;
 }

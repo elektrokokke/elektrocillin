@@ -15,11 +15,11 @@ public:
     double getBaseCutoffFrequency() const;
     void setCutoffModulation(double modulation);
     double getCutoffModulation() const;
-    void setModulationIntensity(double modulationIntensity);
+    void setModulationIntensity(double intensityInOctaves);
     double getModulationIntensity() const;
 
 private:
-    double baseFrequency, modulation, modulationIntensity;
+    double baseFrequency, modulation, intensityInOctaves;
 };
 
 #endif // IIRCUTOFFCONTROLMOOGFILTER_H
