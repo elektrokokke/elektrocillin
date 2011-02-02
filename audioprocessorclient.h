@@ -18,6 +18,10 @@ protected:
     virtual bool process(jack_nframes_t nframes);
     virtual void processAudio(jack_nframes_t start, jack_nframes_t end);
 
+    /**
+      If you override process(jack_nframes_t nframes) call this function
+      before you call processAudio(jack_nframes_t start, jack_nframes_t end).
+      */
     void getPortBuffers(jack_nframes_t nframes);
 
 private:

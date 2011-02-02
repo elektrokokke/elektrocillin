@@ -10,10 +10,7 @@ public:
 
     void setSampleRate(double sampleRate);
 
-    void setCutoffFrequency(double cutoffFrequencyInHertz, double resonance);
-    void setCutoffFrequency(double cutoffFrequencyInHertz);
-    void setResonance(double resonance);
-
+    virtual void setCutoffFrequency(double cutoffFrequencyInHertz, double resonance);
     double getCutoffFrequency() const;
     double getResonance() const;
 

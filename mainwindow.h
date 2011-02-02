@@ -4,10 +4,12 @@
 #include <QMainWindow>
 #include "frequencyresponsegraphicsitem.h"
 #include "iirmoogfilterclient.h"
+#include "iircutoffcontrolmoogfilter.h"
 #include "iirbutterworthfilter.h"
 #include "midiprocessorclient.h"
 #include "monophonicsynthesizer.h"
 #include "midisignalclient.h"
+#include "oscillator.h"
 
 class Record2MemoryClient;
 class MidiController2AudioClient;
@@ -26,25 +28,22 @@ public:
 
 
 private slots:
-    void onRecordingStarted();
-    void onRecordingFinished();
-
     void onMidiMessage(unsigned char, unsigned char, unsigned char);
-
     void onChangeCutoff(QPointF cutoffResonance);
-    void onKeyPressed(unsigned char channel, unsigned char velocity, unsigned char noteNumber);
 
 private:
     Ui::MainWindow *ui;
     Record2MemoryClient *recordClient;
     MidiController2AudioClient *midiControllerClient;
     FrequencyResponseGraphicsItem *frequencyResponse;
-    IIRMoogFilter filterMoog;
-    IIRButterworthFilter filterButterworth1, filterButterworth2, filterParallel, filterSerial;
     MidiSignalThread midiSignalThread;
     MonophonicSynthesizer synthesizer;
     MidiProcessorClient synthesizerClient;
+    IIRCutoffControlMoogFilter moogFilter;
+    IIRMoogFilter moogFilterCopy;
     IIRMoogFilterClient moogFilterClient;
+    Oscillator lfo;
+    AudioProcessorClient lfoClient;
 };
 
 #endif // MAINWINDOW_H

@@ -14,6 +14,8 @@ public:
     virtual void processPitchBend(unsigned char channel, unsigned int value);
     virtual void processAudio(const double *inputs, double *outputs);
 
+    void setFrequency(double hertz);
+    double getFrequency() const;
     double getPhaseIncrement() const;
 
 protected:
@@ -22,7 +24,7 @@ protected:
 private:
     unsigned char noteNumber;
     int pitchBendValue;
-    double frequency, phase, phaseIncrement;
+    double frequencyInHertz, phase, phaseIncrement;
 
     void computePhaseIncrement();
     static double computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber);

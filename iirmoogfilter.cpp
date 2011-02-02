@@ -43,16 +43,6 @@ void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double res
     }
 }
 
-void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
-{
-    setCutoffFrequency(cutoffFrequencyInHertz, getResonance());
-}
-
-void IIRMoogFilter::setResonance(double resonance)
-{
-    setCutoffFrequency(getCutoffFrequency(), resonance);
-}
-
 double IIRMoogFilter::getCutoffFrequency() const
 {
     return cutoffFrequencyInHertz;

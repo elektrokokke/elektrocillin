@@ -1,12 +1,10 @@
 #include "iirmoogfilterclient.h"
 
-IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, QObject *parent) :
+IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter_, QObject *parent) :
     QObject(parent),
-    JackClient(clientName),
-    controlRingBuffer(1024),
-    filter(440, 0, 1, 1),
-    audioInputPortName("audio in"),
-    audioOutputPortName("audio out")
+    AudioProcessorClient(clientName, filter_),
+    filter(filter_),
+    controlRingBuffer(1024)
 {
 }
 
@@ -27,20 +25,14 @@ void IIRMoogFilterClient::setParameters(double cutoffFrequency, double resonance
 bool IIRMoogFilterClient::init()
 {
     // initialize the Moog filter:
-    filter.reset();
-    filter.setSampleRate(getSampleRate());
-    // initialize the audio buffers:
-    audioInputPort = registerAudioPort(audioInputPortName, JackPortIsInput);
-    audioOutputPort = registerAudioPort(audioOutputPortName, JackPortIsOutput);
-    return audioInputPort && audioOutputPort;
+    filter->reset();
+    filter->setSampleRate(getSampleRate());
+    return AudioProcessorClient::init();
 }
 
 bool IIRMoogFilterClient::process(jack_nframes_t nframes)
 {
-    // get port buffers:
-    const jack_default_audio_sample_t *audioInputBuffer = reinterpret_cast<jack_default_audio_sample_t*>(jack_port_get_buffer(audioInputPort, nframes));
-    jack_default_audio_sample_t *audioOutputBuffer = reinterpret_cast<jack_default_audio_sample_t*>(jack_port_get_buffer(audioOutputPort, nframes));
-
+    getPortBuffers(nframes);
     jack_nframes_t lastFrameTime = getLastFrameTime();
     jack_nframes_t currentFrame = 0;
     for (bool hasEvents = true; hasEvents; ) {
@@ -58,19 +50,16 @@ bool IIRMoogFilterClient::process(jack_nframes_t nframes)
             // test if the event belongs into this frame (and not the next):
             if (parameters.time < nframes) {
                 // do the filtering up to the given time:
-                for (; currentFrame < parameters.time; currentFrame++) {
-                    audioOutputBuffer[currentFrame] = filter.processAudio1(audioInputBuffer[currentFrame]);
-                }
+                processAudio(currentFrame, parameters.time);
+                currentFrame = parameters.time;
                 // adjust the filter parameters accordingly:
-                filter.setCutoffFrequency(parameters.cutoffFrequency, parameters.resonance);
+                filter->setCutoffFrequency(parameters.cutoffFrequency, parameters.resonance);
                 controlRingBuffer.readAdvance(1);
                 hasEvents = true;
             }
         }
     }
     // filter till the end of the buffer is reached:
-    for (; currentFrame < nframes; currentFrame++) {
-        audioOutputBuffer[currentFrame] = filter.processAudio1(audioInputBuffer[currentFrame]);
-    }
+    processAudio(currentFrame, nframes);
     return true;
 }

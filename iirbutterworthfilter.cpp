@@ -1,7 +1,7 @@
 #include "iirbutterworthfilter.h"
 #include <cmath>
 
-IIRButterworthFilter::IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate, Type type_) :
+IIRButterworthFilter::IIRButterworthFilter(double cutoffFrequencyInHertz, Type type_, double sampleRate) :
     IIRFilter(3, 2, sampleRate),
     type(type_)
 {

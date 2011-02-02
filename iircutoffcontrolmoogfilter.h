@@ -11,7 +11,9 @@ public:
     // reimplemented from IIRFilter:
     virtual void processAudio(const double *inputs, double *outputs);
 
-    void setBaseCutoffFrequency(double baseFrequency);
+    // reimplemented from IIRMoogFilter:
+    void setCutoffFrequency(double cutoffFrequencyInHertz, double resonance);
+
     double getBaseCutoffFrequency() const;
     void setCutoffModulation(double modulation);
     double getCutoffModulation() const;

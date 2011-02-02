@@ -6,7 +6,7 @@ Oscillator::Oscillator(double sampleRate) :
     MidiProcessor(0, 1, sampleRate),
     noteNumber(0),
     pitchBendValue(0),
-    frequency(0.0),
+    frequencyInHertz(0.0),
     phase(0.0),
     phaseIncrement(0.0)
 {
@@ -22,7 +22,7 @@ void Oscillator::setSampleRate(double sampleRate)
 void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char)
 {
     this->noteNumber = noteNumber;
-    frequency = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
+    frequencyInHertz = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
     computePhaseIncrement();
 }
 
@@ -33,7 +33,7 @@ void Oscillator::processNoteOff(unsigned char channel, unsigned char noteNumber,
 void Oscillator::processPitchBend(unsigned char channel, unsigned int value)
 {
     pitchBendValue = value;
-    frequency = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
+    frequencyInHertz = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
     computePhaseIncrement();
 }
 
@@ -45,6 +45,17 @@ void Oscillator::processAudio(const double *inputs, double *outputs)
     if (phase >= 2.0 * M_PI) {
         phase -= 2.0 * M_PI;
     }
+}
+
+void Oscillator::setFrequency(double hertz)
+{
+    frequencyInHertz = hertz;
+    computePhaseIncrement();
+}
+
+double Oscillator::getFrequency() const
+{
+    return frequencyInHertz;
 }
 
 double Oscillator::getPhaseIncrement() const
@@ -59,7 +70,7 @@ double Oscillator::valueAtPhase(double phase)
 
 void Oscillator::computePhaseIncrement()
 {
-    phaseIncrement = frequency * 2.0 * M_PI / getSampleRate();
+    phaseIncrement = frequencyInHertz * 2.0 * M_PI / getSampleRate();
 }
 
 double Oscillator::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)

@@ -17,27 +17,22 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    filterMoog(0, 0, 44100, 1),
-    filterButterworth1(0, 44100, IIRButterworthFilter::LOW_PASS),
-    filterButterworth2(0, 44100, IIRButterworthFilter::HIGH_PASS),
-    filterParallel(0, 44100),
-    filterSerial(0, 44100),
     midiSignalThread("midi signal client"),
     synthesizerClient("synthesizer", &synthesizer),
-    moogFilterClient("moog filter")
+    moogFilter(0, 0),
+    moogFilterCopy(0, 0),
+    moogFilterClient("moog filter", &moogFilter),
+    lfoClient("lfo", &lfo)
 {
     ui->setupUi(this);
 
+    lfo.setFrequency(0.1);
+
     QGraphicsScene * scene = new QGraphicsScene();
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
-    filterMoog.setCutoffFrequency(frequencyResponse->getLowestHertz());
-    frequencyResponse->addFrequencyResponse(&filterMoog);
-    frequencyResponse->addFrequencyResponse(&filterButterworth1);
-    frequencyResponse->addFrequencyResponse(&filterButterworth2);
-    frequencyResponse->addFrequencyResponse(&filterParallel);
-    frequencyResponse->addFrequencyResponse(&filterSerial);
-
-    onKeyPressed(1, 127, 0);
+    moogFilter.setCutoffFrequency(frequencyResponse->getLowestHertz(), 0);
+    moogFilterCopy.setCutoffFrequency(frequencyResponse->getLowestHertz(), 0);
+    frequencyResponse->addFrequencyResponse(&moogFilterCopy);
 
     GraphicsNodeItem *cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
     cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
@@ -53,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     midiSignalThread.getClient()->activate();
     synthesizerClient.activate();
     moogFilterClient.activate();
+    lfoClient.activate();
 
     GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
     scene->addItem(keyboard);
@@ -172,25 +168,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onRecordingStarted()
-{
-    qDebug() << "onRecordingStarted()";
-}
-
-void MainWindow::onRecordingFinished()
-{
-    qDebug() << "onRecordingFinished()";
-//    // get the new audio model and show it:
-//    JackAudioModel *audioModel = recordClient->popAudioModel();
-//    if (audioModel) {
-//        if (ui->audioView->model()) {
-//            ui->audioView->model()->deleteLater();
-//        }
-//        audioModel->setParent(ui->audioView);
-//        ui->audioView->setModel(audioModel);
-//    }
-}
-
 void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char m3)
 {
     qDebug() << "received midi message" << m1 << m2 << m3;
@@ -199,21 +176,6 @@ void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char
 void MainWindow::onChangeCutoff(QPointF cutoffResonance)
 {
     moogFilterClient.setParameters(cutoffResonance.x(), cutoffResonance.y());
-    filterMoog.setCutoffFrequency(cutoffResonance.x(), cutoffResonance.y());
+    moogFilterCopy.setCutoffFrequency(cutoffResonance.x(), cutoffResonance.y());
     frequencyResponse->updateFrequencyResponse(0);
-}
-
-void MainWindow::onKeyPressed(unsigned char, unsigned char, unsigned char noteNumber)
-{
-    // compute the frequency of the note:
-    // 440 Hz is note number 69:
-    double octave = ((double)noteNumber - 69.0) / 12.0;
-    double frequency = 440.0 * pow(2.0, octave);
-    filterButterworth1.setCutoffFrequency(frequency * 0.25);
-    filterButterworth2.setCutoffFrequency(frequency);
-    filterParallel = filterButterworth1;
-    filterParallel += filterButterworth2;
-    filterSerial = filterButterworth1;
-    filterSerial *= filterButterworth1;
-    frequencyResponse->updateFrequencyResponses();
 }
