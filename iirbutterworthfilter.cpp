@@ -1,9 +1,8 @@
 #include "iirbutterworthfilter.h"
 #include <cmath>
 
-IIRButterworthFilter::IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate, Type type_, int zeros) :
-    IIRFilter(1 + zeros, 2, sampleRate),
-//    IIRFilter(1 + zeros, 0, sampleRate),
+IIRButterworthFilter::IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate, Type type_) :
+    IIRFilter(3, 2, sampleRate),
     type(type_)
 {
     setCutoffFrequency(cutoffFrequencyInHertz);
@@ -15,21 +14,12 @@ void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz, Typ
     this->type = type;
     double radians = convertHertzToRadians(type == LOW_PASS ? cutoffFrequency : getSampleRate() * 0.5 - cutoffFrequencyInHertz);
     double c = cos(radians * 0.5) / sin(radians * 0.5);
-    double factor = 1.0 / (c*c + c*sqrt(2.0) + 1.0);
-    setFeedBackCoefficient(0, (-c*c*2.0 + 2.0) * factor);
-    setFeedBackCoefficient(1, (c*c - c*sqrt(2.0) + 1.0) * factor);
-
-    int n = getFeedForwardCoefficientCount() - 1;
-    int powerOfTwo = 1 << n;
-    factor *= 4.0 / powerOfTwo;
-//    double factor = 1.0 / powerOfTwo;
-    for (int k = 0; k < (n + 2) / 2; k++) {
-        setFeedForwardCoefficient(k, factor * IIRFilter::computeBinomialCoefficient(n, k));
-    }
-    for (int k = (n + 2) / 2; k <= n; k++) {
-        setFeedForwardCoefficient(k, getFeedForwardCoefficient(n - k));
-    }
-
+    double factor = 1 / (c*c + c*sqrt(2.0) + 1.0);
+    getFeedBackCoefficients()[0] = (-c*c*2.0 + 2.0) * factor;
+    getFeedBackCoefficients()[1] = (c*c - c*sqrt(2.0) + 1.0) * factor;
+    getFeedForwardCoefficients()[0] = factor;
+    getFeedForwardCoefficients()[1] = 2 * factor;
+    getFeedForwardCoefficients()[2] = factor;
     if (type == HIGH_PASS) {
         invert();
     }

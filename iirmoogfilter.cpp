@@ -16,22 +16,23 @@ void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double res
     double c = cos(radians);
     double t = tan((radians - M_PI) * 0.25);
     double a1 = t / (s - c * t);
-    double g1Square_inv = 1.0 + a1 * a1 + 2.0 * a1 * c;
+    double a2 = a1 * a1;
+    double g1Square_inv = 1.0 + a2 + 2.0 * a1 * c;
     double k = resonance * g1Square_inv * g1Square_inv;
-    setFeedBackCoefficient(0, k + 4.0 * a1);
-    setFeedBackCoefficient(1, 6.0 * a1 * a1);
-    setFeedBackCoefficient(2, 4.0 * a1 * a1 * a1);
-    setFeedBackCoefficient(3, a1 * a1 * a1 * a1);
+    getFeedBackCoefficients()[0] = k + 4.0 * a1;
+    getFeedBackCoefficients()[1] = 6.0 * a2;
+    getFeedBackCoefficients()[2] = 4.0 * a2 * a1;
+    getFeedBackCoefficients()[3] = a2 * a2;
 
-    int n = getFeedForwardCoefficientCount() - 1;
-    double feedBackSum = 1.0 + getFeedBackCoefficient(0) + getFeedBackCoefficient(1) + getFeedBackCoefficient(2) + getFeedBackCoefficient(3);
+    int n = getFeedForwardCoefficients().size() - 1;
+    double feedBackSum = 1.0 + getFeedBackCoefficients()[0] + getFeedBackCoefficients()[1] + getFeedBackCoefficients()[2] + getFeedBackCoefficients()[3];
     int powerOfTwo = 1 << n;
     double factor = 1.0 / powerOfTwo;
     for (int k = 0; k < (n + 2) / 2; k++) {
-        setFeedForwardCoefficient(k, factor * IIRFilter::computeBinomialCoefficient(n, k) * feedBackSum);
+        getFeedForwardCoefficients()[k] = factor * IIRFilter::computeBinomialCoefficient(n, k) * feedBackSum;
     }
     for (int k = (n + 2) / 2; k <= n; k++) {
-        setFeedForwardCoefficient(k, getFeedForwardCoefficient(n - k));
+        getFeedForwardCoefficients()[k] = getFeedForwardCoefficients()[n - k];
     }
 }
 

@@ -11,7 +11,7 @@ public:
         HIGH_PASS
     };
 
-    IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate, Type type = LOW_PASS, int zeros = 2);
+    IIRButterworthFilter(double cutoffFrequencyInHertz, double sampleRate, Type type = LOW_PASS);
 
     virtual void setCutoffFrequency(double cutoffFrequencyInHertz, Type type);
 

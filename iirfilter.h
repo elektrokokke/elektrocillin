@@ -14,15 +14,12 @@ public:
     IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, double sampleRate = 44100);
 
     // reimplemented from Sampled:
-    void processAudio(const double *inputs, double *outputs);
+    virtual void processAudio(const double *inputs, double *outputs);
     // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);
 
-    void addFeedForwardCoefficient(double c);
-    void addFeedBackCoefficient(double c);
-
-    int getFeedForwardCoefficientCount() const;
-    int getFeedBackCoefficientCount() const;
+    QVector<double> & getFeedForwardCoefficients();
+    QVector<double> & getFeedBackCoefficients();
 
     QString toString() const;
 
@@ -36,12 +33,6 @@ public:
     IIRFilter& operator*=(const IIRFilter &b);
 
     static int computeBinomialCoefficient(int n, int k);
-protected:
-    void setFeedForwardCoefficient(int index, double c);
-    void setFeedBackCoefficient(int index, double c);
-    double getFeedForwardCoefficient(int index) const;
-    double getFeedBackCoefficient(int index) const;
-
 private:
     QVector<double> feedForward, feedBack, x, y;
 

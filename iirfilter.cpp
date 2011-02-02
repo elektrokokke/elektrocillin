@@ -48,26 +48,14 @@ double IIRFilter::getSquaredAmplitudeResponse(double hertz)
     return std::norm(numerator.evaluate(z_inv) / denominator.evaluate(z_inv));
 }
 
-void IIRFilter::addFeedForwardCoefficient(double c)
+QVector<double> & IIRFilter::getFeedForwardCoefficients()
 {
-    feedForward.append(c);
-    x.append(0);
+    return feedForward;
 }
 
-void IIRFilter::addFeedBackCoefficient(double c)
+QVector<double> & IIRFilter::getFeedBackCoefficients()
 {
-    feedBack.append(c);
-    y.append(0);
-}
-
-int IIRFilter::getFeedForwardCoefficientCount() const
-{
-    return feedForward.size();
-}
-
-int IIRFilter::getFeedBackCoefficientCount() const
-{
-    return feedBack.size();
+    return feedBack;
 }
 
 QString IIRFilter::toString() const
@@ -159,26 +147,6 @@ int IIRFilter::computeBinomialCoefficient(int n, int k)
         }
         return result;
     }
-}
-
-void IIRFilter::setFeedForwardCoefficient(int index, double c)
-{
-    feedForward[index] = c;
-}
-
-void IIRFilter::setFeedBackCoefficient(int index, double c)
-{
-    feedBack[index] = c;
-}
-
-double IIRFilter::getFeedForwardCoefficient(int index) const
-{
-    return feedForward[index];
-}
-
-double IIRFilter::getFeedBackCoefficient(int index) const
-{
-    return feedBack[index];
 }
 
 Polynomial<std::complex<double> > IIRFilter::getNumeratorPolynomial() const
