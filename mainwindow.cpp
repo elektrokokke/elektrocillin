@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     filterButterworth2(0, 44100, IIRButterworthFilter::HIGH_PASS),
     filterParallel(0, 44100),
     filterSerial(0, 44100),
-    midiClient("midi client"),
+    midiSignalThread("midi signal client"),
     synthesizerClient("synthesizer", &synthesizer),
     moogFilterClient("moog filter")
 {
@@ -50,15 +50,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     scene->addItem(frequencyResponse);
 
-    midiClient.activate();
+    midiSignalThread.getClient()->activate();
     synthesizerClient.activate();
     moogFilterClient.activate();
 
     GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
     scene->addItem(keyboard);
     //QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char, unsigned char, unsigned char)), this, SLOT(onKeyPressed(unsigned char, unsigned char, unsigned char)));
-    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), midiClient.getMidiThread(), SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
-    QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), midiClient.getMidiThread(), SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
+    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
+    QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
     keyboard->setScale(frequencyResponse->boundingRect().width() / keyboard->sceneBoundingRect().width());
     keyboard->setPos(0, -keyboard->sceneBoundingRect().height() - 10);
 

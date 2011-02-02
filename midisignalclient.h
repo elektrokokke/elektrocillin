@@ -15,11 +15,34 @@ struct MidiMessage {
     jack_midi_data_t message[3];
 };
 
-class MidiThread : public JackThread
+class MidiSignalThread : public JackThread
 {
     Q_OBJECT
 public:
-    explicit MidiThread(JackClientWithDeferredProcessing *client, QObject *parent = 0);
+    class MidiSignalClient : public JackClientWithDeferredProcessing
+    {
+    public:
+        MidiSignalClient(const QString &clientName, JackThread *thread);
+        virtual ~MidiSignalClient();
+
+        const QString & getMidiInputPortName() const;
+        const QString & getMidiOutputPortName() const;
+        MidiSignalThread * getMidiThread();
+
+    protected:
+        JackRingBuffer<MidiMessage> * getInputRingBuffer();
+        JackRingBuffer<MidiMessage> * getOutputRingBuffer();
+        // reimplemented methods from JackClient:
+        virtual bool init();
+        virtual bool process(jack_nframes_t nframes);
+
+    private:
+        QString midiInputPortName, midiOutputPortName;
+        // provide one midi in- and output:
+        jack_port_t *midiIn, *midiOut;
+    };
+
+    explicit MidiSignalThread(const QString &clientName, QObject *parent = 0);
 
     JackRingBuffer<MidiMessage> * getInputRingBuffer();
     JackRingBuffer<MidiMessage> * getOutputRingBuffer();
@@ -49,32 +72,10 @@ public slots:
     void sendPitchWheel(unsigned char channel, unsigned int pitch);
 
 private:
+    MidiSignalClient client;
     // use lock-free ring buffers for communication between threads:
     JackRingBuffer<MidiMessage> ringBufferFromClient, ringBufferToClient;
-};
 
-class MidiClient : public JackClientWithDeferredProcessing
-{
-public:
-    MidiClient(const QString &clientName);
-    virtual ~MidiClient();
-
-    const QString & getMidiInputPortName() const;
-    const QString & getMidiOutputPortName() const;
-    MidiThread * getMidiThread();
-
-protected:
-    JackRingBuffer<MidiMessage> * getInputRingBuffer();
-    JackRingBuffer<MidiMessage> * getOutputRingBuffer();
-    // reimplemented methods from JackClient:
-    virtual bool init();
-    virtual bool process(jack_nframes_t nframes);
-
-private:
-    QString midiInputPortName, midiOutputPortName;
-    // provide one midi in- and output:
-    jack_port_t *midiIn, *midiOut;
-    MidiThread thread;
 };
 
 #endif // MIDICLIENT_H

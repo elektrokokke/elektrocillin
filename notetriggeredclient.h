@@ -11,6 +11,8 @@ public:
     virtual ~NoteTriggeredClient();
 
 protected:
+    void processMidi(const jack_midi_event_t &midiEvent);
+
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
     virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value);

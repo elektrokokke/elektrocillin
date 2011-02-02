@@ -1,23 +1,24 @@
-#include "midiclient.h"
+#include "midisignalclient.h"
 
-MidiThread::MidiThread(JackClientWithDeferredProcessing *client, QObject *parent) :
-        JackThread(client, parent),
-        ringBufferFromClient(1024),
-        ringBufferToClient(1024)
+MidiSignalThread::MidiSignalThread(const QString &clientName, QObject *parent) :
+    JackThread(&client, parent),
+    client(clientName, this),
+    ringBufferFromClient(1024),
+    ringBufferToClient(1024)
 {
 }
 
-JackRingBuffer<MidiMessage> * MidiThread::getInputRingBuffer()
+JackRingBuffer<MidiMessage> * MidiSignalThread::getInputRingBuffer()
 {
     return &ringBufferFromClient;
 }
 
-JackRingBuffer<MidiMessage> * MidiThread::getOutputRingBuffer()
+JackRingBuffer<MidiMessage> * MidiSignalThread::getOutputRingBuffer()
 {
     return &ringBufferToClient;
 }
 
-void MidiThread::processDeferred()
+void MidiSignalThread::processDeferred()
 {
     // read midi input from the ring buffer:
     for (; getInputRingBuffer()->readSpace(); ) {
@@ -77,7 +78,7 @@ void MidiThread::processDeferred()
     }
 }
 
-void MidiThread::sendNoteOff(unsigned char channel, unsigned char note, unsigned char velocity)
+void MidiSignalThread::sendNoteOff(unsigned char channel, unsigned char note, unsigned char velocity)
 {
     // create the midi message:
     MidiMessage message;
@@ -91,7 +92,7 @@ void MidiThread::sendNoteOff(unsigned char channel, unsigned char note, unsigned
     getOutputRingBuffer()->write(message);
 }
 
-void MidiThread::sendNoteOn(unsigned char channel, unsigned char note, unsigned char velocity)
+void MidiSignalThread::sendNoteOn(unsigned char channel, unsigned char note, unsigned char velocity)
 {
     // create the midi message:
     MidiMessage message;
@@ -106,7 +107,7 @@ void MidiThread::sendNoteOn(unsigned char channel, unsigned char note, unsigned 
 //    qDebug() << "sendNoteOn(" << channel << "," << note << "," << velocity << ") at time" << message.time;
 }
 
-void MidiThread::sendAfterTouch(unsigned char channel, unsigned char note, unsigned char pressure)
+void MidiSignalThread::sendAfterTouch(unsigned char channel, unsigned char note, unsigned char pressure)
 {
     // create the midi message:
     MidiMessage message;
@@ -120,7 +121,7 @@ void MidiThread::sendAfterTouch(unsigned char channel, unsigned char note, unsig
     getOutputRingBuffer()->write(message);
 }
 
-void MidiThread::sendControlChange(unsigned char channel, unsigned char controller, unsigned char value)
+void MidiSignalThread::sendControlChange(unsigned char channel, unsigned char controller, unsigned char value)
 {
     // create the midi message:
     MidiMessage message;
@@ -134,7 +135,7 @@ void MidiThread::sendControlChange(unsigned char channel, unsigned char controll
     getOutputRingBuffer()->write(message);
 }
 
-void MidiThread::sendProgramChange(unsigned char channel, unsigned char program)
+void MidiSignalThread::sendProgramChange(unsigned char channel, unsigned char program)
 {
     // create the midi message:
     MidiMessage message;
@@ -147,7 +148,7 @@ void MidiThread::sendProgramChange(unsigned char channel, unsigned char program)
     getOutputRingBuffer()->write(message);
 }
 
-void MidiThread::sendChannelPressure(unsigned char channel, unsigned char pressure)
+void MidiSignalThread::sendChannelPressure(unsigned char channel, unsigned char pressure)
 {
     // create the midi message:
     MidiMessage message;
@@ -160,7 +161,7 @@ void MidiThread::sendChannelPressure(unsigned char channel, unsigned char pressu
     getOutputRingBuffer()->write(message);
 }
 
-void MidiThread::sendPitchWheel(unsigned char channel, unsigned int pitch)
+void MidiSignalThread::sendPitchWheel(unsigned char channel, unsigned int pitch)
 {
     // create the midi message:
     MidiMessage message;
@@ -174,46 +175,45 @@ void MidiThread::sendPitchWheel(unsigned char channel, unsigned int pitch)
     getOutputRingBuffer()->write(message);
 }
 
-MidiClient::MidiClient(const QString &clientName) :
-        JackClientWithDeferredProcessing(clientName, &thread),
+MidiSignalThread::MidiSignalClient::MidiSignalClient(const QString &clientName, JackThread *thread) :
+        JackClientWithDeferredProcessing(clientName, thread),
         midiInputPortName("midi in"),
-        midiOutputPortName("midi out"),
-        thread(this)
+        midiOutputPortName("midi out")
 {
 }
 
-MidiClient::~MidiClient()
+MidiSignalThread::MidiSignalClient::~MidiSignalClient()
 {
     // close the client (this waits for the associated thread to finish):
     close();
 }
 
-const QString & MidiClient::getMidiInputPortName() const
+const QString & MidiSignalThread::MidiSignalClient::getMidiInputPortName() const
 {
     return midiInputPortName;
 }
 
-const QString & MidiClient::getMidiOutputPortName() const
+const QString & MidiSignalThread::MidiSignalClient::getMidiOutputPortName() const
 {
     return midiOutputPortName;
 }
 
-MidiThread * MidiClient::getMidiThread()
+MidiSignalThread * MidiSignalThread::MidiSignalClient::getMidiThread()
 {
-    return (MidiThread*)getJackThread();
+    return (MidiSignalThread*)getJackThread();
 }
 
-JackRingBuffer<MidiMessage> * MidiClient::getInputRingBuffer()
+JackRingBuffer<MidiMessage> * MidiSignalThread::MidiSignalClient::getInputRingBuffer()
 {
     return getMidiThread()->getOutputRingBuffer();
 }
 
-JackRingBuffer<MidiMessage> * MidiClient::getOutputRingBuffer()
+JackRingBuffer<MidiMessage> * MidiSignalThread::MidiSignalClient::getOutputRingBuffer()
 {
     return getMidiThread()->getInputRingBuffer();
 }
 
-bool MidiClient::init()
+bool MidiSignalThread::MidiSignalClient::init()
 {
     // setup the input and output midi ports:
     midiIn = registerMidiPort(midiInputPortName, JackPortIsInput);
@@ -221,7 +221,7 @@ bool MidiClient::init()
     return (JackClientWithDeferredProcessing::init() && midiIn && midiOut);
 }
 
-bool MidiClient::process(jack_nframes_t nframes)
+bool MidiSignalThread::MidiSignalClient::process(jack_nframes_t nframes)
 {
     // get port buffers:
     void *midiInputBuffer = jack_port_get_buffer(midiIn, nframes);
