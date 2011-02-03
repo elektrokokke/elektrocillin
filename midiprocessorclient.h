@@ -19,16 +19,32 @@ public:
     MidiProcessor * getMidiProcessor();
 
 protected:
+    /**
+      Constructor for subclasses that do not want to use a MidiProcessor,
+      but reimplement the respective methods such as to do the MidiProcessor's
+      work themselves.
+      Methods to reimplement:
+      - processAudio(const double*, double*, jack_nframes_t) OR
+      - processAudio(jack_nframes_t, jack_nframes_t),
+      - processNoteOn AND
+      - processNoteOff AND
+      - processController AND
+      - processPitchBend OR
+      - processMidi(const MidiEvent &, jack_nframes_t) OR
+      - processMidi(jack_nframes_t, jack_nframes_t)
+      */
+    MidiProcessorClient(const QString &clientName, int nrOfInputs, int nrOfOutputs);
+
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);
     virtual void processMidi(jack_nframes_t start, jack_nframes_t end);
-    virtual void processMidi(const MidiEvent &event);
+    virtual void processMidi(const MidiEvent &event, jack_nframes_t time);
 
     // Override these in subclasses:
-    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    virtual void processController(unsigned char channel, unsigned char controller, unsigned char value);
-    virtual void processPitchBend(unsigned char channel, unsigned int value);
+    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
+    virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
 
     /**
       If you override process(jack_nframes_t nframes) call this function

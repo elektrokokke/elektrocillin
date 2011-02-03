@@ -2,6 +2,7 @@
 #define SAMPLED_H
 
 #include <QVector>
+#include <jack/jack.h>
 
 class AudioProcessor
 {
@@ -16,10 +17,11 @@ public:
     double getSampleDuration() const;
     double convertHertzToRadians(double hertz) const;
 
-    double processAudio0();
-    double processAudio1(double input);
-    double processAudio2(double input1, double input2);
-    virtual void processAudio(const double *inputs, double *outputs) = 0;
+    double processAudio0(jack_nframes_t time);
+    double processAudio1(double input, jack_nframes_t time);
+    double processAudio2(double input1, double input2, jack_nframes_t time);
+
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time) = 0;
 
 private:
     double sampleRate, sampleDuration;

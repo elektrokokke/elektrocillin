@@ -18,10 +18,10 @@ public:
     IirMoogFilter(double sampleRate = 44100, int zeros = 0);
 
     // reimplemented from IIRFilter:
-    virtual void processAudio(const double *inputs, double *outputs);
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplemented from MidiProcessor:
-    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    virtual void processPitchBend(unsigned char channel, unsigned int value);
+    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
 
     void setSampleRate(double sampleRate);
 

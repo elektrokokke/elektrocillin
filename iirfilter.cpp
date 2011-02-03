@@ -11,7 +11,7 @@ IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, int 
     reset();
 }
 
-void IirFilter::processAudio(const double *inputs, double *outputs)
+void IirFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     if (x.size()) {
         x[0] = inputs[0];

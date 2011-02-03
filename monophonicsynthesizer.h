@@ -15,11 +15,11 @@ public:
     MonophonicSynthesizer(double sampleRate = 441000);
 
     void setSampleRate(double sampleRate);
-    void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    void processPitchBend(unsigned char channel, unsigned int pitch);
-    void processController(unsigned char processController, unsigned char value);
-    void processAudio(const double *inputs, double *outputs);
+    void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    void processPitchBend(unsigned char channel, unsigned int pitch, jack_nframes_t time);
+    void processController(unsigned char processController, unsigned char value, jack_nframes_t time);
+    void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
 
 private:

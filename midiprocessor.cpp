@@ -6,19 +6,19 @@ MidiProcessor::MidiProcessor(int nrOfInputs, int nrOfOutputs, double sampleRate)
 {
 }
 
-void MidiProcessor::processNoteOn(unsigned char, unsigned char, unsigned char)
+void MidiProcessor::processNoteOn(unsigned char, unsigned char, unsigned char, jack_nframes_t)
 {
 }
 
-void MidiProcessor::processNoteOff(unsigned char, unsigned char, unsigned char)
+void MidiProcessor::processNoteOff(unsigned char, unsigned char, unsigned char, jack_nframes_t)
 {
 }
 
-void MidiProcessor::processController(unsigned char, unsigned char, unsigned char)
+void MidiProcessor::processController(unsigned char, unsigned char, unsigned char, jack_nframes_t)
 {
 }
 
-void MidiProcessor::processPitchBend(unsigned char, unsigned int)
+void MidiProcessor::processPitchBend(unsigned char, unsigned int, jack_nframes_t)
 {
 }
 

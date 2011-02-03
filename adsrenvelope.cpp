@@ -13,20 +13,20 @@ AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustain
 {
 }
 
-void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char)
+void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char, jack_nframes_t)
 {
     currentSegmentTime = 0.0;
     currentSegment = ATTACK;
 }
 
-void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char)
+void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char, jack_nframes_t)
 {
     currentSegmentTime = 0.0;
     previousSegmentLevel = previousLevel;
     currentSegment = RELEASE;
 }
 
-void AdsrEnvelope::processAudio(const double *, double *outputs)
+void AdsrEnvelope::processAudio(const double *, double *outputs, jack_nframes_t)
 {
     double level = 0.0;
     if (currentSegment == ATTACK) {

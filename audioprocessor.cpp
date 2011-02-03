@@ -40,26 +40,26 @@ double AudioProcessor::convertHertzToRadians(double hertz) const
     return hertz * 2.0 * M_PI / getSampleRate();
 }
 
-double AudioProcessor::processAudio0()
+double AudioProcessor::processAudio0(jack_nframes_t time)
 {
     Q_ASSERT((inputs.size() == 0) && (outputs.size() == 1));
-    processAudio(inputs.data(), outputs.data());
+    processAudio(inputs.data(), outputs.data(), time);
     return outputs[0];
 }
 
-double AudioProcessor::processAudio1(double input)
+double AudioProcessor::processAudio1(double input, jack_nframes_t time)
 {
     Q_ASSERT((inputs.size() == 1) && (outputs.size() == 1));
     inputs[0] = input;
-    processAudio(inputs.data(), outputs.data());
+    processAudio(inputs.data(), outputs.data(), time);
     return outputs[0];
 }
 
-double AudioProcessor::processAudio2(double input1, double input2)
+double AudioProcessor::processAudio2(double input1, double input2, jack_nframes_t time)
 {
     Q_ASSERT((inputs.size() == 2) && (outputs.size() == 1));
     inputs[0] = input1;
     inputs[1] = input2;
-    processAudio(inputs.data(), outputs.data());
+    processAudio(inputs.data(), outputs.data(), time);
     return outputs[0];
 }

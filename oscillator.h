@@ -9,9 +9,9 @@ public:
     Oscillator(double sampleRate = 44100);
 
     virtual void setSampleRate(double sampleRate);
-    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    virtual void processPitchBend(unsigned char channel, unsigned int value);
-    virtual void processAudio(const double *inputs, double *outputs);
+    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
     void setFrequency(double hertz);
     double getFrequency() const;

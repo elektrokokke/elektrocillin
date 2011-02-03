@@ -6,6 +6,12 @@ MidiProcessorClient::MidiProcessorClient(const QString &clientName, MidiProcesso
 {
 }
 
+MidiProcessorClient::MidiProcessorClient(const QString &clientName, int nrOfInputs, int nrOfOutputs) :
+    AudioProcessorClient(clientName, nrOfInputs, nrOfOutputs),
+    midiProcessor(0)
+{
+}
+
 MidiProcessorClient::~MidiProcessorClient()
 {
     close();
@@ -33,6 +39,7 @@ bool MidiProcessorClient::process(jack_nframes_t nframes)
 
 void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
 {
+    jack_nframes_t lastFrameTime = getLastFrameTime();
     // only process the MIDI events between start and end:
     for (jack_nframes_t currentFrame = start; currentFrame < end; ) {
         // get the next midi event, if there is any:
@@ -48,7 +55,7 @@ void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
                 MidiEvent midiEvent;
                 midiEvent.size = jackMidiEvent.size;
                 memcpy(midiEvent.buffer, jackMidiEvent.buffer, jackMidiEvent.size * sizeof(jack_midi_data_t));
-                processMidi(midiEvent);
+                processMidi(midiEvent, currentFrame + lastFrameTime);
             } else {
                 // produce audio until the end of the buffer:
                 processAudio(currentFrame, end);
@@ -62,7 +69,7 @@ void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
     }
 }
 
-void MidiProcessorClient::processMidi(const MidiProcessorClient::MidiEvent &midiEvent)
+void MidiProcessorClient::processMidi(const MidiProcessorClient::MidiEvent &midiEvent, jack_nframes_t time)
 {
     // interpret the midi event:
     unsigned char statusByte = midiEvent.buffer[0];
@@ -71,49 +78,53 @@ void MidiProcessorClient::processMidi(const MidiProcessorClient::MidiEvent &midi
     if (highNibble == 0x08) {
         unsigned char noteNumber = midiEvent.buffer[1];
         unsigned char velocity = midiEvent.buffer[2];
-        processNoteOff(channel, noteNumber, velocity);
+        processNoteOff(channel, noteNumber, velocity, time);
     } else if (highNibble == 0x09) {
         unsigned char noteNumber = midiEvent.buffer[1];
         unsigned char velocity = midiEvent.buffer[2];
         if (velocity) {
             // note on event:
-            processNoteOn(channel, noteNumber, velocity);
+            processNoteOn(channel, noteNumber, velocity, time);
         } else {
             // note off event:
-            processNoteOff(channel, noteNumber, velocity);
+            processNoteOff(channel, noteNumber, velocity, time);
         }
     } else if (highNibble == 0x0B) {
         // control change:
         unsigned char controller = midiEvent.buffer[1];
         unsigned char value = midiEvent.buffer[2];
-        processController(channel, controller, value);
+        processController(channel, controller, value, time);
     } else if (highNibble == 0x0E) {
         // pitch wheel:
         unsigned char low = midiEvent.buffer[1];
         unsigned char high = midiEvent.buffer[2];
         unsigned int pitch = (high << 7) + low;
-        processPitchBend(channel, pitch);
+        processPitchBend(channel, pitch, time);
     }
 }
 
-void MidiProcessorClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void MidiProcessorClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
 {
-    midiProcessor->processNoteOn(channel, noteNumber, velocity);
+    Q_ASSERT(midiProcessor);
+    midiProcessor->processNoteOn(channel, noteNumber, velocity, time);
 }
 
-void MidiProcessorClient::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void MidiProcessorClient::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
 {
-    midiProcessor->processNoteOff(channel, noteNumber, velocity);
+    Q_ASSERT(midiProcessor);
+    midiProcessor->processNoteOff(channel, noteNumber, velocity, time);
 }
 
-void MidiProcessorClient::processController(unsigned char channel, unsigned char controller, unsigned char value)
+void MidiProcessorClient::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
-    midiProcessor->processController(channel, controller, value);
+    Q_ASSERT(midiProcessor);
+    midiProcessor->processController(channel, controller, value, time);
 }
 
-void MidiProcessorClient::processPitchBend(unsigned char channel, unsigned int value)
+void MidiProcessorClient::processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time)
 {
-    midiProcessor->processPitchBend(channel, value);
+    Q_ASSERT(midiProcessor);
+    midiProcessor->processPitchBend(channel, value, time);
 }
 
 void MidiProcessorClient::getMidiPortBuffer(jack_nframes_t nframes)

@@ -18,21 +18,21 @@ void Oscillator::setSampleRate(double sampleRate)
     computePhaseIncrement();
 }
 
-void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char)
+void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
     this->noteNumber = noteNumber;
     frequencyInHertz = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
     computePhaseIncrement();
 }
 
-void Oscillator::processPitchBend(unsigned char, unsigned int value)
+void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
 {
     pitchBendValue = value;
     frequencyInHertz = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
     computePhaseIncrement();
 }
 
-void Oscillator::processAudio(const double *, double *outputs)
+void Oscillator::processAudio(const double *, double *outputs, jack_nframes_t)
 {
     outputs[0] = valueAtPhase(phase);
     // advance phase:

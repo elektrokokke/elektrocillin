@@ -16,7 +16,7 @@ public:
 
 protected:
     // reimplemented method from EventProcessorClient:
-    virtual void processEvent(const IirMoogFilter::Parameters &event);
+    virtual void processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t time);
 };
 
 #endif // IIRMOOGFILTERCLIENT_H

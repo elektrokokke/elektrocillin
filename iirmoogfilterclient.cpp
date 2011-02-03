@@ -15,7 +15,7 @@ IirMoogFilter * IirMoogFilterClient::getMoogFilter()
     return (IirMoogFilter*)getMidiProcessor();
 }
 
-void IirMoogFilterClient::processEvent(const IirMoogFilter::Parameters &event)
+void IirMoogFilterClient::processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t time)
 {
     getMoogFilter()->setParameters(event);
 }

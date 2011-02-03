@@ -12,22 +12,22 @@ IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     parameters.resonance = 0;
 }
 
-void IirMoogFilter::processAudio(const double *inputs, double *outputs)
+void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
 {
     // modify cutoff frequency from second input:
     parameters.frequencyModulationFactor = pow(1 + parameters.frequencyModulationIntensity, inputs[1]);
     computeCoefficients();
-    IirFilter::processAudio(inputs, outputs);
+    IirFilter::processAudio(inputs, outputs, time);
 }
 
-void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char)
+void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
     // set base cutoff frequency from note number:
     parameters.frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
     computeCoefficients();
 }
 
-void IirMoogFilter::processPitchBend(unsigned char, unsigned int value)
+void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
 {
     // set cutoff frequency pitch bend factor:
     parameters.frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(value);

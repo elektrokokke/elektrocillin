@@ -14,8 +14,8 @@ public:
     };
 
     EventProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = 1024) :
-            MidiProcessorClient(clientName, midiProcessor_),
-            eventRingBuffer(ringBufferSize)
+        MidiProcessorClient(clientName, midiProcessor_),
+        eventRingBuffer(ringBufferSize)
     {}
     virtual ~EventProcessorClient()
     {
@@ -31,6 +31,25 @@ public:
     }
 
 protected:
+    /**
+      Constructor for subclasses that do not want to use a MidiProcessor,
+      but reimplement the respective methods such as to do the MidiProcessor's
+      work themselves.
+      Methods to reimplement:
+      - processAudio(const double*, double*, jack_nframes_t) OR
+      - processAudio(jack_nframes_t, jack_nframes_t),
+      - processNoteOn AND
+      - processNoteOff AND
+      - processController AND
+      - processPitchBend OR
+      - processMidi(const MidiEvent &, jack_nframes_t) OR
+      - processMidi(jack_nframes_t, jack_nframes_t)
+      */
+    EventProcessorClient(const QString &clientName, int nrOfInputs, int nrOfOutputs, size_t ringBufferSize = 1024) :
+        MidiProcessorClient(clientName, nrOfInputs, nrOfOutputs),
+        eventRingBuffer(ringBufferSize)
+    {}
+
     virtual bool process(jack_nframes_t nframes)
     {
         jack_nframes_t lastFrameTime = getLastFrameTime();
@@ -55,7 +74,7 @@ protected:
                     processMidi(currentFrame, eventWithTimeStamp.time);
                     currentFrame = eventWithTimeStamp.time;
                     // process the event:
-                    processEvent(eventWithTimeStamp.event);
+                    processEvent(eventWithTimeStamp.event, eventWithTimeStamp.time);
                 } else {
                     processMidi(currentFrame, nframes);
                     currentFrame = nframes;
@@ -69,7 +88,7 @@ protected:
     }
 
 
-    virtual void processEvent(const T &event) = 0;
+    virtual void processEvent(const T &event, jack_nframes_t time) = 0;
 
 private:
     JackRingBuffer<EventWithTimeStamp> eventRingBuffer;

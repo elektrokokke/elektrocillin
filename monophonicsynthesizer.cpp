@@ -26,28 +26,28 @@ void MonophonicSynthesizer::setSampleRate(double sampleRate)
     filterMorph.setSampleRate(sampleRate);
 }
 
-void MonophonicSynthesizer::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void MonophonicSynthesizer::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
 {
     midiNoteNumbers.push(noteNumber);
-    morphOsc1.processNoteOn(channel, noteNumber, velocity);
+    morphOsc1.processNoteOn(channel, noteNumber, velocity, time);
     // (re-)trigger the ADSR envelope:
-    envelope.processNoteOn(channel, noteNumber, velocity);
+    envelope.processNoteOn(channel, noteNumber, velocity, time);
 }
 
-void MonophonicSynthesizer::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void MonophonicSynthesizer::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
 {
     if (!midiNoteNumbers.isEmpty()) {
         // test if this is the topmost note:
         if (midiNoteNumbers.top() == noteNumber) {
             midiNoteNumbers.pop();
             if (midiNoteNumbers.isEmpty()) {
-                morphOsc1.processNoteOff(channel, noteNumber, velocity);
+                morphOsc1.processNoteOff(channel, noteNumber, velocity, time);
                 // enter the release phase:
-                envelope.processNoteOff(channel, noteNumber, velocity);
+                envelope.processNoteOff(channel, noteNumber, velocity, time);
             } else {
-                morphOsc1.processNoteOn(channel, noteNumber, velocity);
+                morphOsc1.processNoteOn(channel, noteNumber, velocity, time);
                 // retrigger the ADSR envelope:
-                envelope.processNoteOn(channel, noteNumber, velocity);
+                envelope.processNoteOn(channel, noteNumber, velocity, time);
             }
         } else {
             // the note has to be removed from somewhere in the stack
@@ -60,21 +60,21 @@ void MonophonicSynthesizer::processNoteOff(unsigned char channel, unsigned char 
     }
 }
 
-void MonophonicSynthesizer::processPitchBend(unsigned char channel, unsigned int pitch)
+void MonophonicSynthesizer::processPitchBend(unsigned char channel, unsigned int pitch, jack_nframes_t time)
 {
-    morphOsc1.processPitchBend(channel, pitch);
+    morphOsc1.processPitchBend(channel, pitch, time);
 }
 
-void MonophonicSynthesizer::processController(unsigned char, unsigned char value)
+void MonophonicSynthesizer::processController(unsigned char, unsigned char value, jack_nframes_t)
 {
     morph = (double)value / 127.0;
 }
 
-void MonophonicSynthesizer::processAudio(const double *, double *outputs)
+void MonophonicSynthesizer::processAudio(const double *, double *outputs, jack_nframes_t time)
 {
     // get level from ADSR envelope:
-    double envelopeLevel = envelope.processAudio0();
-    morphOsc1.setMorph(filterMorph.processAudio1(morph));
-    double oscillatorLevel = morphOsc1.processAudio0();
-    outputs[0] = filterAudio.processAudio1(envelopeLevel * oscillatorLevel);
+    double envelopeLevel = envelope.processAudio0(time);
+    morphOsc1.setMorph(filterMorph.processAudio1(morph, time));
+    double oscillatorLevel = morphOsc1.processAudio0(time);
+    outputs[0] = filterAudio.processAudio1(envelopeLevel * oscillatorLevel, time);
 }

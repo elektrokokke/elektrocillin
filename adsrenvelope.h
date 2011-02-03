@@ -16,9 +16,9 @@ public:
         RELEASE
     };
 
-    void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    void processAudio(const double *inputs, double *outputs);
+    void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
 private:
     // all times are in seconds, all levels between 0 and 1:

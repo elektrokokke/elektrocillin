@@ -11,7 +11,7 @@ ZPlaneFilter::ZPlaneFilter(double sampleRate) :
 }
 
 // reimplenented from FrequencyResponse:
-void ZPlaneFilter::processAudio(const double *inputs, double *outputs)
+void ZPlaneFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     // set the current x:
     x[tx] = inputs[0];

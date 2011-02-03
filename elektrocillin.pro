@@ -98,7 +98,8 @@ HEADERS  += mainwindow.h \
     midiprocessor.h \
     midiprocessorclient.h \
     eventprocessor.h \
-    eventprocessorclient.h
+    eventprocessorclient.h \
+    jackthreadeventprocessorclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

@@ -13,7 +13,7 @@ public:
     IirFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs = 1, double sampleRate = 44100);
 
     // reimplemented from AudioProcessor:
-    virtual void processAudio(const double *inputs, double *outputs);
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);
 

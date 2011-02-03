@@ -6,9 +6,18 @@
 #include <QString>
 #include <QList>
 
+/**
+  This is an abstract class which should simplify the creation of arbitrary Jack clients.
+  */
+
 class JackClient
 {
 public:
+    /**
+      @param clientName the name of the Jack client. The actual name may vary,
+        as it may be changed by the Jack server if the given name is already taken
+        by another client. Use getClientName() to get the actual name.
+      */
     JackClient(const QString &clientName);
 
     const QString & getClientName() const;

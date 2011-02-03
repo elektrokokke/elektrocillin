@@ -43,6 +43,7 @@ bool MidiController2AudioClient::process(jack_nframes_t nframes)
     void *midiInputBuffer = jack_port_get_buffer(getMidiInputPort(), nframes);
     jack_default_audio_sample_t *audioOutputBuffer = reinterpret_cast<jack_default_audio_sample_t*>(jack_port_get_buffer(getAudioOutputPort(), nframes));
     // interpret the midi input and listen to the specified controller on the given channel:
+    jack_nframes_t lastFrameTime = getLastFrameTime();
     jack_nframes_t currentFrame = 0;
     jack_nframes_t currentMidiEventIndex = 0;
     jack_nframes_t midiEventCount = jack_midi_get_event_count(midiInputBuffer);
@@ -54,7 +55,7 @@ bool MidiController2AudioClient::process(jack_nframes_t nframes)
             jack_midi_event_get(&midiEvent, midiInputBuffer, currentMidiEventIndex);
             // produce audio until the event happens:
             for (; currentFrame < midiEvent.time; currentFrame++) {
-                audioOutputBuffer[currentFrame] = filter.processAudio1(value);
+                audioOutputBuffer[currentFrame] = filter.processAudio1(value, currentFrame + lastFrameTime);
                 //audioOutputBuffer[currentFrame] = value;
             }
             currentMidiEventIndex++;
@@ -69,7 +70,7 @@ bool MidiController2AudioClient::process(jack_nframes_t nframes)
         } else {
             // produce audio until the end of the buffer:
             for (; currentFrame < nframes; currentFrame++) {
-                audioOutputBuffer[currentFrame] = filter.processAudio1(value);
+                audioOutputBuffer[currentFrame] = filter.processAudio1(value, currentFrame + lastFrameTime);
                 //audioOutputBuffer[currentFrame] = value;
             }
         }

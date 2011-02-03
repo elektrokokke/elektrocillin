@@ -12,7 +12,7 @@ public:
     ZPlaneFilter(double sampleRate = 44100);
 
     // reimplemented from AudioProcessor:
-    void processAudio(const double *inputs, double *outputs);
+    void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);
 
