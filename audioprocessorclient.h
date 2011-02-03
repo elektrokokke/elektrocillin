@@ -13,6 +13,8 @@ public:
     AudioProcessorClient(const QString &clientName, AudioProcessor *audioProcessor);
     virtual ~AudioProcessorClient();
 
+    AudioProcessor * getAudioProcessor();
+
 protected:
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);

@@ -1,6 +1,7 @@
 #ifndef IIRMOOGFILTERCLIENT_H
 #define IIRMOOGFILTERCLIENT_H
 
+#include "eventprocessorclient.h"
 #include "audioprocessorclient.h"
 #include "iirmoogfilter.h"
 #include "jackringbuffer.h"
@@ -11,11 +12,11 @@ struct IIRMoogFilterControl {
     IIRMoogFilter::Parameters parameters;
 };
 
-class IIRMoogFilterClient : public AudioProcessorClient
+class IIRMoogFilterClientOld : public AudioProcessorClient
 {
 public:
-    IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter);
-    virtual ~IIRMoogFilterClient();
+    IIRMoogFilterClientOld(const QString &clientName, IIRMoogFilter *filter);
+    virtual ~IIRMoogFilterClientOld();
 
     // this method can be called from any thread:
     void setParameters(const IIRMoogFilter::Parameters &parameters);

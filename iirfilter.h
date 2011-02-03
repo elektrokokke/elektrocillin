@@ -3,11 +3,11 @@
 
 #include <QVector>
 #include <complex>
-#include "audioprocessor.h"
+#include "midiprocessor.h"
 #include "frequencyresponse.h"
 #include "polynomial.h"
 
-class IIRFilter : public AudioProcessor, public FrequencyResponse
+class IIRFilter : public MidiProcessor, public FrequencyResponse
 {
 public:
     IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs = 1, double sampleRate = 44100);

@@ -11,6 +11,11 @@ MidiProcessorClient::~MidiProcessorClient()
     close();
 }
 
+MidiProcessor * MidiProcessorClient::getMidiProcessor()
+{
+    return (MidiProcessor*)getAudioProcessor();
+}
+
 bool MidiProcessorClient::init()
 {
     return AudioProcessorClient::init() && (midiInputPort = registerMidiPort(QString("midi in"), JackPortIsInput));

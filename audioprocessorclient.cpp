@@ -18,6 +18,11 @@ AudioProcessorClient::~AudioProcessorClient()
     close();
 }
 
+AudioProcessor * AudioProcessorClient::getAudioProcessor()
+{
+    return audioProcessor;
+}
+
 bool AudioProcessorClient::init()
 {
     bool ok = true;

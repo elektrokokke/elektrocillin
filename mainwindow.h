@@ -40,7 +40,7 @@ private:
     MidiProcessorClient synthesizerClient;
     IIRMoogFilter moogFilter;
     IIRMoogFilter moogFilterCopy;
-    IIRMoogFilterClient moogFilterClient;
+    IIRMoogFilterClientOld moogFilterClient;
     Oscillator lfo;
     AudioProcessorClient lfoClient;
 };

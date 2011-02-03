@@ -1,7 +1,6 @@
 #ifndef EVENTPROCESSORCLIENT_H
 #define EVENTPROCESSORCLIENT_H
 
-#include "eventprocessor.h"
 #include "midiprocessorclient.h"
 #include "jackringbuffer.h"
 #include <jack/jack.h>
@@ -14,9 +13,8 @@ public:
         T data;
     };
 
-    EventProcessorClient(const QString &clientName, EventProcessor<T> *eventProcessor_, size_t ringBufferSize = 1024) :
-            MidiProcessorClient(clientName, eventProcessor_),
-            eventProcessor(eventProcessor_),
+    EventProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = 1024) :
+            MidiProcessorClient(clientName, midiProcessor_),
             eventRingBuffer(ringBufferSize)
     {}
     virtual ~EventProcessorClient()
@@ -74,7 +72,6 @@ protected:
     virtual void processEvent(const T &event) = 0;
 
 private:
-    EventProcessor<T> *eventProcessor;
     JackRingBuffer<Event> eventRingBuffer;
 };
 

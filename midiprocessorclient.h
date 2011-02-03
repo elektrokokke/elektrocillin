@@ -10,6 +10,8 @@ public:
     MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor);
     virtual ~MidiProcessorClient();
 
+    MidiProcessor * getMidiProcessor();
+
 protected:
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);

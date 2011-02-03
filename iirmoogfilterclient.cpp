@@ -1,18 +1,18 @@
 #include "iirmoogfilterclient.h"
 
-IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter_) :
+IIRMoogFilterClientOld::IIRMoogFilterClientOld(const QString &clientName, IIRMoogFilter *filter_) :
     AudioProcessorClient(clientName, filter_),
     filter(filter_),
     controlRingBuffer(1024)
 {
 }
 
-IIRMoogFilterClient::~IIRMoogFilterClient()
+IIRMoogFilterClientOld::~IIRMoogFilterClientOld()
 {
     close();
 }
 
-void IIRMoogFilterClient::setParameters(const IIRMoogFilter::Parameters &parameters)
+void IIRMoogFilterClientOld::setParameters(const IIRMoogFilter::Parameters &parameters)
 {
     IIRMoogFilterControl event;
     event.time = getEstimatedCurrentTime();
@@ -20,7 +20,7 @@ void IIRMoogFilterClient::setParameters(const IIRMoogFilter::Parameters &paramet
     controlRingBuffer.write(event);
 }
 
-bool IIRMoogFilterClient::init()
+bool IIRMoogFilterClientOld::init()
 {
     // initialize the Moog filter:
     filter->reset();
@@ -28,7 +28,7 @@ bool IIRMoogFilterClient::init()
     return AudioProcessorClient::init();
 }
 
-bool IIRMoogFilterClient::process(jack_nframes_t nframes)
+bool IIRMoogFilterClientOld::process(jack_nframes_t nframes)
 {
     getPortBuffers(nframes);
     jack_nframes_t lastFrameTime = getLastFrameTime();
