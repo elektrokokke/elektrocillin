@@ -43,6 +43,8 @@ signals:
 public slots:
     void setX(qreal x);
     void setY(qreal y);
+    void setXScaled(qreal xScaled);
+    void setYScaled(qreal yScaled);
     void setBoundsLeft(qreal left);
     void setBoundsRight(qreal right);
 
@@ -59,7 +61,11 @@ private:
     bool considerBounds, considerBoundsScaled, sendPositionChanges, changingCoordinates;
 
     QPointF scale(const QPointF &p);
-
+    qreal scaleX(qreal x);
+    qreal scaleY(qreal y);
+    QPointF descale(const QPointF &p);
+    qreal descaleX(qreal x);
+    qreal descaleY(qreal y);
 };
 
 #endif // GRAPHICSNODEITEM_H

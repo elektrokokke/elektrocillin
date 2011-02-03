@@ -18,6 +18,7 @@ public:
 
     double processAudio0();
     double processAudio1(double input);
+    double processAudio2(double input1, double input2);
     virtual void processAudio(const double *inputs, double *outputs) = 0;
 
 private:

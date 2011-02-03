@@ -4,6 +4,12 @@
 IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     IirFilter(1 + zeros, 4, 2, sampleRate)
 {
+    parameters.frequency = sampleRate * 0.5;
+    parameters.frequencyOffsetFactor = 1;
+    parameters.frequencyPitchBendFactor = 1;
+    parameters.frequencyModulationFactor = 1;
+    parameters.frequencyModulationIntensity = 1;
+    parameters.resonance = 0;
 }
 
 void IirMoogFilter::processAudio(const double *inputs, double *outputs)

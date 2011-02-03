@@ -105,12 +105,26 @@ void GraphicsNodeItem::connectLine(GraphicsLogLineItem *line, GraphicsLineItem::
 
 void GraphicsNodeItem::setX(qreal x)
 {
+    changingCoordinates = true;
     QGraphicsEllipseItem::setX(x);
+    changingCoordinates = false;
 }
 
 void GraphicsNodeItem::setY(qreal y)
 {
+    changingCoordinates = true;
     QGraphicsEllipseItem::setY(y);
+    changingCoordinates = false;
+}
+
+void GraphicsNodeItem::setXScaled(qreal xScaled)
+{
+    setX(descaleX(xScaled));
+}
+
+void GraphicsNodeItem::setYScaled(qreal yScaled)
+{
+    setY(descaleY(yScaled));
 }
 
 void GraphicsNodeItem::hoverEnterEvent( QGraphicsSceneHoverEvent * event )
@@ -202,20 +216,58 @@ QPointF GraphicsNodeItem::adjustToBounds(const QPointF &point)
 
 QPointF GraphicsNodeItem::scale(const QPointF &p)
 {
-    if (getSendPositionChangesScaled()) {
-        QPointF scaled;
-        if (horizontalScale == LINEAR) {
-            scaled.setX((p.x() - bounds.left()) / (bounds.right() - bounds.left()) * (boundsScaled.right() - boundsScaled.left()) + boundsScaled.left());
-        } else {
-            scaled.setX(exp((p.x() - bounds.left()) / (bounds.right() - bounds.left()) * log(boundsScaled.right() / boundsScaled.left())) * boundsScaled.left());
-        }
-        if (verticalScale == LINEAR) {
-            scaled.setY((p.y() - bounds.top()) / (bounds.bottom() - bounds.top()) * (boundsScaled.bottom() - boundsScaled.top()) + boundsScaled.top());
-        } else {
-            scaled.setY(exp((p.y() - bounds.top()) / (bounds.bottom() - bounds.top()) * log(boundsScaled.bottom() / boundsScaled.top())) * boundsScaled.top());
-        }
-        return scaled;
+    Q_ASSERT(getSendPositionChangesScaled());
+    QPointF scaled;
+    scaled.setX(scaleX(p.x()));
+    scaled.setY(scaleY(p.y()));
+    return scaled;
+}
+
+qreal GraphicsNodeItem::scaleX(qreal x)
+{
+    Q_ASSERT(getSendPositionChangesScaled());
+    if (horizontalScale == LINEAR) {
+        return (x - bounds.left()) / (bounds.right() - bounds.left()) * (boundsScaled.right() - boundsScaled.left()) + boundsScaled.left();
     } else {
-        return p;
+        return exp((x - bounds.left()) / (bounds.right() - bounds.left()) * log(boundsScaled.right() / boundsScaled.left())) * boundsScaled.left();
+    }
+}
+
+qreal GraphicsNodeItem::scaleY(qreal y)
+{
+    Q_ASSERT(getSendPositionChangesScaled());
+    if (verticalScale == LINEAR) {
+        return (y - bounds.top()) / (bounds.bottom() - bounds.top()) * (boundsScaled.bottom() - boundsScaled.top()) + boundsScaled.top();
+    } else {
+        return exp((y - bounds.top()) / (bounds.bottom() - bounds.top()) * log(boundsScaled.bottom() / boundsScaled.top())) * boundsScaled.top();
+    }
+}
+
+QPointF GraphicsNodeItem::descale(const QPointF &p)
+{
+    Q_ASSERT(getSendPositionChangesScaled());
+    QPointF descaled;
+    descaled.setX(descaleX(p.x()));
+    descaled.setY(descaleY(p.y()));
+    return descaled;
+}
+
+qreal GraphicsNodeItem::descaleX(qreal xScaled)
+{
+    Q_ASSERT(getSendPositionChangesScaled());
+    if (horizontalScale == LINEAR) {
+        return (xScaled - boundsScaled.left()) / (boundsScaled.right() - boundsScaled.left()) * (bounds.right() - bounds.left()) + bounds.left();
+    } else {
+        return log(xScaled / boundsScaled.left()) / log(boundsScaled.right() / boundsScaled.left()) * (bounds.right() - bounds.left()) + bounds.left();
+    }
+}
+
+qreal GraphicsNodeItem::descaleY(qreal yScaled)
+{
+    Q_ASSERT(getSendPositionChangesScaled());
+    if (verticalScale == LINEAR) {
+        return (yScaled - boundsScaled.top()) / (boundsScaled.bottom() - boundsScaled.top()) * (bounds.bottom() - bounds.top()) + bounds.top();
+    } else {
+        return log(yScaled / boundsScaled.top()) / log(boundsScaled.bottom() / boundsScaled.top()) * (bounds.bottom() - bounds.top()) + bounds.top();
     }
 }

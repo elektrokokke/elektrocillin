@@ -20,20 +20,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     midiSignalThread("midi signal client"),
     synthesizerClient("synthesizer", &synthesizer),
-    moogFilter(0, 0),
-    moogFilterCopy(0, 0),
     moogFilterClient("moog filter", &moogFilter),
     lfoClient("lfo", &lfo)
 {
     ui->setupUi(this);
 
-    lfo.setFrequency(0.1);
+    lfo.setFrequency(0.5);
 
     QGraphicsScene * scene = new QGraphicsScene();
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
     IirMoogFilter::Parameters moogFilterParameters;
     moogFilterParameters.frequency = frequencyResponse->getLowestHertz();
-    moogFilterParameters.frequencyOffsetFactor = 1;
+    moogFilterParameters.frequencyOffsetFactor = 16;
     moogFilterParameters.frequencyPitchBendFactor = 1;
     moogFilterParameters.frequencyModulationFactor = 1;
     moogFilterParameters.frequencyModulationIntensity = 1;
@@ -42,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     moogFilterCopy.setParameters(moogFilterParameters);
     frequencyResponse->addFrequencyResponse(&moogFilterCopy);
 
-    GraphicsNodeItem *cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
+    cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
     cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
     cutoffResonanceNode->setBrush(QBrush(qRgb(52, 101, 164)));
     cutoffResonanceNode->setZValue(10);
@@ -60,7 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
     scene->addItem(keyboard);
-    //QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char, unsigned char, unsigned char)), this, SLOT(onKeyPressed(unsigned char, unsigned char, unsigned char)));
+    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char, unsigned char, unsigned char)), this, SLOT(onNoteOn(unsigned char, unsigned char, unsigned char)));
     QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
     QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
     keyboard->setScale(frequencyResponse->boundingRect().width() / keyboard->sceneBoundingRect().width());
@@ -186,7 +184,16 @@ void MainWindow::onChangeCutoff(QPointF cutoffResonance)
     IirMoogFilter::Parameters parameters = moogFilterCopy.getParameters();
     parameters.frequency = cutoffResonance.x();
     parameters.resonance = cutoffResonance.y();
-    moogFilterClient.setParameters(parameters);
+    moogFilterClient.postEvent(parameters);
     moogFilterCopy.setParameters(parameters);
+    frequencyResponse->updateFrequencyResponse(0);
+}
+
+void MainWindow::onNoteOn(unsigned char, unsigned char noteNumber, unsigned char)
+{
+    IirMoogFilter::Parameters parameters = moogFilterCopy.getParameters();
+    parameters.frequency = moogFilterCopy.computeFrequencyFromMidiNoteNumber(noteNumber);
+    moogFilterCopy.setParameters(parameters);
+    cutoffResonanceNode->setXScaled(parameters.frequency);
     frequencyResponse->updateFrequencyResponse(0);
 }

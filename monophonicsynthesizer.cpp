@@ -7,7 +7,7 @@ MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
     osc1(M_PI),
     osc2(0.1),
     morphOsc1(&osc1, &osc2),
-    envelope(0.001, 0.01, 0.25, 0.5),
+    envelope(0.001, 0.01, 0.1, 0.5),
     filterAudio(22050),
     filterMorph(44.1)
 {

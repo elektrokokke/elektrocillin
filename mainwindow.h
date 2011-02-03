@@ -12,6 +12,7 @@
 
 class Record2MemoryClient;
 class MidiController2AudioClient;
+class GraphicsNodeItem;
 
 namespace Ui {
     class MainWindow;
@@ -29,9 +30,11 @@ public:
 private slots:
     void onMidiMessage(unsigned char, unsigned char, unsigned char);
     void onChangeCutoff(QPointF cutoffResonance);
+    void onNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
 
 private:
     Ui::MainWindow *ui;
+    GraphicsNodeItem *cutoffResonanceNode;
     Record2MemoryClient *recordClient;
     MidiController2AudioClient *midiControllerClient;
     FrequencyResponseGraphicsItem *frequencyResponse;
@@ -40,7 +43,7 @@ private:
     MidiProcessorClient synthesizerClient;
     IirMoogFilter moogFilter;
     IirMoogFilter moogFilterCopy;
-    IIRMoogFilterClientOld moogFilterClient;
+    IirMoogFilterClient moogFilterClient;
     Oscillator lfo;
     AudioProcessorClient lfoClient;
 };

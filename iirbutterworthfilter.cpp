@@ -2,7 +2,7 @@
 #include <cmath>
 
 IirButterworthFilter::IirButterworthFilter(double cutoffFrequencyInHertz, Type type_, double sampleRate) :
-    IirFilter(3, 2, sampleRate),
+    IirFilter(3, 2, 1, sampleRate),
     type(type_)
 {
     setCutoffFrequency(cutoffFrequencyInHertz);

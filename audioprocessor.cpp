@@ -54,3 +54,12 @@ double AudioProcessor::processAudio1(double input)
     processAudio(inputs.data(), outputs.data());
     return outputs[0];
 }
+
+double AudioProcessor::processAudio2(double input1, double input2)
+{
+    Q_ASSERT((inputs.size() == 2) && (outputs.size() == 1));
+    inputs[0] = input1;
+    inputs[1] = input2;
+    processAudio(inputs.data(), outputs.data());
+    return outputs[0];
+}
