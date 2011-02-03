@@ -44,7 +44,25 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuJACK">
+    <property name="title">
+     <string>JACK</string>
+    </property>
+    <addaction name="actionStore_connections"/>
+    <addaction name="actionRestore_connections"/>
+   </widget>
+   <addaction name="menuJACK"/>
   </widget>
+  <action name="actionStore_connections">
+   <property name="text">
+    <string>Save connections</string>
+   </property>
+  </action>
+  <action name="actionRestore_connections">
+   <property name="text">
+    <string>Restore connections</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

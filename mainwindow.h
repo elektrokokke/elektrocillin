@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSettings>
 #include "frequencyresponsegraphicsitem.h"
 #include "iirmoogfilterclient.h"
 #include "iirbutterworthfilter.h"
@@ -9,6 +10,7 @@
 #include "monophonicsynthesizer.h"
 #include "midisignalclient.h"
 #include "oscillator.h"
+#include "jacknullclient.h"
 
 class Record2MemoryClient;
 class MidiController2AudioClient;
@@ -32,8 +34,13 @@ private slots:
     void onChangeCutoff(QPointF cutoffResonance);
     void onNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
 
+    void on_actionStore_connections_triggered();
+
+    void on_actionRestore_connections_triggered();
+
 private:
     Ui::MainWindow *ui;
+    QSettings settings;
     GraphicsNodeItem *cutoffResonanceNode;
     Record2MemoryClient *recordClient;
     MidiController2AudioClient *midiControllerClient;
@@ -46,6 +53,7 @@ private:
     IirMoogFilterClient moogFilterClient;
     Oscillator lfo;
     AudioProcessorClient lfoClient;
+    JackNullClient nullClient;
 };
 
 #endif // MAINWINDOW_H

@@ -18,6 +18,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    settings("settings.ini", QSettings::IniFormat),
     midiSignalThread("midi signal client"),
     synthesizerClient("synthesizer", &synthesizer),
     moogFilterClient("moog filter", &moogFilter),
@@ -196,4 +197,14 @@ void MainWindow::onNoteOn(unsigned char, unsigned char noteNumber, unsigned char
     moogFilterCopy.setParameters(parameters);
     cutoffResonanceNode->setXScaled(parameters.frequency);
     frequencyResponse->updateFrequencyResponse(0);
+}
+
+void MainWindow::on_actionStore_connections_triggered()
+{
+    settings.setValue("connections", nullClient.getAllConnections());
+}
+
+void MainWindow::on_actionRestore_connections_triggered()
+{
+    nullClient.restoreConnections(settings.value("connections").toStringList());
 }

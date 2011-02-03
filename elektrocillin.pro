@@ -51,7 +51,8 @@ SOURCES += main.cpp\
     audioprocessor.cpp \
     audioprocessorclient.cpp \
     midiprocessor.cpp \
-    midiprocessorclient.cpp
+    midiprocessorclient.cpp \
+    jacknullclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -99,7 +100,8 @@ HEADERS  += mainwindow.h \
     midiprocessorclient.h \
     eventprocessor.h \
     eventprocessorclient.h \
-    jackthreadeventprocessorclient.h
+    jackthreadeventprocessorclient.h \
+    jacknullclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

@@ -101,6 +101,7 @@ public:
       getLastFrameTime() to relate time in other threads to Jack time.
       */
     jack_nframes_t getEstimatedCurrentTime();
+
 protected:
     /**
       This is called before the jack client is activated.
@@ -182,6 +183,8 @@ private:
     jack_client_t *client;
 
     static int process(jack_nframes_t nframes, void *arg);
+
+    friend class JackNullClient;
 };
 
 #endif // JACKCLIENT_H
