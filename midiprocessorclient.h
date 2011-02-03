@@ -3,10 +3,16 @@
 
 #include "audioprocessorclient.h"
 #include "midiprocessor.h"
+#include <jack/midiport.h>
 
 class MidiProcessorClient : public AudioProcessorClient
 {
 public:
+    struct MidiEvent {
+        size_t size;
+        jack_midi_data_t buffer[3];
+    };
+
     MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor);
     virtual ~MidiProcessorClient();
 
@@ -16,9 +22,9 @@ protected:
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);
     virtual void processMidi(jack_nframes_t start, jack_nframes_t end);
+    virtual void processMidi(const MidiEvent &event);
 
-    virtual void processMidi(const jack_midi_event_t &event);
-
+    // Override these in subclasses:
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
     virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value);

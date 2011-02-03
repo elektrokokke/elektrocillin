@@ -5,14 +5,14 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include <QByteArray>
+#include "midiprocessorclient.h"
 #include "jackthread.h"
 #include "jackclientwithdeferredprocessing.h"
 #include "jack/midiport.h"
 
-struct MidiMessage {
-    jack_nframes_t time, bufferTime;
-    size_t size;
-    jack_midi_data_t message[3];
+struct MidiEventWithTimeStamp {
+    jack_nframes_t time;
+    MidiProcessorClient::MidiEvent event;
 };
 
 class MidiSignalThread : public JackThread
@@ -21,8 +21,8 @@ class MidiSignalThread : public JackThread
 public:
     explicit MidiSignalThread(const QString &clientName, QObject *parent = 0);
 
-    JackRingBuffer<MidiMessage> * getInputRingBuffer();
-    JackRingBuffer<MidiMessage> * getOutputRingBuffer();
+    JackRingBuffer<MidiEventWithTimeStamp> * getInputRingBuffer();
+    JackRingBuffer<MidiEventWithTimeStamp> * getOutputRingBuffer();
 
 protected:
     // reimplemented methods from JackThread:
@@ -60,8 +60,8 @@ private:
         MidiSignalThread * getMidiThread();
 
     protected:
-        JackRingBuffer<MidiMessage> * getInputRingBuffer();
-        JackRingBuffer<MidiMessage> * getOutputRingBuffer();
+        JackRingBuffer<MidiEventWithTimeStamp> * getInputRingBuffer();
+        JackRingBuffer<MidiEventWithTimeStamp> * getOutputRingBuffer();
         // reimplemented methods from JackClient:
         virtual bool init();
         virtual bool process(jack_nframes_t nframes);
@@ -74,7 +74,7 @@ private:
 
     MidiSignalClient client;
     // use lock-free ring buffers for communication between threads:
-    JackRingBuffer<MidiMessage> ringBufferFromClient, ringBufferToClient;
+    JackRingBuffer<MidiEventWithTimeStamp> ringBufferFromClient, ringBufferToClient;
 
 };
 

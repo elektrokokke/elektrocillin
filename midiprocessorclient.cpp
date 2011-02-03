@@ -37,13 +37,17 @@ void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
     for (jack_nframes_t currentFrame = start; currentFrame < end; ) {
         // get the next midi event, if there is any:
         if (currentMidiEventIndex < midiEventCount) {
-            jack_midi_event_t midiEvent;
-            jack_midi_event_get(&midiEvent, midiInputBuffer, currentMidiEventIndex);
-            if (midiEvent.time < end) {
+            jack_midi_event_t jackMidiEvent;
+            jack_midi_event_get(&jackMidiEvent, midiInputBuffer, currentMidiEventIndex);
+            if ((jackMidiEvent.size <= 3) && (jackMidiEvent.time < end)) {
                 // produce audio until the event happens:
-                processAudio(currentFrame, midiEvent.time);
-                currentFrame = midiEvent.time;
+                processAudio(currentFrame, jackMidiEvent.time);
+                currentFrame = jackMidiEvent.time;
                 currentMidiEventIndex++;
+                // copy the midi event to our own structure:
+                MidiEvent midiEvent;
+                midiEvent.size = jackMidiEvent.size;
+                memcpy(midiEvent.buffer, jackMidiEvent.buffer, jackMidiEvent.size * sizeof(jack_midi_data_t));
                 processMidi(midiEvent);
             } else {
                 // produce audio until the end of the buffer:
@@ -58,7 +62,7 @@ void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
     }
 }
 
-void MidiProcessorClient::processMidi(const jack_midi_event_t &midiEvent)
+void MidiProcessorClient::processMidi(const MidiProcessorClient::MidiEvent &midiEvent)
 {
     // interpret the midi event:
     unsigned char statusByte = midiEvent.buffer[0];

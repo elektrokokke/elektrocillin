@@ -4,7 +4,6 @@
 #include "jackclient.h"
 #include "audioprocessor.h"
 #include "jack/jack.h"
-#include "jack/midiport.h"
 #include <QVector>
 
 class AudioProcessorClient : public JackClient

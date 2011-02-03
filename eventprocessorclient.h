@@ -8,9 +8,9 @@
 template<class T> class EventProcessorClient : public MidiProcessorClient
 {
 public:
-    struct Event {
+    struct EventWithTimeStamp {
         jack_nframes_t time;
-        T data;
+        T event;
     };
 
     EventProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = 1024) :
@@ -24,9 +24,9 @@ public:
 
     void postEvent(const T &event)
     {
-        Event ev;
+        EventWithTimeStamp ev;
         ev.time = getEstimatedCurrentTime();
-        ev.data = event;
+        ev.event = event;
         eventRingBuffer.write(ev);
     }
 
@@ -41,21 +41,21 @@ protected:
         for (jack_nframes_t currentFrame = 0; currentFrame < nframes; ) {
             // get the next event from the ring buffer, if there is any:
             if (eventRingBuffer.readSpace()) {
-                Event event = eventRingBuffer.peek();
+                EventWithTimeStamp eventWithTimeStamp = eventRingBuffer.peek();
                 // adjust time relative to the beginning of this frame:
-                if (event.time + nframes < lastFrameTime) {
+                if (eventWithTimeStamp.time + nframes < lastFrameTime) {
                     // if time is too early, this is in the buffer for too long, adjust time accordingly:
-                    event.time = 0;
+                    eventWithTimeStamp.time = 0;
                 } else {
-                    event.time = event.time + nframes - lastFrameTime;
+                    eventWithTimeStamp.time = eventWithTimeStamp.time + nframes - lastFrameTime;
                 }
-                if (event.time < nframes) {
+                if (eventWithTimeStamp.time < nframes) {
                     eventRingBuffer.readAdvance(1);
                     // process everything up to the event's time stamp:
-                    processMidi(currentFrame, event.time);
-                    currentFrame = event.time;
+                    processMidi(currentFrame, eventWithTimeStamp.time);
+                    currentFrame = eventWithTimeStamp.time;
                     // process the event:
-                    processEvent(event.data);
+                    processEvent(eventWithTimeStamp.event);
                 } else {
                     processMidi(currentFrame, nframes);
                     currentFrame = nframes;
@@ -72,7 +72,7 @@ protected:
     virtual void processEvent(const T &event) = 0;
 
 private:
-    JackRingBuffer<Event> eventRingBuffer;
+    JackRingBuffer<EventWithTimeStamp> eventRingBuffer;
 };
 
 #endif // EVENTPROCESSORCLIENT_H
