@@ -12,6 +12,9 @@ public:
     virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
     virtual void processController(unsigned char channel, unsigned char processController, unsigned char value);
     virtual void processPitchBend(unsigned char channel, unsigned int value);
+
+    static double computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber);
+    static double computePitchBendFactorFromMidiPitch(unsigned int processPitchBend);
 };
 
 #endif // NOTETRIGGERED_H

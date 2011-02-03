@@ -1,4 +1,5 @@
 #include "midiprocessor.h"
+#include <cmath>
 
 MidiProcessor::MidiProcessor(int nrOfInputs, int nrOfOutputs, double sampleRate) :
     AudioProcessor(nrOfInputs, nrOfOutputs, sampleRate)
@@ -19,4 +20,21 @@ void MidiProcessor::processController(unsigned char, unsigned char, unsigned cha
 
 void MidiProcessor::processPitchBend(unsigned char, unsigned int)
 {
+}
+
+double MidiProcessor::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)
+{
+    // 440 Hz is note number 69:
+    double octave = ((double)midiNoteNumber - 69.0) / 12.0;
+    double frequency = 440.0 * pow(2.0, octave);
+    return frequency;
+}
+
+double MidiProcessor::computePitchBendFactorFromMidiPitch(unsigned int pitchBend)
+{
+    // center it around 0x2000:
+    int pitchCentered = (int)pitchBend - 0x2000;
+    // -8192 means minus two half tones => -49152 is one octave => factor 2^(-1)
+    // +8192 means plus two half tones => +49152 is one octave => factor 2^1
+    return pow(2.0, (double)pitchCentered / 49152.0);
 }

@@ -9,9 +9,23 @@ IIRMoogFilter::IIRMoogFilter(double sampleRate, int zeros) :
 void IIRMoogFilter::processAudio(const double *inputs, double *outputs)
 {
     // modify cutoff frequency from second input:
-    parameters.frequencyModulation = inputs[1];
+    parameters.frequencyModulationFactor = pow(1 + parameters.frequencyModulationIntensity, inputs[1]);
     computeCoefficients();
     IIRFilter::processAudio(inputs, outputs);
+}
+
+void IIRMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char)
+{
+    // set base cutoff frequency from note number:
+    parameters.frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
+    computeCoefficients();
+}
+
+void IIRMoogFilter::processPitchBend(unsigned char, unsigned int value)
+{
+    // set cutoff frequency pitch bend factor:
+    parameters.frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(value);
+    computeCoefficients();
 }
 
 void IIRMoogFilter::setSampleRate(double sampleRate)
@@ -34,7 +48,7 @@ const IIRMoogFilter::Parameters & IIRMoogFilter::getParameters() const
 
 void IIRMoogFilter::computeCoefficients()
 {
-    double cutoffFrequencyInHertz = parameters.frequency * parameters.frequencyFactor * pow(1 + parameters.frequencyModulationIntensity, parameters.frequencyModulation);
+    double cutoffFrequencyInHertz = parameters.frequency * parameters.frequencyOffsetFactor * parameters.frequencyPitchBendFactor * parameters.frequencyModulationFactor;
     double radians = convertHertzToRadians(cutoffFrequencyInHertz);
     if (radians > M_PI) {
         radians = M_PI;

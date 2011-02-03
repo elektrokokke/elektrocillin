@@ -31,7 +31,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QGraphicsScene * scene = new QGraphicsScene();
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
-    IIRMoogFilter::Parameters moogFilterParameters = { frequencyResponse->getLowestHertz(), 1, 0, 1, 0 };
+    IIRMoogFilter::Parameters moogFilterParameters;
+    moogFilterParameters.frequency = frequencyResponse->getLowestHertz();
+    moogFilterParameters.frequencyOffsetFactor = 1;
+    moogFilterParameters.frequencyPitchBendFactor = 1;
+    moogFilterParameters.frequencyModulationFactor = 1;
+    moogFilterParameters.frequencyModulationIntensity = 1;
+    moogFilterParameters.resonance = 0;
     moogFilter.setParameters(moogFilterParameters);
     moogFilterCopy.setParameters(moogFilterParameters);
     frequencyResponse->addFrequencyResponse(&moogFilterCopy);

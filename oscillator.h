@@ -26,8 +26,6 @@ private:
     double frequencyInHertz, phase, phaseIncrement;
 
     void computePhaseIncrement();
-    static double computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber);
-    static double computePitchBendFactorFromMidiPitch(unsigned int processPitchBend);
 };
 
 #endif // OSCILLATOR_H

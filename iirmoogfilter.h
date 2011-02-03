@@ -8,8 +8,9 @@ class IIRMoogFilter : public IIRFilter
 public:
     struct Parameters {
         double frequency;
-        double frequencyFactor;
-        double frequencyModulation;
+        double frequencyOffsetFactor;
+        double frequencyPitchBendFactor;
+        double frequencyModulationFactor;
         double frequencyModulationIntensity;
         double resonance;
     };
@@ -18,6 +19,9 @@ public:
 
     // reimplemented from IIRFilter:
     virtual void processAudio(const double *inputs, double *outputs);
+    // reimplemented from MidiProcessor:
+    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    virtual void processPitchBend(unsigned char channel, unsigned int value);
 
     void setSampleRate(double sampleRate);
 
