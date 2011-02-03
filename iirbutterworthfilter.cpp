@@ -1,14 +1,14 @@
 #include "iirbutterworthfilter.h"
 #include <cmath>
 
-IIRButterworthFilter::IIRButterworthFilter(double cutoffFrequencyInHertz, Type type_, double sampleRate) :
-    IIRFilter(3, 2, sampleRate),
+IirButterworthFilter::IirButterworthFilter(double cutoffFrequencyInHertz, Type type_, double sampleRate) :
+    IirFilter(3, 2, sampleRate),
     type(type_)
 {
     setCutoffFrequency(cutoffFrequencyInHertz);
 }
 
-void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz, Type type)
+void IirButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz, Type type)
 {
     this->cutoffFrequency = cutoffFrequencyInHertz;
     this->type = type;
@@ -25,22 +25,22 @@ void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz, Typ
     }
 }
 
-void IIRButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
+void IirButterworthFilter::setCutoffFrequency(double cutoffFrequencyInHertz)
 {
     setCutoffFrequency(cutoffFrequencyInHertz, getType());
 }
 
-void IIRButterworthFilter::setType(Type type)
+void IirButterworthFilter::setType(Type type)
 {
     setCutoffFrequency(getCutoffFrequency(), type);
 }
 
-double IIRButterworthFilter::getCutoffFrequency() const
+double IirButterworthFilter::getCutoffFrequency() const
 {
     return cutoffFrequency;
 }
 
-IIRButterworthFilter::Type IIRButterworthFilter::getType() const
+IirButterworthFilter::Type IirButterworthFilter::getType() const
 {
     return type;
 }

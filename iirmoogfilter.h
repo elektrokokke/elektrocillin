@@ -3,7 +3,7 @@
 
 #include "iirfilter.h"
 
-class IIRMoogFilter : public IIRFilter
+class IirMoogFilter : public IirFilter
 {
 public:
     struct Parameters {
@@ -15,7 +15,7 @@ public:
         double resonance;
     };
 
-    IIRMoogFilter(double sampleRate = 44100, int zeros = 0);
+    IirMoogFilter(double sampleRate = 44100, int zeros = 0);
 
     // reimplemented from IIRFilter:
     virtual void processAudio(const double *inputs, double *outputs);

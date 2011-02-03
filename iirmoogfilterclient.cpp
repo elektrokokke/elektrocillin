@@ -1,27 +1,27 @@
 #include "iirmoogfilterclient.h"
 
-IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter) :
-        EventProcessorClient<IIRMoogFilter::Parameters>(clientName, filter)
+IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter) :
+        EventProcessorClient<IirMoogFilter::Parameters>(clientName, filter)
 {
 }
 
-IIRMoogFilterClient::~IIRMoogFilterClient()
+IirMoogFilterClient::~IirMoogFilterClient()
 {
     close();
 }
 
-IIRMoogFilter * IIRMoogFilterClient::getMoogFilter()
+IirMoogFilter * IirMoogFilterClient::getMoogFilter()
 {
-    return (IIRMoogFilter*)getMidiProcessor();
+    return (IirMoogFilter*)getMidiProcessor();
 }
 
-void IIRMoogFilterClient::processEvent(const IIRMoogFilter::Parameters &event)
+void IirMoogFilterClient::processEvent(const IirMoogFilter::Parameters &event)
 {
     getMoogFilter()->setParameters(event);
 }
 
 
-IIRMoogFilterClientOld::IIRMoogFilterClientOld(const QString &clientName, IIRMoogFilter *filter_) :
+IIRMoogFilterClientOld::IIRMoogFilterClientOld(const QString &clientName, IirMoogFilter *filter_) :
     AudioProcessorClient(clientName, filter_),
     filter(filter_),
     controlRingBuffer(1024)
@@ -33,7 +33,7 @@ IIRMoogFilterClientOld::~IIRMoogFilterClientOld()
     close();
 }
 
-void IIRMoogFilterClientOld::setParameters(const IIRMoogFilter::Parameters &parameters)
+void IIRMoogFilterClientOld::setParameters(const IirMoogFilter::Parameters &parameters)
 {
     IIRMoogFilterControl event;
     event.time = getEstimatedCurrentTime();

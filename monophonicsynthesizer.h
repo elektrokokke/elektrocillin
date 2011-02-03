@@ -28,7 +28,7 @@ private:
     SawtoothOscillator osc2;
     MorphingPiecewiseLinearOscillator morphOsc1;
     AdsrEnvelope envelope;
-    IIRButterworthFilter filterAudio, filterMorph;
+    IirButterworthFilter filterAudio, filterMorph;
     QStack<unsigned char> midiNoteNumbers;
 };
 

@@ -38,8 +38,8 @@ private:
     MidiSignalThread midiSignalThread;
     MonophonicSynthesizer synthesizer;
     MidiProcessorClient synthesizerClient;
-    IIRMoogFilter moogFilter;
-    IIRMoogFilter moogFilterCopy;
+    IirMoogFilter moogFilter;
+    IirMoogFilter moogFilterCopy;
     IIRMoogFilterClientOld moogFilterClient;
     Oscillator lfo;
     AudioProcessorClient lfoClient;

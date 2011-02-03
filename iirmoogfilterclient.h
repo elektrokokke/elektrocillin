@@ -7,31 +7,31 @@
 #include "jackringbuffer.h"
 #include <QObject>
 
-class IIRMoogFilterClient : public EventProcessorClient<IIRMoogFilter::Parameters> {
+class IirMoogFilterClient : public EventProcessorClient<IirMoogFilter::Parameters> {
 public:
-    IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter);
-    virtual ~IIRMoogFilterClient();
+    IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter);
+    virtual ~IirMoogFilterClient();
 
-    IIRMoogFilter * getMoogFilter();
+    IirMoogFilter * getMoogFilter();
 
 protected:
     // reimplemented method from EventProcessorClient:
-    virtual void processEvent(const IIRMoogFilter::Parameters &event);
+    virtual void processEvent(const IirMoogFilter::Parameters &event);
 };
 
 struct IIRMoogFilterControl {
     jack_nframes_t time;
-    IIRMoogFilter::Parameters parameters;
+    IirMoogFilter::Parameters parameters;
 };
 
 class IIRMoogFilterClientOld : public AudioProcessorClient
 {
 public:
-    IIRMoogFilterClientOld(const QString &clientName, IIRMoogFilter *filter);
+    IIRMoogFilterClientOld(const QString &clientName, IirMoogFilter *filter);
     virtual ~IIRMoogFilterClientOld();
 
     // this method can be called from any thread:
-    void setParameters(const IIRMoogFilter::Parameters &parameters);
+    void setParameters(const IirMoogFilter::Parameters &parameters);
 
 protected:
     // reimplemented methods from AudioProcessorClient:
@@ -39,7 +39,7 @@ protected:
     virtual bool process(jack_nframes_t nframes);
 
 private:
-    IIRMoogFilter *filter;
+    IirMoogFilter *filter;
     JackRingBuffer<IIRMoogFilterControl> controlRingBuffer;
 };
 

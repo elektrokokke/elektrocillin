@@ -7,10 +7,10 @@
 #include "frequencyresponse.h"
 #include "polynomial.h"
 
-class IIRFilter : public MidiProcessor, public FrequencyResponse
+class IirFilter : public MidiProcessor, public FrequencyResponse
 {
 public:
-    IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs = 1, double sampleRate = 44100);
+    IirFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs = 1, double sampleRate = 44100);
 
     // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs);
@@ -27,9 +27,9 @@ public:
     // filter arithmetic:
     void invert();
     // add another IIRFilter (which means parallel operation):
-    IIRFilter& operator+=(const IIRFilter &b);
+    IirFilter& operator+=(const IirFilter &b);
     // multiply with another IIRFilter (which means serial operation):
-    IIRFilter& operator*=(const IIRFilter &b);
+    IirFilter& operator*=(const IirFilter &b);
 
     static int computeBinomialCoefficient(int n, int k);
 private:

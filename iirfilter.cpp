@@ -1,7 +1,7 @@
 #include "iirfilter.h"
 #include <QDebug>
 
-IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs, double sampleRate) :
+IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs, double sampleRate) :
     MidiProcessor(nrOfInputs, 1, sampleRate),
     feedForward(feedForwardCoefficients),
     feedBack(feedBackCoefficients),
@@ -11,7 +11,7 @@ IIRFilter::IIRFilter(int feedForwardCoefficients, int feedBackCoefficients, int 
     reset();
 }
 
-void IIRFilter::processAudio(const double *inputs, double *outputs)
+void IirFilter::processAudio(const double *inputs, double *outputs)
 {
     if (x.size()) {
         x[0] = inputs[0];
@@ -35,7 +35,7 @@ void IIRFilter::processAudio(const double *inputs, double *outputs)
     }
 }
 
-double IIRFilter::getSquaredAmplitudeResponse(double hertz)
+double IirFilter::getSquaredAmplitudeResponse(double hertz)
 {
     std::complex<double> z_inv = 1.0 / std::exp(std::complex<double>(0.0, convertHertzToRadians(hertz)));
     Polynomial<std::complex<double> > numerator = getNumeratorPolynomial();
@@ -43,28 +43,28 @@ double IIRFilter::getSquaredAmplitudeResponse(double hertz)
     return std::norm(numerator.evaluate(z_inv) / denominator.evaluate(z_inv));
 }
 
-QVector<double> & IIRFilter::getFeedForwardCoefficients()
+QVector<double> & IirFilter::getFeedForwardCoefficients()
 {
     return feedForward;
 }
 
-QVector<double> & IIRFilter::getFeedBackCoefficients()
+QVector<double> & IirFilter::getFeedBackCoefficients()
 {
     return feedBack;
 }
 
-QString IIRFilter::toString() const
+QString IirFilter::toString() const
 {
     return getNumeratorPolynomial().toString() + " / " + getDenominatorPolynomial().toString();
 }
 
-void IIRFilter::reset()
+void IirFilter::reset()
 {
     x.fill(0.0);
     y.fill(0.0);
 }
 
-void IIRFilter::invert()
+void IirFilter::invert()
 {
     // negate all coefficients with odd exponent:
     for (int i = 1; i < feedForward.size(); i += 2) {
@@ -75,7 +75,7 @@ void IIRFilter::invert()
     }
 }
 
-IIRFilter& IIRFilter::operator+=(const IIRFilter &b)
+IirFilter& IirFilter::operator+=(const IirFilter &b)
 {
     // get numerators and denominators:
     Polynomial<std::complex<double> > numerator1 = getNumeratorPolynomial();
@@ -106,7 +106,7 @@ IIRFilter& IIRFilter::operator+=(const IIRFilter &b)
     return *this;
 }
 
-IIRFilter& IIRFilter::operator*=(const IIRFilter &b)
+IirFilter& IirFilter::operator*=(const IirFilter &b)
 {
     // multiply numerators and denominators:
     Polynomial<std::complex<double> > numerator = getNumeratorPolynomial();
@@ -128,7 +128,7 @@ IIRFilter& IIRFilter::operator*=(const IIRFilter &b)
     return *this;
 }
 
-int IIRFilter::computeBinomialCoefficient(int n, int k)
+int IirFilter::computeBinomialCoefficient(int n, int k)
 {
     if (k == 0) {
         return 1;
@@ -144,7 +144,7 @@ int IIRFilter::computeBinomialCoefficient(int n, int k)
     }
 }
 
-Polynomial<std::complex<double> > IIRFilter::getNumeratorPolynomial() const
+Polynomial<std::complex<double> > IirFilter::getNumeratorPolynomial() const
 {
     Polynomial<std::complex<double> > numerator(feedForward.size() ? feedForward[0] : 0);
     for (int i = 1; i < feedForward.size(); i++) {
@@ -153,7 +153,7 @@ Polynomial<std::complex<double> > IIRFilter::getNumeratorPolynomial() const
     return numerator;
 }
 
-Polynomial<std::complex<double> > IIRFilter::getDenominatorPolynomial() const
+Polynomial<std::complex<double> > IirFilter::getDenominatorPolynomial() const
 {
     Polynomial<std::complex<double> > denominator(1);
     for (int i = 0; i < feedBack.size(); i++) {

@@ -3,7 +3,7 @@
 
 #include "iirfilter.h"
 
-class IIRButterworthFilter : public IIRFilter
+class IirButterworthFilter : public IirFilter
 {
 public:
     enum Type {
@@ -11,7 +11,7 @@ public:
         HIGH_PASS
     };
 
-    IIRButterworthFilter(double cutoffFrequencyInHertz, Type type = LOW_PASS, double sampleRate = 44100);
+    IirButterworthFilter(double cutoffFrequencyInHertz, Type type = LOW_PASS, double sampleRate = 44100);
 
     virtual void setCutoffFrequency(double cutoffFrequencyInHertz, Type type);
 
