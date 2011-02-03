@@ -98,7 +98,9 @@ HEADERS  += mainwindow.h \
     audioprocessorclient.h \
     midiprocessor.h \
     midiprocessorclient.h \
-    iircutoffcontrolmoogfilter.h
+    iircutoffcontrolmoogfilter.h \
+    eventprocessor.h \
+    eventprocessorclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

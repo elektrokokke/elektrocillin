@@ -20,27 +20,37 @@ bool MidiProcessorClient::process(jack_nframes_t nframes)
 {
     // get audio port buffers:
     getPortBuffers(nframes);
-    // get midi port buffer:
-    void *midiInputBuffer = jack_port_get_buffer(midiInputPort, nframes);
-    jack_nframes_t currentMidiEventIndex = 0;
-    jack_nframes_t midiEventCount = jack_midi_get_event_count(midiInputBuffer);
-    for (jack_nframes_t currentFrame = 0; currentFrame < nframes; ) {
+    getMidiPortBuffer(nframes);
+    // process all MIDI events:
+    processMidi(0, nframes);
+    return true;
+}
+
+void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
+{
+    // only process the MIDI events between start and end:
+    for (jack_nframes_t currentFrame = start; currentFrame < end; ) {
         // get the next midi event, if there is any:
         if (currentMidiEventIndex < midiEventCount) {
             jack_midi_event_t midiEvent;
             jack_midi_event_get(&midiEvent, midiInputBuffer, currentMidiEventIndex);
-            // produce audio until the event happens:
-            processAudio(currentFrame, midiEvent.time);
-            currentFrame = midiEvent.time;
-            currentMidiEventIndex++;
-            processMidi(midiEvent);
+            if (midiEvent.time < end) {
+                // produce audio until the event happens:
+                processAudio(currentFrame, midiEvent.time);
+                currentFrame = midiEvent.time;
+                currentMidiEventIndex++;
+                processMidi(midiEvent);
+            } else {
+                // produce audio until the end of the buffer:
+                processAudio(currentFrame, end);
+                currentFrame = end;
+            }
         } else {
             // produce audio until the end of the buffer:
-            processAudio(currentFrame, nframes);
-            currentFrame = nframes;
+            processAudio(currentFrame, end);
+            currentFrame = end;
         }
     }
-    return true;
 }
 
 void MidiProcessorClient::processMidi(const jack_midi_event_t &midiEvent)
@@ -95,4 +105,12 @@ void MidiProcessorClient::processController(unsigned char channel, unsigned char
 void MidiProcessorClient::processPitchBend(unsigned char channel, unsigned int value)
 {
     midiProcessor->processPitchBend(channel, value);
+}
+
+void MidiProcessorClient::getMidiPortBuffer(jack_nframes_t nframes)
+{
+    // get midi port buffer:
+    midiInputBuffer = jack_port_get_buffer(midiInputPort, nframes);
+    currentMidiEventIndex = 0;
+    midiEventCount = jack_midi_get_event_count(midiInputBuffer);
 }
