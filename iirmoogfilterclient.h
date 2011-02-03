@@ -19,28 +19,4 @@ protected:
     virtual void processEvent(const IirMoogFilter::Parameters &event);
 };
 
-struct IIRMoogFilterControl {
-    jack_nframes_t time;
-    IirMoogFilter::Parameters parameters;
-};
-
-class IIRMoogFilterClientOld : public AudioProcessorClient
-{
-public:
-    IIRMoogFilterClientOld(const QString &clientName, IirMoogFilter *filter);
-    virtual ~IIRMoogFilterClientOld();
-
-    // this method can be called from any thread:
-    void setParameters(const IirMoogFilter::Parameters &parameters);
-
-protected:
-    // reimplemented methods from AudioProcessorClient:
-    virtual bool init();
-    virtual bool process(jack_nframes_t nframes);
-
-private:
-    IirMoogFilter *filter;
-    JackRingBuffer<IIRMoogFilterControl> controlRingBuffer;
-};
-
 #endif // IIRMOOGFILTERCLIENT_H
