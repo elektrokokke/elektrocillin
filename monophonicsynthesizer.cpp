@@ -6,8 +6,8 @@ MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
     morph(0.0),
     osc1(M_PI),
     osc2(0.1),
-    morphOsc1(&osc1, &osc2),
-    envelope(0.001, 0.01, 0.1, 0.5),
+    morphOsc1(&osc1, &osc2, 2),
+    envelope(0.01, 0.5, 0, 0),
     filterAudio(22050),
     filterMorph(44.1)
 {
@@ -75,6 +75,6 @@ void MonophonicSynthesizer::processAudio(const double *, double *outputs, jack_n
     // get level from ADSR envelope:
     double envelopeLevel = envelope.processAudio0(time);
     morphOsc1.setMorph(filterMorph.processAudio1(morph, time));
-    double oscillatorLevel = morphOsc1.processAudio0(time);
+    double oscillatorLevel = morphOsc1.processAudio1(envelopeLevel, time);
     outputs[0] = filterAudio.processAudio1(envelopeLevel * oscillatorLevel, time);
 }

@@ -1,6 +1,11 @@
 #include "piecewiselinearoscillator.h"
 #include <cmath>
 
+PiecewiseLinearOscillator::PiecewiseLinearOscillator(double frequencyModulationIntensity, double sampleRate) :
+    Oscillator(frequencyModulationIntensity, sampleRate)
+{
+}
+
 QPointF PiecewiseLinearOscillator::getNode(int index) const
 {
     if (nodes.size()) {

@@ -1,7 +1,8 @@
 #include "sawtoothoscillator.h"
 #include <cmath>
 
-SawtoothOscillator::SawtoothOscillator(double peak)
+SawtoothOscillator::SawtoothOscillator(double peak, double frequencyModulationIntensity, double sampleRate) :
+    PiecewiseLinearOscillator(frequencyModulationIntensity, sampleRate)
 {
     Q_ASSERT((peak >= 0.0) && (peak <= M_PI));
     addNode(QPointF(peak, -1.0));

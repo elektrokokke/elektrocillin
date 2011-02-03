@@ -23,8 +23,9 @@ public:
 private:
     // all times are in seconds, all levels between 0 and 1:
     double attackTime, decayTime, sustainLevel, releaseTime;
-    double currentSegmentTime, previousLevel, previousSegmentLevel;
+    double currentSegmentTime;
     CurrentSegment currentSegment;
+    bool release;
 };
 
 #endif // ADSRENVELOPE_H

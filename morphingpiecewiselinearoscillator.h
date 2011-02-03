@@ -6,7 +6,7 @@
 class MorphingPiecewiseLinearOscillator : public PiecewiseLinearOscillator
 {
 public:
-    MorphingPiecewiseLinearOscillator(const PiecewiseLinearOscillator *osc1, const PiecewiseLinearOscillator *osc2);
+    MorphingPiecewiseLinearOscillator(const PiecewiseLinearOscillator *osc1, const PiecewiseLinearOscillator *osc2, double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100);
 
     virtual QPointF getNode(int index) const;
     virtual int size() const;

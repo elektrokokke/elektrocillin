@@ -6,7 +6,7 @@
 class Oscillator : public MidiProcessor
 {
 public:
-    Oscillator(double sampleRate = 44100);
+    Oscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100);
 
     virtual void setSampleRate(double sampleRate);
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
@@ -21,9 +21,7 @@ protected:
     virtual double valueAtPhase(double phase);
 
 private:
-    unsigned char noteNumber;
-    int pitchBendValue;
-    double frequencyInHertz, phase, phaseIncrement;
+    double frequency, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, phaseIncrement;
 
     void computePhaseIncrement();
 };

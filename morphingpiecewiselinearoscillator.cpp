@@ -1,6 +1,7 @@
 #include "morphingpiecewiselinearoscillator.h"
 
-MorphingPiecewiseLinearOscillator::MorphingPiecewiseLinearOscillator(const PiecewiseLinearOscillator *osc1_, const PiecewiseLinearOscillator *osc2_) :
+MorphingPiecewiseLinearOscillator::MorphingPiecewiseLinearOscillator(const PiecewiseLinearOscillator *osc1_, const PiecewiseLinearOscillator *osc2_, double frequencyModulationIntensity, double sampleRate) :
+    PiecewiseLinearOscillator(frequencyModulationIntensity, sampleRate),
     osc1(osc1_),
     osc2(osc2_),
     morph(0.0)

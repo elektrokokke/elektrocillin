@@ -8,6 +8,7 @@
 class PiecewiseLinearOscillator : public Oscillator
 {
 public:
+    PiecewiseLinearOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100);
     virtual QPointF getNode(int index) const;
     virtual int size() const;
 
