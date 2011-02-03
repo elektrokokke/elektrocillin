@@ -12,13 +12,12 @@ IIRMoogFilterClient::~IIRMoogFilterClient()
     close();
 }
 
-void IIRMoogFilterClient::setParameters(double cutoffFrequency, double resonance)
+void IIRMoogFilterClient::setParameters(const IIRMoogFilter::Parameters &parameters)
 {
-    IIRMoogFilterControl parameters;
-    parameters.time = getEstimatedCurrentTime();
-    parameters.cutoffFrequency = cutoffFrequency;
-    parameters.resonance = resonance;
-    controlRingBuffer.write(parameters);
+    IIRMoogFilterControl event;
+    event.time = getEstimatedCurrentTime();
+    event.parameters = parameters;
+    controlRingBuffer.write(event);
 }
 
 bool IIRMoogFilterClient::init()
@@ -38,21 +37,21 @@ bool IIRMoogFilterClient::process(jack_nframes_t nframes)
         hasEvents = false;
         if (controlRingBuffer.readSpace()) {
             // get the message from the ring buffer:
-            IIRMoogFilterControl parameters = controlRingBuffer.peek();
+            IIRMoogFilterControl event = controlRingBuffer.peek();
             // adjust time relative to the beginning of this frame:
-            if (parameters.time + nframes < lastFrameTime) {
+            if (event.time + nframes < lastFrameTime) {
                 // if time is too early, this is in the buffer for too long, adjust time accordingly:
-                parameters.time = 0;
+                event.time = 0;
             } else {
-                parameters.time = parameters.time + nframes - lastFrameTime;
+                event.time = event.time + nframes - lastFrameTime;
             }
             // test if the event belongs into this frame (and not the next):
-            if (parameters.time < nframes) {
+            if (event.time < nframes) {
                 // do the filtering up to the given time:
-                processAudio(currentFrame, parameters.time);
-                currentFrame = parameters.time;
-                // adjust the filter parameters accordingly:
-                filter->setCutoffFrequency(parameters.cutoffFrequency, parameters.resonance);
+                processAudio(currentFrame, event.time);
+                currentFrame = event.time;
+                // adjust the filter event accordingly:
+                filter->setParameters(event.parameters);
                 controlRingBuffer.readAdvance(1);
                 hasEvents = true;
             }

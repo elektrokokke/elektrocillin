@@ -6,16 +6,27 @@
 class IIRMoogFilter : public IIRFilter
 {
 public:
-    IIRMoogFilter(double cutoffFrequencyInHertz, double resonance, int nrOfInputs = 1, double sampleRate = 44100, int zeros = 0);
+    struct Parameters {
+        double frequency;
+        double frequencyFactor;
+        double frequencyModulation;
+        double frequencyModulationIntensity;
+        double resonance;
+    };
+
+    IIRMoogFilter(double sampleRate = 44100, int zeros = 0);
+
+    // reimplemented from IIRFilter:
+    virtual void processAudio(const double *inputs, double *outputs);
 
     void setSampleRate(double sampleRate);
 
-    virtual void setCutoffFrequency(double cutoffFrequencyInHertz, double resonance);
-    double getCutoffFrequency() const;
-    double getResonance() const;
+    void setParameters(const Parameters parameters);
+    const Parameters & getParameters() const;
 
+    void computeCoefficients();
 private:
-    double cutoffFrequencyInHertz, resonance;
+    Parameters parameters;
 };
 
 #endif // IIRMOOGFILTER_H

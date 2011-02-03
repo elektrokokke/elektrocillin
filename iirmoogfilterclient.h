@@ -8,8 +8,7 @@
 
 struct IIRMoogFilterControl {
     jack_nframes_t time;
-    double cutoffFrequency;
-    double resonance;
+    IIRMoogFilter::Parameters parameters;
 };
 
 class IIRMoogFilterClient : public AudioProcessorClient
@@ -19,7 +18,7 @@ public:
     virtual ~IIRMoogFilterClient();
 
     // this method can be called from any thread:
-    void setParameters(double cutoffFrequency, double resonance);
+    void setParameters(const IIRMoogFilter::Parameters &parameters);
 
 protected:
     // reimplemented methods from AudioProcessorClient:

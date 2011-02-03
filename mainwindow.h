@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include "frequencyresponsegraphicsitem.h"
 #include "iirmoogfilterclient.h"
-#include "iircutoffcontrolmoogfilter.h"
 #include "iirbutterworthfilter.h"
 #include "midiprocessorclient.h"
 #include "monophonicsynthesizer.h"
@@ -39,7 +38,7 @@ private:
     MidiSignalThread midiSignalThread;
     MonophonicSynthesizer synthesizer;
     MidiProcessorClient synthesizerClient;
-    IIRCutoffControlMoogFilter moogFilter;
+    IIRMoogFilter moogFilter;
     IIRMoogFilter moogFilterCopy;
     IIRMoogFilterClient moogFilterClient;
     Oscillator lfo;

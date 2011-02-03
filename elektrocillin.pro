@@ -51,8 +51,7 @@ SOURCES += main.cpp\
     audioprocessor.cpp \
     audioprocessorclient.cpp \
     midiprocessor.cpp \
-    midiprocessorclient.cpp \
-    iircutoffcontrolmoogfilter.cpp
+    midiprocessorclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -98,7 +97,6 @@ HEADERS  += mainwindow.h \
     audioprocessorclient.h \
     midiprocessor.h \
     midiprocessorclient.h \
-    iircutoffcontrolmoogfilter.h \
     eventprocessor.h \
     eventprocessorclient.h
 

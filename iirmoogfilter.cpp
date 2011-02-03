@@ -1,31 +1,51 @@
 #include "iirmoogfilter.h"
 #include <cmath>
 
-IIRMoogFilter::IIRMoogFilter(double cutoffFrequencyInHertz, double resonance, int nrOfInputs, double sampleRate, int zeros) :
-    IIRFilter(1 + zeros, 4, nrOfInputs, sampleRate)
+IIRMoogFilter::IIRMoogFilter(double sampleRate, int zeros) :
+    IIRFilter(1 + zeros, 4, 2, sampleRate)
 {
-    setCutoffFrequency(cutoffFrequencyInHertz, resonance);
+}
+
+void IIRMoogFilter::processAudio(const double *inputs, double *outputs)
+{
+    // modify cutoff frequency from second input:
+    parameters.frequencyModulation = inputs[1];
+    computeCoefficients();
+    IIRFilter::processAudio(inputs, outputs);
 }
 
 void IIRMoogFilter::setSampleRate(double sampleRate)
 {
     IIRFilter::setSampleRate(sampleRate);
     // recompute coefficients:
-    setCutoffFrequency(getCutoffFrequency(), getResonance());
+    computeCoefficients();
 }
 
-void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double resonance)
+void IIRMoogFilter::setParameters(const Parameters parameters)
 {
-    this->cutoffFrequencyInHertz = cutoffFrequencyInHertz;
-    this->resonance = resonance;
+    this->parameters = parameters;
+    computeCoefficients();
+}
+
+const IIRMoogFilter::Parameters & IIRMoogFilter::getParameters() const
+{
+    return parameters;
+}
+
+void IIRMoogFilter::computeCoefficients()
+{
+    double cutoffFrequencyInHertz = parameters.frequency * parameters.frequencyFactor * pow(1 + parameters.frequencyModulationIntensity, parameters.frequencyModulation);
     double radians = convertHertzToRadians(cutoffFrequencyInHertz);
+    if (radians > M_PI) {
+        radians = M_PI;
+    }
     double s = sin(radians);
     double c = cos(radians);
     double t = tan((radians - M_PI) * 0.25);
     double a1 = t / (s - c * t);
     double a2 = a1 * a1;
     double g1Square_inv = 1.0 + a2 + 2.0 * a1 * c;
-    double k = resonance * g1Square_inv * g1Square_inv;
+    double k = parameters.resonance * g1Square_inv * g1Square_inv;
     getFeedBackCoefficients()[0] = k + 4.0 * a1;
     getFeedBackCoefficients()[1] = 6.0 * a2;
     getFeedBackCoefficients()[2] = 4.0 * a2 * a1;
@@ -41,13 +61,4 @@ void IIRMoogFilter::setCutoffFrequency(double cutoffFrequencyInHertz, double res
     for (int k = (n + 2) / 2; k <= n; k++) {
         getFeedForwardCoefficients()[k] = getFeedForwardCoefficients()[n - k];
     }
-}
-
-double IIRMoogFilter::getCutoffFrequency() const
-{
-    return cutoffFrequencyInHertz;
-}
-double IIRMoogFilter::getResonance() const
-{
-    return resonance;
 }

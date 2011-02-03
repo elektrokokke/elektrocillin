@@ -31,8 +31,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QGraphicsScene * scene = new QGraphicsScene();
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
-    moogFilter.setCutoffFrequency(frequencyResponse->getLowestHertz(), 0);
-    moogFilterCopy.setCutoffFrequency(frequencyResponse->getLowestHertz(), 0);
+    IIRMoogFilter::Parameters moogFilterParameters = { frequencyResponse->getLowestHertz(), 1, 0, 1, 0 };
+    moogFilter.setParameters(moogFilterParameters);
+    moogFilterCopy.setParameters(moogFilterParameters);
     frequencyResponse->addFrequencyResponse(&moogFilterCopy);
 
     GraphicsNodeItem *cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
@@ -176,7 +177,10 @@ void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char
 
 void MainWindow::onChangeCutoff(QPointF cutoffResonance)
 {
-    moogFilterClient.setParameters(cutoffResonance.x(), cutoffResonance.y());
-    moogFilterCopy.setCutoffFrequency(cutoffResonance.x(), cutoffResonance.y());
+    IIRMoogFilter::Parameters parameters = moogFilterCopy.getParameters();
+    parameters.frequency = cutoffResonance.x();
+    parameters.resonance = cutoffResonance.y();
+    moogFilterClient.setParameters(parameters);
+    moogFilterCopy.setParameters(parameters);
     frequencyResponse->updateFrequencyResponse(0);
 }
