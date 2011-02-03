@@ -70,7 +70,7 @@ void MonophonicSynthesizer::processController(unsigned char, unsigned char value
     morph = (double)value / 127.0;
 }
 
-void MonophonicSynthesizer::processAudio(const double *inputs, double *outputs)
+void MonophonicSynthesizer::processAudio(const double *, double *outputs)
 {
     // get level from ADSR envelope:
     double envelopeLevel = envelope.processAudio0();

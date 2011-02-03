@@ -1,7 +1,6 @@
 #include "iirmoogfilterclient.h"
 
-IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter_, QObject *parent) :
-    QObject(parent),
+IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter_) :
     AudioProcessorClient(clientName, filter_),
     filter(filter_),
     controlRingBuffer(1024)

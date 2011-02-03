@@ -22,14 +22,14 @@ unsigned char GraphicsKeyboardItem::getChannel() const
     return channel;
 }
 
-void GraphicsKeyboardItem::pressKey(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void GraphicsKeyboardItem::pressKey(unsigned char channel, unsigned char noteNumber, unsigned char)
 {
     if (channel == getChannel()) {
         keys[noteNumber]->pressKey();
     }
 }
 
-void GraphicsKeyboardItem::releaseKey(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void GraphicsKeyboardItem::releaseKey(unsigned char channel, unsigned char noteNumber, unsigned char)
 {
     if (channel == getChannel()) {
         keys[noteNumber]->releaseKey();

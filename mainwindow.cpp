@@ -9,6 +9,7 @@
 #include "iirbutterworthfilter.h"
 #include "graphicsnodeitem.h"
 #include "graphicskeyboarditem.h"
+#include "eventprocessorclient.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>

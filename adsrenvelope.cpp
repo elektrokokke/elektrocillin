@@ -13,13 +13,13 @@ AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustain
 {
 }
 
-void AdsrEnvelope::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
+void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char)
 {
     currentSegmentTime = 0.0;
     currentSegment = ATTACK;
 }
 
-void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char velocity)
+void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char)
 {
     currentSegmentTime = 0.0;
     previousSegmentLevel = previousLevel;

@@ -10,7 +10,6 @@ public:
 
     virtual void setSampleRate(double sampleRate);
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
-    virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
     virtual void processPitchBend(unsigned char channel, unsigned int value);
     virtual void processAudio(const double *inputs, double *outputs);
 

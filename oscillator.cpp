@@ -26,18 +26,14 @@ void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned
     computePhaseIncrement();
 }
 
-void Oscillator::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity)
-{
-}
-
-void Oscillator::processPitchBend(unsigned char channel, unsigned int value)
+void Oscillator::processPitchBend(unsigned char, unsigned int value)
 {
     pitchBendValue = value;
     frequencyInHertz = computeFrequencyFromMidiNoteNumber(noteNumber) * computePitchBendFactorFromMidiPitch(pitchBendValue);
     computePhaseIncrement();
 }
 
-void Oscillator::processAudio(const double *inputs, double *outputs)
+void Oscillator::processAudio(const double *, double *outputs)
 {
     outputs[0] = valueAtPhase(phase);
     // advance phase:

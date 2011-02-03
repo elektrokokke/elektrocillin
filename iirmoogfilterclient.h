@@ -12,14 +12,13 @@ struct IIRMoogFilterControl {
     double resonance;
 };
 
-class IIRMoogFilterClient : public QObject, public AudioProcessorClient
+class IIRMoogFilterClient : public AudioProcessorClient
 {
-    Q_OBJECT
 public:
-    IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter, QObject *parent = 0);
+    IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter);
     virtual ~IIRMoogFilterClient();
 
-public slots:
+    // this method can be called from any thread:
     void setParameters(double cutoffFrequency, double resonance);
 
 protected:
