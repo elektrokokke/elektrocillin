@@ -24,6 +24,7 @@ private:
     // all times are in seconds, all levels between 0 and 1:
     double attackTime, decayTime, sustainLevel, releaseTime;
     double currentSegmentTime;
+    double velocity;
     CurrentSegment currentSegment;
     bool release;
 };

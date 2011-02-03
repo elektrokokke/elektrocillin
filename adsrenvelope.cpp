@@ -6,14 +6,16 @@ AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustain
     decayTime(decayTime_),
     sustainLevel(sustainLevel_),
     releaseTime(releaseTime_),
-    currentSegmentTime(0.0),
+    currentSegmentTime(0),
+    velocity(1),
     currentSegment(NONE),
     release(false)
 {
 }
 
-void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char, jack_nframes_t)
+void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t)
 {
+    this->velocity = velocity / 127.0;
     currentSegmentTime = 0.0;
     currentSegment = ATTACK;
     release = false;
@@ -62,5 +64,5 @@ void AdsrEnvelope::processAudio(const double *, double *outputs, jack_nframes_t)
         }
     }
     currentSegmentTime += getSampleDuration();
-    outputs[0] = level;
+    outputs[0] = level * velocity;
 }
