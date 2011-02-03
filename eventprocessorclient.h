@@ -24,6 +24,14 @@ public:
         close();
     }
 
+    void postEvent(const T &event)
+    {
+        Event ev;
+        ev.time = getEstimatedCurrentTime();
+        ev.data = event;
+        eventRingBuffer.write(ev);
+    }
+
 protected:
     virtual bool process(jack_nframes_t nframes)
     {
