@@ -1,5 +1,26 @@
 #include "iirmoogfilterclient.h"
 
+IIRMoogFilterClient::IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter) :
+        EventProcessorClient<IIRMoogFilter::Parameters>(clientName, filter)
+{
+}
+
+IIRMoogFilterClient::~IIRMoogFilterClient()
+{
+    close();
+}
+
+IIRMoogFilter * IIRMoogFilterClient::getMoogFilter()
+{
+    return (IIRMoogFilter*)getMidiProcessor();
+}
+
+void IIRMoogFilterClient::processEvent(const IIRMoogFilter::Parameters &event)
+{
+    getMoogFilter()->setParameters(event);
+}
+
+
 IIRMoogFilterClientOld::IIRMoogFilterClientOld(const QString &clientName, IIRMoogFilter *filter_) :
     AudioProcessorClient(clientName, filter_),
     filter(filter_),

@@ -2,10 +2,22 @@
 #define IIRMOOGFILTERCLIENT_H
 
 #include "eventprocessorclient.h"
-#include "audioprocessorclient.h"
+#include "eventprocessorclient.h"
 #include "iirmoogfilter.h"
 #include "jackringbuffer.h"
 #include <QObject>
+
+class IIRMoogFilterClient : public EventProcessorClient<IIRMoogFilter::Parameters> {
+public:
+    IIRMoogFilterClient(const QString &clientName, IIRMoogFilter *filter);
+    virtual ~IIRMoogFilterClient();
+
+    IIRMoogFilter * getMoogFilter();
+
+protected:
+    // reimplemented method from EventProcessorClient:
+    virtual void processEvent(const IIRMoogFilter::Parameters &event);
+};
 
 struct IIRMoogFilterControl {
     jack_nframes_t time;
