@@ -4,7 +4,7 @@
 #include <QDebug>
 
 ZPlaneFilter::ZPlaneFilter(double sampleRate) :
-    AudioProcessor(1, 1, sampleRate),
+    AudioProcessor(QStringList("audio_in"), QStringList("filtered_out"), sampleRate),
     tx(0),
     ty(0)
 {

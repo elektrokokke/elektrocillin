@@ -23,6 +23,7 @@ protected:
       Constructor for subclasses that do not want to use a MidiProcessor,
       but reimplement the respective methods such as to do the MidiProcessor's
       work themselves.
+
       Methods to reimplement:
       - processAudio(const double*, double*, jack_nframes_t) OR
       - processAudio(jack_nframes_t, jack_nframes_t),
@@ -32,8 +33,11 @@ protected:
       - processPitchBend OR
       - processMidi(const MidiEvent &, jack_nframes_t) OR
       - processMidi(jack_nframes_t, jack_nframes_t)
+
+      See AudioProcessorClient::AudioProcessorClient(const QString &, const QStringList &, const QStringList &)
+      for a description of the parameters.
       */
-    MidiProcessorClient(const QString &clientName, int nrOfInputs, int nrOfOutputs);
+    MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames);
 
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);

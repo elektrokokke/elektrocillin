@@ -1,22 +1,33 @@
 #include "audioprocessor.h"
 #include <cmath>
 
-AudioProcessor::AudioProcessor(int nrOfInputs, int nrOfOutputs, double sampleRate_) :
+AudioProcessor::AudioProcessor(const QStringList &inputPortNames_, const QStringList &outputPortNames_, double sampleRate_) :
     sampleRate(sampleRate_),
     sampleDuration(1.0 / sampleRate),
-    inputs(nrOfInputs),
-    outputs(nrOfOutputs)
+    inputPortNames(inputPortNames_),
+    outputPortNames(outputPortNames_),
+    inputs(inputPortNames.size()),
+    outputs(outputPortNames.size())
 {
+}
+
+const QStringList & AudioProcessor::getInputPortNames() const
+{
+    return inputPortNames;
+}
+const QStringList & AudioProcessor::getOutputPortNames() const
+{
+    return outputPortNames;
 }
 
 int AudioProcessor::getNrOfInputs() const
 {
-    return inputs.size();
+    return inputPortNames.size();
 }
 
 int AudioProcessor::getNrOfOutputs() const
 {
-    return outputs.size();
+    return outputPortNames.size();
 }
 
 void AudioProcessor::setSampleRate(double sampleRate)

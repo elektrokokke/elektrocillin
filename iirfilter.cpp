@@ -1,8 +1,8 @@
 #include "iirfilter.h"
 #include <QDebug>
 
-IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, int nrOfInputs, double sampleRate) :
-    MidiProcessor(nrOfInputs, 1, sampleRate),
+IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames, double sampleRate) :
+    MidiProcessor(QStringList("audio_in") + additionalInputPortNames, QStringList("filtered_out"), sampleRate),
     feedForward(feedForwardCoefficients),
     feedBack(feedBackCoefficients),
     x(feedForwardCoefficients),

@@ -1,7 +1,7 @@
 #include "adsrenvelope.h"
 
 AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustainLevel_, double releaseTime_, double sampleRate) :
-    MidiProcessor(0, 1, sampleRate),
+    MidiProcessor(QStringList(), QStringList("envelope_out"), sampleRate),
     attackTime(attackTime_),
     decayTime(decayTime_),
     sustainLevel(sustainLevel_),

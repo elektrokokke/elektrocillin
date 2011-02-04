@@ -6,8 +6,8 @@ MidiProcessorClient::MidiProcessorClient(const QString &clientName, MidiProcesso
 {
 }
 
-MidiProcessorClient::MidiProcessorClient(const QString &clientName, int nrOfInputs, int nrOfOutputs) :
-    AudioProcessorClient(clientName, nrOfInputs, nrOfOutputs),
+MidiProcessorClient::MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames) :
+    AudioProcessorClient(clientName, inputPortNames, outputPortNames),
     midiProcessor(0)
 {
 }
@@ -24,7 +24,7 @@ MidiProcessor * MidiProcessorClient::getMidiProcessor()
 
 bool MidiProcessorClient::init()
 {
-    return AudioProcessorClient::init() && (midiInputPort = registerMidiPort(QString("midi in"), JackPortIsInput));
+    return AudioProcessorClient::init() && (midiInputPort = registerMidiPort(QString("midi_in"), JackPortIsInput));
 }
 
 bool MidiProcessorClient::process(jack_nframes_t nframes)

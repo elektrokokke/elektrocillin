@@ -2,7 +2,7 @@
 #include <cmath>
 
 MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
-    MidiProcessor(0, 1, sampleRate),
+    MidiProcessor(QStringList(), QStringList("audio_out"), sampleRate),
     morph(0.0),
     osc1(M_PI),
     osc2(0.1),

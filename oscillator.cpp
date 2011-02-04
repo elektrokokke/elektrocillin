@@ -2,7 +2,7 @@
 #include <cmath>
 
 Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate) :
-    MidiProcessor(1, 1, sampleRate),
+    MidiProcessor(QStringList("pitch_modulation_in"), QStringList("oscillator_out"), sampleRate),
     frequency(0),
     frequencyPitchBendFactor(1),
     frequencyModulationFactor(1),

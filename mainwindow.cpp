@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     synthesizerClient("synthesizer", &synthesizer),
     moogFilterClient("moog filter", &moogFilter),
     lfoClient("lfo", &lfo)
-{
+{   
     ui->setupUi(this);
 
     lfo.setFrequency(0.5);

@@ -59,10 +59,12 @@ protected:
       - processAudio(jack_nframes_t, jack_nframes_t)
 
       @param clientName the name of the Jack client (see JackClient::JackClient)
-      @param nrOfInputs the desired number of audio input ports
-      @param nrOfOutputs the desired number of audio output ports
+      @param inputPortNames the desired audio input port names, at the same time determining
+        the input port count
+      @param outputPortnames the desired audio output port names, at the same time determining
+        the output port count
       */
-    AudioProcessorClient(const QString &clientName, int nrOfInputs, int nrOfOutputs);
+    AudioProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames);
 
     /**
       This implementation creates the Jack input and output ports as specified
@@ -134,6 +136,7 @@ protected:
 
 private:
     AudioProcessor *audioProcessor;
+    QStringList inputPortNames, outputPortNames;
     QVector<jack_port_t*> inputPorts, outputPorts;
     QVector<jack_default_audio_sample_t*> inputBuffers, outputBuffers;
     QVector<double> inputs, outputs;

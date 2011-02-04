@@ -2,13 +2,16 @@
 #define SAMPLED_H
 
 #include <QVector>
+#include <QStringList>
 #include <jack/jack.h>
 
 class AudioProcessor
 {
 public:
-    AudioProcessor(int nrOfInputs = 0, int nrOfOutputs = 0, double sampleRate = 44100);
+    AudioProcessor(const QStringList &inputPortNames, const QStringList &outputPortNames, double sampleRate = 44100);
 
+    const QStringList & getInputPortNames() const;
+    const QStringList & getOutputPortNames() const;
     int getNrOfInputs() const;
     int getNrOfOutputs() const;
 
@@ -25,6 +28,7 @@ public:
 
 private:
     double sampleRate, sampleDuration;
+    QStringList inputPortNames, outputPortNames;
     QVector<double> inputs, outputs;
 };
 

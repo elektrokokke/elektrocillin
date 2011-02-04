@@ -4,25 +4,28 @@
 AudioProcessorClient::AudioProcessorClient(const QString &clientName, AudioProcessor *audioProcessor_) :
     JackClient(clientName),
     audioProcessor(audioProcessor_),
-    inputPorts(audioProcessor->getNrOfInputs()),
-    outputPorts(audioProcessor->getNrOfOutputs()),
-    inputBuffers(audioProcessor->getNrOfInputs()),
-    outputBuffers(audioProcessor->getNrOfOutputs()),
-    inputs(audioProcessor->getNrOfInputs()),
-    outputs(audioProcessor->getNrOfOutputs())
+    inputPortNames(audioProcessor->getInputPortNames()),
+    outputPortNames(audioProcessor->getOutputPortNames()),
+    inputPorts(inputPortNames.size()),
+    outputPorts(outputPortNames.size()),
+    inputBuffers(inputPortNames.size()),
+    outputBuffers(outputPortNames.size()),
+    inputs(inputPortNames.size()),
+    outputs(outputPortNames.size())
 {
 }
 
-AudioProcessorClient::AudioProcessorClient(const QString &clientName, int nrOfInputs, int nrOfOutputs) :
+AudioProcessorClient::AudioProcessorClient(const QString &clientName, const QStringList &inputPortNames_, const QStringList &outputPortNames_) :
     JackClient(clientName),
     audioProcessor(0),
-    inputPorts(nrOfInputs),
-    outputPorts(nrOfOutputs),
-    inputBuffers(nrOfInputs),
-    outputBuffers(nrOfOutputs),
-    inputs(nrOfInputs),
-    outputs(nrOfOutputs)
-
+    inputPortNames(inputPortNames_),
+    outputPortNames(outputPortNames_),
+    inputPorts(inputPortNames.size()),
+    outputPorts(outputPortNames.size()),
+    inputBuffers(inputPortNames.size()),
+    outputBuffers(outputPortNames.size()),
+    inputs(inputPortNames.size()),
+    outputs(outputPortNames.size())
 {}
 
 AudioProcessorClient::~AudioProcessorClient()
@@ -39,11 +42,11 @@ bool AudioProcessorClient::init()
 {
     bool ok = true;
     // create audio input and output ports:
-    for (int i = 0; i < inputs.size(); i++) {
-        ok = ok && (inputPorts[i] = registerAudioPort(QString("audio in %1").arg(i), JackPortIsInput));
+    for (int i = 0; ok && (i < inputPortNames.size()); i++) {
+        ok = ok && (inputPorts[i] = registerAudioPort(inputPortNames[i], JackPortIsInput));
     }
-    for (int i = 0; i < outputs.size(); i++) {
-        ok = ok && (outputPorts[i] = registerAudioPort(QString("audio out %1").arg(i), JackPortIsOutput));
+    for (int i = 0; ok && (i < outputPortNames.size()); i++) {
+        ok = ok && (outputPorts[i] = registerAudioPort(outputPortNames[i], JackPortIsOutput));
     }
     if (audioProcessor) {
         audioProcessor->setSampleRate(getSampleRate());

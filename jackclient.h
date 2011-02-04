@@ -3,8 +3,7 @@
 
 #include <jack/jack.h>
 
-#include <QString>
-#include <QList>
+#include <QStringList>
 
 /**
   This is an abstract class which should simplify the creation of arbitrary Jack clients.
@@ -66,6 +65,16 @@ public:
 
     bool isActive() const;
     /**
+      Returns the current (estimated) Jack server time.
+      From the Jack documentation (names are translated to this
+      API when appropriate):
+
+      This function is intended for use in other threads (not the process
+      callback). The return value can be compared with the value of
+      getLastFrameTime() to relate time in other threads to Jack time.
+      */
+    jack_nframes_t getEstimatedCurrentTime();
+    /**
       Connects two given ports. Port names are constructed in the form
       "[clientname]:[portname]". Both ports have to be of the same type
       (e.g., two audio ports or two midi ports). You can only connect
@@ -91,16 +100,16 @@ public:
       */
     bool disconnectPorts(const QString &sourcePortName, const QString &destPortName);
 
-    /**
-      Returns the current (estimated) Jack server time.
-      From the Jack documentation (names are translated to this
-      API when appropriate):
+    QString getShortPortname(jack_port_t *port);
+    QString getFullPortname(jack_port_t *port);
+    QStringList getClientPorts(const QString &clientName, unsigned long flags = 0);
+    QStringList getAllPorts(unsigned long flags = 0);
+    QStringList getAllConnectedPorts(const QString &fullPortName);
+    QStringList getAllConnections();
+    void restoreConnections(const QStringList &connections);
 
-      This function is intended for use in other threads (not the process
-      callback). The return value can be compared with the value of
-      getLastFrameTime() to relate time in other threads to Jack time.
-      */
-    jack_nframes_t getEstimatedCurrentTime();
+    static QString getFullPortName(const QString &clientName, const QString &shortPortName);
+    static int getMaximumPortNameLength();
 
 protected:
     /**
@@ -145,7 +154,17 @@ protected:
       may have advanced in a non-linear way (e.g. cycles may have been skipped).
       */
     jack_nframes_t getLastFrameTime();
+    /**
+      This method retrieves the sample rate of the Jack server. You will
+      find the sample rate useful for things like oscillators, filters etc.
 
+      This method may only be called when the client is registered at the
+      server, i.e. in or after the init() method call and before the client
+      is closed.
+
+      @return the sample rate of the Jack server in Hertz
+      */
+    jack_nframes_t getSampleRate() const;
     /**
       Creates an audio port with a given name.
 
@@ -166,17 +185,6 @@ protected:
       @return a pointer to the newly create port if successful, 0 otherwise
       */
     jack_port_t * registerMidiPort(const QString &name, unsigned long flags);
-    /**
-      This method retrieves the sample rate of the Jack server. You will
-      find the sample rate useful for things like oscillators, filters etc.
-
-      This method may only be called when the client is registered at the
-      server, i.e. in or after the init() method call and before the client
-      is closed.
-
-      @return the sample rate of the Jack server in Hertz
-      */
-    jack_nframes_t getSampleRate() const;
 
 private:
     QString requestedName, actualName;

@@ -1,8 +1,8 @@
 #include "midiprocessor.h"
 #include <cmath>
 
-MidiProcessor::MidiProcessor(int nrOfInputs, int nrOfOutputs, double sampleRate) :
-    AudioProcessor(nrOfInputs, nrOfOutputs, sampleRate)
+MidiProcessor::MidiProcessor(const QStringList &inputPortNames, const QStringList &outputPortNames, double sampleRate) :
+    AudioProcessor(inputPortNames, outputPortNames, sampleRate)
 {
 }
 
