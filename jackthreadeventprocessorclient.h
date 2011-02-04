@@ -8,7 +8,7 @@ template<class T> class JackThreadEventProcessorClient : public EventProcessorCl
 {
 public:
     JackThreadEventProcessorClient(JackThread *thread, const QString &clientName, MidiProcessor *midiProcessor, size_t ringBufferSize = 1024) :
-        EventProcessorClient(clientName, midiProcessor, ringBufferSize),
+        EventProcessorClient<T>(clientName, midiProcessor, ringBufferSize),
         jackThread(thread)
     {}
     /**
@@ -25,14 +25,10 @@ public:
       - processMidi(const MidiEvent &, jack_nframes_t) OR
       - processMidi(jack_nframes_t, jack_nframes_t)
       */
-    JackThreadEventProcessorClient(JackThread *thread, const QString &clientName, int nrOfInputs, int nrOfOutputs, size_t ringBufferSize = 1024) :
-        EventProcessorClient(clientName, nrOfInputs, nrOfOutputs, ringBufferSize),
+    JackThreadEventProcessorClient(JackThread *thread, const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = 1024) :
+        EventProcessorClient<T>(clientName, inputPortNames, outputPortNames, ringBufferSize),
         jackThread(thread)
     {}
-    virtual ~JackThreadEventProcessorClient()
-    {
-        close();
-    }
 
     JackThread * getJackThread()
     {

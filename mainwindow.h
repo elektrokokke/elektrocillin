@@ -32,7 +32,7 @@ public:
 private slots:
     void onMidiMessage(unsigned char, unsigned char, unsigned char);
     void onChangeCutoff(QPointF cutoffResonance);
-    void onNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity);
+    void onChangedParameters(double frequency);
 
     void on_actionStore_connections_triggered();
 

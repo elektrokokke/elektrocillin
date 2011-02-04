@@ -17,10 +17,6 @@ public:
         MidiProcessorClient(clientName, midiProcessor_),
         eventRingBuffer(ringBufferSize)
     {}
-    virtual ~EventProcessorClient()
-    {
-        close();
-    }
 
     void postEvent(const T &event)
     {
