@@ -13,6 +13,7 @@
 #include "cubicsplineinterpolator.h"
 #include "linearinterpolator.h"
 #include "graphicsinterpolationitem.h"
+#include "linearwaveshapingclient.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
@@ -28,38 +29,39 @@ MainWindow::MainWindow(QWidget *parent) :
     moogFilterCopy(44100, 1),
     moogFilterClient("moog filter", &moogFilter),
     lfoClient1("lfo", &lfo1),
-    lfoClient2("lfo_2", &lfo2)
+    lfoClient2("lfo_2", &lfo2),
+    linearWaveShapingClient("waveshaping")
 {   
     ui->setupUi(this);
     QGraphicsScene * scene = new QGraphicsScene();
 
-    // interpolation test:
-    QVector<double> controlPointsX, controlPointsY;
-    controlPointsX.append(0);
-    controlPointsY.append(0);
-    controlPointsX.append(0.4);
-    controlPointsY.append(1);
-    controlPointsX.append(0.6);
-    controlPointsY.append(1);
-    controlPointsX.append(1);
-    controlPointsY.append(0);
-    controlPointsX.append(1.4);
-    controlPointsY.append(-1);
-    controlPointsX.append(1.6);
-    controlPointsY.append(-1);
-    controlPointsX.append(2);
-    controlPointsY.append(0);
-    LinearInterpolator linearInterpolator(controlPointsX, controlPointsY);
-    CubicSplineInterpolator splineInterpolator(controlPointsX, controlPointsY);
-    GraphicsInterpolationItem *interpolationItem = new GraphicsInterpolationItem(&linearInterpolator, 0.01);
-    interpolationItem->setScale(100);
-    interpolationItem->setPos(0, -200);
-    scene->addItem(interpolationItem);
-    GraphicsInterpolationItem *splineItem = new GraphicsInterpolationItem(&splineInterpolator, 0.01);
-    splineItem->setScale(100);
-    splineItem->setPos(200, -200);
-    scene->addItem(splineItem);
-    // end interpolation test
+//    // interpolation test:
+//    QVector<double> controlPointsX, controlPointsY;
+//    controlPointsX.append(0);
+//    controlPointsY.append(0);
+//    controlPointsX.append(0.4);
+//    controlPointsY.append(1);
+//    controlPointsX.append(0.6);
+//    controlPointsY.append(1);
+//    controlPointsX.append(1);
+//    controlPointsY.append(0);
+//    controlPointsX.append(1.4);
+//    controlPointsY.append(-1);
+//    controlPointsX.append(1.6);
+//    controlPointsY.append(-1);
+//    controlPointsX.append(2);
+//    controlPointsY.append(0);
+//    LinearInterpolator linearInterpolator(controlPointsX, controlPointsY);
+//    CubicSplineInterpolator splineInterpolator(controlPointsX, controlPointsY);
+//    GraphicsInterpolationItem *interpolationItem = new GraphicsInterpolationItem(&linearInterpolator, 0.01);
+//    interpolationItem->setScale(100);
+//    interpolationItem->setPos(0, -200);
+//    scene->addItem(interpolationItem);
+//    GraphicsInterpolationItem *splineItem = new GraphicsInterpolationItem(&splineInterpolator, 0.01);
+//    splineItem->setScale(100);
+//    splineItem->setPos(200, -200);
+//    scene->addItem(splineItem);
+//    // end interpolation test
 
     // moog filter client and gui test setup:
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
@@ -74,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
     moogFilterCopy.setParameters(moogFilterParameters);
     frequencyResponse->addFrequencyResponse(&moogFilterCopy);
     cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
+    cutoffResonanceNode->setScale(GraphicsNodeItem::LOGARITHMIC, GraphicsNodeItem::LINEAR);
     cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
     cutoffResonanceNode->setBrush(QBrush(qRgb(52, 101, 164)));
     cutoffResonanceNode->setZValue(10);
@@ -92,6 +95,11 @@ MainWindow::MainWindow(QWidget *parent) :
     midiSignalThread.getClient()->activate();
     // end virtual keyboard and midi signal client test setup
 
+    // waveshaping client test setup:
+    LinearWaveShapingGraphicsItem *waveShapingItem = new LinearWaveShapingGraphicsItem(QRectF(0, 0, 600, 600), &linearWaveShapingClient);
+    linearWaveShapingClient.activate();
+    // end waveshaping client test setup
+
     // monophonic synthesizer and lfo test setup:
     synthesizerClient.activate();
     lfo1.setFrequency(0.5);
@@ -109,6 +117,9 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), rect.translated(size.width() + 100, 0), size, 10);
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
+    GraphicsClientItem *graphicsClientItemWaveShaping = new GraphicsClientItem("Wave shaping", rect.translated((size.width() + 100) * 2, 0), size, 10);
+    graphicsClientItemWaveShaping->setInnerItem(waveShapingItem);
+    scene->addItem(graphicsClientItemWaveShaping);
     // end client graphics item test setup
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
@@ -261,7 +272,6 @@ void MainWindow::on_actionMoog_filter_triggered()
     QRectF rectFrom = QRectF(ui->graphicsView->mapToScene(topLeft), ui->graphicsView->mapToScene(bottomRight));
     //QRectF rectFrom = ui->graphicsView->viewportTransform().mapRect(ui->graphicsView->viewport()->rect());
     QRectF rectTo = graphicsClientItemFilter->sceneBoundingRect();
-    qDebug() << rectFrom << rectTo;
     for (qreal i = 0.1; i <= 1; i += 0.1) {
         QRectF rectCurrent(rectFrom.x() * (1-i) + rectTo.x() * i, rectFrom.y() * (1-i) + rectTo.y() * i, rectFrom.width() * (1-i) + rectTo.width() * i, rectFrom.height() * (1-i) + rectTo.height() * i);
         ui->graphicsView->fitInView(rectCurrent, Qt::KeepAspectRatio);

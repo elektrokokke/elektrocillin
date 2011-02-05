@@ -12,6 +12,7 @@
 #include "oscillator.h"
 #include "jacknullclient.h"
 #include "graphicsclientitem.h"
+#include "linearwaveshapingclient.h"
 
 class Record2MemoryClient;
 class MidiController2AudioClient;
@@ -62,6 +63,7 @@ private:
     IirMoogFilterClient moogFilterClient;
     Oscillator lfo1, lfo2;
     AudioProcessorClient lfoClient1, lfoClient2;
+    LinearWaveShapingClient linearWaveShapingClient;
     JackNullClient nullClient;
     GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard;
 };

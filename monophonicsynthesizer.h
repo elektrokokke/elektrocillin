@@ -21,7 +21,8 @@ public:
 
 private:
     double controller;
-    PulseOscillator2 pulseOsc;
+    //PulseOscillator2 osc;
+    Oscillator osc;
     AdsrEnvelope envelope;
     IirButterworthFilter filterAudio, filterController;
     QStack<unsigned char> midiNoteNumbers;

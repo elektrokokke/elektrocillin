@@ -86,6 +86,8 @@ qreal FrequencyResponseGraphicsItem::getZeroDecibelY() const
 
 void FrequencyResponseGraphicsItem::initialize()
 {
+    setPen(QPen(QBrush(Qt::black), 2));
+
     frequencyResponsePens.append(QPen(QBrush(Qt::black), 2));
     frequencyResponsePens.append(QPen(QBrush(Qt::darkRed), 2));
     frequencyResponsePens.append(QPen(QBrush(Qt::darkGreen), 2));

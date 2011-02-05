@@ -58,7 +58,8 @@ SOURCES += main.cpp\
     linearinterpolator.cpp \
     cubicsplineinterpolator.cpp \
     graphicsinterpolationitem.cpp \
-    pulseoscillator2.cpp
+    pulseoscillator2.cpp \
+    linearwaveshapingclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -113,7 +114,8 @@ HEADERS  += mainwindow.h \
     linearinterpolator.h \
     cubicsplineinterpolator.h \
     graphicsinterpolationitem.h \
-    pulseoscillator2.h
+    pulseoscillator2.h \
+    linearwaveshapingclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

@@ -186,7 +186,7 @@ void GraphicsNodeItem::init()
     considerBoundsScaled = false;
     changingCoordinates = false;
     sendPositionChanges = false;
-    horizontalScale = LOGARITHMIC;
+    horizontalScale = LINEAR;
     verticalScale = LINEAR;
     setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);// | QGraphicsItem::ItemIsSelectable);
