@@ -1,6 +1,12 @@
 #include "interpolator.h"
 #include <cmath>
 
+double Interpolator::evaluate(double x)
+{
+    int jlo = cor ? hunt(x) : locate(x);
+    return interpolate(jlo, x);
+}
+
 Interpolator::Interpolator(const QVector<double> &xx_, const QVector<double> &yy_, int m_) :
     xx(xx_),
     yy(yy_),
