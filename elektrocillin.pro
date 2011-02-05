@@ -55,7 +55,8 @@ SOURCES += main.cpp\
     jacknullclient.cpp \
     graphicsclientitem.cpp \
     interpolator.cpp \
-    linearinterpolator.cpp
+    linearinterpolator.cpp \
+    cubicsplineinterpolator.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -107,7 +108,8 @@ HEADERS  += mainwindow.h \
     jacknullclient.h \
     graphicsclientitem.h \
     interpolator.h \
-    linearinterpolator.h
+    linearinterpolator.h \
+    cubicsplineinterpolator.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
