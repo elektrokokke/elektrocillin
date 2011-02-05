@@ -1,9 +1,15 @@
 #include "graphicsinterpolationitem.h"
 #include <QPainterPath>
 
-GraphicsInterpolationItem::GraphicsInterpolationItem(Interpolator *interpolator_, double samplingInterval, QGraphicsItem *parent) :
+GraphicsInterpolationItem::GraphicsInterpolationItem(Interpolator *interpolator_, double samplingInterval_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
-    interpolator(interpolator_)
+    interpolator(interpolator_),
+    samplingInterval(samplingInterval_)
+{
+    updatePath();
+}
+
+void GraphicsInterpolationItem::updatePath()
 {
     // set the path according to the given spline:
     QPainterPath path(QPointF(interpolator->getX()[0], interpolator->getY()[0]));

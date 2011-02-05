@@ -9,8 +9,8 @@ LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size
 {
     interpolator.getX()[0] = 0;
     interpolator.getY()[0] = 0;
-    interpolator.getX()[1] = 1;
-    interpolator.getY()[1] = 1;
+    interpolator.getX()[1] = 0.5;
+    interpolator.getY()[1] = 0.5;
     interpolator.getX()[2] = 1;
     interpolator.getY()[2] = 1;
 }
@@ -57,7 +57,8 @@ LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect,
     nodeItem->setZValue(1);
     nodeItem->setBounds(rect);
     nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(1, 0)));
-    nodeItem->setPos(rect.topRight());
+    nodeItem->setXScaled(0.5);
+    nodeItem->setYScaled(0.5);
     nodeItem->setSendPositionChanges(true);
     GraphicsLineItem *lineItem1 = new GraphicsLineItem(rect.left(), rect.bottom(), rect.right(), rect.top(), this);
     GraphicsLineItem *lineItem2 = new GraphicsLineItem(rect.top(), rect.right(), rect.right(), rect.top(), this);

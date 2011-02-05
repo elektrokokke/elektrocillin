@@ -14,6 +14,12 @@ public:
       Constructor for "natural" splines.
       */
     CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy);
+    /**
+      Constructor with given second derivatives.
+      */
+    CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy, const QVector<double> &y2);
+
+    const QVector<double> & getY2() const;
 
 protected:
     double interpolate(int jlo, double x);

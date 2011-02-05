@@ -14,6 +14,17 @@ CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, cons
     sety2NaturalSpline(xx, yy);
 }
 
+CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy, const QVector<double> &y2_) :
+    Interpolator(xx, yy, 2),
+    y2(y2_)
+{
+}
+
+const QVector<double> & CubicSplineInterpolator::getY2() const
+{
+    return y2;
+}
+
 /**
   Comments from "Numerical Recipes"
 
