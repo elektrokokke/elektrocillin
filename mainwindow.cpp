@@ -10,6 +10,9 @@
 #include "graphicsnodeitem.h"
 #include "graphicskeyboarditem.h"
 #include "eventprocessorclient.h"
+#include "cubicsplineinterpolator.h"
+#include "linearinterpolator.h"
+#include "graphicsinterpolationitem.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
@@ -27,11 +30,37 @@ MainWindow::MainWindow(QWidget *parent) :
     lfoClient("lfo", &lfo)
 {   
     ui->setupUi(this);
-
-    lfo.setFrequency(0.5);
-
     QGraphicsScene * scene = new QGraphicsScene();
 
+    // interpolation test:
+    QVector<double> controlPointsX, controlPointsY;
+    controlPointsX.append(0);
+    controlPointsY.append(0);
+    controlPointsX.append(0.4);
+    controlPointsY.append(1);
+    controlPointsX.append(0.6);
+    controlPointsY.append(1);
+    controlPointsX.append(1);
+    controlPointsY.append(0);
+    controlPointsX.append(1.4);
+    controlPointsY.append(-1);
+    controlPointsX.append(1.6);
+    controlPointsY.append(-1);
+    controlPointsX.append(2);
+    controlPointsY.append(0);
+    LinearInterpolator linearInterpolator(controlPointsX, controlPointsY);
+    CubicSplineInterpolator splineInterpolator(controlPointsX, controlPointsY);
+    GraphicsInterpolationItem *interpolationItem = new GraphicsInterpolationItem(&linearInterpolator, 0.01);
+    interpolationItem->setScale(100);
+    interpolationItem->setPos(0, -200);
+    scene->addItem(interpolationItem);
+    GraphicsInterpolationItem *splineItem = new GraphicsInterpolationItem(&splineInterpolator, 0.01);
+    splineItem->setScale(100);
+    splineItem->setPos(200, -200);
+    scene->addItem(splineItem);
+    // end interpolation test
+
+    // moog filter client and gui test setup:
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
     IirMoogFilter::Parameters moogFilterParameters;
     moogFilterParameters.frequency = frequencyResponse->getLowestHertz();
@@ -43,7 +72,6 @@ MainWindow::MainWindow(QWidget *parent) :
     moogFilter.setParameters(moogFilterParameters);
     moogFilterCopy.setParameters(moogFilterParameters);
     frequencyResponse->addFrequencyResponse(&moogFilterCopy);
-
     cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
     cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
     cutoffResonanceNode->setBrush(QBrush(qRgb(52, 101, 164)));
@@ -53,16 +81,23 @@ MainWindow::MainWindow(QWidget *parent) :
     cutoffResonanceNode->setPos(frequencyResponse->getFrequencyResponseRectangle().left(), frequencyResponse->getZeroDecibelY());
     QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onChangeCutoff(QPointF)));
     QObject::connect(moogFilterClient.getMoogFilterThread(), SIGNAL(changedParameters(double)), this, SLOT(onChangedParameters(double)));
-
-    midiSignalThread.getClient()->activate();
-    synthesizerClient.activate();
     moogFilterClient.activate();
-    lfoClient.activate();
+    // end moog filter client and gui test setup
 
+    // virtual keyboard and midi signal client test setup:
     GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
     QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
     QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
+    midiSignalThread.getClient()->activate();
+    // end virtual keyboard and midi signal client test setup
 
+    // monophonic synthesizer and lfo test setup:
+    synthesizerClient.activate();
+    lfo.setFrequency(0.5);
+    lfoClient.activate();
+    // end monophonic synthesizer and lfo test setup
+
+    // client graphics item test setup:
     QSizeF size(100, 75);
     QRectF rect(-35, -20, size.width() + 35 * 2, size.height() + 20 * 2);
     graphicsClientItemFilter = new GraphicsClientItem(moogFilterClient.getClientName(), rect, size, 10);
@@ -71,6 +106,7 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), rect.translated(size.width() + 100, 0), size, 10);
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
+    // end client graphics item test setup
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);

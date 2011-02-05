@@ -56,6 +56,7 @@ void CubicSplineInterpolator::sety2(const QVector<double> &xx, const QVector<dou
         sig = (xx[i] - xx[i - 1]) / (xx[i + 1] - xx[i - 1]);
         p = sig * y2[i - 1] + 2.0;
         y2[i] = (sig - 1.0) / p;
+        u[i] = (yy[i + 1] - yy[i]) / (xx[i+ 1] - xx[i]) - (yy[i] - yy[i - 1]) / (xx[i] - xx[i - 1]);
         u[i] = (6.0 * u[i] / (xx[i + 1] - xx[i - 1]) - sig * u[i - 1]) / p;
     }
                                         // The upper boundary condition is set either to be "natural" (see sety2NaturalSpline())
@@ -77,6 +78,7 @@ void CubicSplineInterpolator::sety2NaturalSpline(const QVector<double> &xx, cons
         sig = (xx[i] - xx[i - 1]) / (xx[i + 1] - xx[i - 1]);
         p = sig * y2[i - 1] + 2.0;
         y2[i] = (sig - 1.0) / p;
+        u[i] = (yy[i + 1] - yy[i]) / (xx[i+ 1] - xx[i]) - (yy[i] - yy[i - 1]) / (xx[i] - xx[i - 1]);
         u[i] = (6.0 * u[i] / (xx[i + 1] - xx[i - 1]) - sig * u[i - 1]) / p;
     }
     qn = un = 0.0;                      // The upper boundary condition is set either to be "natural"
