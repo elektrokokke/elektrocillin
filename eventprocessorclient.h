@@ -20,10 +20,12 @@ public:
 
     void postEvent(const T &event)
     {
-        EventWithTimeStamp ev;
-        ev.time = getEstimatedCurrentTime();
-        ev.event = event;
-        eventRingBuffer.write(ev);
+        if (isActive()) {
+            EventWithTimeStamp ev;
+            ev.time = getEstimatedCurrentTime();
+            ev.event = event;
+            eventRingBuffer.write(ev);
+        }
     }
 
 protected:

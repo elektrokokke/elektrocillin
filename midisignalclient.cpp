@@ -80,99 +80,112 @@ void MidiSignalThread::processDeferred()
 
 void MidiSignalThread::sendNoteOff(unsigned char channel, unsigned char note, unsigned char velocity)
 {
-    // create the midi message:
-    MidiEventWithTimeStamp eventWithTimeStamp;
-    eventWithTimeStamp.event.size = 3;
-    eventWithTimeStamp.event.buffer[0] = 0x80 + channel;
-    eventWithTimeStamp.event.buffer[1] = note;
-    eventWithTimeStamp.event.buffer[2] = velocity;
-    // get estimated current time:
-    eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
-    // send the midi message:
-    getOutputRingBuffer()->write(eventWithTimeStamp);
+    if (client.isActive()) {
+        // create the midi message:
+        MidiEventWithTimeStamp eventWithTimeStamp;
+        eventWithTimeStamp.event.size = 3;
+        eventWithTimeStamp.event.buffer[0] = 0x80 + channel;
+        eventWithTimeStamp.event.buffer[1] = note;
+        eventWithTimeStamp.event.buffer[2] = velocity;
+        // get estimated current time:
+        eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
+        // send the midi message:
+        getOutputRingBuffer()->write(eventWithTimeStamp);
+    }
 }
 
 void MidiSignalThread::sendNoteOn(unsigned char channel, unsigned char note, unsigned char velocity)
 {
-    // create the midi message:
-    MidiEventWithTimeStamp eventWithTimeStamp;
-    eventWithTimeStamp.event.size = 3;
-    eventWithTimeStamp.event.buffer[0] = 0x90 + channel;
-    eventWithTimeStamp.event.buffer[1] = note;
-    eventWithTimeStamp.event.buffer[2] = velocity;
-    // get estimated current time:
-    eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
-    // send the midi message:
-    getOutputRingBuffer()->write(eventWithTimeStamp);
-//    qDebug() << "sendNoteOn(" << channel << "," << note << "," << velocity << ") at time" << message.time;
+    if (client.isActive()) {
+        // create the midi message:
+        MidiEventWithTimeStamp eventWithTimeStamp;
+        eventWithTimeStamp.event.size = 3;
+        eventWithTimeStamp.event.buffer[0] = 0x90 + channel;
+        eventWithTimeStamp.event.buffer[1] = note;
+        eventWithTimeStamp.event.buffer[2] = velocity;
+        // get estimated current time:
+        eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
+        // send the midi message:
+        getOutputRingBuffer()->write(eventWithTimeStamp);
+    }
 }
 
 void MidiSignalThread::sendAfterTouch(unsigned char channel, unsigned char note, unsigned char pressure)
 {
-    // create the midi message:
-    MidiEventWithTimeStamp eventWithTimeStamp;
-    eventWithTimeStamp.event.size = 3;
-    eventWithTimeStamp.event.buffer[0] = 0xA0 + channel;
-    eventWithTimeStamp.event.buffer[1] = note;
-    eventWithTimeStamp.event.buffer[2] = pressure;
-    // get estimated current time:
-    eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
-    // send the midi message:
-    getOutputRingBuffer()->write(eventWithTimeStamp);
+    if (client.isActive()) {
+        // create the midi message:
+        MidiEventWithTimeStamp eventWithTimeStamp;
+        eventWithTimeStamp.event.size = 3;
+        eventWithTimeStamp.event.buffer[0] = 0xA0 + channel;
+        eventWithTimeStamp.event.buffer[1] = note;
+        eventWithTimeStamp.event.buffer[2] = pressure;
+        // get estimated current time:
+        eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
+        // send the midi message:
+        getOutputRingBuffer()->write(eventWithTimeStamp);
+    }
 }
 
 void MidiSignalThread::sendControlChange(unsigned char channel, unsigned char controller, unsigned char value)
 {
-    // create the midi message:
-    MidiEventWithTimeStamp eventWithTimeStamp;
-    eventWithTimeStamp.event.size = 3;
-    eventWithTimeStamp.event.buffer[0] = 0xB0 + channel;
-    eventWithTimeStamp.event.buffer[1] = controller;
-    eventWithTimeStamp.event.buffer[2] = value;
-    // get estimated current time:
-    eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
-    // send the midi message:
-    getOutputRingBuffer()->write(eventWithTimeStamp);
+    if (client.isActive()) {
+        // create the midi message:
+        MidiEventWithTimeStamp eventWithTimeStamp;
+        eventWithTimeStamp.event.size = 3;
+        eventWithTimeStamp.event.buffer[0] = 0xB0 + channel;
+        eventWithTimeStamp.event.buffer[1] = controller;
+        eventWithTimeStamp.event.buffer[2] = value;
+        // get estimated current time:
+        eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
+        // send the midi message:
+        getOutputRingBuffer()->write(eventWithTimeStamp);
+    }
 }
 
 void MidiSignalThread::sendProgramChange(unsigned char channel, unsigned char program)
 {
-    // create the midi message:
-    MidiEventWithTimeStamp eventWithTimeStamp;
-    eventWithTimeStamp.event.size = 2;
-    eventWithTimeStamp.event.buffer[0] = 0xC0 + channel;
-    eventWithTimeStamp.event.buffer[1] = program;
-    // get estimated current time:
-    eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
-    // send the midi message:
-    getOutputRingBuffer()->write(eventWithTimeStamp);
+    if (client.isActive()) {
+        // create the midi message:
+        MidiEventWithTimeStamp eventWithTimeStamp;
+        eventWithTimeStamp.event.size = 2;
+        eventWithTimeStamp.event.buffer[0] = 0xC0 + channel;
+        eventWithTimeStamp.event.buffer[1] = program;
+        // get estimated current time:
+        eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
+        // send the midi message:
+        getOutputRingBuffer()->write(eventWithTimeStamp);
+    }
 }
 
 void MidiSignalThread::sendChannelPressure(unsigned char channel, unsigned char pressure)
 {
-    // create the midi message:
-    MidiEventWithTimeStamp eventWithTimeStamp;
-    eventWithTimeStamp.event.size = 2;
-    eventWithTimeStamp.event.buffer[0] = 0xD0 + channel;
-    eventWithTimeStamp.event.buffer[1] = pressure;
-    // get estimated current time:
-    eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
-    // send the midi message:
-    getOutputRingBuffer()->write(eventWithTimeStamp);
+    if (client.isActive()) {
+        // create the midi message:
+        MidiEventWithTimeStamp eventWithTimeStamp;
+        eventWithTimeStamp.event.size = 2;
+        eventWithTimeStamp.event.buffer[0] = 0xD0 + channel;
+        eventWithTimeStamp.event.buffer[1] = pressure;
+        // get estimated current time:
+        eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
+        // send the midi message:
+        getOutputRingBuffer()->write(eventWithTimeStamp);
+    }
 }
 
 void MidiSignalThread::sendPitchWheel(unsigned char channel, unsigned int pitch)
 {
-    // create the midi message:
-    MidiEventWithTimeStamp eventWithTimeStamp;
-    eventWithTimeStamp.event.size = 3;
-    eventWithTimeStamp.event.buffer[0] = 0xE0 + channel;
-    eventWithTimeStamp.event.buffer[1] = pitch & 0x0F;
-    eventWithTimeStamp.event.buffer[2] = pitch >> 7;
-    // get estimated current time:
-    eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
-    // send the midi message:
-    getOutputRingBuffer()->write(eventWithTimeStamp);
+    if (client.isActive()) {
+        // create the midi message:
+        MidiEventWithTimeStamp eventWithTimeStamp;
+        eventWithTimeStamp.event.size = 3;
+        eventWithTimeStamp.event.buffer[0] = 0xE0 + channel;
+        eventWithTimeStamp.event.buffer[1] = pitch & 0x0F;
+        eventWithTimeStamp.event.buffer[2] = pitch >> 7;
+        // get estimated current time:
+        eventWithTimeStamp.time = getClient()->getEstimatedCurrentTime();
+        // send the midi message:
+        getOutputRingBuffer()->write(eventWithTimeStamp);
+    }
 }
 
 MidiSignalThread::MidiSignalClient::MidiSignalClient(const QString &clientName, JackThread *thread) :

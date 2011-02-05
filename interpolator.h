@@ -8,6 +8,9 @@ class Interpolator
 public:
     double evaluate(double x);
 
+    const QVector<double> & getX() const;
+    const QVector<double> & getY() const;
+
 protected:
     Interpolator(const QVector<double> &xx, const QVector<double> &yy, int m);
 

@@ -7,6 +7,16 @@ double Interpolator::evaluate(double x)
     return interpolate(jlo, x);
 }
 
+const QVector<double> & Interpolator::getX() const
+{
+    return xx;
+}
+
+const QVector<double> & Interpolator::getY() const
+{
+    return yy;
+}
+
 Interpolator::Interpolator(const QVector<double> &xx_, const QVector<double> &yy_, int m_) :
     xx(xx_),
     yy(yy_),
