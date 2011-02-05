@@ -39,6 +39,8 @@ protected:
       */
     MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames);
 
+    void deactivateMidiInput();
+
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);
     virtual void processMidi(jack_nframes_t start, jack_nframes_t end);
@@ -61,7 +63,8 @@ private:
     jack_port_t * midiInputPort;
     void *midiInputBuffer;
     jack_nframes_t currentMidiEventIndex;
-    jack_nframes_t midiEventCount ;
+    jack_nframes_t midiEventCount;
+    bool midiInput;
 };
 
 #endif // NOTETRIGGEREDCLIENT_H

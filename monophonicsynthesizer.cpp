@@ -2,9 +2,9 @@
 #include <cmath>
 
 MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
-    MidiProcessor(QStringList("pitch_modulation_in"), QStringList("audio_out"), sampleRate),
+    MidiProcessor(QStringList("modulation_in"), QStringList("audio_out"), sampleRate),
     controller(0.0),
-    envelope(0.01, 0.5, 0, 0),
+    envelope(0.01, 0.25, 0.2, 0.25),
     filterAudio(22050),
     filterController(44.1)
 {
@@ -69,6 +69,7 @@ void MonophonicSynthesizer::processAudio(const double *inputs, double *outputs, 
     // get level from ADSR envelope:
     double envelopeLevel = envelope.processAudio0(time);
     filterController.processAudio1(controller, time);
-    double oscillatorLevel = osc.processAudio1(envelopeLevel + inputs[0], time);
+    //double oscillatorLevel = osc.processAudio1(envelopeLevel + inputs[0], time);
+    double oscillatorLevel = osc.processAudio2(0, inputs[0], time);
     outputs[0] = filterAudio.processAudio1(envelopeLevel * oscillatorLevel, time);
 }

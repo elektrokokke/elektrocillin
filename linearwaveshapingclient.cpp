@@ -13,6 +13,7 @@ LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size
     interpolator.getY()[1] = 0.5;
     interpolator.getX()[2] = 1;
     interpolator.getY()[2] = 1;
+    deactivateMidiInput();
 }
 
 LinearWaveShapingClient::~LinearWaveShapingClient()

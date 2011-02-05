@@ -6,7 +6,7 @@
 class Oscillator : public MidiProcessor
 {
 public:
-    Oscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100);
+    Oscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
 
     virtual void setSampleRate(double sampleRate);
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);

@@ -1,7 +1,8 @@
 #include "pulseoscillator2.h"
 #include <cmath>
 
-PulseOscillator2::PulseOscillator2() :
+PulseOscillator2::PulseOscillator2(double frequencyModulationIntensity, double sampleRate) :
+    Oscillator(frequencyModulationIntensity, sampleRate, QStringList("pulsewidth_modulation_in")),
     previousPhase(0),
     previousIntegralValue(0),
     pulseIntegral(QVector<double>(3), QVector<double>(3))
@@ -13,6 +14,25 @@ PulseOscillator2::PulseOscillator2() :
     pulseIntegral.getY()[1] = M_PI;
     pulseIntegral.getX()[2] = 2 * M_PI;
     pulseIntegral.getY()[2] = 0;
+}
+
+void PulseOscillator2::setPulseWidth(double pulseWidth)
+{
+    if (pulseWidth < 0) {
+        pulseWidth = 0;
+    } else if (pulseWidth > 2 * M_PI) {
+        pulseWidth = 2 * M_PI;
+    }
+    pulseIntegral.getX()[1] = pulseWidth;
+    pulseIntegral.getY()[1] = pulseWidth;
+}
+
+void PulseOscillator2::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
+{
+    // process the second input (to modulate pulse width):
+    setPulseWidth(inputs[1] * M_PI * 0.9 + M_PI);
+    // create the sound:
+    Oscillator::processAudio(inputs, outputs, time);
 }
 
 double PulseOscillator2::valueAtPhase(double phase)

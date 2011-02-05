@@ -7,7 +7,10 @@
 class PulseOscillator2 : public Oscillator
 {
 public:
-    PulseOscillator2();
+    PulseOscillator2(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100);
+
+    void setPulseWidth(double pulseWidth);
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
 protected:
     double valueAtPhase(double phase);

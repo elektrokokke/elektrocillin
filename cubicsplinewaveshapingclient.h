@@ -8,7 +8,7 @@
 #include <QGraphicsRectItem>
 
 struct CubicSplineWaveShapingParameters {
-    double x[3], y[3], y2[3];
+    double x[4], y[4], y2[4];
 };
 
 class CubicSplineWaveShapingClient : public EventProcessorClient<CubicSplineWaveShapingParameters>
@@ -34,7 +34,8 @@ public:
     CubicSplineWaveShapingGraphicsItem(const QRectF &rect, CubicSplineWaveShapingClient *client, QGraphicsItem *parent = 0);
 
 private slots:
-    void onNodePositionChanged(QPointF position);
+    void onNodePositionChanged1(QPointF position);
+    void onNodePositionChanged2(QPointF position);
 
 private:
     CubicSplineWaveShapingClient *client;

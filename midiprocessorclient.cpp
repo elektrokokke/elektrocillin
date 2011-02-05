@@ -2,19 +2,26 @@
 
 MidiProcessorClient::MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_) :
     AudioProcessorClient(clientName, midiProcessor_),
-    midiProcessor(midiProcessor_)
+    midiProcessor(midiProcessor_),
+    midiInput(true)
 {
 }
 
 MidiProcessorClient::MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames) :
     AudioProcessorClient(clientName, inputPortNames, outputPortNames),
-    midiProcessor(0)
+    midiProcessor(0),
+    midiInput(true)
 {
 }
 
 MidiProcessorClient::~MidiProcessorClient()
 {
     close();
+}
+
+void MidiProcessorClient::deactivateMidiInput()
+{
+    midiInput = false;
 }
 
 MidiProcessor * MidiProcessorClient::getMidiProcessor()
@@ -24,7 +31,7 @@ MidiProcessor * MidiProcessorClient::getMidiProcessor()
 
 bool MidiProcessorClient::init()
 {
-    return AudioProcessorClient::init() && (midiInputPort = registerMidiPort(QString("midi_in"), JackPortIsInput));
+    return AudioProcessorClient::init() && (!midiInput || (midiInputPort = registerMidiPort(QString("midi_in"), JackPortIsInput)));
 }
 
 bool MidiProcessorClient::process(jack_nframes_t nframes)
@@ -129,8 +136,12 @@ void MidiProcessorClient::processPitchBend(unsigned char channel, unsigned int v
 
 void MidiProcessorClient::getMidiPortBuffer(jack_nframes_t nframes)
 {
-    // get midi port buffer:
-    midiInputBuffer = jack_port_get_buffer(midiInputPort, nframes);
-    currentMidiEventIndex = 0;
-    midiEventCount = jack_midi_get_event_count(midiInputBuffer);
+    if (midiInput) {
+        // get midi port buffer:
+        midiInputBuffer = jack_port_get_buffer(midiInputPort, nframes);
+        currentMidiEventIndex = 0;
+        midiEventCount = jack_midi_get_event_count(midiInputBuffer);
+    } else {
+        midiEventCount = 0;
+    }
 }
