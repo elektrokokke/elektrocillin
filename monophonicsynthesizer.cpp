@@ -4,7 +4,7 @@
 MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
     MidiProcessor(QStringList("modulation_in"), QStringList("audio_out"), sampleRate),
     controller(0.0),
-    envelope(0.01, 0.25, 0.2, 0.25),
+    envelope(0.001, 0.2, 0.2, 0.3),
     filterAudio(22050),
     filterController(44.1)
 {
@@ -39,9 +39,9 @@ void MonophonicSynthesizer::processNoteOff(unsigned char channel, unsigned char 
                 // enter the release phase:
                 envelope.processNoteOff(channel, noteNumber, velocity, time);
             } else {
-                osc.processNoteOn(channel, noteNumber, velocity, time);
+                osc.processNoteOn(channel, midiNoteNumbers.top(), velocity, time);
                 // retrigger the ADSR envelope:
-                envelope.processNoteOn(channel, noteNumber, velocity, time);
+                envelope.processNoteOn(channel, midiNoteNumbers.top(), velocity, time);
             }
         } else {
             // the note has to be removed from somewhere in the stack

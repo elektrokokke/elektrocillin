@@ -22,7 +22,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QGraphicsView" name="graphicsView">
+     <widget class="VisibleRectangleGraphicsView" name="graphicsView">
       <property name="verticalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOn</enum>
       </property>
@@ -62,8 +62,8 @@
      <addaction name="actionAll"/>
      <addaction name="actionMoog_filter"/>
      <addaction name="actionVirtual_keyboard"/>
-     <addaction name="separator"/>
-     <addaction name="actionReset_view"/>
+     <addaction name="actionLinear_waveshaping"/>
+     <addaction name="actionCubic_spline_waveshaping"/>
     </widget>
     <addaction name="actionStore_connections"/>
     <addaction name="actionRestore_connections"/>
@@ -96,13 +96,25 @@
     <string>All</string>
    </property>
   </action>
-  <action name="actionReset_view">
+  <action name="actionLinear_waveshaping">
    <property name="text">
-    <string>Reset view</string>
+    <string>Linear waveshaping</string>
+   </property>
+  </action>
+  <action name="actionCubic_spline_waveshaping">
+   <property name="text">
+    <string>Cubic spline waveshaping</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>VisibleRectangleGraphicsView</class>
+   <extends>QGraphicsView</extends>
+   <header>visiblerectanglegraphicsview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

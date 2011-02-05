@@ -60,7 +60,8 @@ SOURCES += main.cpp\
     graphicsinterpolationitem.cpp \
     pulseoscillator2.cpp \
     linearwaveshapingclient.cpp \
-    cubicsplinewaveshapingclient.cpp
+    cubicsplinewaveshapingclient.cpp \
+    visiblerectanglegraphicsview.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -117,7 +118,8 @@ HEADERS  += mainwindow.h \
     graphicsinterpolationitem.h \
     pulseoscillator2.h \
     linearwaveshapingclient.h \
-    cubicsplinewaveshapingclient.h
+    cubicsplinewaveshapingclient.h \
+    visiblerectanglegraphicsview.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

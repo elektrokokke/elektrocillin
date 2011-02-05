@@ -120,16 +120,17 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), rect.translated(size.width() + 100, 0), size, 10);
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
-    GraphicsClientItem *graphicsClientItemWaveShaping = new GraphicsClientItem("Linear waveshaping", rect.translated(0, size.height() + 100), size, 10);
+    graphicsClientItemWaveShaping = new GraphicsClientItem("Linear waveshaping", rect.translated(0, size.height() + 100), size, 10);
     graphicsClientItemWaveShaping->setInnerItem(waveShapingItem);
     scene->addItem(graphicsClientItemWaveShaping);
-    GraphicsClientItem *graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem("Cubic spline waveshaping", rect.translated(size.width() + 100, size.height() + 100), size, 10);
+    graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem("Cubic spline waveshaping", rect.translated(size.width() + 100, size.height() + 100), size, 10);
     graphicsClientItemCubicSplineWaveShaping->setInnerItem(cubicSplineWaveShapingItem);
     scene->addItem(graphicsClientItemCubicSplineWaveShaping);
     // end client graphics item test setup
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
+    ui->graphicsView->setVisibleSceneRect(ui->graphicsView->sceneRect());
 
 //    QDialog *dialog = new QDialog(this);
 //    dialog->setLayout(new QHBoxLayout(dialog));
@@ -272,30 +273,25 @@ void MainWindow::on_actionRestore_connections_triggered()
 
 void MainWindow::on_actionMoog_filter_triggered()
 {
-    QRect rectViewport = ui->graphicsView->viewport()->rect();
-    QPoint topLeft = rectViewport.topLeft();
-    QPoint bottomRight = rectViewport.bottomRight();
-    QRectF rectFrom = QRectF(ui->graphicsView->mapToScene(topLeft), ui->graphicsView->mapToScene(bottomRight));
-    //QRectF rectFrom = ui->graphicsView->viewportTransform().mapRect(ui->graphicsView->viewport()->rect());
-    QRectF rectTo = graphicsClientItemFilter->sceneBoundingRect();
-    for (qreal i = 0.1; i <= 1; i += 0.1) {
-        QRectF rectCurrent(rectFrom.x() * (1-i) + rectTo.x() * i, rectFrom.y() * (1-i) + rectTo.y() * i, rectFrom.width() * (1-i) + rectTo.width() * i, rectFrom.height() * (1-i) + rectTo.height() * i);
-        ui->graphicsView->fitInView(rectCurrent, Qt::KeepAspectRatio);
-        qApp->processEvents();
-    }
+    ui->graphicsView->animateToVisibleSceneRect(graphicsClientItemFilter->sceneBoundingRect());
 }
 
 void MainWindow::on_actionVirtual_keyboard_triggered()
 {
-    ui->graphicsView->fitInView(graphicsClientItemKeyboard, Qt::KeepAspectRatio);
+    ui->graphicsView->animateToVisibleSceneRect(graphicsClientItemKeyboard->sceneBoundingRect());
 }
 
 void MainWindow::on_actionAll_triggered()
 {
-    ui->graphicsView->fitInView(ui->graphicsView->sceneRect(), Qt::KeepAspectRatio);
+    ui->graphicsView->animateToVisibleSceneRect(ui->graphicsView->sceneRect());
 }
 
-void MainWindow::on_actionReset_view_triggered()
+void MainWindow::on_actionLinear_waveshaping_triggered()
 {
-    ui->graphicsView->resetTransform();
+    ui->graphicsView->animateToVisibleSceneRect(graphicsClientItemWaveShaping->sceneBoundingRect());
+}
+
+void MainWindow::on_actionCubic_spline_waveshaping_triggered()
+{
+    ui->graphicsView->animateToVisibleSceneRect(graphicsClientItemCubicSplineWaveShaping->sceneBoundingRect());
 }

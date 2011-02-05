@@ -47,7 +47,9 @@ private slots:
 
     void on_actionAll_triggered();
 
-    void on_actionReset_view_triggered();
+    void on_actionLinear_waveshaping_triggered();
+
+    void on_actionCubic_spline_waveshaping_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -67,7 +69,7 @@ private:
     LinearWaveShapingClient linearWaveShapingClient;
     CubicSplineWaveShapingClient cubicSplineWaveShapingClient;
     JackNullClient nullClient;
-    GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard;
+    GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard, *graphicsClientItemWaveShaping, *graphicsClientItemCubicSplineWaveShaping;
 };
 
 #endif // MAINWINDOW_H

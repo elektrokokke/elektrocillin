@@ -52,6 +52,7 @@ void AdsrEnvelope::processAudio(const double *, double *outputs, jack_nframes_t)
     }
     if (currentSegment == SUSTAIN) {
         if (release) {
+            currentSegmentTime = 0.0;
             currentSegment = RELEASE;
         } else {
             level = sustainLevel;
