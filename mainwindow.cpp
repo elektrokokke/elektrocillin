@@ -30,7 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     moogFilterClient("moog filter", &moogFilter),
     lfoClient1("lfo", &lfo1),
     lfoClient2("lfo_2", &lfo2),
-    linearWaveShapingClient("waveshaping")
+    linearWaveShapingClient("linear waveshaping"),
+    cubicSplineWaveShapingClient("spline waveshaping")
 {   
     ui->setupUi(this);
     QGraphicsScene * scene = new QGraphicsScene();
@@ -95,9 +96,11 @@ MainWindow::MainWindow(QWidget *parent) :
     midiSignalThread.getClient()->activate();
     // end virtual keyboard and midi signal client test setup
 
-    // waveshaping client test setup:
+    // waveshaping clients test setup:
     LinearWaveShapingGraphicsItem *waveShapingItem = new LinearWaveShapingGraphicsItem(QRectF(0, 0, 600, 600), &linearWaveShapingClient);
     linearWaveShapingClient.activate();
+    CubicSplineWaveShapingGraphicsItem *cubicSplineWaveShapingItem = new CubicSplineWaveShapingGraphicsItem(QRectF(0, 0, 600, 600), &cubicSplineWaveShapingClient);
+    cubicSplineWaveShapingClient.activate();
     // end waveshaping client test setup
 
     // monophonic synthesizer and lfo test setup:
@@ -117,9 +120,12 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), rect.translated(size.width() + 100, 0), size, 10);
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
-    GraphicsClientItem *graphicsClientItemWaveShaping = new GraphicsClientItem("Wave shaping", rect.translated((size.width() + 100) * 2, 0), size, 10);
+    GraphicsClientItem *graphicsClientItemWaveShaping = new GraphicsClientItem("Linear waveshaping", rect.translated(0, size.height() + 100), size, 10);
     graphicsClientItemWaveShaping->setInnerItem(waveShapingItem);
     scene->addItem(graphicsClientItemWaveShaping);
+    GraphicsClientItem *graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem("Cubic spline waveshaping", rect.translated(size.width() + 100, size.height() + 100), size, 10);
+    graphicsClientItemCubicSplineWaveShaping->setInnerItem(cubicSplineWaveShapingItem);
+    scene->addItem(graphicsClientItemCubicSplineWaveShaping);
     // end client graphics item test setup
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);

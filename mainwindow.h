@@ -13,6 +13,7 @@
 #include "jacknullclient.h"
 #include "graphicsclientitem.h"
 #include "linearwaveshapingclient.h"
+#include "cubicsplinewaveshapingclient.h"
 
 class Record2MemoryClient;
 class MidiController2AudioClient;
@@ -64,6 +65,7 @@ private:
     Oscillator lfo1, lfo2;
     AudioProcessorClient lfoClient1, lfoClient2;
     LinearWaveShapingClient linearWaveShapingClient;
+    CubicSplineWaveShapingClient cubicSplineWaveShapingClient;
     JackNullClient nullClient;
     GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard;
 };

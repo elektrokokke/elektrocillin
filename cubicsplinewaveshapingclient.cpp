@@ -77,34 +77,37 @@ CubicSplineWaveShapingGraphicsItem::CubicSplineWaveShapingGraphicsItem(const QRe
     nodeItem->setXScaled(0.5);
     nodeItem->setYScaled(0.5);
     nodeItem->setSendPositionChanges(true);
-    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, this);
+    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, rect.width(), -rect.height(), this);
     interpolationItem->setPen(QPen(QBrush(Qt::black), 2));
+    interpolationItem->setPos(rect.bottomLeft());
     QObject::connect(nodeItem, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onNodePositionChanged(QPointF)));
 }
 
 void CubicSplineWaveShapingGraphicsItem::onNodePositionChanged(QPointF position)
 {
-    // compute the new spline parameters:
-    QVector<double> xx, yy;
-    xx.append(0);
-    yy.append(0);
-    xx.append(position.x());
-    yy.append(position.y());
-    xx.append(1);
-    yy.append(1);
-    interpolator = CubicSplineInterpolator(xx, yy);
-    // update the spline graphics:
-    interpolationItem->updatePath();
-    // send the changes to the associated client:
-    CubicSplineWaveShapingParameters parameters;
-    parameters.x[0] = xx[0];
-    parameters.x[1] = xx[1];
-    parameters.x[2] = xx[2];
-    parameters.y[0] = yy[0];
-    parameters.y[1] = yy[1];
-    parameters.y[2] = yy[2];
-    parameters.y2[0] = interpolator.getY2()[0];
-    parameters.y2[1] = interpolator.getY2()[1];
-    parameters.y2[2] = interpolator.getY2()[2];
-    client->postEvent(parameters);
+    if ((position.x() > 0) && (position.x() < 1)) {
+        // compute the new spline parameters:
+        QVector<double> xx, yy;
+        xx.append(0);
+        yy.append(0);
+        xx.append(position.x());
+        yy.append(position.y());
+        xx.append(1);
+        yy.append(1);
+        interpolator = CubicSplineInterpolator(xx, yy);
+        // update the spline graphics:
+        interpolationItem->updatePath();
+        // send the changes to the associated client:
+        CubicSplineWaveShapingParameters parameters;
+        parameters.x[0] = xx[0];
+        parameters.x[1] = xx[1];
+        parameters.x[2] = xx[2];
+        parameters.y[0] = yy[0];
+        parameters.y[1] = yy[1];
+        parameters.y[2] = yy[2];
+        parameters.y2[0] = interpolator.getY2()[0];
+        parameters.y2[1] = interpolator.getY2()[1];
+        parameters.y2[2] = interpolator.getY2()[2];
+        client->postEvent(parameters);
+    }
 }
