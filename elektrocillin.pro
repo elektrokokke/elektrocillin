@@ -53,7 +53,9 @@ SOURCES += main.cpp\
     midiprocessor.cpp \
     midiprocessorclient.cpp \
     jacknullclient.cpp \
-    graphicsclientitem.cpp
+    graphicsclientitem.cpp \
+    interpolator.cpp \
+    linearinterpolator.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -103,7 +105,9 @@ HEADERS  += mainwindow.h \
     eventprocessorclient.h \
     jackthreadeventprocessorclient.h \
     jacknullclient.h \
-    graphicsclientitem.h
+    graphicsclientitem.h \
+    interpolator.h \
+    linearinterpolator.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
