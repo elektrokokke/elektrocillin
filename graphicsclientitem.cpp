@@ -1,6 +1,7 @@
 #include "graphicsclientitem.h"
 #include <QGraphicsPathItem>
 #include <QGraphicsSimpleTextItem>
+#include <QDebug>
 #include <QPen>
 
 GraphicsClientItem::GraphicsClientItem(const QString &clientName, const QRectF &rect, const QSizeF &innerSize, qreal padding, QGraphicsItem *parent) :
@@ -13,12 +14,12 @@ GraphicsClientItem::GraphicsClientItem(const QString &clientName, const QRectF &
 
     QPainterPath path(rect.topLeft());
     path.lineTo(rect.bottomLeft());
-    path.lineTo(2 * innerRect.left() - rect.left(), rect.bottom());
-    path.lineTo(2 * innerRect.left() - rect.left(), innerRect.bottom() + padding);
+    path.lineTo(2 * innerRect.left() - rect.left() - 2 * padding, rect.bottom());
+    path.lineTo(2 * innerRect.left() - rect.left() - 2 * padding, innerRect.bottom() + padding);
     path.lineTo(innerRect.left() - padding, innerRect.bottom() + padding);
     path.lineTo(innerRect.left() - padding, innerRect.top() - padding);
-    path.lineTo(2 * innerRect.left() - rect.left(), innerRect.top() - padding);
-    path.lineTo(2 * innerRect.left() - rect.left(), rect.top());
+    path.lineTo(2 * innerRect.left() - rect.left() - 2 * padding, innerRect.top() - padding);
+    path.lineTo(2 * innerRect.left() - rect.left() - 2 * padding, rect.top());
     path.lineTo(rect.topLeft());
     QGraphicsPathItem *leftBracket = new QGraphicsPathItem(path, this);
     leftBracket->setPen(QPen(Qt::NoPen));
@@ -28,10 +29,6 @@ GraphicsClientItem::GraphicsClientItem(const QString &clientName, const QRectF &
     rightBracket->setRotation(180);
     rightBracket->setPen(QPen(Qt::NoPen));
     rightBracket->setBrush(QBrush(Qt::gray));
-
-    // create a text showing the client name:
-    QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
-    fitItemIntoRectangle(textItem, QRectF(innerRect.left(), rect.top() - innerRect.height() * 0.2, innerRect.width(), innerRect.height() * 0.2));
 }
 
 void GraphicsClientItem::setInnerItem(QGraphicsItem *item)

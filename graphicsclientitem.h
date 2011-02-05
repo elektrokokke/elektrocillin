@@ -2,6 +2,7 @@
 #define GRAPHICSCLIENTITEM_H
 
 #include <QGraphicsRectItem>
+#include <QTransform>
 
 class GraphicsClientItem : public QGraphicsRectItem
 {

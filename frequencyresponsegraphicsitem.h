@@ -10,7 +10,7 @@ class FrequencyResponse;
 class FrequencyResponseGraphicsItem : public QGraphicsRectItem
 {
 public:
-    FrequencyResponseGraphicsItem(const QRectF &rect, double lowestHertz, double highestHertz, double lowestDecibel = -40, double highestDecibel = 40, QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
+    FrequencyResponseGraphicsItem(const QRectF &fitInto, double lowestHertz, double highestHertz, double lowestDecibel = -40, double highestDecibel = 40, QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
     FrequencyResponseGraphicsItem(qreal x, qreal y, qreal w, qreal h, double lowestHertz, double highestHertz, double lowestDecibel = -40, double highestDecibel = 40, QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
 
     int addFrequencyResponse(FrequencyResponse *response);

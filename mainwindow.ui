@@ -22,7 +22,14 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QGraphicsView" name="graphicsView"/>
+     <widget class="QGraphicsView" name="graphicsView">
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -48,8 +55,19 @@
     <property name="title">
      <string>JACK</string>
     </property>
+    <widget class="QMenu" name="menuClients">
+     <property name="title">
+      <string>Clients</string>
+     </property>
+     <addaction name="actionAll"/>
+     <addaction name="actionMoog_filter"/>
+     <addaction name="actionVirtual_keyboard"/>
+     <addaction name="separator"/>
+     <addaction name="actionReset_view"/>
+    </widget>
     <addaction name="actionStore_connections"/>
     <addaction name="actionRestore_connections"/>
+    <addaction name="menuClients"/>
    </widget>
    <addaction name="menuJACK"/>
   </widget>
@@ -61,6 +79,26 @@
   <action name="actionRestore_connections">
    <property name="text">
     <string>Restore connections</string>
+   </property>
+  </action>
+  <action name="actionMoog_filter">
+   <property name="text">
+    <string>Moog filter</string>
+   </property>
+  </action>
+  <action name="actionVirtual_keyboard">
+   <property name="text">
+    <string>Virtual keyboard</string>
+   </property>
+  </action>
+  <action name="actionAll">
+   <property name="text">
+    <string>All</string>
+   </property>
+  </action>
+  <action name="actionReset_view">
+   <property name="text">
+    <string>Reset view</string>
    </property>
   </action>
  </widget>

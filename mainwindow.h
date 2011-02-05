@@ -11,6 +11,7 @@
 #include "midisignalclient.h"
 #include "oscillator.h"
 #include "jacknullclient.h"
+#include "graphicsclientitem.h"
 
 class Record2MemoryClient;
 class MidiController2AudioClient;
@@ -38,6 +39,14 @@ private slots:
 
     void on_actionRestore_connections_triggered();
 
+    void on_actionMoog_filter_triggered();
+
+    void on_actionVirtual_keyboard_triggered();
+
+    void on_actionAll_triggered();
+
+    void on_actionReset_view_triggered();
+
 private:
     Ui::MainWindow *ui;
     QSettings settings;
@@ -54,6 +63,7 @@ private:
     Oscillator lfo;
     AudioProcessorClient lfoClient;
     JackNullClient nullClient;
+    GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard;
 };
 
 #endif // MAINWINDOW_H

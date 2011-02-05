@@ -10,7 +10,6 @@
 #include "graphicsnodeitem.h"
 #include "graphicskeyboarditem.h"
 #include "eventprocessorclient.h"
-#include "graphicsclientitem.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
@@ -22,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
     settings("settings.ini", QSettings::IniFormat),
     midiSignalThread("virtual keyboard"),
     synthesizerClient("synthesizer", &synthesizer),
+    moogFilter(44100, 1),
+    moogFilterCopy(44100, 1),
     moogFilterClient("moog filter", &moogFilter),
     lfoClient("lfo", &lfo)
 {   
@@ -62,12 +63,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
     QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
 
-    GraphicsClientItem *clientItemFilter = new GraphicsClientItem(moogFilterClient.getClientName(), QRectF(-35, -20, 470, 340), QSizeF(400, 300), 10);
-    clientItemFilter->setInnerItem(frequencyResponse);
-    scene->addItem(clientItemFilter);
-    GraphicsClientItem *clientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), QRectF(-35, -20, 470, 340).translated(500, 0), QSizeF(400, 300), 10);
-    clientItemKeyboard->setInnerItem(keyboard);
-    scene->addItem(clientItemKeyboard);
+    QSizeF size(100, 75);
+    QRectF rect(-35, -20, size.width() + 35 * 2, size.height() + 20 * 2);
+    graphicsClientItemFilter = new GraphicsClientItem(moogFilterClient.getClientName(), rect, size, 10);
+    graphicsClientItemFilter->setInnerItem(frequencyResponse);
+    scene->addItem(graphicsClientItemFilter);
+    graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), rect.translated(size.width() + 100, 0), size, 10);
+    graphicsClientItemKeyboard->setInnerItem(keyboard);
+    scene->addItem(graphicsClientItemKeyboard);
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
@@ -209,4 +212,35 @@ void MainWindow::on_actionStore_connections_triggered()
 void MainWindow::on_actionRestore_connections_triggered()
 {
     nullClient.restoreConnections(settings.value("connections").toStringList());
+}
+
+void MainWindow::on_actionMoog_filter_triggered()
+{
+    QRect rectViewport = ui->graphicsView->viewport()->rect();
+    QPoint topLeft = rectViewport.topLeft();
+    QPoint bottomRight = rectViewport.bottomRight();
+    QRectF rectFrom = QRectF(ui->graphicsView->mapToScene(topLeft), ui->graphicsView->mapToScene(bottomRight));
+    //QRectF rectFrom = ui->graphicsView->viewportTransform().mapRect(ui->graphicsView->viewport()->rect());
+    QRectF rectTo = graphicsClientItemFilter->sceneBoundingRect();
+    qDebug() << rectFrom << rectTo;
+    for (qreal i = 0.1; i <= 1; i += 0.1) {
+        QRectF rectCurrent(rectFrom.x() * (1-i) + rectTo.x() * i, rectFrom.y() * (1-i) + rectTo.y() * i, rectFrom.width() * (1-i) + rectTo.width() * i, rectFrom.height() * (1-i) + rectTo.height() * i);
+        ui->graphicsView->fitInView(rectCurrent, Qt::KeepAspectRatio);
+        qApp->processEvents();
+    }
+}
+
+void MainWindow::on_actionVirtual_keyboard_triggered()
+{
+    ui->graphicsView->fitInView(graphicsClientItemKeyboard, Qt::KeepAspectRatio);
+}
+
+void MainWindow::on_actionAll_triggered()
+{
+    ui->graphicsView->fitInView(ui->graphicsView->sceneRect(), Qt::KeepAspectRatio);
+}
+
+void MainWindow::on_actionReset_view_triggered()
+{
+    ui->graphicsView->resetTransform();
 }
