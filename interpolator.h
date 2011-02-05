@@ -19,7 +19,7 @@ protected:
 
     virtual double interpolate(int jlo, double x) = 0;
 
-    const QVector<double> xx, yy;
+    QVector<double> xx, yy;
     int n;
 private:
     int mm, jsav, cor, dj;

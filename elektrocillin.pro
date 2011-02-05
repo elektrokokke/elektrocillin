@@ -57,7 +57,8 @@ SOURCES += main.cpp\
     interpolator.cpp \
     linearinterpolator.cpp \
     cubicsplineinterpolator.cpp \
-    graphicsinterpolationitem.cpp
+    graphicsinterpolationitem.cpp \
+    pulseoscillator2.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -111,7 +112,8 @@ HEADERS  += mainwindow.h \
     interpolator.h \
     linearinterpolator.h \
     cubicsplineinterpolator.h \
-    graphicsinterpolationitem.h
+    graphicsinterpolationitem.h \
+    pulseoscillator2.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

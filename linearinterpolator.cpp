@@ -5,6 +5,16 @@ LinearInterpolator::LinearInterpolator(const QVector<double> &xx, const QVector<
 {
 }
 
+QVector<double> & LinearInterpolator::getX()
+{
+    return xx;
+}
+
+QVector<double> & LinearInterpolator::getY()
+{
+    return yy;
+}
+
 /**
   Comments from "Numerical Recipes"
 
