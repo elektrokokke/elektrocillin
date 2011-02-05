@@ -1,10 +1,8 @@
 #ifndef MONOPHONICSYNTHESIZER_H
 #define MONOPHONICSYNTHESIZER_H
 
-#include "morphingpiecewiselinearoscillator.h"
 #include "simplelowpassfilter.h"
-#include "sawtoothoscillator.h"
-#include "pulseoscillator.h"
+#include "pulseoscillator2.h"
 #include "adsrenvelope.h"
 #include "iirbutterworthfilter.h"
 #include <QStack>
@@ -21,14 +19,11 @@ public:
     void processController(unsigned char processController, unsigned char value, jack_nframes_t time);
     void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
-
 private:
-    double morph;
-    PulseOscillator osc1;
-    SawtoothOscillator osc2;
-    MorphingPiecewiseLinearOscillator morphOsc1;
+    double controller;
+    PulseOscillator2 pulseOsc;
     AdsrEnvelope envelope;
-    IirButterworthFilter filterAudio, filterMorph;
+    IirButterworthFilter filterAudio, filterController;
     QStack<unsigned char> midiNoteNumbers;
 };
 

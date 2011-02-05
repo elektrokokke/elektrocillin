@@ -60,8 +60,8 @@ private:
     IirMoogFilter moogFilter;
     IirMoogFilter moogFilterCopy;
     IirMoogFilterClient moogFilterClient;
-    Oscillator lfo;
-    AudioProcessorClient lfoClient;
+    Oscillator lfo1, lfo2;
+    AudioProcessorClient lfoClient1, lfoClient2;
     JackNullClient nullClient;
     GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard;
 };

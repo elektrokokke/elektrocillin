@@ -35,12 +35,12 @@ void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframe
 {
     frequencyModulationFactor = pow(1 + frequencyModulationIntensity, inputs[0]);
     computePhaseIncrement();
+    outputs[0] = valueAtPhase(phase);
     // advance phase:
     phase += phaseIncrement;
     if (phase >= 2.0 * M_PI) {
         phase -= 2.0 * M_PI;
     }
-    outputs[0] = valueAtPhase(phase);
 }
 
 void Oscillator::setFrequency(double hertz)

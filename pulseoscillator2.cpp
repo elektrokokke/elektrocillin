@@ -17,6 +17,9 @@ PulseOscillator2::PulseOscillator2() :
 
 double PulseOscillator2::valueAtPhase(double phase)
 {
+    if (phase == previousPhase) {
+        return 0;
+    }
     // compare current phase with previous phase:
     if (phase < previousPhase) {
         // phase has wrapped around, adjust the previous integral level accordingly:

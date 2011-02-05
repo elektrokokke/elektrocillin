@@ -27,7 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     moogFilter(44100, 1),
     moogFilterCopy(44100, 1),
     moogFilterClient("moog filter", &moogFilter),
-    lfoClient("lfo", &lfo)
+    lfoClient1("lfo", &lfo1),
+    lfoClient2("lfo_2", &lfo2)
 {   
     ui->setupUi(this);
     QGraphicsScene * scene = new QGraphicsScene();
@@ -93,8 +94,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // monophonic synthesizer and lfo test setup:
     synthesizerClient.activate();
-    lfo.setFrequency(0.5);
-    lfoClient.activate();
+    lfo1.setFrequency(0.5);
+    lfo2.setFrequency(20);
+    lfoClient1.activate();
+    lfoClient2.activate();
     // end monophonic synthesizer and lfo test setup
 
     // client graphics item test setup:
