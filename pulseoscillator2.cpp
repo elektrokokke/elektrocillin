@@ -25,6 +25,7 @@ void PulseOscillator2::setPulseWidth(double pulseWidth)
     }
     pulseIntegral.getX()[1] = pulseWidth;
     pulseIntegral.getY()[1] = pulseWidth;
+    pulseIntegral.getY()[2] = (pulseWidth - M_PI) * 2;
 }
 
 void PulseOscillator2::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
