@@ -27,6 +27,7 @@ void VisibleRectangleGraphicsView::animateToVisibleSceneRect(const QRectF &rect,
     QPropertyAnimation *animation = new QPropertyAnimation(this, "visibleSceneRect");
     animation->setDuration(msecs);
     animation->setStartValue(visibleSceneRect());
+    animation->setKeyValueAt(0.5, sceneRect());
     animation->setEndValue(rect);
     animation->start(QAbstractAnimation::DeleteWhenStopped);
 }

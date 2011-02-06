@@ -14,7 +14,7 @@ public:
     const QRectF & visibleSceneRect() const;
     void setVisibleSceneRect(const QRectF &rect);
 
-    void animateToVisibleSceneRect(const QRectF &rect, int msecs = 200);
+    void animateToVisibleSceneRect(const QRectF &rect, int msecs = 750);
 
 signals:
 
