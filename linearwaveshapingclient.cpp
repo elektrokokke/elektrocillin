@@ -3,22 +3,26 @@
 #include "graphicslineitem.h"
 #include <QPen>
 
+const int LinearWaveShapingClient::controlPointCount = sizeof(LinearWaveShapingParameters::x) / sizeof(double);
+
 LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
     EventProcessorClient<LinearWaveShapingParameters>(clientName, QStringList("audio_in"), QStringList("shaped_out"), ringBufferSize),
-    interpolator(QVector<double>(3), QVector<double>(3))
+    interpolator(QVector<double>(controlPointCount), QVector<double>(controlPointCount))
 {
-    interpolator.getX()[0] = 0;
-    interpolator.getY()[0] = 0;
-    interpolator.getX()[1] = 0.5;
-    interpolator.getY()[1] = 0.5;
-    interpolator.getX()[2] = 1;
-    interpolator.getY()[2] = 1;
+    for (int i = 0; i < controlPointCount; i++) {
+        parameters.x[i] = parameters.y[i] = interpolator.getX()[i] =  interpolator.getY()[i] = (double)i / (double)(controlPointCount - 1);
+    }
     deactivateMidiInput();
 }
 
 LinearWaveShapingClient::~LinearWaveShapingClient()
 {
     close();
+}
+
+const LinearWaveShapingParameters & LinearWaveShapingClient::getParameters() const
+{
+    return parameters;
 }
 
 void LinearWaveShapingClient::processAudio(const double *inputs, double *outputs, jack_nframes_t)
@@ -32,14 +36,18 @@ void LinearWaveShapingClient::processAudio(const double *inputs, double *outputs
 
 void LinearWaveShapingClient::processEvent(const LinearWaveShapingParameters &event, jack_nframes_t)
 {
+    parameters = event;
     // set the interpolator parameters accordingly:
-    interpolator.getX()[1] = event.x;
-    interpolator.getY()[1] = event.y;
+    for (int i = 0; i < controlPointCount; i++) {
+        interpolator.getX()[i] = event.x[i];
+        interpolator.getY()[i] = event.y[i];
+    }
 }
 
 LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client_, QGraphicsItem *parent) :
     QGraphicsRectItem(rect, parent),
-    client(client_)
+    client(client_),
+    parameters(client->getParameters())
 {
     setPen(QPen(QBrush(Qt::black), 2));
     // create dotted vertical lines:
@@ -52,29 +60,38 @@ LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect,
         qreal y = (double)i / 10.0 * (rect.top() - rect.bottom()) + rect.bottom();
         (new QGraphicsLineItem(rect.left(), y, rect.right(), y, this))->setPen(QPen(Qt::DotLine));
     }
-    GraphicsNodeItem *nodeItem = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
-    nodeItem->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
-    nodeItem->setBrush(QBrush(qRgb(52, 101, 164)));
-    nodeItem->setZValue(1);
-    nodeItem->setBounds(rect);
-    nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(1, 0)));
-    nodeItem->setXScaled(0.5);
-    nodeItem->setYScaled(0.5);
-    nodeItem->setSendPositionChanges(true);
-    GraphicsLineItem *lineItem1 = new GraphicsLineItem(rect.left(), rect.bottom(), rect.right(), rect.top(), this);
-    GraphicsLineItem *lineItem2 = new GraphicsLineItem(rect.top(), rect.right(), rect.right(), rect.top(), this);
-    lineItem1->setPen(QPen(QBrush(Qt::black), 2));
-    lineItem2->setPen(QPen(QBrush(Qt::black), 2));
-    nodeItem->connectLine(lineItem1, GraphicsLineItem::P2);
-    nodeItem->connectLine(lineItem2, GraphicsLineItem::P1);
-    QObject::connect(nodeItem, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onNodePositionChanged(QPointF)));
+    GraphicsLineItem *previousLine = 0;
+    QPointF currentPoint(rect.left() + rect.width() * parameters.x[0], rect.bottom() - rect.height() * parameters.y[0]);
+    for (int i = 0; i < LinearWaveShapingClient::controlPointCount; i++) {
+        GraphicsNodeItem *nodeItem = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
+        nodeItem->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
+        nodeItem->setBrush(QBrush(qRgb(52, 101, 164)));
+        nodeItem->setZValue(1);
+        nodeItem->setBounds(rect);
+        nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(1, 0)));
+        nodeItem->setPos(currentPoint);
+        nodeItem->setSendPositionChanges(true);
+        mapSenderToControlPointIndex[nodeItem] = i;
+        if (i > 0) {
+            nodeItem->connectLine(previousLine, GraphicsLineItem::P2);
+        }
+        if (i < LinearWaveShapingClient::controlPointCount - 1) {
+            QPointF nextPoint(rect.left() + rect.width() * parameters.x[i + 1], rect.bottom() - rect.height() * parameters.y[i + 1]);
+            GraphicsLineItem *currentLine = new GraphicsLineItem(QLineF(currentPoint, nextPoint), this);
+            currentLine->setPen(QPen(QBrush(Qt::black), 2));
+            nodeItem->connectLine(currentLine, GraphicsLineItem::P1);
+            currentPoint = nextPoint;
+            previousLine = currentLine;
+        }
+        QObject::connect(nodeItem, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onNodePositionChangedScaled(QPointF)));
+    }
 }
 
-void LinearWaveShapingGraphicsItem::onNodePositionChanged(QPointF position)
+void LinearWaveShapingGraphicsItem::onNodePositionChangedScaled(QPointF position)
 {
-
-    LinearWaveShapingParameters parameters;
-    parameters.x = position.x();
-    parameters.y = position.y();
+    // get the control point index:
+    int index = mapSenderToControlPointIndex[sender()];
+    parameters.x[index] = position.x();
+    parameters.y[index] = position.y();
     client->postEvent(parameters);
 }
