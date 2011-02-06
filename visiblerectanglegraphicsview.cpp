@@ -1,8 +1,8 @@
 #include "visiblerectanglegraphicsview.h"
-#include <QPropertyAnimation>
 
 VisibleRectangleGraphicsView::VisibleRectangleGraphicsView(QWidget *parent) :
-    QGraphicsView(parent)
+    QGraphicsView(parent),
+    animation(this, "visibleSceneRect")
 {
 }
 
@@ -11,23 +11,24 @@ VisibleRectangleGraphicsView::VisibleRectangleGraphicsView(QGraphicsScene *scene
 {
 }
 
-const QRectF & VisibleRectangleGraphicsView::visibleSceneRect() const
+QRectF VisibleRectangleGraphicsView::visibleSceneRect() const
 {
-    return visibleSceneRectangle;
+    // compute visible rectangle from viewport rectangel and the current transform:
+    QRect rectViewport = viewport()->rect();
+    return mapToScene(rectViewport).boundingRect();
 }
 
 void VisibleRectangleGraphicsView::setVisibleSceneRect(const QRectF &rect)
 {
-    visibleSceneRectangle = rect;
     fitInView(rect, Qt::KeepAspectRatio);
 }
 
 void VisibleRectangleGraphicsView::animateToVisibleSceneRect(const QRectF &rect, int msecs)
 {
-    QPropertyAnimation *animation = new QPropertyAnimation(this, "visibleSceneRect");
-    animation->setDuration(msecs);
-    animation->setStartValue(visibleSceneRect());
-    animation->setKeyValueAt(0.5, sceneRect());
-    animation->setEndValue(rect);
-    animation->start(QAbstractAnimation::DeleteWhenStopped);
+    animation.stop();
+    animation.setDuration(msecs);
+    animation.setStartValue(visibleSceneRect());
+    animation.setKeyValueAt(0.5, sceneRect());
+    animation.setEndValue(rect);
+    animation.start();
 }

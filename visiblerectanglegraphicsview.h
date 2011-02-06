@@ -2,6 +2,7 @@
 #define VISIBLERECTANGLEGRAPHICSVIEW_H
 
 #include <QGraphicsView>
+#include <QPropertyAnimation>
 
 class VisibleRectangleGraphicsView : public QGraphicsView
 {
@@ -11,7 +12,7 @@ public:
     explicit VisibleRectangleGraphicsView(QWidget *parent = 0);
     explicit VisibleRectangleGraphicsView(QGraphicsScene *scene, QWidget *parent = 0);
 
-    const QRectF & visibleSceneRect() const;
+    QRectF visibleSceneRect() const;
     void setVisibleSceneRect(const QRectF &rect);
 
     void animateToVisibleSceneRect(const QRectF &rect, int msecs = 750);
@@ -21,7 +22,7 @@ signals:
 public slots:
 
 private:
-    QRectF visibleSceneRectangle;
+    QPropertyAnimation animation;
 };
 
 #endif // VISIBLERECTANGLEGRAPHICSVIEW_H

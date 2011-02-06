@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    // end interpolation test
 
     // moog filter client and gui test setup:
-    frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 800, 600), 22050.0 / 2048.0, 22050, -60, 20);
+    frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 600, 600), 11025.0 / 512.0, 11025, -60, 30);
     IirMoogFilter::Parameters moogFilterParameters;
     moogFilterParameters.frequency = frequencyResponse->getLowestHertz();
     moogFilterParameters.frequencyOffsetFactor = 16;
@@ -130,7 +130,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
-    ui->graphicsView->setVisibleSceneRect(ui->graphicsView->sceneRect());
 
 //    QDialog *dialog = new QDialog(this);
 //    dialog->setLayout(new QHBoxLayout(dialog));
