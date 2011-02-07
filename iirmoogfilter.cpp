@@ -5,7 +5,7 @@ IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     IirFilter(1 + zeros, 4, QStringList("Cutoff modulation"), sampleRate)
 {
     parameters.frequency = sampleRate * 0.5;
-    parameters.frequencyOffsetFactor = 1;
+    parameters.frequencyOffsetFactor = 16; // two octaves difference from MIDI input note
     parameters.frequencyPitchBendFactor = 1;
     parameters.frequencyModulationFactor = 1;
     parameters.frequencyModulationIntensity = 1;
@@ -23,7 +23,7 @@ void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nfr
 void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
     // set base cutoff frequency from note number:
-    parameters.frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
+    parameters.frequency = parameters.frequencyOffsetFactor * computeFrequencyFromMidiNoteNumber(noteNumber);
     computeCoefficients();
 }
 
@@ -54,7 +54,7 @@ const IirMoogFilter::Parameters & IirMoogFilter::getParameters() const
 
 void IirMoogFilter::computeCoefficients()
 {
-    double cutoffFrequencyInHertz = parameters.frequency * parameters.frequencyOffsetFactor * parameters.frequencyPitchBendFactor * parameters.frequencyModulationFactor;
+    double cutoffFrequencyInHertz = parameters.frequency * parameters.frequencyPitchBendFactor * parameters.frequencyModulationFactor;
     double radians = convertHertzToRadians(cutoffFrequencyInHertz);
     if (radians > M_PI) {
         radians = M_PI;
