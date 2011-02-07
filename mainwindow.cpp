@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    // end interpolation test
 
     // moog filter client and gui test setup:
-    frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 600, 600), 11025.0 / 512.0, 11025, -60, 30);
+    frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 600, 600), 22050.0 / 512.0, 22050, -60, 30);
     IirMoogFilter::Parameters moogFilterParameters = moogFilter.getParameters();
     moogFilterParameters.frequency = frequencyResponse->getLowestHertz();
     moogFilter.setParameters(moogFilterParameters);
@@ -108,63 +108,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // client graphics item test setup:
     QRectF rect(0, 0, 100, 100);
-    graphicsClientItemFilter = new GraphicsClientItem(moogFilterClient.getClientName(), rect);
+    graphicsClientItemFilter = new GraphicsClientItem(&moogFilterClient, rect);
     graphicsClientItemFilter->setInnerItem(frequencyResponse);
     scene->addItem(graphicsClientItemFilter);
-    graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), rect.translated(rect.width(), 0));
+    graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient(), rect.translated(rect.width(), 0));
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
-    graphicsClientItemWaveShaping = new GraphicsClientItem("Linear waveshaping", rect.translated(0, rect.height()));
+    graphicsClientItemWaveShaping = new GraphicsClientItem(&linearWaveShapingClient, rect.translated(0, rect.height()));
     graphicsClientItemWaveShaping->setInnerItem(waveShapingItem);
     scene->addItem(graphicsClientItemWaveShaping);
-    graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem("Cubic spline waveshaping", rect.translated(rect.width(), rect.height()));
+    graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem(&cubicSplineWaveShapingClient, rect.translated(rect.width(), rect.height()));
     graphicsClientItemCubicSplineWaveShaping->setInnerItem(cubicSplineWaveShapingItem);
     scene->addItem(graphicsClientItemCubicSplineWaveShaping);
     // end client graphics item test setup
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
-
-//    QDialog *dialog = new QDialog(this);
-//    dialog->setLayout(new QHBoxLayout(dialog));
-//    dialog->layout()->addWidget(new TestMidiClientWidget(dialog));
-//    dialog->show();
-
-//    QObject::connect(ui->spinBoxZoom, SIGNAL(valueChanged(int)), ui->audioView, SLOT(setHorizontalScale(int)));
-
-//    ui->horizontalSlider_2->setController(1);
-//    Midi2SignalClient *midiClient = new Midi2SignalClient("signals/slots", this);
-//    midiClient->activate();
-//    midiClient->connectPorts("system_midi:capture_4", "signals/slots:midi in");
-//    //QObject::connect(midiClient, SIGNAL(receivedControlChange(unsigned char,unsigned char,unsigned char)), this, SLOT(onMidiMessage(unsigned char,unsigned char,unsigned char)));
-//    QObject::connect(midiClient, SIGNAL(receivedControlChange(unsigned char,unsigned char,unsigned char)), ui->horizontalSlider_2, SLOT(onControlChange(unsigned char,unsigned char,unsigned char)));
-//    QObject::connect(ui->horizontalSlider_2, SIGNAL(controlChanged(unsigned char,unsigned char,unsigned char)), midiClient, SLOT(sendControlChange(unsigned char,unsigned char,unsigned char)));
-//    QObject::connect(midiClient, SIGNAL(receivedPitchWheel(unsigned char,uint)), ui->horizontalSlider, SLOT(onPitchWheel(unsigned char,uint)));
-
-//    recordClient = new Record2MemoryClient("record");
-//    recordClient->activate();
-//    recordClient->connectPorts("system_midi:capture_2", "record:midi in");
-//    QObject::connect(recordClient, SIGNAL(recordingStarted()), this, SLOT(onRecordingStarted()));
-//    QObject::connect(recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
-
-//    simpleMonophonicClient = new SimpleMonophonicClient("synthesizer");
-//    simpleMonophonicClient->activate();
-//    simpleMonophonicClient->connectPorts("system_midi:capture_4", "synthesizer:midi in");
-//    simpleMonophonicClient->connectPorts("synthesizer:audio out", "system:playback_1");
-//    simpleMonophonicClient->connectPorts("synthesizer:audio out", "system:playback_2");
-//    simpleMonophonicClient->connectPorts("synthesizer:audio out", "record:audio in");
-//    simpleMonophonicClient->connectPorts("system_midi:capture_4", "record:midi in");
-
-//    midiControllerClient = new MidiController2AudioClient("controller", 0, 1);
-//    midiControllerClient->activate();
-//    midiControllerClient->connectPorts("system_midi:capture_2", "controller:midi in");
-//    midiControllerClient->connectPorts("controller:audio out", "record:audio in");
-
-//    // add a GraphicsNodeItem to the graphics scene:
-//    QGraphicsScene * scene = new QGraphicsScene();
-
-//    QRectF bounds(0.0, 0.0, 600.0, 200.0);
-//    scene->addRect(bounds.adjusted(-10.0, -10.0, 10.0, 10.0));
+    ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-200, -200, 200, 200));
 
 //    // ADSR envelope GUI test:
 //    int nrOfNodes = 5;
@@ -256,35 +216,37 @@ void MainWindow::onChangedParameters(double frequency)
 
 void MainWindow::on_actionStore_connections_triggered()
 {
+    qDebug() << nullClient.getAllConnections();
     settings.setValue("connections", nullClient.getAllConnections());
 }
 
 void MainWindow::on_actionRestore_connections_triggered()
 {
+    qDebug() << settings.value("connections").toStringList();
     nullClient.restoreConnections(settings.value("connections").toStringList());
 }
 
 void MainWindow::on_actionMoog_filter_triggered()
 {
-    ui->graphicsView->animateToVisibleSceneRect(graphicsClientItemFilter->sceneBoundingRect());
+    ui->graphicsView->animateToClientItem(graphicsClientItemFilter);
 }
 
 void MainWindow::on_actionVirtual_keyboard_triggered()
 {
-    ui->graphicsView->animateToVisibleSceneRect(graphicsClientItemKeyboard->sceneBoundingRect());
+    ui->graphicsView->animateToClientItem(graphicsClientItemKeyboard);
 }
 
 void MainWindow::on_actionAll_triggered()
 {
-    ui->graphicsView->animateToVisibleSceneRect(ui->graphicsView->sceneRect());
+    ui->graphicsView->animateToVisibleSceneRect(ui->graphicsView->scene()->sceneRect());
 }
 
 void MainWindow::on_actionLinear_waveshaping_triggered()
 {
-    ui->graphicsView->animateToVisibleSceneRect(graphicsClientItemWaveShaping->sceneBoundingRect());
+    ui->graphicsView->animateToClientItem(graphicsClientItemWaveShaping);
 }
 
 void MainWindow::on_actionCubic_spline_waveshaping_triggered()
 {
-    ui->graphicsView->animateToVisibleSceneRect(graphicsClientItemCubicSplineWaveShaping->sceneBoundingRect());
+    ui->graphicsView->animateToClientItem(graphicsClientItemCubicSplineWaveShaping);
 }

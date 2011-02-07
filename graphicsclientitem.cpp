@@ -1,43 +1,41 @@
 #include "graphicsclientitem.h"
 #include <QGraphicsPathItem>
 #include <QGraphicsSimpleTextItem>
-#include <QDebug>
 #include <QPen>
 #include <cmath>
 
-GraphicsClientItem::GraphicsClientItem(const QString &clientName, const QRectF &rect, QGraphicsItem *parent) :
-    QGraphicsEllipseItem(rect, parent)
+GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QRectF &rect, QGraphicsItem *parent) :
+    QGraphicsEllipseItem(rect, parent),
+    client(client_),
+    innerItem(0)
 {
     setPen(QPen(QBrush(Qt::gray), 7, Qt::DashLine));
     setBrush(QBrush(QColor(Qt::gray).lighter()));
-//    QRectF innerRect = rect.adjusted((rect.width() - innerSize.width()) * 0.5, (rect.height() - innerSize.height()) * 0.5, -(rect.width() - innerSize.width()) * 0.5, -(rect.height() - innerSize.height()) * 0.5);
-//    setRect(innerRect);
-//    QPainterPath path(rect.topLeft());
-//    path.lineTo(rect.bottomLeft());
-//    path.lineTo(2 * innerRect.left() - rect.left() - 2 * padding, rect.bottom());
-//    path.lineTo(2 * innerRect.left() - rect.left() - 2 * padding, innerRect.bottom() + padding);
-//    path.lineTo(innerRect.left() - padding, innerRect.bottom() + padding);
-//    path.lineTo(innerRect.left() - padding, innerRect.top() - padding);
-//    path.lineTo(2 * innerRect.left() - rect.left() - 2 * padding, innerRect.top() - padding);
-//    path.lineTo(2 * innerRect.left() - rect.left() - 2 * padding, rect.top());
-//    path.lineTo(rect.topLeft());
-//    QGraphicsPathItem *leftBracket = new QGraphicsPathItem(path, this);
-//    leftBracket->setPen(QPen(Qt::NoPen));
-//    leftBracket->setBrush(QBrush(Qt::gray));
-//    QGraphicsPathItem *rightBracket = new QGraphicsPathItem(path, this);
-//    rightBracket->setTransformOriginPoint(rect.topLeft() * 0.5 + rect.bottomRight() * 0.5);
-//    rightBracket->setRotation(180);
-//    rightBracket->setPen(QPen(Qt::NoPen));
-//    rightBracket->setBrush(QBrush(Qt::gray));
+    QPointF offset = (rect.bottomRight() - rect.topLeft()) * 0.25 * (2 - sqrt(2.0));
+    innerRect = QRectF(rect.topLeft() + offset, rect.bottomRight() - offset);
+}
+
+JackClient * GraphicsClientItem::getClient()
+{
+    return client;
+}
+
+const QRectF & GraphicsClientItem::getInnerRect() const
+{
+    return innerRect;
+}
+
+QGraphicsItem * GraphicsClientItem::getInnerItem()
+{
+    return innerItem;
 }
 
 void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
 {
+    innerItem = item;
     // add the item to our children:
     item->setParentItem(this);
-    QPointF offset = (rect().bottomRight() - rect().topLeft()) * 0.25 * (2 - sqrt(2.0));
-    QRectF innerRect(rect().topLeft() + offset, rect().bottomRight() - offset);
-    fitItemIntoRectangle(item, innerRect);
+    fitItemIntoRectangle(item, getInnerRect());
 }
 
 void GraphicsClientItem::fitItemIntoRectangle(QGraphicsItem *item, const QRectF &rect)

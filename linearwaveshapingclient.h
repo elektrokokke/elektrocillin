@@ -3,6 +3,8 @@
 
 #include "eventprocessorclient.h"
 #include "linearinterpolator.h"
+#include "linearintegralinterpolator.h"
+#include "graphicsinterpolationitem.h"
 #include <QGraphicsRectItem>
 #include "graphicslineitem.h"
 #include <QObject>
@@ -18,6 +20,7 @@ public:
     LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~LinearWaveShapingClient();
 
+    const LinearInterpolator & getInterpolator() const;
     const LinearWaveShapingParameters & getParameters() const;
 
     static const int controlPointCount;
@@ -44,7 +47,9 @@ private:
     LinearWaveShapingClient *client;
     LinearWaveShapingParameters parameters;
     QMap<QObject*, int> mapSenderToControlPointIndex;
-    QVector<GraphicsLineItem*> lines;
+    LinearInterpolator interpolator;
+    LinearIntegralInterpolator interpolatorIntegral;
+    GraphicsInterpolationItem *interpolationItem, *interpolationIntegralItem;
 };
 
 #endif // LINEARWAVESHAPINGCLIENT_H

@@ -19,6 +19,11 @@ LinearWaveShapingClient::~LinearWaveShapingClient()
     close();
 }
 
+const LinearInterpolator & LinearWaveShapingClient::getInterpolator() const
+{
+    return interpolator;
+}
+
 const LinearWaveShapingParameters & LinearWaveShapingClient::getParameters() const
 {
     return parameters;
@@ -46,7 +51,9 @@ void LinearWaveShapingClient::processEvent(const LinearWaveShapingParameters &ev
 LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client_, QGraphicsItem *parent) :
     QGraphicsRectItem(rect, parent),
     client(client_),
-    parameters(client->getParameters())
+    parameters(client->getParameters()),
+    interpolator(client->getInterpolator()),
+    interpolatorIntegral(&interpolator)
 {
     setPen(QPen(QBrush(Qt::black), 2));
     setBrush(QBrush(Qt::white));
@@ -60,7 +67,6 @@ LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect,
         qreal y = (double)i / 10.0 * (rect.top() - rect.bottom()) + rect.bottom();
         (new QGraphicsLineItem(rect.left(), y, rect.right(), y, this))->setPen(QPen(Qt::DotLine));
     }
-    QPointF currentPoint(rect.left() + rect.width() * parameters.x[0], rect.bottom() - rect.height() * parameters.y[0]);
     for (int i = 0; i < LinearWaveShapingClient::controlPointCount; i++) {
         GraphicsNodeItem *nodeItem = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
         nodeItem->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
@@ -68,18 +74,18 @@ LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect,
         nodeItem->setZValue(1);
         nodeItem->setBounds(rect);
         nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(1, 0)));
-        nodeItem->setPos(currentPoint);
+        nodeItem->setPos(QPointF(rect.left() + rect.width() * parameters.x[i], rect.bottom() - rect.height() * parameters.y[i]));
         nodeItem->setSendPositionChanges(true);
         mapSenderToControlPointIndex[nodeItem] = i;
-        if (i < LinearWaveShapingClient::controlPointCount - 1) {
-            QPointF nextPoint(rect.left() + rect.width() * parameters.x[i + 1], rect.bottom() - rect.height() * parameters.y[i + 1]);
-            GraphicsLineItem *currentLine = new GraphicsLineItem(QLineF(currentPoint, nextPoint), this);
-            currentLine->setPen(QPen(QBrush(Qt::black), 2));
-            lines.append(currentLine);
-            currentPoint = nextPoint;
-        }
         QObject::connect(nodeItem, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onNodePositionChangedScaled(QPointF)));
     }
+    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, 0, 1, rect.width(), -rect.height(), this);
+    interpolationItem->setPen(QPen(QBrush(Qt::black), 2));
+    interpolationItem->setPos(rect.bottomLeft());
+
+    interpolationIntegralItem = new GraphicsInterpolationItem(&interpolatorIntegral, 0.01, 0, 1, rect.width(), -rect.height(), this);
+    interpolationIntegralItem->setPen(QPen(QBrush(Qt::black), 2, Qt::DotLine));
+    interpolationIntegralItem->setPos(rect.bottomLeft());
 }
 
 void LinearWaveShapingGraphicsItem::onNodePositionChangedScaled(QPointF position)
@@ -98,15 +104,11 @@ void LinearWaveShapingGraphicsItem::onNodePositionChangedScaled(QPointF position
     if ((index < LinearWaveShapingClient::controlPointCount - 1) && (position.x() >= parameters.x[index + 1])) {
         return;
     }
-    if (index > 0) {
-        QPointF p2(position.x() * rect().width() + rect().left(), rect().bottom() - position.y() * rect().height());
-        lines[index - 1]->setP2(p2);
-    }
-    if (index < LinearWaveShapingClient::controlPointCount - 1) {
-        QPointF p1(position.x() * rect().width() + rect().left(), rect().bottom() - position.y() * rect().height());
-        lines[index]->setP1(p1);
-    }
-    parameters.x[index] = position.x();
-    parameters.y[index] = position.y();
+    interpolator.getX()[index] = parameters.x[index] = position.x();
+    interpolator.getY()[index] = parameters.y[index] = position.y();
     client->postEvent(parameters);
+    interpolationItem->updatePath();
+
+    interpolatorIntegral = LinearIntegralInterpolator(&interpolator);
+    interpolationIntegralItem->updatePath();
 }
