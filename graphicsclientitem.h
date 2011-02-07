@@ -1,13 +1,13 @@
 #ifndef GRAPHICSCLIENTITEM_H
 #define GRAPHICSCLIENTITEM_H
 
-#include <QGraphicsRectItem>
+#include <QGraphicsEllipseItem>
 #include <QTransform>
 
-class GraphicsClientItem : public QGraphicsRectItem
+class GraphicsClientItem : public QGraphicsEllipseItem
 {
 public:
-    GraphicsClientItem(const QString &clientName, const QRectF &rect, const QSizeF &innerSize, qreal padding, QGraphicsItem *parent = 0);
+    GraphicsClientItem(const QString &clientName, const QRectF &rect, QGraphicsItem *parent = 0);
 
     void setInnerItem(QGraphicsItem *item);
 

@@ -14,7 +14,7 @@ GraphicsKeyboardItem::GraphicsKeyboardItem(unsigned char channel_, QGraphicsItem
         keys.append(new GraphicsKeyItem(i, whiteKeySize, this));
     }
     setRect(childrenBoundingRect());
-    setPen(QPen(Qt::NoPen));
+    setBrush(QBrush(Qt::white));
 }
 
 unsigned char GraphicsKeyboardItem::getChannel() const

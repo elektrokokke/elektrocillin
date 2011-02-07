@@ -4,6 +4,7 @@
 #include "eventprocessorclient.h"
 #include "linearinterpolator.h"
 #include <QGraphicsRectItem>
+#include "graphicslineitem.h"
 #include <QObject>
 #include <QMap>
 
@@ -43,6 +44,7 @@ private:
     LinearWaveShapingClient *client;
     LinearWaveShapingParameters parameters;
     QMap<QObject*, int> mapSenderToControlPointIndex;
+    QVector<GraphicsLineItem*> lines;
 };
 
 #endif // LINEARWAVESHAPINGCLIENT_H

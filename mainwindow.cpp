@@ -66,13 +66,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // moog filter client and gui test setup:
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 600, 600), 11025.0 / 512.0, 11025, -60, 30);
-    IirMoogFilter::Parameters moogFilterParameters;
+    IirMoogFilter::Parameters moogFilterParameters = moogFilter.getParameters();
     moogFilterParameters.frequency = frequencyResponse->getLowestHertz();
-    moogFilterParameters.frequencyOffsetFactor = 16;
-    moogFilterParameters.frequencyPitchBendFactor = 1;
-    moogFilterParameters.frequencyModulationFactor = 1;
-    moogFilterParameters.frequencyModulationIntensity = 1;
-    moogFilterParameters.resonance = 0;
     moogFilter.setParameters(moogFilterParameters);
     moogFilterCopy.setParameters(moogFilterParameters);
     frequencyResponse->addFrequencyResponse(&moogFilterCopy);
@@ -105,25 +100,24 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // monophonic synthesizer and lfo test setup:
     synthesizerClient.activate();
-    lfo1.setFrequency(0.5);
+    lfo1.setFrequency(0.1);
     lfo2.setFrequency(20);
     lfoClient1.activate();
     lfoClient2.activate();
     // end monophonic synthesizer and lfo test setup
 
     // client graphics item test setup:
-    QSizeF size(100, 75);
-    QRectF rect(-35, -20, size.width() + 35 * 2, size.height() + 20 * 2);
-    graphicsClientItemFilter = new GraphicsClientItem(moogFilterClient.getClientName(), rect, size, 10);
+    QRectF rect(0, 0, 100, 100);
+    graphicsClientItemFilter = new GraphicsClientItem(moogFilterClient.getClientName(), rect);
     graphicsClientItemFilter->setInnerItem(frequencyResponse);
     scene->addItem(graphicsClientItemFilter);
-    graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), rect.translated(size.width() + 100, 0), size, 10);
+    graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient()->getClientName(), rect.translated(rect.width(), 0));
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
-    graphicsClientItemWaveShaping = new GraphicsClientItem("Linear waveshaping", rect.translated(0, size.height() + 100), size, 10);
+    graphicsClientItemWaveShaping = new GraphicsClientItem("Linear waveshaping", rect.translated(0, rect.height()));
     graphicsClientItemWaveShaping->setInnerItem(waveShapingItem);
     scene->addItem(graphicsClientItemWaveShaping);
-    graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem("Cubic spline waveshaping", rect.translated(size.width() + 100, size.height() + 100), size, 10);
+    graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem("Cubic spline waveshaping", rect.translated(rect.width(), rect.height()));
     graphicsClientItemCubicSplineWaveShaping->setInnerItem(cubicSplineWaveShapingItem);
     scene->addItem(graphicsClientItemCubicSplineWaveShaping);
     // end client graphics item test setup

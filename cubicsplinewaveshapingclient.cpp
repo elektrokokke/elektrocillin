@@ -33,9 +33,9 @@ const CubicSplineInterpolator & CubicSplineWaveShapingClient::getInterpolator() 
 void CubicSplineWaveShapingClient::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     if (inputs[0] >= 0) {
-        outputs[0] = interpolator.evaluate(inputs[0]);
+        outputs[0] = std::max(std::min(interpolator.evaluate(inputs[0]), 1.0), 0.0);
     } else {
-        outputs[0] = -interpolator.evaluate(-inputs[0]);
+        outputs[0] = -std::max(std::min(interpolator.evaluate(-inputs[0]), 1.0), 0.0);
     }
 }
 
@@ -64,6 +64,7 @@ CubicSplineWaveShapingGraphicsItem::CubicSplineWaveShapingGraphicsItem(const QRe
     interpolator(client->getInterpolator())
 {
     setPen(QPen(QBrush(Qt::black), 2));
+    setBrush(QBrush(Qt::white));
     // create dotted vertical lines:
     for (int i = 0; i <= 10; i++) {
         qreal x = (double)i / 10.0 * (rect.right() - rect.left()) + rect.left();
@@ -79,8 +80,8 @@ CubicSplineWaveShapingGraphicsItem::CubicSplineWaveShapingGraphicsItem(const QRe
         nodeItem->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
         nodeItem->setBrush(QBrush(qRgb(52, 101, 164)));
         nodeItem->setZValue(1);
-        nodeItem->setBounds(QRectF(rect.left(), rect.top(), rect.width() * 0.5, rect.height()));
-        nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(0.5, 0)));
+        nodeItem->setBounds(QRectF(rect.left(), rect.top(), rect.width(), rect.height()));
+        nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(1, 0)));
         nodeItem->setXScaled(interpolator.getX()[1]);
         nodeItem->setYScaled(interpolator.getY()[1]);
         nodeItem->setSendPositionChanges(true);
@@ -91,15 +92,15 @@ CubicSplineWaveShapingGraphicsItem::CubicSplineWaveShapingGraphicsItem(const QRe
         nodeItem->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
         nodeItem->setBrush(QBrush(qRgb(52, 101, 164)));
         nodeItem->setZValue(1);
-        nodeItem->setBounds(QRectF(rect.left() + rect.width() * 0.5, rect.top(), rect.width() * 0.5, rect.height()));
-        nodeItem->setBoundsScaled(QRectF(QPointF(0.5, 1), QPointF(1, 0)));
+        nodeItem->setBounds(QRectF(rect.left(), rect.top(), rect.width(), rect.height()));
+        nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(1, 0)));
         nodeItem->setXScaled(interpolator.getX()[2]);
         nodeItem->setYScaled(interpolator.getY()[2]);
         nodeItem->setSendPositionChanges(true);
         QObject::connect(nodeItem, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onNodePositionChanged2(QPointF)));
     }
 
-    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, rect.width(), -rect.height(), this);
+    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, 0, 1, rect.width(), -rect.height(), this);
     interpolationItem->setPen(QPen(QBrush(Qt::black), 2));
     interpolationItem->setPos(rect.bottomLeft());
 }
