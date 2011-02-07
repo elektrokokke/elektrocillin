@@ -1,9 +1,12 @@
 #include "interpolator.h"
 #include <cmath>
 
-double Interpolator::evaluate(double x)
+double Interpolator::evaluate(double x, int *index)
 {
     int jlo = cor ? hunt(x) : locate(x);
+    if (index) {
+        *index = jlo;
+    }
     return interpolate(jlo, x);
 }
 
@@ -12,20 +15,17 @@ const QVector<double> & Interpolator::getX() const
     return xx;
 }
 
-const QVector<double> & Interpolator::getY() const
-{
-    return yy;
+int Interpolator::getM() const {
+    return mm;
 }
 
-Interpolator::Interpolator(const QVector<double> &xx_, const QVector<double> &yy_, int m_) :
+Interpolator::Interpolator(const QVector<double> &xx_, int m_) :
     xx(xx_),
-    yy(yy_),
     n(xx_.size()),
     mm(m_),
     jsav(0),
     cor(0)
 {
-    Q_ASSERT_X(xx.size() == yy.size(), "Interpolator::Interpolator(const QVector<double> &xx, const QVector<double> &yy, int m_) :", "sizes of input vectors do not match");
     dj = std::max(1, (int)pow((double)n, 0.25));
 }
 

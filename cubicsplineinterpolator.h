@@ -19,13 +19,13 @@ public:
       */
     CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy, const QVector<double> &y2);
 
+    const QVector<double> & getY() const;
     const QVector<double> & getY2() const;
 
-protected:
     double interpolate(int jlo, double x);
 
 private:
-    QVector<double> y2;
+    QVector<double> yy, y2;
 
     void sety2(const QVector<double> &xx, const QVector<double> &yy, double yp1, double ypn);
     void sety2NaturalSpline(const QVector<double> &xx, const QVector<double> &yy);

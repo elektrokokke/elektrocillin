@@ -6,20 +6,23 @@
 class Interpolator
 {
 public:
-    double evaluate(double x);
+    /**
+      @param index pointer to a variable where the current
+        index should be written to, if non-zero
+      */
+    double evaluate(double x, int *index = 0);
 
     const QVector<double> & getX() const;
-    const QVector<double> & getY() const;
+    int getM() const;
 
+    virtual double interpolate(int jlo, double x) = 0;
 protected:
-    Interpolator(const QVector<double> &xx, const QVector<double> &yy, int m);
+    Interpolator(const QVector<double> &xx, int m);
 
     int locate(double x);
     int hunt(double x);
 
-    virtual double interpolate(int jlo, double x) = 0;
-
-    QVector<double> xx, yy;
+    QVector<double> xx;
     int n;
 private:
     int mm, jsav, cor, dj;

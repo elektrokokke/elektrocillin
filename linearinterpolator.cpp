@@ -1,8 +1,19 @@
 #include "linearinterpolator.h"
 
-LinearInterpolator::LinearInterpolator(const QVector<double> &xx, const QVector<double> &yy) :
-    Interpolator(xx, yy, 2)
+LinearInterpolator::LinearInterpolator(const QVector<double> &xx, const QVector<double> &yy_) :
+    Interpolator(xx, 2),
+    yy(yy_)
 {
+}
+
+const QVector<double> & LinearInterpolator::getX() const
+{
+    return Interpolator::getX();
+}
+
+const QVector<double> & LinearInterpolator::getY() const
+{
+    return yy;
 }
 
 QVector<double> & LinearInterpolator::getX()
