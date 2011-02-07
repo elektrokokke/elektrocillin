@@ -31,7 +31,7 @@ MidiProcessor * MidiProcessorClient::getMidiProcessor()
 
 bool MidiProcessorClient::init()
 {
-    return AudioProcessorClient::init() && (!midiInput || (midiInputPort = registerMidiPort(QString("midi_in"), JackPortIsInput)));
+    return AudioProcessorClient::init() && (!midiInput || (midiInputPort = registerMidiPort(QString("Midi in"), JackPortIsInput)));
 }
 
 bool MidiProcessorClient::process(jack_nframes_t nframes)

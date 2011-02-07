@@ -5,7 +5,7 @@
 const int LinearWaveShapingClient::controlPointCount = sizeof(LinearWaveShapingParameters::x) / sizeof(double);
 
 LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient<LinearWaveShapingParameters>(clientName, QStringList("audio_in"), QStringList("shaped_out"), ringBufferSize),
+    EventProcessorClient<LinearWaveShapingParameters>(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
     interpolator(QVector<double>(controlPointCount), QVector<double>(controlPointCount))
 {
     for (int i = 0; i < controlPointCount; i++) {

@@ -1,6 +1,9 @@
 #include "graphicsclientitem.h"
 #include <QGraphicsPathItem>
 #include <QGraphicsSimpleTextItem>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QGraphicsProxyWidget>
 #include <QPen>
 #include <cmath>
 
@@ -13,6 +16,62 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QRectF &rect, 
     setBrush(QBrush(QColor(Qt::gray).lighter()));
     QPointF offset = (rect.bottomRight() - rect.topLeft()) * 0.25 * (2 - sqrt(2.0));
     innerRect = QRectF(rect.topLeft() + offset, rect.bottomRight() - offset);
+    // show the client name on the bottom:
+    {
+        QLabel *label = new QLabel(client->getClientName());
+        label->setFrameStyle(QFrame::Raised | QFrame::Panel);
+        QGraphicsProxyWidget *labelProxy = new QGraphicsProxyWidget(this);
+        labelProxy->setWidget(label);
+        labelProxy->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+        labelProxy->setPos(innerRect.bottomLeft());
+        labelProxy->setZValue(1);
+    }
+    {
+        // show the client's inputs on the left:
+        QWidget *widget = new QWidget();
+        widget->setLayout(new QVBoxLayout());
+        widget->layout()->setContentsMargins(0, 0, 0, 0);
+        widget->layout()->setSpacing(0);
+        QStringList portNames = client->getClientPorts(client->getClientName(), JackPortIsInput);
+        for (int i = 0; i < portNames.size(); i++) {
+            QLabel *label = new QLabel(portNames[i].split(':')[1]);
+            label->setFrameStyle(QFrame::Raised | QFrame::Panel);
+            widget->layout()->addWidget(label);
+        }
+        widget->adjustSize();
+        QGraphicsRectItem *proxyRect = new QGraphicsRectItem(QRectF(0, 0, widget->width(), widget->height()), this);
+        proxyRect->setPen(QPen(Qt::NoPen));
+        proxyRect->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+        proxyRect->setPos(innerRect.left(), 0.5 * (innerRect.top() + innerRect.bottom()));
+        QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(proxyRect);
+        proxy->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+        proxy->setWidget(widget);
+        proxy->setPos(proxyRect->rect().right(), 0.5 * (proxyRect->rect().top() + proxyRect->rect().bottom()));
+        proxy->rotate(180);
+        proxyRect->rotate(180);
+    }
+    {
+        // show the client's outputs on the left:
+        QWidget *widget = new QWidget();
+        widget->setLayout(new QVBoxLayout());
+        widget->layout()->setContentsMargins(0, 0, 0, 0);
+        widget->layout()->setSpacing(0);
+        QStringList portNames = client->getClientPorts(client->getClientName(), JackPortIsOutput);
+        for (int i = 0; i < portNames.size(); i++) {
+            QLabel *label = new QLabel(portNames[i].split(':')[1]);
+            label->setFrameStyle(QFrame::Raised | QFrame::Panel);
+            widget->layout()->addWidget(label);
+        }
+        widget->adjustSize();
+        QGraphicsRectItem *proxyRect = new QGraphicsRectItem(QRectF(0, 0, widget->width(), widget->height()), this);
+        proxyRect->setPen(QPen(Qt::NoPen));
+        proxyRect->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+        proxyRect->setPos(innerRect.right(), 0.5 * (innerRect.top() + innerRect.bottom()));
+        QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(proxyRect);
+        proxy->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+        proxy->setWidget(widget);
+        proxy->setPos(proxyRect->rect().left(), -0.5 * (proxyRect->rect().top() + proxyRect->rect().bottom()));
+    }
 }
 
 JackClient * GraphicsClientItem::getClient()

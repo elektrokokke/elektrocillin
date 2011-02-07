@@ -4,7 +4,7 @@
 #include <QPen>
 
 CubicSplineWaveShapingClient::CubicSplineWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient<CubicSplineWaveShapingParameters>(clientName, QStringList("audio_in"), QStringList("shaped_out"), ringBufferSize),
+    EventProcessorClient<CubicSplineWaveShapingParameters>(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
     interpolator(QVector<double>(), QVector<double>(), QVector<double>())
 {
     QVector<double> xx, yy;

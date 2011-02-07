@@ -2,7 +2,7 @@
 #include <QDebug>
 
 IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames, double sampleRate) :
-    MidiProcessor(QStringList("audio_in") + additionalInputPortNames, QStringList("filtered_out"), sampleRate),
+    MidiProcessor(QStringList("Audio in") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
     feedForward(feedForwardCoefficients),
     feedBack(feedBackCoefficients),
     x(feedForwardCoefficients),

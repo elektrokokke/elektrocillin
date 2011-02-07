@@ -190,8 +190,8 @@ void MidiSignalThread::sendPitchWheel(unsigned char channel, unsigned int pitch)
 
 MidiSignalThread::MidiSignalClient::MidiSignalClient(const QString &clientName, JackThread *thread) :
         JackClientWithDeferredProcessing(clientName, thread),
-        midiInputPortName("midi in"),
-        midiOutputPortName("midi out")
+        midiInputPortName("Midi in"),
+        midiOutputPortName("Midi out")
 {
 }
 

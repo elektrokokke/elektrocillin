@@ -2,7 +2,7 @@
 #include <cmath>
 
 IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
-    IirFilter(1 + zeros, 4, QStringList("cutoff_modulation_in"), sampleRate)
+    IirFilter(1 + zeros, 4, QStringList("Cutoff modulation"), sampleRate)
 {
     parameters.frequency = sampleRate * 0.5;
     parameters.frequencyOffsetFactor = 1;

@@ -23,15 +23,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     settings("settings.ini", QSettings::IniFormat),
-    midiSignalThread("virtual keyboard"),
-    synthesizerClient("synthesizer", &synthesizer),
+    midiSignalThread("Virtual keyboard"),
+    synthesizerClient("Synthesizer", &synthesizer),
     moogFilter(44100, 1),
     moogFilterCopy(44100, 1),
-    moogFilterClient("moog filter", &moogFilter),
-    lfoClient1("lfo", &lfo1),
-    lfoClient2("lfo_2", &lfo2),
-    linearWaveShapingClient("linear waveshaping"),
-    cubicSplineWaveShapingClient("spline waveshaping")
+    moogFilterClient("Moog filter", &moogFilter),
+    lfoClient1("LFO", &lfo1),
+    lfoClient2("LFO 2", &lfo2),
+    linearWaveShapingClient("Linear waveshaping"),
+    cubicSplineWaveShapingClient("Cubic spline waveshaping")
 {   
     ui->setupUi(this);
     QGraphicsScene * scene = new QGraphicsScene();
