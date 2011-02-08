@@ -54,7 +54,7 @@ double CubicSplineInterpolator::interpolate(int jl, double x)
 /**
   Comments from "Numerical Recipes"
 
-  This routine stores an array y2[0..n-1] with second derivatices of the interpolating function
+  This routine stores an array y2[0..xx.size()-1] with second derivatices of the interpolating function
   at the tabulated points pointed to by xx, using function values pointed to by yy. If yp1
   and/or ypn are equal to 1x10^99 or larger, the routine is signaled to set the corresponding
   boundary condition for a natural spline, with zero second derivatives on that boundary; otherwise,
@@ -67,11 +67,11 @@ double CubicSplineInterpolator::interpolate(int jl, double x)
 void CubicSplineInterpolator::sety2(const QVector<double> &xx, const QVector<double> &yy, double yp1, double ypn)
 {
     double p, qn, sig, un;
-    QVector<double> u(n - 1);
+    QVector<double> u(xx.size() - 1);
                                         // The lower boundary condition is set either to be "natural" (see sety2NaturalSpline())
     y2[0] = -0.5;                       // or else to have a specified first derivative.
     u[0] = (3.0 / (xx[1] - xx[0])) * ((yy[1] - yy[0]) / (xx[1] - xx[0]) - yp1);
-    for (int i = 1; i < n - 1; i++) {   // This is the decomposition loop of the tridiagonal algorithm. y2 and u are used for temporary storage of the decomposed factors.
+    for (int i = 1; i < xx.size() - 1; i++) {   // This is the decomposition loop of the tridiagonal algorithm. y2 and u are used for temporary storage of the decomposed factors.
         sig = (xx[i] - xx[i - 1]) / (xx[i + 1] - xx[i - 1]);
         p = sig * y2[i - 1] + 2.0;
         y2[i] = (sig - 1.0) / p;
@@ -80,9 +80,9 @@ void CubicSplineInterpolator::sety2(const QVector<double> &xx, const QVector<dou
     }
                                         // The upper boundary condition is set either to be "natural" (see sety2NaturalSpline())
     qn = 0.5;                           // or else to have a specified first derivative.
-    un = (3.0 / (xx[n - 1] - xx[n - 2])) * (ypn - (yy[n - 1] - yy[n - 2]) / (xx[n - 1] - xx[n - 2]));
-    y2[n - 1] = (un - qn * u[n - 2]) / (qn * y2[n - 2] + 1.0);
-    for (int k = n - 2; k >= 0; k--) {  // This is the backsubstitution loop of the trtidiagonal algorithm.
+    un = (3.0 / (xx[xx.size() - 1] - xx[xx.size() - 2])) * (ypn - (yy[xx.size() - 1] - yy[xx.size() - 2]) / (xx[xx.size() - 1] - xx[xx.size() - 2]));
+    y2[xx.size() - 1] = (un - qn * u[xx.size() - 2]) / (qn * y2[xx.size() - 2] + 1.0);
+    for (int k = xx.size() - 2; k >= 0; k--) {  // This is the backsubstitution loop of the trtidiagonal algorithm.
         y2[k] = y2[k] * y2[k + 1] + u[k];
     }
 }
@@ -90,10 +90,10 @@ void CubicSplineInterpolator::sety2(const QVector<double> &xx, const QVector<dou
 void CubicSplineInterpolator::sety2NaturalSpline(const QVector<double> &xx, const QVector<double> &yy)
 {
     double p, qn, sig, un;
-    QVector<double> u(n - 1);
+    QVector<double> u(xx.size() - 1);
     y2[0] = u[0] = 0.0;                 // The lower boundary condition is set either to be "natural"
                                         // or else to have a specified first derivative (see sety2()).
-    for (int i = 1; i < n - 1; i++) {   // This is the decomposition loop of the tridiagonal algorithm. y2 and u are used for temporary storage of the decomposed factors.
+    for (int i = 1; i < xx.size() - 1; i++) {   // This is the decomposition loop of the tridiagonal algorithm. y2 and u are used for temporary storage of the decomposed factors.
         sig = (xx[i] - xx[i - 1]) / (xx[i + 1] - xx[i - 1]);
         p = sig * y2[i - 1] + 2.0;
         y2[i] = (sig - 1.0) / p;
@@ -102,8 +102,8 @@ void CubicSplineInterpolator::sety2NaturalSpline(const QVector<double> &xx, cons
     }
     qn = un = 0.0;                      // The upper boundary condition is set either to be "natural"
                                         // or else to have a specified first derivative (see sety2()).
-    y2[n - 1] = (un - qn * u[n - 2]) / (qn * y2[n - 2] + 1.0);
-    for (int k = n - 2; k >= 0; k--) {  // This is the backsubstitution loop of the trtidiagonal algorithm.
+    y2[xx.size() - 1] = (un - qn * u[xx.size() - 2]) / (qn * y2[xx.size() - 2] + 1.0);
+    for (int k = xx.size() - 2; k >= 0; k--) {  // This is the backsubstitution loop of the trtidiagonal algorithm.
         y2[k] = y2[k] * y2[k + 1] + u[k];
     }
 }

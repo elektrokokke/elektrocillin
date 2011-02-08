@@ -68,7 +68,7 @@ LinearOscillatorGraphicsItem::LinearOscillatorGraphicsItem(const QRectF &rect, L
 
     interpolationIntegralItem = new GraphicsInterpolationItem(&interpolatorIntegral, 0.01, -1, 1, rect.width() * 0.5 / M_PI, -rect.height() * 0.5, this);
     interpolationIntegralItem->setPen(QPen(QBrush(Qt::black), 2, Qt::DotLine));
-    interpolationIntegralItem->setPos(rect.center());
+    interpolationIntegralItem->setPos(0, 0.5 * (rect.top() + rect.bottom()));
 }
 
 void LinearOscillatorGraphicsItem::onNodePositionChangedScaled(QPointF position)

@@ -48,7 +48,7 @@
      <x>0</x>
      <y>0</y>
      <width>731</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuJACK">
@@ -64,6 +64,7 @@
      <addaction name="actionVirtual_keyboard"/>
      <addaction name="actionLinear_waveshaping"/>
      <addaction name="actionCubic_spline_waveshaping"/>
+     <addaction name="actionOscillator"/>
     </widget>
     <addaction name="actionStore_connections"/>
     <addaction name="actionRestore_connections"/>
@@ -104,6 +105,11 @@
   <action name="actionCubic_spline_waveshaping">
    <property name="text">
     <string>Cubic spline waveshaping</string>
+   </property>
+  </action>
+  <action name="actionOscillator">
+   <property name="text">
+    <string>Oscillator</string>
    </property>
   </action>
  </widget>

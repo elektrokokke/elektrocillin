@@ -23,9 +23,8 @@ protected:
     int hunt(double x);
 
     QVector<double> xx;
-    int n;
 private:
-    int mm, jsav, cor, dj;
+    int mm, jsav, cor, dj, previousN;
 };
 
 #endif // INTERPOLATOR_H

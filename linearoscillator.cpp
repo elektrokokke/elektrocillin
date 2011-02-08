@@ -5,9 +5,16 @@ LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double s
         Oscillator(frequencyModulationIntensity, sampleRate),
         previousPhase(0),
         previousIntegralValue(0),
-        interpolator(QVector<double>(0) + QVector<double>(2 * M_PI), QVector<double>(-1) + QVector<double>(1)),
+        interpolator(QVector<double>(1), QVector<double>(1)),
         integral(interpolator)
 {
+    interpolator.getX()[0] = 0;
+    interpolator.getY()[0] = -1;
+    interpolator.getX().append(M_PI);
+    interpolator.getY().append(0);
+    interpolator.getX().append(2 * M_PI);
+    interpolator.getY().append(1);
+    integral = LinearIntegralInterpolator(interpolator);
 }
 
 LinearOscillator::LinearOscillator(const LinearInterpolator &interpolator_, double frequencyModulationIntensity, double sampleRate) :

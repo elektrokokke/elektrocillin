@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     lfoClient1("LFO", &lfo1),
     lfoClient2("LFO 2", &lfo2),
     linearWaveShapingClient("Linear waveshaping"),
+    linearOscillatorClient("Oscillator"),
     cubicSplineWaveShapingClient("Cubic spline waveshaping")
 {   
     ui->setupUi(this);
@@ -98,6 +99,11 @@ MainWindow::MainWindow(QWidget *parent) :
     cubicSplineWaveShapingClient.activate();
     // end waveshaping client test setup
 
+    // piecewise linear oscillator test setup:
+    LinearOscillatorGraphicsItem *linearOscillatorGraphicsItem = new LinearOscillatorGraphicsItem(QRectF(0, 0, 600, 600), &linearOscillatorClient);
+    linearOscillatorClient.activate();
+    // end piecewise linear oscillator test setup
+
     // monophonic synthesizer and lfo test setup:
     synthesizerClient.activate();
     lfo1.setFrequency(0.1);
@@ -120,6 +126,9 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem(&cubicSplineWaveShapingClient, rect.translated(rect.width(), rect.height()));
     graphicsClientItemCubicSplineWaveShaping->setInnerItem(cubicSplineWaveShapingItem);
     scene->addItem(graphicsClientItemCubicSplineWaveShaping);
+    graphicsClientItemLinearOscillator = new GraphicsClientItem(&linearOscillatorClient, rect.translated(rect.width() * 2, 0));
+    graphicsClientItemLinearOscillator->setInnerItem(linearOscillatorGraphicsItem);
+    scene->addItem(graphicsClientItemLinearOscillator);
     // end client graphics item test setup
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
@@ -249,4 +258,9 @@ void MainWindow::on_actionLinear_waveshaping_triggered()
 void MainWindow::on_actionCubic_spline_waveshaping_triggered()
 {
     ui->graphicsView->animateToClientItem(graphicsClientItemCubicSplineWaveShaping);
+}
+
+void MainWindow::on_actionOscillator_triggered()
+{
+    ui->graphicsView->animateToClientItem(graphicsClientItemLinearOscillator);
 }

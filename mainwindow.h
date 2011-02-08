@@ -13,6 +13,7 @@
 #include "jacknullclient.h"
 #include "graphicsclientitem.h"
 #include "linearwaveshapingclient.h"
+#include "linearoscillatorclient.h"
 #include "cubicsplinewaveshapingclient.h"
 
 class Record2MemoryClient;
@@ -33,6 +34,7 @@ public:
 
 
 private slots:
+    void on_actionOscillator_triggered();
     void onMidiMessage(unsigned char, unsigned char, unsigned char);
     void onChangeCutoff(QPointF cutoffResonance);
     void onChangedParameters(double frequency);
@@ -67,9 +69,10 @@ private:
     Oscillator lfo1, lfo2;
     AudioProcessorClient lfoClient1, lfoClient2;
     LinearWaveShapingClient linearWaveShapingClient;
+    LinearOscillatorClient linearOscillatorClient;
     CubicSplineWaveShapingClient cubicSplineWaveShapingClient;
     JackNullClient nullClient;
-    GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard, *graphicsClientItemWaveShaping, *graphicsClientItemCubicSplineWaveShaping;
+    GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard, *graphicsClientItemWaveShaping, *graphicsClientItemCubicSplineWaveShaping, *graphicsClientItemLinearOscillator;
 };
 
 #endif // MAINWINDOW_H
