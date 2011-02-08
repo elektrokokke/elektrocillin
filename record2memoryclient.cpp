@@ -1,7 +1,6 @@
 #include "record2memoryclient.h"
 #include "jack/midiport.h"
 #include <QApplication>
-#include <QDebug>
 
 const size_t Record2MemoryClient::ringBufferSize = 2 << 20;
 
@@ -163,7 +162,6 @@ bool Record2MemoryClient::process(jack_nframes_t nframes)
 
 void Record2MemoryClient::run()
 {
-    qDebug() << "Record2MemoryClient::run() : starting thread";
     // mutex has to be locked to be used for the wait condition:
     mutexForAudio.lock();
     for (; jack_ringbuffer_read_space(ringBufferStopThread) == 0; ) {
@@ -187,12 +185,10 @@ void Record2MemoryClient::run()
                     audioModelsMutex.unlock();
                     audioModel_run = 0;
                     // invoke the corresponding signal:
-                    qDebug() << "recordingFinished();";
                     recordingFinished();
                 }
             } else if (jack_ringbuffer_read_space(ringBuffer) >= sizeof(jack_nframes_t) + framesToRead * sizeof(jack_default_audio_sample_t)) {
                 if (!audioModel_run) {
-                    qDebug() << "recordingStarted();";
                     recordingStarted();
                     // create the audio model:
                     audioModel_run = new JackAudioModel();
@@ -205,7 +201,6 @@ void Record2MemoryClient::run()
             }
         }
     }
-    qDebug() << "Record2MemoryClient::run() : shutting down thread";
     char dummy;
     jack_ringbuffer_read(ringBufferStopThread, &dummy, 1);
 }
