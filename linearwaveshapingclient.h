@@ -2,7 +2,6 @@
 #define LINEARWAVESHAPINGCLIENT_H
 
 #include "eventprocessorclient.h"
-#include "linearinterpolator.h"
 #include "linearintegralinterpolator.h"
 #include "graphicsinterpolationitem.h"
 #include <QGraphicsRectItem>
@@ -30,7 +29,6 @@ protected:
     virtual void processEvent(const LinearWaveShapingParameters &event, jack_nframes_t time);
 
 private:
-    LinearWaveShapingParameters parameters;
     LinearInterpolator interpolator;
 };
 
@@ -45,7 +43,6 @@ private slots:
 
 private:
     LinearWaveShapingClient *client;
-    LinearWaveShapingParameters parameters;
     QMap<QObject*, int> mapSenderToControlPointIndex;
     LinearInterpolator interpolator;
     LinearIntegralInterpolator interpolatorIntegral;

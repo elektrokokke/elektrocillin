@@ -1,33 +1,25 @@
-#include "linearwaveshapingclient.h"
+#include "linearoscillatorclient.h"
 #include "graphicsnodeitem.h"
+#include <cmath>
 #include <QPen>
 
-LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient<LinearWaveShapingParameters>(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
-    interpolator(QVector<double>(5), QVector<double>(5))
+LinearOscillatorClient::LinearOscillatorClient(const QString &clientName, size_t ringBufferSize) :
+        EventProcessorClient<LinearOscillatorParameters>(clientName, new LinearOscillator(), ringBufferSize),
+        interpolator(getLinearOscillator()->getLinearInterpolator())
 {
-    for (int i = 0; i < interpolator.getX().size(); i++) {
-        interpolator.getX()[i] =  interpolator.getY()[i] = (double)i / (double)(interpolator.getX().size() - 1) * 2 - 1;
-    }
-    deactivateMidiInput();
 }
 
-LinearWaveShapingClient::~LinearWaveShapingClient()
+LinearOscillatorClient::~LinearOscillatorClient()
 {
     close();
 }
 
-const LinearInterpolator & LinearWaveShapingClient::getInterpolator() const
+LinearOscillator * LinearOscillatorClient::getLinearOscillator()
 {
-    return interpolator;
+    return (LinearOscillator*)getMidiProcessor();
 }
 
-void LinearWaveShapingClient::processAudio(const double *inputs, double *outputs, jack_nframes_t)
-{
-    outputs[0] = interpolator.evaluate(inputs[0]);
-}
-
-void LinearWaveShapingClient::processEvent(const LinearWaveShapingParameters &event, jack_nframes_t)
+void LinearOscillatorClient::processEvent(const LinearOscillatorParameters &event, jack_nframes_t)
 {
     // set the interpolator's nr of control points:
     interpolator.getX().resize(event.controlPoints);
@@ -35,13 +27,15 @@ void LinearWaveShapingClient::processEvent(const LinearWaveShapingParameters &ev
     // set the interpolator control point at "index" accordingly:
     interpolator.getX()[event.index] = event.x;
     interpolator.getY()[event.index] = event.y;
+    // update the integral:
+    getLinearOscillator()->setLinearInterpolator(interpolator);
 }
 
-LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client_, QGraphicsItem *parent) :
+LinearOscillatorGraphicsItem::LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client_, QGraphicsItem *parent) :
     QGraphicsRectItem(rect, parent),
     client(client_),
-    interpolator(client->getInterpolator()),
-    interpolatorIntegral(interpolator)
+    interpolator(client->getLinearOscillator()->getLinearInterpolator()),
+    interpolatorIntegral(client->getLinearOscillator()->getLinearIntegralInterpolator())
 {
     setPen(QPen(QBrush(Qt::black), 2));
     setBrush(QBrush(Qt::white));
@@ -61,23 +55,23 @@ LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect,
         nodeItem->setBrush(QBrush(qRgb(52, 101, 164)));
         nodeItem->setZValue(1);
         nodeItem->setBounds(rect);
-        nodeItem->setBoundsScaled(QRectF(QPointF(-1, 1), QPointF(1, -1)));
+        nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(2 * M_PI, -1)));
         nodeItem->setXScaled(interpolator.getX()[i]);
         nodeItem->setYScaled(interpolator.getY()[i]);
         nodeItem->setSendPositionChanges(true);
         mapSenderToControlPointIndex[nodeItem] = i;
         QObject::connect(nodeItem, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onNodePositionChangedScaled(QPointF)));
     }
-    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, -1, 1, rect.width() * 0.5, -rect.height() * 0.5, this);
+    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, -1, 1, rect.width() * 0.5 / M_PI, -rect.height() * 0.5, this);
     interpolationItem->setPen(QPen(QBrush(Qt::black), 2));
-    interpolationItem->setPos(rect.center());
+    interpolationItem->setPos(0, 0.5 * (rect.top() + rect.bottom()));
 
-    interpolationIntegralItem = new GraphicsInterpolationItem(&interpolatorIntegral, 0.01, -1, 1, rect.width() * 0.5, -rect.height() * 0.5, this);
+    interpolationIntegralItem = new GraphicsInterpolationItem(&interpolatorIntegral, 0.01, -1, 1, rect.width() * 0.5 / M_PI, -rect.height() * 0.5, this);
     interpolationIntegralItem->setPen(QPen(QBrush(Qt::black), 2, Qt::DotLine));
     interpolationIntegralItem->setPos(rect.center());
 }
 
-void LinearWaveShapingGraphicsItem::onNodePositionChangedScaled(QPointF position)
+void LinearOscillatorGraphicsItem::onNodePositionChangedScaled(QPointF position)
 {
     // get the control point index:
     int index = mapSenderToControlPointIndex[sender()];
@@ -93,7 +87,7 @@ void LinearWaveShapingGraphicsItem::onNodePositionChangedScaled(QPointF position
     if ((index < interpolator.getX().size() - 1) && (position.x() >= interpolator.getX()[index + 1])) {
         position.setX(interpolator.getX()[index + 1]);
     }
-    LinearWaveShapingParameters parameters;
+    LinearOscillatorParameters parameters;
     parameters.controlPoints = interpolator.getX().size();
     parameters.index = index;
     interpolator.getX()[index] = parameters.x = position.x();

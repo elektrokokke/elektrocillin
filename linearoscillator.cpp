@@ -1,15 +1,38 @@
 #include "linearoscillator.h"
 #include <cmath>
 
-LinearOscillator::LinearOscillator(const LinearInterpolator *interpolator, double frequencyModulationIntensity, double sampleRate) :
+LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate) :
         Oscillator(frequencyModulationIntensity, sampleRate),
+        previousPhase(0),
+        previousIntegralValue(0),
+        interpolator(QVector<double>(0) + QVector<double>(2 * M_PI), QVector<double>(-1) + QVector<double>(1)),
         integral(interpolator)
 {
 }
 
-void LinearOscillator::setLinearInterpolator(const LinearInterpolator *interpolator)
+LinearOscillator::LinearOscillator(const LinearInterpolator &interpolator_, double frequencyModulationIntensity, double sampleRate) :
+        Oscillator(frequencyModulationIntensity, sampleRate),
+        previousPhase(0),
+        previousIntegralValue(0),
+        interpolator(interpolator_),
+        integral(interpolator_)
 {
+}
+
+const LinearInterpolator & LinearOscillator::getLinearInterpolator() const
+{
+    return interpolator;
+}
+
+void LinearOscillator::setLinearInterpolator(const LinearInterpolator &interpolator)
+{
+    this->interpolator = interpolator;
     integral = LinearIntegralInterpolator(interpolator);
+}
+
+const LinearIntegralInterpolator & LinearOscillator::getLinearIntegralInterpolator() const
+{
+    return integral;
 }
 
 double LinearOscillator::valueAtPhase(double phase)

@@ -11,7 +11,7 @@
 class LinearIntegralInterpolator : public Interpolator
 {
 public:
-    LinearIntegralInterpolator(const LinearInterpolator *linearInterpolator);
+    LinearIntegralInterpolator(const LinearInterpolator &linearInterpolator);
 
     double interpolate(int jlo, double x);
 
