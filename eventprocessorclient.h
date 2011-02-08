@@ -4,6 +4,7 @@
 #include "midiprocessorclient.h"
 #include "jackringbuffer.h"
 #include <jack/jack.h>
+#include <QVector>
 
 template<class T> class EventProcessorClient : public MidiProcessorClient
 {
@@ -25,6 +26,19 @@ public:
             ev.time = getEstimatedCurrentTime();
             ev.event = event;
             eventRingBuffer.write(ev);
+        }
+    }
+
+    void postEvents(const QVector<T> &events)
+    {
+        if (isActive()) {
+            jack_nframes_t time = getEstimatedCurrentTime();
+            for (int i = 0; i < events.size(); i++) {
+                EventWithTimeStamp ev;
+                ev.time = time;
+                ev.event = events[i];
+                eventRingBuffer.write(ev);
+            }
         }
     }
 

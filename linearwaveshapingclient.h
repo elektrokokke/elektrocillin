@@ -11,7 +11,8 @@
 #include <QMap>
 
 struct LinearWaveShapingParameters {
-    double x[5], y[5];
+    int controlPoints, index;
+    double x, y;
 };
 
 class LinearWaveShapingClient : public EventProcessorClient<LinearWaveShapingParameters>
@@ -21,7 +22,6 @@ public:
     virtual ~LinearWaveShapingClient();
 
     const LinearInterpolator & getInterpolator() const;
-    const LinearWaveShapingParameters & getParameters() const;
 
     static const int controlPointCount;
 

@@ -43,7 +43,7 @@ IirMoogFilterThread * IirMoogFilterClient::getMoogFilterThread()
     return (IirMoogFilterThread*)getJackThread();
 }
 
-void IirMoogFilterClient::processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t time)
+void IirMoogFilterClient::processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t)
 {
     getMoogFilter()->setParameters(event);
 }
