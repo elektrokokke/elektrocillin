@@ -20,6 +20,7 @@ public:
     void animateToClientItem(GraphicsClientItem *item, int msecs = 750);
 
 signals:
+    void animationFinished();
 
 public slots:
 

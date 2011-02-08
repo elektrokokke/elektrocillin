@@ -187,10 +187,12 @@ void Record2MemoryClient::run()
                     audioModelsMutex.unlock();
                     audioModel_run = 0;
                     // invoke the corresponding signal:
+                    qDebug() << "recordingFinished();";
                     recordingFinished();
                 }
             } else if (jack_ringbuffer_read_space(ringBuffer) >= sizeof(jack_nframes_t) + framesToRead * sizeof(jack_default_audio_sample_t)) {
                 if (!audioModel_run) {
+                    qDebug() << "recordingStarted();";
                     recordingStarted();
                     // create the audio model:
                     audioModel_run = new JackAudioModel();

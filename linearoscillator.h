@@ -21,7 +21,7 @@ protected:
     double valueAtPhase(double phase);
 
 private:
-    double previousPhase, previousIntegralValue;
+    double previousPhase;
     LinearInterpolator interpolator;
     LinearIntegralInterpolator integral;
 

@@ -6,6 +6,7 @@ VisibleRectangleGraphicsView::VisibleRectangleGraphicsView(QWidget *parent) :
     animation(this, "visibleSceneRect"),
     moving(false)
 {
+    QObject::connect(&animation, SIGNAL(finished()), this, SIGNAL(animationFinished()));
 }
 
 VisibleRectangleGraphicsView::VisibleRectangleGraphicsView(QGraphicsScene *scene, QWidget *parent) :
@@ -13,6 +14,7 @@ VisibleRectangleGraphicsView::VisibleRectangleGraphicsView(QGraphicsScene *scene
     animation(this, "visibleSceneRect"),
     moving(false)
 {
+    QObject::connect(&animation, SIGNAL(finished()), this, SIGNAL(animationFinished()));
 }
 
 QRectF VisibleRectangleGraphicsView::visibleSceneRect() const

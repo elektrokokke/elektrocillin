@@ -6,6 +6,10 @@
 #include "graphicsinterpolationitem.h"
 #include <QObject>
 #include <QGraphicsRectItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QMenu>
+
+class GraphicsNodeItem;
 
 struct LinearOscillatorParameters {
     int controlPoints, index;
@@ -20,6 +24,9 @@ public:
 
     LinearOscillator * getLinearOscillator();
 
+    const LinearInterpolator & postIncreaseControlPoints();
+    const LinearInterpolator & postDecreaseControlPoints();
+
 protected:
     virtual void processEvent(const LinearOscillatorParameters &event, jack_nframes_t time);
 
@@ -33,15 +40,26 @@ class LinearOscillatorGraphicsItem : public QObject, public QGraphicsRectItem
 public:
     LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client, QGraphicsItem *parent = 0);
 
+public slots:
+    void increaseControlPoints();
+    void decreaseControlPoints();
+
+protected:
+    virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+
 private slots:
     void onNodePositionChangedScaled(QPointF position);
 
 private:
     LinearOscillatorClient *client;
     QMap<QObject*, int> mapSenderToControlPointIndex;
+    QVector<GraphicsNodeItem*> nodes;
     LinearInterpolator interpolator;
     LinearIntegralInterpolator interpolatorIntegral;
     GraphicsInterpolationItem *interpolationItem, *interpolationIntegralItem;
+    QMenu contextMenu;
+
+    GraphicsNodeItem * createNode(qreal x, qreal y);
 };
 
 

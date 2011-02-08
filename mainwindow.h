@@ -15,10 +15,10 @@
 #include "linearwaveshapingclient.h"
 #include "linearoscillatorclient.h"
 #include "cubicsplinewaveshapingclient.h"
+#include "record2memoryclient.h"
 
-class Record2MemoryClient;
-class MidiController2AudioClient;
 class GraphicsNodeItem;
+class GraphView;
 
 namespace Ui {
     class MainWindow;
@@ -53,12 +53,13 @@ private slots:
 
     void on_actionCubic_spline_waveshaping_triggered();
 
+    void onRecordFinished();
+    void onAnimationFinished();
+
 private:
     Ui::MainWindow *ui;
     QSettings settings;
     GraphicsNodeItem *cutoffResonanceNode;
-    Record2MemoryClient *recordClient;
-    MidiController2AudioClient *midiControllerClient;
     FrequencyResponseGraphicsItem *frequencyResponse;
     MidiSignalThread midiSignalThread;
     MonophonicSynthesizer synthesizer;
@@ -71,8 +72,10 @@ private:
     LinearWaveShapingClient linearWaveShapingClient;
     LinearOscillatorClient linearOscillatorClient;
     CubicSplineWaveShapingClient cubicSplineWaveShapingClient;
+    Record2MemoryClient recordClient;
+    GraphView *recordClientGraphView;
     JackNullClient nullClient;
-    GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard, *graphicsClientItemWaveShaping, *graphicsClientItemCubicSplineWaveShaping, *graphicsClientItemLinearOscillator;
+    GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard, *graphicsClientItemWaveShaping, *graphicsClientItemCubicSplineWaveShaping, *graphicsClientItemLinearOscillator, *graphicsClientItemRecord;
 };
 
 #endif // MAINWINDOW_H

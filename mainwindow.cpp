@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "record2memoryclient.h"
 #include "graphicslineitem.h"
 #include "graphicsloglineitem.h"
 #include "graphicsnodeitem.h"
@@ -14,10 +13,12 @@
 #include "linearinterpolator.h"
 #include "graphicsinterpolationitem.h"
 #include "linearwaveshapingclient.h"
+#include "graphview.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
 #include <QGraphicsScene>
+#include <QGraphicsProxyWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,7 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
     lfoClient2("LFO 2", &lfo2),
     linearWaveShapingClient("Linear waveshaping"),
     linearOscillatorClient("Oscillator"),
-    cubicSplineWaveShapingClient("Cubic spline waveshaping")
+    cubicSplineWaveShapingClient("Cubic spline waveshaping"),
+    recordClient("Record")
 {   
     ui->setupUi(this);
     QGraphicsScene * scene = new QGraphicsScene();
@@ -112,6 +114,17 @@ MainWindow::MainWindow(QWidget *parent) :
     lfoClient2.activate();
     // end monophonic synthesizer and lfo test setup
 
+    // record client test setup:
+    QGraphicsRectItem *recordClientRect = new QGraphicsRectItem(0, 0, 500, 500);
+    recordClient.activate();
+    recordClientGraphView = new GraphView(0);
+    recordClientGraphView->resize(500, 500);
+    QGraphicsProxyWidget *recordClientGraphicsItem = new QGraphicsProxyWidget(recordClientRect);
+    recordClientGraphicsItem->setWidget(recordClientGraphView);
+    recordClientGraphicsItem->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+    QObject::connect(&recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
+    // end record client test setup
+
     // client graphics item test setup:
     QRectF rect(0, 0, 100, 100);
     graphicsClientItemFilter = new GraphicsClientItem(&moogFilterClient, rect);
@@ -129,11 +142,17 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemLinearOscillator = new GraphicsClientItem(&linearOscillatorClient, rect.translated(rect.width() * 2, 0));
     graphicsClientItemLinearOscillator->setInnerItem(linearOscillatorGraphicsItem);
     scene->addItem(graphicsClientItemLinearOscillator);
+    graphicsClientItemRecord = new GraphicsClientItem(&recordClient, rect.translated(rect.width() * 2, rect.height()));
+    graphicsClientItemRecord->setInnerItem(recordClientRect);
+    scene->addItem(graphicsClientItemRecord);
     // end client graphics item test setup
 
-    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+    //ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-200, -200, 200, 200));
+
+    onAnimationFinished();
+    QObject::connect(ui->graphicsView, SIGNAL(animationFinished()), this, SLOT(onAnimationFinished()));
 
 //    // ADSR envelope GUI test:
 //    int nrOfNodes = 5;
@@ -263,4 +282,29 @@ void MainWindow::on_actionCubic_spline_waveshaping_triggered()
 void MainWindow::on_actionOscillator_triggered()
 {
     ui->graphicsView->animateToClientItem(graphicsClientItemLinearOscillator);
+}
+
+void MainWindow::onRecordFinished()
+{
+    recordClientGraphView->setModel(recordClient.popAudioModel());
+    recordClientGraphView->model()->setParent(recordClientGraphView);
+    double min = -1, max = 1;
+    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {
+        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
+        if (value < min) {
+            min = value;
+        } else if (value > max) {
+            max = value;
+        }
+    }
+    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {
+        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
+        recordClientGraphView->model()->setData(recordClientGraphView->model()->index(i, 0), (value - min) / (max - min) * 2.0 - 1.0, Qt::DisplayRole);
+    }
+}
+
+void MainWindow::onAnimationFinished()
+{
+    QRect recordClientGraphViewRect = ui->graphicsView->mapFromScene(graphicsClientItemRecord->getInnerItem()->sceneBoundingRect()).boundingRect();
+    recordClientGraphView->resize(recordClientGraphViewRect.width(), recordClientGraphViewRect.height());
 }

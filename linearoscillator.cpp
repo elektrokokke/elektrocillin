@@ -4,7 +4,6 @@
 LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate) :
         Oscillator(frequencyModulationIntensity, sampleRate),
         previousPhase(0),
-        previousIntegralValue(0),
         interpolator(QVector<double>(1), QVector<double>(1)),
         integral(interpolator)
 {
@@ -20,7 +19,6 @@ LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double s
 LinearOscillator::LinearOscillator(const LinearInterpolator &interpolator_, double frequencyModulationIntensity, double sampleRate) :
         Oscillator(frequencyModulationIntensity, sampleRate),
         previousPhase(0),
-        previousIntegralValue(0),
         interpolator(interpolator_),
         integral(interpolator_)
 {
@@ -47,6 +45,7 @@ double LinearOscillator::valueAtPhase(double phase)
     if (phase == previousPhase) {
         return 0;
     }
+    double previousIntegralValue = integral.evaluate(previousPhase);
     // compare current phase with previous phase:
     if (phase < previousPhase) {
         // phase has wrapped around, adjust the previous integral level accordingly:
@@ -56,7 +55,6 @@ double LinearOscillator::valueAtPhase(double phase)
     double integralValue = integral.evaluate(phase);
     // integral difference / phase difference is the oscillator output:
     double output = (integralValue - previousIntegralValue) / (phase - previousPhase);
-    previousIntegralValue = integralValue;
     previousPhase = phase;
     return output;
 }
