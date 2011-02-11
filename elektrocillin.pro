@@ -104,7 +104,6 @@ HEADERS  += mainwindow.h \
     audioprocessorclient.h \
     midiprocessor.h \
     midiprocessorclient.h \
-    eventprocessor.h \
     eventprocessorclient.h \
     jackthreadeventprocessorclient.h \
     jacknullclient.h \
