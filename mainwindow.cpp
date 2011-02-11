@@ -108,8 +108,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // monophonic synthesizer and lfo test setup:
     synthesizerClient.activate();
-    lfo1.setFrequency(0.1);
-    lfo2.setFrequency(20);
+    lfo1.setFrequency(0.11);
+    lfo2.setFrequency(0.21);
     lfoClient1.activate();
     lfoClient2.activate();
     // end monophonic synthesizer and lfo test setup

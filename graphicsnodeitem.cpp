@@ -106,14 +106,18 @@ void GraphicsNodeItem::connectLine(GraphicsLogLineItem *line, GraphicsLineItem::
 void GraphicsNodeItem::setX(qreal x)
 {
     changingCoordinates = true;
-    QGraphicsEllipseItem::setX(x);
+    if (!considerBounds || ((x >= bounds.left()) && (x <= bounds.right()))) {
+        QGraphicsEllipseItem::setX(x);
+    }
     changingCoordinates = false;
 }
 
 void GraphicsNodeItem::setY(qreal y)
 {
     changingCoordinates = true;
-    QGraphicsEllipseItem::setY(y);
+    if (!considerBounds || ((y >= bounds.top()) && (y <= bounds.bottom()))) {
+        QGraphicsEllipseItem::setY(y);
+    }
     changingCoordinates = false;
 }
 
