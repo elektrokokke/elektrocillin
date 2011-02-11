@@ -64,7 +64,8 @@ SOURCES += main.cpp\
     visiblerectanglegraphicsview.cpp \
     linearintegralinterpolator.cpp \
     linearoscillator.cpp \
-    linearoscillatorclient.cpp
+    linearoscillatorclient.cpp \
+    linearmorphoscillator.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -125,7 +126,8 @@ HEADERS  += mainwindow.h \
     visiblerectanglegraphicsview.h \
     linearintegralinterpolator.h \
     linearoscillator.h \
-    linearoscillatorclient.h
+    linearoscillatorclient.h \
+    linearmorphoscillator.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
