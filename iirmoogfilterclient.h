@@ -8,10 +8,12 @@
 #include "jackringbuffer.h"
 #include <QObject>
 
+class IirMoogFilterClient;
+
 class IirMoogFilterThread : public JackThread {
     Q_OBJECT
 public:
-    IirMoogFilterThread(JackClient *client, QObject *parent = 0);
+    IirMoogFilterThread(IirMoogFilterClient *client, QObject *parent = 0);
 
     void setRingBufferFromClient(JackRingBuffer<IirMoogFilter::Parameters> *ringBufferFromClient);
 signals:

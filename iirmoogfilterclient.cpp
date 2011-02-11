@@ -1,6 +1,6 @@
 #include "iirmoogfilterclient.h"
 
-IirMoogFilterThread::IirMoogFilterThread(JackClient *client, QObject *parent) :
+IirMoogFilterThread::IirMoogFilterThread(IirMoogFilterClient *client, QObject *parent) :
     JackThread(client, parent),
     ringBufferFromClient(0)
 {
@@ -30,7 +30,7 @@ IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilte
 IirMoogFilterClient::~IirMoogFilterClient()
 {
     close();
-    delete getJackThread();
+    delete getMoogFilterThread();
 }
 
 IirMoogFilter * IirMoogFilterClient::getMoogFilter()
