@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     lfoClient1("LFO", &lfo1),
     lfoClient2("LFO 2", &lfo2),
     adsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3),
+    multiplierClient("Multiplier", &multiplier),
     linearWaveShapingClient("Linear waveshaping"),
     linearOscillatorClient("Oscillator"),
     cubicSplineWaveShapingClient("Cubic spline waveshaping"),
@@ -117,6 +118,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // ADSR envelope test setup:
     adsrClient.activate();
+    multiplierClient.activate();
     // end ADSR envelope test setup
 
     // record client test setup:

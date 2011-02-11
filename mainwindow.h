@@ -17,6 +17,7 @@
 #include "cubicsplinewaveshapingclient.h"
 #include "record2memoryclient.h"
 #include "adsrclient.h"
+#include "multiplyprocessor.h"
 
 class GraphicsNodeItem;
 class GraphView;
@@ -71,6 +72,8 @@ private:
     Oscillator lfo1, lfo2;
     AudioProcessorClient lfoClient1, lfoClient2;
     AdsrClient adsrClient;
+    MultiplyProcessor multiplier;
+    AudioProcessorClient multiplierClient;
     LinearWaveShapingClient linearWaveShapingClient;
     LinearOscillatorClient linearOscillatorClient;
     CubicSplineWaveShapingClient cubicSplineWaveShapingClient;
