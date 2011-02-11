@@ -16,6 +16,7 @@
 #include "linearoscillatorclient.h"
 #include "cubicsplinewaveshapingclient.h"
 #include "record2memoryclient.h"
+#include "adsrclient.h"
 
 class GraphicsNodeItem;
 class GraphView;
@@ -69,6 +70,7 @@ private:
     IirMoogFilterClient moogFilterClient;
     Oscillator lfo1, lfo2;
     AudioProcessorClient lfoClient1, lfoClient2;
+    AdsrClient adsrClient;
     LinearWaveShapingClient linearWaveShapingClient;
     LinearOscillatorClient linearOscillatorClient;
     CubicSplineWaveShapingClient cubicSplineWaveShapingClient;

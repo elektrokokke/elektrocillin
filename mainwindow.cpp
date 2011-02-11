@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     moogFilterClient("Moog filter", &moogFilter),
     lfoClient1("LFO", &lfo1),
     lfoClient2("LFO 2", &lfo2),
+    adsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3),
     linearWaveShapingClient("Linear waveshaping"),
     linearOscillatorClient("Oscillator"),
     cubicSplineWaveShapingClient("Cubic spline waveshaping"),
@@ -113,6 +114,10 @@ MainWindow::MainWindow(QWidget *parent) :
     lfoClient1.activate();
     lfoClient2.activate();
     // end monophonic synthesizer and lfo test setup
+
+    // ADSR envelope test setup:
+    adsrClient.activate();
+    // end ADSR envelope test setup
 
     // record client test setup:
     QGraphicsRectItem *recordClientRect = new QGraphicsRectItem(0, 0, 500, 500);
