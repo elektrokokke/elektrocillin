@@ -61,7 +61,8 @@ SOURCES += main.cpp\
     linearoscillator.cpp \
     linearoscillatorclient.cpp \
     linearmorphoscillator.cpp \
-    pulseoscillator.cpp
+    pulseoscillator.cpp \
+    adsrclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -119,7 +120,8 @@ HEADERS  += mainwindow.h \
     linearoscillator.h \
     linearoscillatorclient.h \
     linearmorphoscillator.h \
-    pulseoscillator.h
+    pulseoscillator.h \
+    adsrclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

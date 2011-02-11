@@ -15,6 +15,26 @@ AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustain
 {
 }
 
+void AdsrEnvelope::setAttackTime(double value)
+{
+    attackTime = value;
+}
+
+void AdsrEnvelope::setDecayTime(double value)
+{
+    decayTime = value;
+}
+
+void AdsrEnvelope::setSustainLevel(double value)
+{
+    sustainLevel = value;
+}
+
+void AdsrEnvelope::setReleaseTime(double value)
+{
+    releaseTime = value;
+}
+
 void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t)
 {
     this->velocity = velocity / 127.0;

@@ -8,6 +8,11 @@ class AdsrEnvelope : public MidiProcessor
 public:
     AdsrEnvelope(double attackTime, double decayTime, double sustainLevel, double releaseTime, double sampleRate = 44100);
 
+    void setAttackTime(double value);
+    void setDecayTime(double value);
+    void setSustainLevel(double value);
+    void setReleaseTime(double value);
+
     enum CurrentSegment {
         NONE,
         ATTACK,
