@@ -7,7 +7,7 @@
 class LinearOscillator : public Oscillator
 {
 public:
-    LinearOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100);
+    LinearOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
     /**
       @param interpolator has to span the interval [0..2 * pi]
       */

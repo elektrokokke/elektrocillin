@@ -4,8 +4,8 @@
 #include <QPen>
 
 LinearOscillatorClient::LinearOscillatorClient(const QString &clientName, size_t ringBufferSize) :
-        EventProcessorClient<LinearOscillatorParameters>(clientName, new LinearOscillator(), ringBufferSize),
-        interpolator(getLinearOscillator()->getLinearInterpolator())
+    EventProcessorClient<LinearOscillatorParameters>(clientName, new LinearOscillator(), ringBufferSize),
+    interpolator(getLinearOscillator()->getLinearInterpolator())
 {
 }
 

@@ -1,8 +1,8 @@
 #include "linearoscillator.h"
 #include <cmath>
 
-LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate) :
-    Oscillator(frequencyModulationIntensity, sampleRate),
+LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate, const QStringList &additionalInputPortNames) :
+    Oscillator(frequencyModulationIntensity, sampleRate, additionalInputPortNames),
     interpolator(QVector<double>(1), QVector<double>(1)),
     integral(interpolator)
 {

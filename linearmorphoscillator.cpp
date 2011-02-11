@@ -1,7 +1,7 @@
 #include "linearmorphoscillator.h"
 
 LinearMorphOscillator::LinearMorphOscillator(const LinearOscillator &state1_, const LinearOscillator &state2_, double frequencyModulationIntensity, double sampleRate) :
-    LinearOscillator(frequencyModulationIntensity, sampleRate),
+    LinearOscillator(frequencyModulationIntensity, sampleRate, QStringList("Morph modulation")),
     state1(state1_.getLinearInterpolator()),
     state2(state2_.getLinearInterpolator()),
     morphedState(state1.getX(), state1.getY())
@@ -10,7 +10,7 @@ LinearMorphOscillator::LinearMorphOscillator(const LinearOscillator &state1_, co
 }
 
 LinearMorphOscillator::LinearMorphOscillator(const LinearInterpolator &state1_, const LinearInterpolator &state2_, double frequencyModulationIntensity, double sampleRate) :
-    LinearOscillator(frequencyModulationIntensity, sampleRate),
+    LinearOscillator(frequencyModulationIntensity, sampleRate, QStringList("Morph modulation")),
     state1(state1_),
     state2(state2_),
     morphedState(state1.getX(), state1.getY())
