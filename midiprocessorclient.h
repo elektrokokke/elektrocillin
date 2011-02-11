@@ -39,7 +39,8 @@ protected:
       */
     MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames);
 
-    void deactivateMidiInput();
+    void activateMidiInput(bool active);
+    void activateMidiOutput(bool active);
 
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);
@@ -53,6 +54,11 @@ protected:
     virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
 
     /**
+      This may only be called from any of the process...() methods!
+      */
+    void writeMidi(const MidiEvent &event, jack_nframes_t time);
+
+    /**
       If you override process(jack_nframes_t nframes) call this function
       before you call processMidi(jack_nframes_t start, jack_nframes_t end).
       */
@@ -60,11 +66,12 @@ protected:
 
 private:
     MidiProcessor *midiProcessor;
-    jack_port_t * midiInputPort;
-    void *midiInputBuffer;
+    jack_port_t *midiInputPort, *midiOutputPort;
+    void *midiInputBuffer, *midiOutputBuffer;
     jack_nframes_t currentMidiEventIndex;
     jack_nframes_t midiEventCount;
-    bool midiInput;
+    jack_nframes_t nframes;
+    bool midiInput, midiOutput;
 };
 
 #endif // NOTETRIGGEREDCLIENT_H

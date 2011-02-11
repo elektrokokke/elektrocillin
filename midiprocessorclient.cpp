@@ -3,14 +3,16 @@
 MidiProcessorClient::MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_) :
     AudioProcessorClient(clientName, midiProcessor_),
     midiProcessor(midiProcessor_),
-    midiInput(true)
+    midiInput(true),
+    midiOutput(false)
 {
 }
 
 MidiProcessorClient::MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames) :
     AudioProcessorClient(clientName, inputPortNames, outputPortNames),
     midiProcessor(0),
-    midiInput(true)
+    midiInput(true),
+    midiOutput(false)
 {
 }
 
@@ -19,9 +21,14 @@ MidiProcessorClient::~MidiProcessorClient()
     close();
 }
 
-void MidiProcessorClient::deactivateMidiInput()
+void MidiProcessorClient::activateMidiInput(bool active)
 {
-    midiInput = false;
+    midiInput = active;
+}
+
+void MidiProcessorClient::activateMidiOutput(bool active)
+{
+    midiOutput = active;
 }
 
 MidiProcessor * MidiProcessorClient::getMidiProcessor()
@@ -31,7 +38,9 @@ MidiProcessor * MidiProcessorClient::getMidiProcessor()
 
 bool MidiProcessorClient::init()
 {
-    return AudioProcessorClient::init() && (!midiInput || (midiInputPort = registerMidiPort(QString("Midi in"), JackPortIsInput)));
+    return AudioProcessorClient::init()
+            && (!midiInput || (midiInputPort = registerMidiPort(QString("Midi in"), JackPortIsInput)))
+            && (!midiOutput || (midiOutputPort = registerMidiPort(QString("Midi out"), JackPortIsOutput)));
 }
 
 bool MidiProcessorClient::process(jack_nframes_t nframes)
@@ -134,14 +143,38 @@ void MidiProcessorClient::processPitchBend(unsigned char channel, unsigned int v
     midiProcessor->processPitchBend(channel, value, time);
 }
 
+void MidiProcessorClient::writeMidi(const MidiEvent &event, jack_nframes_t time)
+{
+    Q_ASSERT(midiOutput);
+    jack_nframes_t lastFrameTime = getLastFrameTime();
+    // adjust time relative to the beginning of this frame:
+    if (time + nframes < lastFrameTime) {
+        // if time is too early, this is in the buffer for too long, adjust time accordingly:
+        time = 0;
+    } else if (time >= lastFrameTime)  {
+        time = nframes - 1;
+    } else {
+        time = time + nframes - lastFrameTime;
+    }
+    // write the event to the jack midi output buffer:
+    jack_midi_event_write(midiOutputBuffer, time, event.buffer, event.size * sizeof(jack_midi_data_t));
+}
+
 void MidiProcessorClient::getMidiPortBuffer(jack_nframes_t nframes)
 {
     if (midiInput) {
-        // get midi port buffer:
+        // get MIDI input port buffer:
         midiInputBuffer = jack_port_get_buffer(midiInputPort, nframes);
         currentMidiEventIndex = 0;
         midiEventCount = jack_midi_get_event_count(midiInputBuffer);
     } else {
         midiEventCount = 0;
     }
+    if (midiOutput) {
+        // get MIDI output port buffer:
+        midiOutputBuffer = jack_port_get_buffer(midiOutputPort, nframes);
+        // clear it:
+        jack_midi_clear_buffer(midiOutputBuffer);
+    }
+    this->nframes = nframes;
 }
