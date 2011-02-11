@@ -16,12 +16,8 @@ SOURCES += main.cpp\
     jackclient.cpp \
     oscillator.cpp \
     monophonicsynthesizer.cpp \
-    pulseoscillator.cpp \
     simplelowpassfilter.cpp \
     adsrenvelope.cpp \
-    piecewiselinearoscillator.cpp \
-    sawtoothoscillator.cpp \
-    morphingpiecewiselinearoscillator.cpp \
     distortionfilter.cpp \
     midicontrollerslider.cpp \
     midicontrollercheckbox.cpp \
@@ -72,12 +68,8 @@ HEADERS  += mainwindow.h \
     jackclient.h \
     oscillator.h \
     monophonicsynthesizer.h \
-    pulseoscillator.h \
     simplelowpassfilter.h \
     adsrenvelope.h \
-    piecewiselinearoscillator.h \
-    sawtoothoscillator.h \
-    morphingpiecewiselinearoscillator.h \
     distortionfilter.h \
     midicontrollerslider.h \
     midicontrollercheckbox.h \
