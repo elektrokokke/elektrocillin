@@ -9,7 +9,7 @@ LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size
     for (int i = 0; i < interpolator.getX().size(); i++) {
         interpolator.getX()[i] =  interpolator.getY()[i] = (double)i / (double)(interpolator.getX().size() - 1) * 2 - 1;
     }
-    deactivateMidiInput();
+    activateMidiInput(false);
 }
 
 LinearWaveShapingClient::~LinearWaveShapingClient()

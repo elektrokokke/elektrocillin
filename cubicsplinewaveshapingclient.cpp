@@ -17,7 +17,7 @@ CubicSplineWaveShapingClient::CubicSplineWaveShapingClient(const QString &client
     xx.append(1);
     yy.append(1);
     interpolator = CubicSplineInterpolator(xx, yy);
-    deactivateMidiInput();
+    activateMidiInput(false);
 }
 
 CubicSplineWaveShapingClient::~CubicSplineWaveShapingClient()
