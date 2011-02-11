@@ -3,8 +3,6 @@
 
 PulseOscillator2::PulseOscillator2(double frequencyModulationIntensity, double sampleRate) :
     Oscillator(frequencyModulationIntensity, sampleRate, QStringList("pulsewidth_modulation_in")),
-    previousPhase(0),
-    previousIntegralValue(0),
     pulseIntegral(QVector<double>(3), QVector<double>(3))
 {
     // initialize the pulse integral control points:
@@ -36,11 +34,12 @@ void PulseOscillator2::processAudio(const double *inputs, double *outputs, jack_
     Oscillator::processAudio(inputs, outputs, time);
 }
 
-double PulseOscillator2::valueAtPhase(double phase)
+double PulseOscillator2::valueAtPhase(double phase, double previousPhase)
 {
     if (phase == previousPhase) {
         return 0;
     }
+    double previousIntegralValue = pulseIntegral.evaluate(previousPhase);
     // compare current phase with previous phase:
     if (phase < previousPhase) {
         // phase has wrapped around, adjust the previous integral level accordingly:
@@ -50,7 +49,5 @@ double PulseOscillator2::valueAtPhase(double phase)
     double integralValue = pulseIntegral.evaluate(phase);
     // integral difference / phase difference is the oscillator output:
     double output = (integralValue - previousIntegralValue) / (phase - previousPhase);
-    previousIntegralValue = integralValue;
-    previousPhase = phase;
     return output;
 }

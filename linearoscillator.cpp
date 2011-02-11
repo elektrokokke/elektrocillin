@@ -2,25 +2,21 @@
 #include <cmath>
 
 LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate) :
-        Oscillator(frequencyModulationIntensity, sampleRate),
-        previousPhase(0),
-        interpolator(QVector<double>(1), QVector<double>(1)),
-        integral(interpolator)
+    Oscillator(frequencyModulationIntensity, sampleRate),
+    interpolator(QVector<double>(1), QVector<double>(1)),
+    integral(interpolator)
 {
     interpolator.getX()[0] = 0;
     interpolator.getY()[0] = -1;
-    interpolator.getX().append(M_PI);
-    interpolator.getY().append(0);
     interpolator.getX().append(2 * M_PI);
     interpolator.getY().append(1);
     integral = LinearIntegralInterpolator(interpolator);
 }
 
 LinearOscillator::LinearOscillator(const LinearInterpolator &interpolator_, double frequencyModulationIntensity, double sampleRate) :
-        Oscillator(frequencyModulationIntensity, sampleRate),
-        previousPhase(0),
-        interpolator(interpolator_),
-        integral(interpolator_)
+    Oscillator(frequencyModulationIntensity, sampleRate),
+    interpolator(interpolator_),
+    integral(interpolator_)
 {
 }
 
@@ -40,7 +36,7 @@ const LinearIntegralInterpolator & LinearOscillator::getLinearIntegralInterpolat
     return integral;
 }
 
-double LinearOscillator::valueAtPhase(double phase)
+double LinearOscillator::valueAtPhase(double phase, double previousPhase)
 {
     if (phase == previousPhase) {
         return 0;

@@ -13,10 +13,9 @@ public:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
 protected:
-    double valueAtPhase(double phase);
+    double valueAtPhase(double phase, double previousPhase);
 
 private:
-    double previousPhase, previousIntegralValue;
     LinearInterpolator pulseIntegral;
 };
 

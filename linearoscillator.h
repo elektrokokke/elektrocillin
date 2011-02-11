@@ -18,10 +18,9 @@ public:
     const LinearIntegralInterpolator & getLinearIntegralInterpolator() const;
 
 protected:
-    double valueAtPhase(double phase);
+    double valueAtPhase(double phase, double previousPhase);
 
 private:
-    double previousPhase;
     LinearInterpolator interpolator;
     LinearIntegralInterpolator integral;
 

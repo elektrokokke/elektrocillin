@@ -2,6 +2,7 @@
 #define OSCILLATOR_H
 
 #include "midiprocessor.h"
+#include "linearinterpolator.h"
 
 class Oscillator : public MidiProcessor
 {
@@ -18,10 +19,11 @@ public:
     double getPhaseIncrement() const;
 
 protected:
-    virtual double valueAtPhase(double phase);
+    virtual double valueAtPhase(double phase, double previousPhase);
 
 private:
     double frequency, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, phaseIncrement;
+    LinearInterpolator pulseWidthInterpolator;
 
     void computePhaseIncrement();
 };

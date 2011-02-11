@@ -13,7 +13,7 @@ public:
     virtual int size() const;
 
 protected:
-    double valueAtPhase(double phase);
+    double valueAtPhase(double phase, double previousPhase);
     void addNode(const QPointF &node);
 
 private:

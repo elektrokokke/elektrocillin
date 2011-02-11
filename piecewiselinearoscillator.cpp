@@ -29,19 +29,12 @@ int PiecewiseLinearOscillator::size() const
     return nodes.size();
 }
 
-double PiecewiseLinearOscillator::valueAtPhase(double phase)
+double PiecewiseLinearOscillator::valueAtPhase(double phase, double previousPhase)
 {
     Q_ASSERT(phase >= 0.0);
     Q_ASSERT(phase <= 2.0 * M_PI);
-    double leftPhase = phase - 0.5 * getPhaseIncrement();
-    double rightPhase = phase + 0.5 * getPhaseIncrement();
-//    if (leftPhase >= M_PI) {
-//        return 1.0;
-//    } else if (rightPhase <= M_PI) {
-//        return -1.0;
-//    } else {
-//        return interpolate(QPointF(leftPhase, 1.0), QPointF(rightPhase, -1.0), M_PI);
-//    }
+    double leftPhase = previousPhase;
+    double rightPhase = phase;
     // compute the line segments surrounding the given phase:
     QList<QPointF> intersection;
     int leftNode = 0;
