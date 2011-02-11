@@ -62,7 +62,7 @@ private:
     QSettings settings;
     GraphicsNodeItem *cutoffResonanceNode;
     FrequencyResponseGraphicsItem *frequencyResponse;
-    MidiSignalThread midiSignalThread;
+    MidiSignalThreadOld midiSignalThread;
     MonophonicSynthesizer synthesizer;
     MidiProcessorClient synthesizerClient;
     IirMoogFilter moogFilter;

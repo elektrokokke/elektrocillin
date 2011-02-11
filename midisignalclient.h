@@ -1,25 +1,69 @@
 #ifndef MIDICLIENT_H
 #define MIDICLIENT_H
 
-#include <QThread>
-#include <QWaitCondition>
-#include <QMutex>
-#include <QByteArray>
 #include "midiprocessorclient.h"
-#include "jackthread.h"
+#include "jackthreadeventprocessorclient.h"
 #include "jackclientwithdeferredprocessing.h"
-#include "jack/midiport.h"
+
+class MidiSignalClient;
+
+class MidiSignalThread : public JackThread {
+    Q_OBJECT
+public:
+    MidiSignalThread(MidiSignalClient *client, QObject *parent = 0);
+
+    MidiSignalClient *getMidiSignalClient();
+
+    void setRingBufferFromClient(JackRingBuffer<MidiProcessorClient::MidiEvent> *ringBufferFromClient);
+signals:
+    void receivedNoteOff(unsigned char channel, unsigned char note, unsigned char velocity);
+    void receivedNoteOn(unsigned char channel, unsigned char note, unsigned char velocity);
+    void receivedAfterTouch(unsigned char channel, unsigned char note, unsigned char pressure);
+    void receivedControlChange(unsigned char channel, unsigned char controller, unsigned char value);
+    void receivedProgramChange(unsigned char channel, unsigned char program);
+    void receivedChannelPressure(unsigned char channel, unsigned char pressure);
+    void receivedPitchWheel(unsigned char channel, unsigned int pitch);
+public slots:
+    void sendNoteOff(unsigned char channel, unsigned char note, unsigned char velocity);
+    void sendNoteOn(unsigned char channel, unsigned char note, unsigned char velocity);
+    void sendAfterTouch(unsigned char channel, unsigned char note, unsigned char pressure);
+    void sendControlChange(unsigned char channel, unsigned char controller, unsigned char value);
+    void sendProgramChange(unsigned char channel, unsigned char program);
+    void sendChannelPressure(unsigned char channel, unsigned char pressure);
+    void sendPitchWheel(unsigned char channel, unsigned int pitch);
+protected:
+    void processDeferred();
+private:
+    JackRingBuffer<MidiProcessorClient::MidiEvent> *ringBufferFromClient;
+};
+
+class MidiSignalClient : public JackThreadEventProcessorClient<MidiProcessorClient::MidiEvent> {
+public:
+    MidiSignalClient(const QString &clientName, size_t ringBufferSize = 1024);
+    virtual ~MidiSignalClient();
+
+    MidiSignalThread * getMidiSignalThread();
+
+protected:
+    // reimplemented from EventProcessor:
+    virtual void processEvent(const MidiProcessorClient::MidiEvent &event, jack_nframes_t time);
+    // reimplemented from MidiProcessor:
+    virtual void processMidi(const MidiProcessorClient::MidiEvent &event, jack_nframes_t time);
+
+private:
+    JackRingBuffer<MidiProcessorClient::MidiEvent> ringBufferToThread;
+};
 
 struct MidiEventWithTimeStamp {
     jack_nframes_t time;
     MidiProcessorClient::MidiEvent event;
 };
 
-class MidiSignalThread : public JackThread
+class MidiSignalThreadOld : public JackThread
 {
     Q_OBJECT
 public:
-    explicit MidiSignalThread(const QString &clientName, QObject *parent = 0);
+    explicit MidiSignalThreadOld(const QString &clientName, QObject *parent = 0);
 
     JackRingBuffer<MidiEventWithTimeStamp> * getInputRingBuffer();
     JackRingBuffer<MidiEventWithTimeStamp> * getOutputRingBuffer();
@@ -49,15 +93,15 @@ public slots:
     void sendPitchWheel(unsigned char channel, unsigned int pitch);
 
 private:
-    class MidiSignalClient : public JackClientWithDeferredProcessing
+    class MidiSignalClientOld : public JackClientWithDeferredProcessing
     {
     public:
-        MidiSignalClient(const QString &clientName, JackThread *thread);
-        virtual ~MidiSignalClient();
+        MidiSignalClientOld(const QString &clientName, JackThread *thread);
+        virtual ~MidiSignalClientOld();
 
         const QString & getMidiInputPortName() const;
         const QString & getMidiOutputPortName() const;
-        MidiSignalThread * getMidiThread();
+        MidiSignalThreadOld * getMidiThread();
 
     protected:
         JackRingBuffer<MidiEventWithTimeStamp> * getInputRingBuffer();
@@ -72,7 +116,7 @@ private:
         jack_port_t *midiIn, *midiOut;
     };
 
-    MidiSignalClient client;
+    MidiSignalClientOld client;
     // use lock-free ring buffers for communication between threads:
     JackRingBuffer<MidiEventWithTimeStamp> ringBufferFromClient, ringBufferToClient;
 
