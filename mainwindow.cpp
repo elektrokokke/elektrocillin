@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     settings("settings.ini", QSettings::IniFormat),
-    midiSignalThread("Virtual keyboard"),
+    midiSignalClient("Virtual keyboard"),
     synthesizerClient("Synthesizer", &synthesizer),
     moogFilter(44100, 1),
     moogFilterCopy(44100, 1),
@@ -90,9 +90,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // virtual keyboard and midi signal client test setup:
     GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
-    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
-    QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), &midiSignalThread, SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
-    midiSignalThread.getClient()->activate();
+    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), midiSignalClient.getMidiSignalThread(), SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
+    QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), midiSignalClient.getMidiSignalThread(), SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
+    midiSignalClient.activate();
     // end virtual keyboard and midi signal client test setup
 
     // waveshaping clients test setup:
@@ -135,7 +135,7 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemFilter = new GraphicsClientItem(&moogFilterClient, rect);
     graphicsClientItemFilter->setInnerItem(frequencyResponse);
     scene->addItem(graphicsClientItemFilter);
-    graphicsClientItemKeyboard = new GraphicsClientItem(midiSignalThread.getClient(), rect.translated(rect.width(), 0));
+    graphicsClientItemKeyboard = new GraphicsClientItem(&midiSignalClient, rect.translated(rect.width(), 0));
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
     graphicsClientItemWaveShaping = new GraphicsClientItem(&linearWaveShapingClient, rect.translated(0, rect.height()));
