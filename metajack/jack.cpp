@@ -1,5 +1,11 @@
 #include <jack/jack.h>
 #include <stdarg.h>
+#include <QString>
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /*
   All notes regard what is to be done to make meta_jack work,
@@ -25,6 +31,8 @@ const char * meta_jack_get_version_string()
 jack_client_t * meta_jack_client_open (const char *client_name, jack_options_t options, jack_status_t *status, ...)
 {
     // for now, just ignore the optional JackServerName parameter:
+//    QString clientName = QString("meta_%1").arg(client_name);
+//    return jack_client_open(clientName.toAscii().data(), options, status);
     return jack_client_open(client_name, options, status);
 }
 
@@ -510,6 +518,9 @@ int meta_jack_port_monitoring_input (jack_port_t *port)
   */
 int meta_jack_connect (jack_client_t *client, const char *source_port, const char *destination_port)
 {
+//    QString port1 = QString("meta_%1").arg(source_port);
+//    QString port2 = QString("meta_%1").arg(destination_port);
+//    return jack_connect(client, port1.toAscii().data(), port2.toAscii().data());
     return jack_connect(client, source_port, destination_port);
 }
 
@@ -649,3 +660,7 @@ void meta_jack_free(void* ptr)
 {
     jack_free(ptr);
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,7 +1,7 @@
 #ifndef JACKCLIENT_H
 #define JACKCLIENT_H
 
-#include <jack/jack.h>
+#include "metajack/jack.h"
 
 #include <QStringList>
 

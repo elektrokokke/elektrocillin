@@ -1,5 +1,10 @@
 #include <jack/midiport.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 jack_nframes_t meta_jack_midi_get_event_count(void* port_buffer)
 {
     return jack_midi_get_event_count(port_buffer);
@@ -36,3 +41,7 @@ jack_nframes_t meta_jack_midi_get_lost_event_count(void *port_buffer)
 {
     return jack_midi_get_lost_event_count(port_buffer);
 }
+
+#ifdef __cplusplus
+}
+#endif

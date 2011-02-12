@@ -3,7 +3,7 @@
 
 #include "audioprocessorclient.h"
 #include "midiprocessor.h"
-#include <jack/midiport.h>
+#include "metajack/midiport.h"
 
 class MidiProcessorClient : public AudioProcessorClient
 {

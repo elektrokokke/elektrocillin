@@ -64,8 +64,8 @@ SOURCES += main.cpp\
     pulseoscillator.cpp \
     adsrclient.cpp \
     multiplyprocessor.cpp \
-    metajack/jack.c \
-    metajack/midiport.c
+    metajack/jack.cpp \
+    metajack/midiport.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
