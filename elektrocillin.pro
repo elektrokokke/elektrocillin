@@ -63,7 +63,8 @@ SOURCES += main.cpp\
     linearmorphoscillator.cpp \
     pulseoscillator.cpp \
     adsrclient.cpp \
-    multiplyprocessor.cpp
+    multiplyprocessor.cpp \
+    metajack/jack.c
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -122,7 +123,8 @@ HEADERS  += mainwindow.h \
     linearmorphoscillator.h \
     pulseoscillator.h \
     adsrclient.h \
-    multiplyprocessor.h
+    multiplyprocessor.h \
+    metajack/jack.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
