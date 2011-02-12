@@ -1,5 +1,5 @@
 #include "midicontroller2audioclient.h"
-#include "jack/midiport.h"
+#include "metajack/midiport.h"
 #include <QDebug>
 
 MidiController2AudioClient::MidiController2AudioClient(const QString &clientName, unsigned char channel_, unsigned char controller_, jack_default_audio_sample_t min_, jack_default_audio_sample_t max_) :

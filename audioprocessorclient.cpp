@@ -1,5 +1,5 @@
 #include "audioprocessorclient.h"
-#include "jack/midiport.h"
+#include "metajack/midiport.h"
 
 AudioProcessorClient::AudioProcessorClient(const QString &clientName, AudioProcessor *audioProcessor_) :
     JackClient(clientName),

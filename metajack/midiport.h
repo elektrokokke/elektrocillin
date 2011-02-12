@@ -1,11 +1,11 @@
-#ifndef MIDIPORT_H
-#define MIDIPORT_H
+#ifndef META_JACK_MIDIPORT_H
+#define META_JACK_MIDIPORT_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <jack/types.h>
+#include "metajack/types.h"
 #include <stdlib.h>
 #include <jack/weakmacros.h>
 
@@ -141,4 +141,4 @@ meta_jack_midi_get_lost_event_count(void *port_buffer) JACK_OPTIONAL_WEAK_EXPORT
 }
 #endif
 
-#endif // MIDIPORT_H
+#endif // META_JACK_MIDIPORT_H

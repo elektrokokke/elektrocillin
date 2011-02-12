@@ -3,7 +3,6 @@
 
 #include "jackclient.h"
 #include "audioprocessor.h"
-#include "jack/jack.h"
 #include <QVector>
 
 /**

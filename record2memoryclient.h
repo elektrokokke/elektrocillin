@@ -7,7 +7,7 @@
 #include <QMutex>
 #include "jackclient.h"
 #include "jackaudiomodel.h"
-#include "jack/ringbuffer.h"
+#include <jack/ringbuffer.h>
 
 class Record2MemoryClient : public QThread, public JackClient
 {

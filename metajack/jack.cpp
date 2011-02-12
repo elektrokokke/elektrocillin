@@ -7,6 +7,9 @@ extern "C"
 {
 #endif
 
+typedef struct _jack_port meta_jack_port_t;
+typedef struct _jack_client meta_jack_client_t;
+
 /*
   All notes regard what is to be done to make meta_jack work,
   not the current state, which just passes on calls to the original JACK API.
@@ -25,10 +28,10 @@ const char * meta_jack_get_version_string()
 }
 
 /*
-  Note: the type jack_client_t (_jack_client) has to be defined.
+  Note: the type meta_jack_client_t (_jack_client) has to be defined.
   A new instance has to be created in the current meta_jack_context.
   */
-jack_client_t * meta_jack_client_open (const char *client_name, jack_options_t options, jack_status_t *status, ...)
+meta_jack_client_t * meta_jack_client_open (const char *client_name, jack_options_t options, jack_status_t *status, ...)
 {
     // for now, just ignore the optional JackServerName parameter:
 //    QString clientName = QString("meta_%1").arg(client_name);
@@ -36,7 +39,7 @@ jack_client_t * meta_jack_client_open (const char *client_name, jack_options_t o
     return jack_client_open(client_name, options, status);
 }
 
-int meta_jack_client_close (jack_client_t *client)
+int meta_jack_client_close (meta_jack_client_t *client)
 {
     return jack_client_close(client);
 }
@@ -49,10 +52,10 @@ int meta_jack_client_name_size (void)
 
 /*
   Note: the client name has to be stored somewhere in the
-  client's meta_jack_context. Probably the jack_client_t
+  client's meta_jack_context. Probably the meta_jack_client_t
   should be defined such that it includes that name.
   */
-char * meta_jack_get_client_name (jack_client_t *client)
+char * meta_jack_get_client_name (meta_jack_client_t *client)
 {
     return jack_get_client_name(client);
 }
@@ -63,7 +66,7 @@ char * meta_jack_get_client_name (jack_client_t *client)
   Probably this could just mean to allow the creation
   of connections to this client's ports.
   */
-int meta_jack_activate (jack_client_t *client)
+int meta_jack_activate (meta_jack_client_t *client)
 {
     return jack_activate(client);
 }
@@ -73,7 +76,7 @@ int meta_jack_activate (jack_client_t *client)
   forbid making any further connections to it.
   Port buffer should be left as they are.
   */
-int meta_jack_deactivate (jack_client_t *client)
+int meta_jack_deactivate (meta_jack_client_t *client)
 {
     return jack_deactivate(client);
 }
@@ -94,7 +97,7 @@ int meta_jack_get_client_pid (const char *name)
   Sidenote: multithreading inside one meta_jack_context
   is not possible this way.
   */
-pthread_t meta_jack_client_thread_id (jack_client_t *client)
+pthread_t meta_jack_client_thread_id (meta_jack_client_t *client)
 {
     return jack_client_thread_id(client);
 }
@@ -104,7 +107,7 @@ pthread_t meta_jack_client_thread_id (jack_client_t *client)
   the real JACK client it represents, and call jack_is_realtime
   with it.
   */
-int meta_jack_is_realtime (jack_client_t *client)
+int meta_jack_is_realtime (meta_jack_client_t *client)
 {
     return jack_is_realtime(client);
 }
@@ -115,7 +118,7 @@ int meta_jack_is_realtime (jack_client_t *client)
   given client's meta_jack_context and then call the original
   implementation on it?
   */
-int meta_jack_set_thread_init_callback (jack_client_t *client, JackThreadInitCallback thread_init_callback, void *arg)
+int meta_jack_set_thread_init_callback (meta_jack_client_t *client, JackThreadInitCallback thread_init_callback, void *arg)
 {
     return jack_set_thread_init_callback(client, thread_init_callback, arg);
 }
@@ -126,7 +129,7 @@ int meta_jack_set_thread_init_callback (jack_client_t *client, JackThreadInitCal
   should register its own callback at the real server and then (in that callback)
   call all stored callback functions.
   */
-void meta_jack_on_shutdown (jack_client_t *client, JackShutdownCallback shutdown_callback, void *arg)
+void meta_jack_on_shutdown (meta_jack_client_t *client, JackShutdownCallback shutdown_callback, void *arg)
 {
     jack_on_shutdown(client, shutdown_callback, arg);
 }
@@ -137,7 +140,7 @@ void meta_jack_on_shutdown (jack_client_t *client, JackShutdownCallback shutdown
   should register its own callback at the real server and then (in that callback)
   call all stored callback functions.
   */
-void meta_jack_on_info_shutdown (jack_client_t *client, JackInfoShutdownCallback shutdown_callback, void *arg)
+void meta_jack_on_info_shutdown (meta_jack_client_t *client, JackInfoShutdownCallback shutdown_callback, void *arg)
 {
     jack_on_info_shutdown(client, shutdown_callback, arg);
 }
@@ -146,7 +149,7 @@ void meta_jack_on_info_shutdown (jack_client_t *client, JackInfoShutdownCallback
   Note: the given callback definitely has to be stored and later called
   by meta_jack.
   */
-int meta_jack_set_process_callback (jack_client_t *client, JackProcessCallback process_callback, void *arg)
+int meta_jack_set_process_callback (meta_jack_client_t *client, JackProcessCallback process_callback, void *arg)
 {
     return jack_set_process_callback(client, process_callback, arg);
 }
@@ -157,7 +160,7 @@ int meta_jack_set_process_callback (jack_client_t *client, JackProcessCallback p
   should register its own callback at the real server and then (in that callback)
   call all stored callback functions.
   */
-int meta_jack_set_freewheel_callback (jack_client_t *client, JackFreewheelCallback freewheel_callback, void *arg)
+int meta_jack_set_freewheel_callback (meta_jack_client_t *client, JackFreewheelCallback freewheel_callback, void *arg)
 {
     return jack_set_freewheel_callback(client, freewheel_callback, arg);
 }
@@ -168,7 +171,7 @@ int meta_jack_set_freewheel_callback (jack_client_t *client, JackFreewheelCallba
   should register its own callback at the real server and then (in that callback)
   call all stored callback functions.
   */
-int meta_jack_set_buffer_size_callback (jack_client_t *client, JackBufferSizeCallback bufsize_callback, void *arg)
+int meta_jack_set_buffer_size_callback (meta_jack_client_t *client, JackBufferSizeCallback bufsize_callback, void *arg)
 {
     return jack_set_buffer_size_callback(client, bufsize_callback, arg);
 }
@@ -179,7 +182,7 @@ int meta_jack_set_buffer_size_callback (jack_client_t *client, JackBufferSizeCal
   should register its own callback at the real server and then (in that callback)
   call all stored callback functions.
   */
-int meta_jack_set_sample_rate_callback (jack_client_t *client, JackSampleRateCallback srate_callback, void *arg)
+int meta_jack_set_sample_rate_callback (meta_jack_client_t *client, JackSampleRateCallback srate_callback, void *arg)
 {
     return jack_set_sample_rate_callback(client, srate_callback, arg);
 }
@@ -189,31 +192,31 @@ int meta_jack_set_sample_rate_callback (jack_client_t *client, JackSampleRateCal
   It should only be called when new clients register in the same
   meta_jack_context as the given client.
   */
-int meta_jack_set_client_registration_callback (jack_client_t *client, JackClientRegistrationCallback registration_callback, void *arg)
+int meta_jack_set_client_registration_callback (meta_jack_client_t *client, JackClientRegistrationCallback registration_callback, void *arg)
 {
     return jack_set_client_registration_callback(client, registration_callback, arg);
 }
 
 // Note: see meta_jack_set_client_registration_callback
-int meta_jack_set_port_registration_callback (jack_client_t *client, JackPortRegistrationCallback registration_callback, void *arg)
+int meta_jack_set_port_registration_callback (meta_jack_client_t *client, JackPortRegistrationCallback registration_callback, void *arg)
 {
     return jack_set_port_registration_callback(client, registration_callback, arg);
 }
 
 // Note: see meta_jack_set_client_registration_callback
-int meta_jack_set_port_connect_callback (jack_client_t *client, JackPortConnectCallback connect_callback, void *arg)
+int meta_jack_set_port_connect_callback (meta_jack_client_t *client, JackPortConnectCallback connect_callback, void *arg)
 {
     return jack_set_port_connect_callback(client, connect_callback, arg);
 }
 
 // Note: see meta_jack_set_client_registration_callback
-int meta_jack_set_port_rename_callback (jack_client_t *client, JackPortRenameCallback rename_callback, void *arg)
+int meta_jack_set_port_rename_callback (meta_jack_client_t *client, JackPortRenameCallback rename_callback, void *arg)
 {
     return jack_set_port_rename_callback(client, rename_callback, arg);
 }
 
 // Note: see meta_jack_set_client_registration_callback
-int meta_jack_set_graph_order_callback (jack_client_t *client, JackGraphOrderCallback graph_callback, void *arg)
+int meta_jack_set_graph_order_callback (meta_jack_client_t *client, JackGraphOrderCallback graph_callback, void *arg)
 {
     return jack_set_graph_order_callback(client, graph_callback, arg);
 }
@@ -224,7 +227,7 @@ int meta_jack_set_graph_order_callback (jack_client_t *client, JackGraphOrderCal
   should register its own callback at the real server and then (in that callback)
   call all stored callback functions.
   */
-int meta_jack_set_xrun_callback (jack_client_t *client, JackXRunCallback xrun_callback, void *arg)
+int meta_jack_set_xrun_callback (meta_jack_client_t *client, JackXRunCallback xrun_callback, void *arg)
 {
     return jack_set_xrun_callback(client, xrun_callback, arg);
 }
@@ -233,7 +236,7 @@ int meta_jack_set_xrun_callback (jack_client_t *client, JackXRunCallback xrun_ca
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-int meta_jack_set_freewheel(jack_client_t* client, int onoff)
+int meta_jack_set_freewheel(meta_jack_client_t* client, int onoff)
 {
     return jack_set_freewheel(client, onoff);
 }
@@ -242,7 +245,7 @@ int meta_jack_set_freewheel(jack_client_t* client, int onoff)
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-int meta_jack_set_buffer_size (jack_client_t *client, jack_nframes_t nframes)
+int meta_jack_set_buffer_size (meta_jack_client_t *client, jack_nframes_t nframes)
 {
     return jack_set_buffer_size(client, nframes);
 }
@@ -251,7 +254,7 @@ int meta_jack_set_buffer_size (jack_client_t *client, jack_nframes_t nframes)
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-jack_nframes_t meta_jack_get_sample_rate (jack_client_t *client)
+jack_nframes_t meta_jack_get_sample_rate (meta_jack_client_t *client)
 {
     return jack_get_sample_rate(client);
 }
@@ -260,7 +263,7 @@ jack_nframes_t meta_jack_get_sample_rate (jack_client_t *client)
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-jack_nframes_t meta_jack_get_buffer_size (jack_client_t *client)
+jack_nframes_t meta_jack_get_buffer_size (meta_jack_client_t *client)
 {
     return jack_get_buffer_size(client);
 }
@@ -269,17 +272,17 @@ jack_nframes_t meta_jack_get_buffer_size (jack_client_t *client)
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-float meta_jack_cpu_load (jack_client_t *client)
+float meta_jack_cpu_load (meta_jack_client_t *client)
 {
     return jack_cpu_load(client);
 }
 
 /*
-  Note: the type jack_port_t (_jack_port) has to be defined.
+  Note: the type meta_jack_port_t (_jack_port) has to be defined.
   A new instance has to be created in the current meta_jack_context.
   A buffer has to be created for the new port.
   */
-jack_port_t * meta_jack_port_register (jack_client_t *client, const char *port_name, const char *port_type, unsigned long flags, unsigned long buffer_size)
+meta_jack_port_t * meta_jack_port_register (meta_jack_client_t *client, const char *port_name, const char *port_type, unsigned long flags, unsigned long buffer_size)
 {
     return jack_port_register(client, port_name, port_type, flags, buffer_size);
 }
@@ -287,7 +290,7 @@ jack_port_t * meta_jack_port_register (jack_client_t *client, const char *port_n
 /*
   Note: remove all connections from the port and free the buffer associated with the port.
   */
-int meta_jack_port_unregister (jack_client_t *client, jack_port_t *port)
+int meta_jack_port_unregister (meta_jack_client_t *client, meta_jack_port_t *port)
 {
     return jack_port_unregister(client, port);
 }
@@ -296,7 +299,7 @@ int meta_jack_port_unregister (jack_client_t *client, jack_port_t *port)
   Note: get the buffer which is associated to the given port in its
   client's meta_jack_context.
   */
-void * meta_jack_port_get_buffer (jack_port_t *port, jack_nframes_t nframes)
+void * meta_jack_port_get_buffer (meta_jack_port_t *port, jack_nframes_t nframes)
 {
     return jack_port_get_buffer(port, nframes);
 }
@@ -304,11 +307,11 @@ void * meta_jack_port_get_buffer (jack_port_t *port, jack_nframes_t nframes)
 /*
   Note: the port name has to be stored somewhere in the given
   port's client's meta_jack_context.
-  Probably define the jack_port_t type to store that name
+  Probably define the meta_jack_port_t type to store that name
   (or the short name, respectively, which means that the client
   name has to be appended).
   */
-const char * meta_jack_port_name (const jack_port_t *port)
+const char * meta_jack_port_name (const meta_jack_port_t *port)
 {
     return jack_port_name(port);
 }
@@ -316,27 +319,27 @@ const char * meta_jack_port_name (const jack_port_t *port)
 /*
   Note: the port name has to be stored somewhere in the given
   port's client's meta_jack_context.
-  Probably the jack_port_t type should be defined to store that name.
+  Probably the meta_jack_port_t type should be defined to store that name.
   */
-const char * meta_jack_port_short_name (const jack_port_t *port)
+const char * meta_jack_port_short_name (const meta_jack_port_t *port)
 {
     return jack_port_short_name(port);
 }
 
 /*
   Note: these flags should probably be stored in the yet-to-define
-  jack_port_t type.
+  meta_jack_port_t type.
   */
-int meta_jack_port_flags (const jack_port_t *port)
+int meta_jack_port_flags (const meta_jack_port_t *port)
 {
     return jack_port_flags(port);
 }
 
 /*
   Note: the port type should probably be stored in the yet-to-define
-  jack_port_t type.
+  meta_jack_port_t type.
   */
-const char * meta_jack_port_type (const jack_port_t *port)
+const char * meta_jack_port_type (const meta_jack_port_t *port)
 {
     return jack_port_type(port);
 }
@@ -345,16 +348,16 @@ const char * meta_jack_port_type (const jack_port_t *port)
   Note: not quite sure how to know what port type is associated with which
   port type id...
   */
-jack_port_type_id_t meta_jack_port_type_id (const jack_port_t *port)
+jack_port_type_id_t meta_jack_port_type_id (const meta_jack_port_t *port)
 {
     return jack_port_type_id(port);
 }
 
 /*
   Note: a port's client should probably be stored in the yet-to-define
-  jack_port_t type (which makes this test trivial).
+  meta_jack_port_t type (which makes this test trivial).
   */
-int meta_jack_port_is_mine (const jack_client_t *client, const jack_port_t *port)
+int meta_jack_port_is_mine (const meta_jack_client_t *client, const meta_jack_port_t *port)
 {
     return jack_port_is_mine(client, port);
 }
@@ -363,7 +366,7 @@ int meta_jack_port_is_mine (const jack_client_t *client, const jack_port_t *port
   Note: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-int meta_jack_port_connected (const jack_port_t *port)
+int meta_jack_port_connected (const meta_jack_port_t *port)
 {
     return jack_port_connected(port);
 }
@@ -372,7 +375,7 @@ int meta_jack_port_connected (const jack_port_t *port)
   Note: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-int meta_jack_port_connected_to (const jack_port_t *port, const char *port_name)
+int meta_jack_port_connected_to (const meta_jack_port_t *port, const char *port_name)
 {
     return jack_port_connected_to(port, port_name);
 }
@@ -383,7 +386,7 @@ int meta_jack_port_connected_to (const jack_port_t *port, const char *port_name)
   Also: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-const char ** meta_jack_port_get_connections (const jack_port_t *port)
+const char ** meta_jack_port_get_connections (const meta_jack_port_t *port)
 {
     return jack_port_get_connections(port);
 }
@@ -394,7 +397,7 @@ const char ** meta_jack_port_get_connections (const jack_port_t *port)
   Also: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-const char ** meta_jack_port_get_all_connections (const jack_client_t *client, const jack_port_t *port)
+const char ** meta_jack_port_get_all_connections (const meta_jack_client_t *client, const meta_jack_port_t *port)
 {
     return jack_port_get_all_connections(client, port);
 }
@@ -402,7 +405,7 @@ const char ** meta_jack_port_get_all_connections (const jack_client_t *client, c
 /*
   Note: probably just return 0 here?
   */
-jack_nframes_t meta_jack_port_get_latency (jack_port_t *port)
+jack_nframes_t meta_jack_port_get_latency (meta_jack_port_t *port)
 {
     return jack_port_get_latency(port);
 }
@@ -412,7 +415,7 @@ jack_nframes_t meta_jack_port_get_latency (jack_port_t *port)
   a meta_jack_context will have the JackPortIsTerminal flag set.
   Just return 0 or pass on to the real JACK server?
   */
-jack_nframes_t meta_jack_port_get_total_latency (jack_client_t *client, jack_port_t *port)
+jack_nframes_t meta_jack_port_get_total_latency (meta_jack_client_t *client, meta_jack_port_t *port)
 {
     return jack_port_get_total_latency(client, port);
 }
@@ -421,7 +424,7 @@ jack_nframes_t meta_jack_port_get_total_latency (jack_client_t *client, jack_por
   Note: will probably not be needed in meta_jack, so just make this
   a no-op...
   */
-void meta_jack_port_set_latency (jack_port_t *port, jack_nframes_t nframes)
+void meta_jack_port_set_latency (meta_jack_port_t *port, jack_nframes_t nframes)
 {
     jack_port_set_latency(port, nframes);
 }
@@ -430,7 +433,7 @@ void meta_jack_port_set_latency (jack_port_t *port, jack_nframes_t nframes)
   Note: will probably not be needed in meta_jack, so just make this
   a no-op...
   */
-int meta_jack_recompute_total_latency (jack_client_t *client, jack_port_t* port)
+int meta_jack_recompute_total_latency (meta_jack_client_t *client, meta_jack_port_t* port)
 {
     return jack_recompute_total_latency(client, port);
 }
@@ -439,17 +442,17 @@ int meta_jack_recompute_total_latency (jack_client_t *client, jack_port_t* port)
   Note: will probably not be needed in meta_jack, so just make this
   a no-op...
   */
-int meta_jack_recompute_total_latencies (jack_client_t *client)
+int meta_jack_recompute_total_latencies (meta_jack_client_t *client)
 {
     return jack_recompute_total_latencies(client);
 }
 
 /*
-  Note: this depends on how jack_port_t (_jack_port) is implemented.
+  Note: this depends on how meta_jack_port_t (_jack_port) is implemented.
   The callback handed to meta_jack_set_port_rename_callback should be called here if the port's
   client has registered such a callback.
   */
-int meta_jack_port_set_name (jack_port_t *port, const char *port_name)
+int meta_jack_port_set_name (meta_jack_port_t *port, const char *port_name)
 {
     return jack_port_set_name(port, port_name);
 }
@@ -459,7 +462,7 @@ int meta_jack_port_set_name (jack_port_t *port, const char *port_name)
   Assure that each port has two aliases at most. Also assure that
   no two ports have the same alias.
   */
-int meta_jack_port_set_alias (jack_port_t *port, const char *alias)
+int meta_jack_port_set_alias (meta_jack_port_t *port, const char *alias)
 {
     return jack_port_set_alias(port, alias);
 }
@@ -467,7 +470,7 @@ int meta_jack_port_set_alias (jack_port_t *port, const char *alias)
 /*
   Note: probably have a map of such aliases in a meta_jack_context.
   */
-int meta_jack_port_unset_alias (jack_port_t *port, const char *alias)
+int meta_jack_port_unset_alias (meta_jack_port_t *port, const char *alias)
 {
     return jack_port_unset_alias(port, alias);
 }
@@ -475,7 +478,7 @@ int meta_jack_port_unset_alias (jack_port_t *port, const char *alias)
 /*
   Note: probably have a map of such aliases in a meta_jack_context.
   */
-int meta_jack_port_get_aliases (const jack_port_t *port, char* const aliases[2])
+int meta_jack_port_get_aliases (const meta_jack_port_t *port, char* const aliases[2])
 {
     return jack_port_get_aliases(port, aliases);
 }
@@ -483,7 +486,7 @@ int meta_jack_port_get_aliases (const jack_port_t *port, char* const aliases[2])
 /*
   Note: probably a no-op.
   */
-int meta_jack_port_request_monitor (jack_port_t *port, int onoff)
+int meta_jack_port_request_monitor (meta_jack_port_t *port, int onoff)
 {
     return jack_port_request_monitor(port, onoff);
 }
@@ -491,7 +494,7 @@ int meta_jack_port_request_monitor (jack_port_t *port, int onoff)
 /*
   Note: probably a no-op.
   */
-int meta_jack_port_request_monitor_by_name (jack_client_t *client, const char *port_name, int onoff)
+int meta_jack_port_request_monitor_by_name (meta_jack_client_t *client, const char *port_name, int onoff)
 {
     return jack_port_request_monitor_by_name(client, port_name, onoff);
 }
@@ -499,7 +502,7 @@ int meta_jack_port_request_monitor_by_name (jack_client_t *client, const char *p
 /*
   Note: probably a no-op.
   */
-int meta_jack_port_ensure_monitor (jack_port_t *port, int onoff)
+int meta_jack_port_ensure_monitor (meta_jack_port_t *port, int onoff)
 {
     return jack_port_ensure_monitor(port, onoff);
 }
@@ -507,7 +510,7 @@ int meta_jack_port_ensure_monitor (jack_port_t *port, int onoff)
 /*
   Note: probably a no-op.
   */
-int meta_jack_port_monitoring_input (jack_port_t *port)
+int meta_jack_port_monitoring_input (meta_jack_port_t *port)
 {
     return jack_port_monitoring_input(port);
 }
@@ -516,7 +519,7 @@ int meta_jack_port_monitoring_input (jack_port_t *port)
   Note: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-int meta_jack_connect (jack_client_t *client, const char *source_port, const char *destination_port)
+int meta_jack_connect (meta_jack_client_t *client, const char *source_port, const char *destination_port)
 {
 //    QString port1 = QString("meta_%1").arg(source_port);
 //    QString port2 = QString("meta_%1").arg(destination_port);
@@ -528,7 +531,7 @@ int meta_jack_connect (jack_client_t *client, const char *source_port, const cha
   Note: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-int meta_jack_disconnect (jack_client_t *client, const char *source_port, const char *destination_port)
+int meta_jack_disconnect (meta_jack_client_t *client, const char *source_port, const char *destination_port)
 {
     return jack_disconnect(client, source_port, destination_port);
 }
@@ -537,7 +540,7 @@ int meta_jack_disconnect (jack_client_t *client, const char *source_port, const 
   Note: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-int meta_jack_port_disconnect (jack_client_t *client, jack_port_t *port)
+int meta_jack_port_disconnect (meta_jack_client_t *client, meta_jack_port_t *port)
 {
     return jack_port_disconnect(client, port);
 }
@@ -561,7 +564,7 @@ int meta_jack_port_type_size(void)
   Also: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-const char ** meta_jack_get_ports (jack_client_t *client, const char *port_name_pattern, const char *type_name_pattern, unsigned long flags)
+const char ** meta_jack_get_ports (meta_jack_client_t *client, const char *port_name_pattern, const char *type_name_pattern, unsigned long flags)
 {
     return jack_get_ports(client, port_name_pattern, type_name_pattern, flags);
 }
@@ -569,7 +572,7 @@ const char ** meta_jack_get_ports (jack_client_t *client, const char *port_name_
 /*
   Note: look through the given client's ports to see which one has the given name.
   */
-jack_port_t * meta_jack_port_by_name (jack_client_t *client, const char *port_name)
+meta_jack_port_t * meta_jack_port_by_name (meta_jack_client_t *client, const char *port_name)
 {
     return jack_port_by_name(client, port_name);
 }
@@ -577,7 +580,7 @@ jack_port_t * meta_jack_port_by_name (jack_client_t *client, const char *port_na
 /*
   Note: look through the given client's ports to see which one has the given id.
   */
-jack_port_t * meta_jack_port_by_id (jack_client_t *client, jack_port_id_t port_id)
+meta_jack_port_t * meta_jack_port_by_id (meta_jack_client_t *client, jack_port_id_t port_id)
 {
     return jack_port_by_id(client, port_id);
 }
@@ -586,7 +589,7 @@ jack_port_t * meta_jack_port_by_id (jack_client_t *client, jack_port_id_t port_i
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-jack_nframes_t meta_jack_frames_since_cycle_start (const jack_client_t *client)
+jack_nframes_t meta_jack_frames_since_cycle_start (const meta_jack_client_t *client)
 {
     return jack_frames_since_cycle_start(client);
 }
@@ -595,7 +598,7 @@ jack_nframes_t meta_jack_frames_since_cycle_start (const jack_client_t *client)
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-jack_nframes_t meta_jack_frame_time (const jack_client_t *client)
+jack_nframes_t meta_jack_frame_time (const meta_jack_client_t *client)
 {
     return jack_frame_time(client);
 }
@@ -604,7 +607,7 @@ jack_nframes_t meta_jack_frame_time (const jack_client_t *client)
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-jack_nframes_t meta_jack_last_frame_time (const jack_client_t *client)
+jack_nframes_t meta_jack_last_frame_time (const meta_jack_client_t *client)
 {
     return jack_last_frame_time(client);
 }
@@ -613,7 +616,7 @@ jack_nframes_t meta_jack_last_frame_time (const jack_client_t *client)
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-jack_time_t meta_jack_frames_to_time(const jack_client_t *client, jack_nframes_t nframes)
+jack_time_t meta_jack_frames_to_time(const meta_jack_client_t *client, jack_nframes_t nframes)
 {
     return jack_frames_to_time(client, nframes);
 }
@@ -622,7 +625,7 @@ jack_time_t meta_jack_frames_to_time(const jack_client_t *client, jack_nframes_t
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-jack_nframes_t meta_jack_time_to_frames(const jack_client_t *client, jack_time_t time)
+jack_nframes_t meta_jack_time_to_frames(const meta_jack_client_t *client, jack_time_t time)
 {
     return jack_time_to_frames(client, time);
 }

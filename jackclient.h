@@ -2,7 +2,6 @@
 #define JACKCLIENT_H
 
 #include "metajack/jack.h"
-
 #include <QStringList>
 
 /**

@@ -126,7 +126,8 @@ HEADERS  += mainwindow.h \
     adsrclient.h \
     multiplyprocessor.h \
     metajack/jack.h \
-    metajack/midiport.h
+    metajack/midiport.h \
+    metajack/types.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

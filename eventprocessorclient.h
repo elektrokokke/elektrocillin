@@ -3,7 +3,6 @@
 
 #include "midiprocessorclient.h"
 #include "jackringbuffer.h"
-#include "metajack/jack.h"
 #include <QVector>
 
 template<class T> class EventProcessorClient : public MidiProcessorClient

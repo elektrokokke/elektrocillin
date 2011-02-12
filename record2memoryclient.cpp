@@ -1,5 +1,5 @@
 #include "record2memoryclient.h"
-#include "jack/midiport.h"
+#include "metajack/midiport.h"
 #include <QApplication>
 
 const size_t Record2MemoryClient::ringBufferSize = 2 << 20;

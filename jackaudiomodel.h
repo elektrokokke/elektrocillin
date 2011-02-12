@@ -2,7 +2,7 @@
 #define JACKAUDIOMODEL_H
 
 #include "floattablemodel.h"
-#include "jack/ringbuffer.h"
+#include <jack/ringbuffer.h>
 
 class JackAudioModel : public FloatTableModel
 {
