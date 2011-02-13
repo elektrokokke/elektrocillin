@@ -1,7 +1,7 @@
 #include "multiplyprocessor.h"
 
 MultiplyProcessor::MultiplyProcessor(double sampleRate) :
-    AudioProcessor(QStringList("Factor 1") + QStringList("Factor 2"), QStringList("Product"), sampleRate)
+    AudioProcessor(QStringList("Factor 1") + QStringList("Factor 2"), QStringList("Product out"), sampleRate)
 {
 }
 

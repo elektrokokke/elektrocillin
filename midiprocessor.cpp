@@ -22,6 +22,10 @@ void MidiProcessor::processPitchBend(unsigned char, unsigned int, jack_nframes_t
 {
 }
 
+void MidiProcessor::processChannelPressure(unsigned char, unsigned char, jack_nframes_t)
+{
+}
+
 double MidiProcessor::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)
 {
     // 440 Hz is note number 69:

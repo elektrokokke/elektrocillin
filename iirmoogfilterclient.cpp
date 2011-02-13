@@ -16,7 +16,7 @@ void IirMoogFilterThread::processDeferred()
     if (ringBufferFromClient && ringBufferFromClient->readSpace()) {
         ringBufferFromClient->readAdvance(ringBufferFromClient->readSpace() - 1);
         IirMoogFilter::Parameters parameters = ringBufferFromClient->read();
-        changedParameters(parameters.frequency);
+        changedParameters(parameters.frequency, parameters.resonance);
     }
 }
 
@@ -52,6 +52,14 @@ void IirMoogFilterClient::processNoteOn(unsigned char channel, unsigned char not
 {
     // call the midi processor's method:
     getMoogFilter()->processNoteOn(channel, noteNumber, velocity, time);
+    // notify the associated thread:
+    ringBufferToThread.write(getMoogFilter()->getParameters());
+    wakeJackThread();
+}
+
+void IirMoogFilterClient::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
+{
+    getMoogFilter()->processController(channel, controller, value, time);
     // notify the associated thread:
     ringBufferToThread.write(getMoogFilter()->getParameters());
     wakeJackThread();

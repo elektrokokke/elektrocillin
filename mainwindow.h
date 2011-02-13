@@ -39,7 +39,7 @@ private slots:
     void on_actionOscillator_triggered();
     void onMidiMessage(unsigned char, unsigned char, unsigned char);
     void onChangeCutoff(QPointF cutoffResonance);
-    void onChangedParameters(double frequency);
+    void onChangedParameters(double frequency, double resonance);
 
     void on_actionStore_connections_triggered();
 

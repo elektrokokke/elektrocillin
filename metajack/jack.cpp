@@ -34,7 +34,7 @@ const char * meta_jack_get_version_string()
 
   Status update is not yet implemented... as is any option except JackUseExactName.
   */
-meta_jack_client_t * meta_jack_client_open (const char *client_name, jack_options_t options, jack_status_t *status, ...)
+meta_jack_client_t * meta_jack_client_open (const char *client_name, jack_options_t options, jack_status_t *, ...)
 {
     //return jack_client_open(client_name, options, status);
     return MetaJackContext::instance->client_open(client_name, options);
@@ -92,7 +92,7 @@ int meta_jack_deactivate (meta_jack_client_t *client)
   this client, i.e. the PID of the real JACK client
   this meta client is capsuled in.
   */
-int meta_jack_get_client_pid (const char *name)
+int meta_jack_get_client_pid (const char *)
 {
     //return jack_get_client_pid(name);
     return MetaJackContext::instance->get_pid();
@@ -466,7 +466,7 @@ jack_nframes_t meta_jack_port_get_total_latency (meta_jack_client_t *client, met
   Note: will probably not be needed in meta_jack, so just make this
   a no-op...
   */
-void meta_jack_port_set_latency (meta_jack_port_t *port, jack_nframes_t nframes)
+void meta_jack_port_set_latency (meta_jack_port_t *, jack_nframes_t)
 {
     //jack_port_set_latency(port, nframes);
 }
@@ -475,7 +475,7 @@ void meta_jack_port_set_latency (meta_jack_port_t *port, jack_nframes_t nframes)
   Note: will probably not be needed in meta_jack, so just make this
   a no-op...
   */
-int meta_jack_recompute_total_latency (meta_jack_client_t *client, meta_jack_port_t* port)
+int meta_jack_recompute_total_latency (meta_jack_client_t *, meta_jack_port_t*)
 {
     //return jack_recompute_total_latency(client, port);
     return 1;
@@ -485,7 +485,7 @@ int meta_jack_recompute_total_latency (meta_jack_client_t *client, meta_jack_por
   Note: will probably not be needed in meta_jack, so just make this
   a no-op...
   */
-int meta_jack_recompute_total_latencies (meta_jack_client_t *client)
+int meta_jack_recompute_total_latencies (meta_jack_client_t *)
 {
     //return jack_recompute_total_latencies(client);
     return 1;
@@ -534,7 +534,7 @@ int meta_jack_port_get_aliases (const meta_jack_port_t *port, char* const aliase
 /*
   Note: probably a no-op.
   */
-int meta_jack_port_request_monitor (meta_jack_port_t *port, int onoff)
+int meta_jack_port_request_monitor (meta_jack_port_t *, int)
 {
     //return jack_port_request_monitor(port, onoff);
     return 1;
@@ -543,7 +543,7 @@ int meta_jack_port_request_monitor (meta_jack_port_t *port, int onoff)
 /*
   Note: probably a no-op.
   */
-int meta_jack_port_request_monitor_by_name (meta_jack_client_t *client, const char *port_name, int onoff)
+int meta_jack_port_request_monitor_by_name (meta_jack_client_t *, const char *, int)
 {
     //return jack_port_request_monitor_by_name(client, port_name, onoff);
     return 1;
@@ -552,7 +552,7 @@ int meta_jack_port_request_monitor_by_name (meta_jack_client_t *client, const ch
 /*
   Note: probably a no-op.
   */
-int meta_jack_port_ensure_monitor (meta_jack_port_t *port, int onoff)
+int meta_jack_port_ensure_monitor (meta_jack_port_t *, int)
 {
     //return jack_port_ensure_monitor(port, onoff);
     return 1;
@@ -561,7 +561,7 @@ int meta_jack_port_ensure_monitor (meta_jack_port_t *port, int onoff)
 /*
   Note: probably a no-op.
   */
-int meta_jack_port_monitoring_input (meta_jack_port_t *port)
+int meta_jack_port_monitoring_input (meta_jack_port_t *)
 {
     //return jack_port_monitoring_input(port);
     return 0;
@@ -621,7 +621,13 @@ int meta_jack_port_type_size(void)
 const char ** meta_jack_get_ports (meta_jack_client_t *client, const char *port_name_pattern, const char *type_name_pattern, unsigned long flags)
 {
     //return jack_get_ports(client, port_name_pattern, type_name_pattern, flags);
-    return client->context->get_ports(port_name_pattern, type_name_pattern, flags);
+    if (client) {
+        std::string port_name_pattern_string = (port_name_pattern ? port_name_pattern : "");
+        std::string type_name_pattern_string = (type_name_pattern ? type_name_pattern : "");
+        return client->context->get_ports(port_name_pattern_string, type_name_pattern_string, flags);
+    } else {
+        return 0;
+    }
 }
 
 /*
@@ -702,7 +708,7 @@ jack_time_t meta_jack_get_time()
 /*
   Note: should clients capsuled in a meta_jack_context receive error messages?
   */
-void meta_jack_set_error_function (void (*func)(const char *))
+void meta_jack_set_error_function (void (*)(const char *))
 {
     //jack_set_error_function(func);
 }
@@ -710,7 +716,7 @@ void meta_jack_set_error_function (void (*func)(const char *))
 /*
   Note: should clients capsuled in a meta_jack_context receive error messages?
   */
-void meta_jack_set_info_function (void (*func)(const char *))
+void meta_jack_set_info_function (void (*)(const char *))
 {
     //jack_set_info_function(func);
 }

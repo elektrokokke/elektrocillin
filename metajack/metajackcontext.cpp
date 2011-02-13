@@ -1,6 +1,8 @@
 #include "metajackcontext.h"
 #include <sstream>
+#include <list>
 #include <cassert>
+#include <memory.h>
 
 _meta_jack_client::_meta_jack_client(MetaJackContext *context_, const std::string &name_) :
     context(context_),
@@ -13,8 +15,8 @@ _meta_jack_client::_meta_jack_client(MetaJackContext *context_, const std::strin
 _meta_jack_client::~_meta_jack_client()
 {
     // delete all ports (this will also remove all their connections):
-    for (std::set<_meta_jack_port*>::iterator i = ports.begin(); i != ports.end(); i++) {
-        _meta_jack_port *port = *i;
+    for (; ports.size(); ) {
+        _meta_jack_port *port = *ports.begin();
         delete port;
     }
 }
@@ -136,21 +138,49 @@ void _meta_jack_port::clearBuffer()
     }
 }
 
-void _meta_jack_port::mergeBuffers(_meta_jack_port *destination_port)
+bool compare_midi_events(const jack_midi_event_t &event1, const jack_midi_event_t &event2) {
+    return event1.time < event2.time;
+}
+
+void _meta_jack_port::mergeConnectedBuffers()
 {
-    assert(type == destination_port->type);
-    assert(bufferSize == destination_port->bufferSize);
-    // merge this port's buffer into the buffer of the given port:
+    assert(isInput());
+    // first clear the buffer:
+    clearBuffer();
     if (type == JACK_DEFAULT_AUDIO_TYPE) {
-        // merging means adding in this case:
-        jack_default_audio_sample_t *sourceBuffer = (jack_default_audio_sample_t*)buffer;
-        jack_default_audio_sample_t *destBuffer = (jack_default_audio_sample_t*)destination_port->buffer;
+        jack_default_audio_sample_t *destBuffer = (jack_default_audio_sample_t*)buffer;
         size_t nframes = bufferSize / sizeof(jack_default_audio_sample_t);
-        for (jack_nframes_t i = 0; i < nframes; i++) {
-            destBuffer[i] += sourceBuffer[i];
+        // add audio from all connected output buffers:
+        for (std::set<_meta_jack_port*>::iterator i = connectedPorts.begin(); i != connectedPorts.end(); i++) {
+            _meta_jack_port *connectedPort = *i;
+            jack_default_audio_sample_t *sourceBuffer = (jack_default_audio_sample_t*)connectedPort->buffer;
+            for (jack_nframes_t j = 0; j < nframes; j++) {
+                destBuffer[j] += sourceBuffer[j];
+            }
         }
     } else if (type == JACK_DEFAULT_MIDI_TYPE) {
-        // TODO
+        // first collect all midi events from connected output buffers:
+        std::list<jack_midi_event_t> events;
+        for (std::set<_meta_jack_port*>::iterator i = connectedPorts.begin(); i != connectedPorts.end(); i++) {
+            _meta_jack_port *connectedPort = *i;
+            void *midiOutputBuffer = connectedPort->buffer;
+            for (jack_nframes_t j = 0; j < client->context->midi_get_event_count(midiOutputBuffer); j++) {
+                jack_midi_event_t event;
+                client->context->midi_event_get(&event, midiOutputBuffer, j);
+                events.push_back(event);
+            }
+        }
+        // now sort the events by time:
+        events.sort(compare_midi_events);
+        // write them to the input buffer:
+        void *midiInputBuffer = buffer;
+        bool lost = false;
+        for (std::list<jack_midi_event_t>::iterator i = events.begin(); !lost && (i != events.end()); i++) {
+            lost = client->context->midi_event_write(midiInputBuffer, i->time, i->buffer, i->size);
+        }
+        // remember the number of lost midi events (those that could not be written to the midi buffer):
+        MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)midiInputBuffer;
+        head->lostMidiEvents = events.size();
     }
 }
 
@@ -473,7 +503,7 @@ float MetaJackContext::get_cpu_load()
     return jack_cpu_load(client);
 }
 
-_meta_jack_port * MetaJackContext::port_register(_meta_jack_client *metaClient, const std::string &port_name, const std::string &port_type, unsigned long flags, unsigned long buffer_size)
+_meta_jack_port * MetaJackContext::port_register(_meta_jack_client *metaClient, const std::string &port_name, const std::string &port_type, unsigned long flags, unsigned long)
 {
     // check if the given port name is not too long:
     if (metaClient->name.length() + port_name.length() + 1 > (size_t)jack_port_name_size()) {
@@ -553,7 +583,7 @@ void * MetaJackContext::port_get_buffer(_meta_jack_port *port, jack_nframes_t nf
         if (port->type == JACK_DEFAULT_MIDI_TYPE) {
             MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port->buffer;
             head->bufferSize = port->bufferSize - sizeof(MetaJackContextMidiBufferHead);
-            head->midiDataSize = head->midiEventCount = 0;
+            head->midiDataSize = head->midiEventCount = head->lostMidiEvents = 0;
         }
     }
     return port->buffer;
@@ -639,12 +669,12 @@ const char ** MetaJackContext::port_get_all_connections(const _meta_jack_port *p
     return port_get_connections(port);
 }
 
-jack_nframes_t MetaJackContext::port_get_latency(_meta_jack_port *port)
+jack_nframes_t MetaJackContext::port_get_latency(_meta_jack_port *)
 {
     return 0;
 }
 
-jack_nframes_t MetaJackContext::port_get_total_latency(_meta_jack_port *port)
+jack_nframes_t MetaJackContext::port_get_total_latency(_meta_jack_port *)
 {
     // TODO figure out how to do this best, until then return 0:
     return 0;
@@ -674,19 +704,19 @@ int MetaJackContext::port_set_name(_meta_jack_port *port, const std::string &por
     return 0;
 }
 
-int MetaJackContext::port_set_alias(_meta_jack_port *port, const std::string &alias)
+int MetaJackContext::port_set_alias(_meta_jack_port *, const std::string &)
 {
     // TODO
     return 1;
 }
 
-int MetaJackContext::port_unset_alias(_meta_jack_port *port, const std::string &alias)
+int MetaJackContext::port_unset_alias(_meta_jack_port *, const std::string &)
 {
     // TODO
     return 1;
 }
 
-int MetaJackContext::port_get_aliases(const _meta_jack_port *port, char* const aliases[2])
+int MetaJackContext::port_get_aliases(const _meta_jack_port *, char* const aliases[2])
 {
     // TODO
     return 0;
@@ -772,7 +802,7 @@ int MetaJackContext::port_disconnect(const std::string &source_port, const std::
     return 1;
 }
 
-int MetaJackContext::port_disconnect(meta_jack_client_t *client, meta_jack_port_t *port)
+int MetaJackContext::port_disconnect(meta_jack_client_t *, meta_jack_port_t *)
 {
     // documentation of this function is very strange, what does it do?
     return 1;
@@ -867,7 +897,7 @@ int MetaJackContext::midi_event_get(jack_midi_event_t *event, void *port_buffer,
 void MetaJackContext::midi_clear_buffer(void *port_buffer)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
-    head->midiDataSize = head->midiEventCount = 0;
+    head->midiDataSize = head->midiEventCount = head->lostMidiEvents = 0;
 }
 
 size_t MetaJackContext::midi_max_event_size(void* port_buffer)
@@ -879,7 +909,7 @@ size_t MetaJackContext::midi_max_event_size(void* port_buffer)
 jack_midi_data_t* MetaJackContext::midi_event_reserve(void *port_buffer, jack_nframes_t  time, size_t data_size)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
-    char *charBuffer = (char*)port_buffer + sizeof(MetaJackContextMidiBufferHead);;
+    char *charBuffer = (char*)port_buffer + sizeof(MetaJackContextMidiBufferHead);
     // check if enough space is left:
     if (head->bufferSize >= (head->midiEventCount + 1) * sizeof(jack_midi_data_t) + head->midiDataSize + data_size) {
         jack_midi_event_t event;
@@ -910,8 +940,8 @@ int MetaJackContext::midi_event_write(void *port_buffer, jack_nframes_t time, co
 
 jack_nframes_t MetaJackContext::midi_get_lost_event_count(void *port_buffer)
 {
-    // TODO
-    return 0;
+    MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
+    return head->lostMidiEvents;
 }
 
 void MetaJackContext::free(void* ptr)
@@ -932,26 +962,31 @@ int MetaJackContext::process(_meta_jack_client *metaClient, std::set<_meta_jack_
     for (std::set<_meta_jack_port*>::iterator i = metaClient->ports.begin(); i != metaClient->ports.end(); i++) {
         _meta_jack_port *port = *i;
         assert(!port->twin);
+        // make sure all the client's buffers are initialized:
+        port_get_buffer(port, nframes);
+        // process all other clients that are connected to one of our inputs first:
         if (port->isInput()) {
-            port_get_buffer(port, nframes);
-            // clear the port buffer:
-            port->clearBuffer();
             for (std::set<_meta_jack_port*>::iterator j = port->connectedPorts.begin(); j != port->connectedPorts.end(); j++) {
                 _meta_jack_port *connectedPort = *j;
                 if (unprocessedClients.find(connectedPort->client) != unprocessedClients.end()) {
-                    if (process(connectedPort->client, unprocessedClients, nframes)) {
-                        return 1;
+                    int errorCode = process(connectedPort->client, unprocessedClients, nframes);
+                    if (errorCode) {
+                        return errorCode;
                     }
                 }
-                // add all buffers connected to input ports to this client's ports:
-                connectedPort->mergeBuffers(port);
             }
+            // add all buffers connected to input ports to this client's ports:
+            port->mergeConnectedBuffers();
         }
     }
     // process this client:
-    if (metaClient->processCallback && metaClient->processCallback(nframes, metaClient->processCallbackArgument)) {
-        return 1;
+    if (metaClient->processCallback) {
+        int errorCode = metaClient->processCallback(nframes, metaClient->processCallbackArgument);
+        if (errorCode) {
+            return 1;
+        }
     }
+    // processing succeeded:
     unprocessedClients.erase(metaClient);
     return 0;
 }
@@ -1028,7 +1063,8 @@ int MetaJackContext::processDummyInputClient(jack_nframes_t nframes, void *arg)
     void *midiOutputBuffer = context->port_get_buffer(midiOutputPort, nframes);
     void *midiInputBuffer = jack_port_get_buffer(context->midiIn, nframes);
     context->midi_clear_buffer(midiOutputBuffer);
-    for (jack_nframes_t i = 0; i < jack_midi_get_event_count(midiInputBuffer); i++) {
+    jack_nframes_t midiEventCount = jack_midi_get_event_count(midiInputBuffer);
+    for (jack_nframes_t i = 0; i < midiEventCount; i++) {
         jack_midi_event_t event;
         jack_midi_event_get(&event, midiInputBuffer, i);
         context->midi_event_write(midiOutputBuffer, event.time, event.buffer, event.size);

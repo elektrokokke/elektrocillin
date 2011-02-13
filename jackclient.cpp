@@ -1,4 +1,5 @@
 #include "jackclient.h"
+#include <QDebug>
 
 JackClient::JackClient(const QString &clientName) :
     requestedName(clientName),
@@ -149,7 +150,9 @@ void JackClient::restoreConnections(const QStringList &connections)
     for (int i = 0; i < connections.size(); i++) {
         QStringList connection = connections[i].split("::");
         Q_ASSERT(connection.size() == 2);
-        connectPorts(connection[0], connection[1]);
+        if (!connectPorts(connection[0], connection[1])) {
+            qDebug() << "void JackClient::restoreConnections(const QStringList &connections)" << "could not restore connection" << connections[i];
+        }
     }
 }
 

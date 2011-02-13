@@ -17,7 +17,7 @@ public:
 
     void setRingBufferFromClient(JackRingBuffer<IirMoogFilter::Parameters> *ringBufferFromClient);
 signals:
-    void changedParameters(double frequency);
+    void changedParameters(double frequency, double resonance);
 protected:
     void processDeferred();
 private:
@@ -37,6 +37,7 @@ protected:
     virtual void processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t time);
     // reimplemented from MidiProcessorClient:
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
 
 private:
     JackRingBuffer<IirMoogFilter::Parameters> ringBufferToThread;

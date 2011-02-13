@@ -51,6 +51,7 @@ struct MetaJackContextEvent {
 
 struct MetaJackContextMidiBufferHead {
     size_t bufferSize, midiEventCount, midiDataSize;
+    jack_nframes_t lostMidiEvents;
 };
 
 class MetaJackContext
@@ -210,7 +211,7 @@ public:
     _meta_jack_port * createTwin();
 
     void clearBuffer();
-    void mergeBuffers(_meta_jack_port *destination_port);
+    void mergeConnectedBuffers();
 
     _meta_jack_client *client;
     jack_port_id_t id;

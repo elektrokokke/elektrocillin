@@ -52,6 +52,7 @@ protected:
     virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
+    virtual void processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time);
 
     /**
       This may only be called from any of the process...() methods!

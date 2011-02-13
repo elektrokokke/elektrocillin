@@ -105,6 +105,11 @@ void MidiProcessorClient::processMidi(const MidiProcessorClient::MidiEvent &midi
             // note off event:
             processNoteOff(channel, noteNumber, velocity, time);
         }
+    } else if (highNibble == 0x0A) {
+       // aftertouch:
+//       unsigned char note = midiEvent.buffer[1];
+//       unsigned char pressure = midiEvent.buffer[2];
+//       processAfterTouch(channel, note, pressure, time);
     } else if (highNibble == 0x0B) {
         // control change:
         unsigned char controller = midiEvent.buffer[1];
@@ -116,6 +121,10 @@ void MidiProcessorClient::processMidi(const MidiProcessorClient::MidiEvent &midi
         unsigned char high = midiEvent.buffer[2];
         unsigned int pitch = (high << 7) + low;
         processPitchBend(channel, pitch, time);
+    } else if (highNibble == 0x0D) {
+        // channel pressure:
+        unsigned char pressure = midiEvent.buffer[1];
+        processChannelPressure(channel, pressure, time);
     }
 }
 
@@ -141,6 +150,12 @@ void MidiProcessorClient::processPitchBend(unsigned char channel, unsigned int v
 {
     Q_ASSERT(midiProcessor);
     midiProcessor->processPitchBend(channel, value, time);
+}
+
+void MidiProcessorClient::processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time)
+{
+    Q_ASSERT(midiProcessor);
+    midiProcessor->processChannelPressure(channel, pressure, time);
 }
 
 void MidiProcessorClient::writeMidi(const MidiEvent &event, jack_nframes_t time)

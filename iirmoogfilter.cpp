@@ -34,6 +34,15 @@ void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nfr
     computeCoefficients();
 }
 
+void IirMoogFilter::processController(unsigned char, unsigned char controller, unsigned char value, jack_nframes_t)
+{
+    if (controller == 1) {
+        // set resonance according to pressure:
+        parameters.resonance = (double)value / 127.0;
+        computeCoefficients();
+    }
+}
+
 void IirMoogFilter::setSampleRate(double sampleRate)
 {
     IirFilter::setSampleRate(sampleRate);
