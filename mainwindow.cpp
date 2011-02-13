@@ -86,44 +86,44 @@ MainWindow::MainWindow(QWidget *parent) :
     cutoffResonanceNode->setPos(frequencyResponse->getFrequencyResponseRectangle().left(), frequencyResponse->getZeroDecibelY());
     QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onChangeCutoff(QPointF)));
     QObject::connect(moogFilterClient.getMoogFilterThread(), SIGNAL(changedParameters(double)), this, SLOT(onChangedParameters(double)));
-    moogFilterClient.activate();
+//    moogFilterClient.activate();
     // end moog filter client and gui test setup
 
     // virtual keyboard and midi signal client test setup:
     GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
     QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), midiSignalClient.getMidiSignalThread(), SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
     QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), midiSignalClient.getMidiSignalThread(), SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
-    midiSignalClient.activate();
+//    midiSignalClient.activate();
     // end virtual keyboard and midi signal client test setup
 
     // waveshaping clients test setup:
     LinearWaveShapingGraphicsItem *waveShapingItem = new LinearWaveShapingGraphicsItem(QRectF(0, 0, 600, 600), &linearWaveShapingClient);
-    linearWaveShapingClient.activate();
+//    linearWaveShapingClient.activate();
     CubicSplineWaveShapingGraphicsItem *cubicSplineWaveShapingItem = new CubicSplineWaveShapingGraphicsItem(QRectF(0, 0, 600, 600), &cubicSplineWaveShapingClient);
-    cubicSplineWaveShapingClient.activate();
+//    cubicSplineWaveShapingClient.activate();
     // end waveshaping client test setup
 
     // piecewise linear oscillator test setup:
     LinearOscillatorGraphicsItem *linearOscillatorGraphicsItem = new LinearOscillatorGraphicsItem(QRectF(0, 0, 600, 600), &linearOscillatorClient);
-    linearOscillatorClient.activate();
+//    linearOscillatorClient.activate();
     // end piecewise linear oscillator test setup
 
     // monophonic synthesizer and lfo test setup:
-    synthesizerClient.activate();
+//    synthesizerClient.activate();
     lfo1.setFrequency(0.11);
     lfo2.setFrequency(0.21);
-    lfoClient1.activate();
-    lfoClient2.activate();
+//    lfoClient1.activate();
+//    lfoClient2.activate();
     // end monophonic synthesizer and lfo test setup
 
     // ADSR envelope test setup:
-    adsrClient.activate();
-    multiplierClient.activate();
+//    adsrClient.activate();
+//    multiplierClient.activate();
     // end ADSR envelope test setup
 
     // record client test setup:
     QGraphicsRectItem *recordClientRect = new QGraphicsRectItem(0, 0, 500, 500);
-    recordClient.activate();
+//    recordClient.activate();
     recordClientGraphView = new GraphView(0);
     recordClientGraphView->resize(500, 500);
     QGraphicsProxyWidget *recordClientGraphicsItem = new QGraphicsProxyWidget(recordClientRect);

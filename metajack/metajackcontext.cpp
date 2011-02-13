@@ -48,6 +48,7 @@ _meta_jack_port * _meta_jack_client::createPortTwin(_meta_jack_port *port)
 {
     assert(twin);
     _meta_jack_port * portTwin = port->createTwin();
+    assert(portTwin);
     twin->ports.insert(portTwin);
     twin->portsByShortName[portTwin->short_name] = portTwin;
     return portTwin;
@@ -60,7 +61,8 @@ _meta_jack_port::_meta_jack_port(_meta_jack_client *client_, jack_port_id_t id_,
     type(type_),
     flags(flags_),
     bufferSize(0),
-    buffer(0)
+    buffer(0),
+    twin(0)
 {}
 
 _meta_jack_port::~_meta_jack_port()
@@ -112,6 +114,7 @@ _meta_jack_port * _meta_jack_port::createTwin()
     if (twin) {
         return twin;
     }
+    assert(client->twin);
     twin = new _meta_jack_port(client->twin, id, short_name, type, flags);
     twin->aliases[0] = aliases[0];
     twin->aliases[1] = aliases[1];
@@ -536,18 +539,20 @@ int MetaJackContext::port_unregister(_meta_jack_port *port)
 
 void * MetaJackContext::port_get_buffer(_meta_jack_port *port, jack_nframes_t nframes)
 {
+    if (port->twin) {
+        port = port->twin;
+    }
     // resize the buffer if necessary:
-    if (nframes > port->bufferSize) {
+    if (nframes * sizeof(jack_default_audio_sample_t) > port->bufferSize) {
         if (port->buffer) {
             delete [] port->buffer;
         }
-        port->bufferSize = nframes;
-        port->buffer = new char[nframes * sizeof(jack_default_audio_sample_t)];
-        // if this is a MIDI port, write its size to the begin of the buffer:
+        port->bufferSize = nframes * sizeof(jack_default_audio_sample_t);
+        port->buffer = new char[port->bufferSize];
+        // if this is a MIDI port, write its size to the head of the buffer:
         if (port->type == JACK_DEFAULT_MIDI_TYPE) {
-            size_t adjustedBufferSize = port->bufferSize - sizeof(size_t) * 3;
             MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port->buffer;
-            head->bufferSize = adjustedBufferSize;
+            head->bufferSize = port->bufferSize - sizeof(MetaJackContextMidiBufferHead);
             head->midiDataSize = head->midiEventCount = 0;
         }
     }
@@ -922,9 +927,11 @@ void MetaJackContext::free(void* ptr)
 
 int MetaJackContext::process(_meta_jack_client *metaClient, std::set<_meta_jack_client*> &unprocessedClients, jack_nframes_t nframes)
 {
+    assert(!metaClient->twin);
     // recursively process all clients that are connected to this client's input ports first:
-    for (std::set<_meta_jack_port*>::iterator i = metaClient->ports.begin(); i != metaClient->ports.begin(); i++) {
+    for (std::set<_meta_jack_port*>::iterator i = metaClient->ports.begin(); i != metaClient->ports.end(); i++) {
         _meta_jack_port *port = *i;
+        assert(!port->twin);
         if (port->isInput()) {
             port_get_buffer(port, nframes);
             // clear the port buffer:
@@ -1033,7 +1040,7 @@ int MetaJackContext::processDummyOutputClient(jack_nframes_t nframes, void *arg)
 {
     MetaJackContext *context = (MetaJackContext*)arg;
     // copy from the real inputs to the dummy client outputs:
-    _meta_jack_client *dummy = context->dummyInputClient;
+    _meta_jack_client *dummy = context->dummyOutputClient;
     _meta_jack_port *audioInputPort = dummy->portsByShortName["playback_audio"];
     _meta_jack_port *midiInputPort = dummy->portsByShortName["playback_midi"];
     // copy audio:
