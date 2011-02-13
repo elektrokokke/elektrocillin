@@ -276,40 +276,40 @@ int meta_jack_is_realtime (meta_jack_client_t *client) JACK_OPTIONAL_WEAK_EXPORT
 // */
 //jack_nframes_t jack_thread_wait (meta_jack_client_t*, int status) JACK_OPTIONAL_WEAK_EXPORT;
 
-/**
- * Wait until this JACK client should process data.
- *
- * @param client - pointer to a JACK client structure
- *
- * @return the number of frames of data to process
- */
-jack_nframes_t meta_jack_cycle_wait (meta_jack_client_t* client) JACK_OPTIONAL_WEAK_EXPORT;
+///**
+// * Wait until this JACK client should process data.
+// *
+// * @param client - pointer to a JACK client structure
+// *
+// * @return the number of frames of data to process
+// */
+//jack_nframes_t meta_jack_cycle_wait (meta_jack_client_t* client) JACK_OPTIONAL_WEAK_EXPORT;
 
-/**
- * Signal next clients in the graph.
- *
- * @param client - pointer to a JACK client structure
- * @param status - if non-zero, calling thread should exit
- */
-void meta_jack_cycle_signal (meta_jack_client_t* client, int status) JACK_OPTIONAL_WEAK_EXPORT;
+///**
+// * Signal next clients in the graph.
+// *
+// * @param client - pointer to a JACK client structure
+// * @param status - if non-zero, calling thread should exit
+// */
+//void meta_jack_cycle_signal (meta_jack_client_t* client, int status) JACK_OPTIONAL_WEAK_EXPORT;
 
-/**
- * Tell the Jack server to call @a thread_callback in the RT thread.
- * Typical use are in conjunction with @a jack_cycle_wait and @a jack_cycle_signal functions.
- * The code in the supplied function must be suitable for real-time
- * execution.  That means that it cannot call functions that might
- * block for a long time. This includes malloc, free, printf,
- * pthread_mutex_lock, sleep, wait, poll, select, pthread_join,
- * pthread_cond_wait, etc, etc. See
- * http://jackit.sourceforge.net/docs/design/design.html#SECTION00411000000000000000
- * for more information.
- *
- * NOTE: this function cannot be called while the client is activated
- * (after jack_activate has been called.)
- *
- * @return 0 on success, otherwise a non-zero error code.
-*/
-int meta_jack_set_process_thread(meta_jack_client_t* client, JackThreadCallback thread_callback, void *arg) JACK_OPTIONAL_WEAK_EXPORT;
+///**
+// * Tell the Jack server to call @a thread_callback in the RT thread.
+// * Typical use are in conjunction with @a jack_cycle_wait and @a jack_cycle_signal functions.
+// * The code in the supplied function must be suitable for real-time
+// * execution.  That means that it cannot call functions that might
+// * block for a long time. This includes malloc, free, printf,
+// * pthread_mutex_lock, sleep, wait, poll, select, pthread_join,
+// * pthread_cond_wait, etc, etc. See
+// * http://jackit.sourceforge.net/docs/design/design.html#SECTION00411000000000000000
+// * for more information.
+// *
+// * NOTE: this function cannot be called while the client is activated
+// * (after jack_activate has been called.)
+// *
+// * @return 0 on success, otherwise a non-zero error code.
+//*/
+//int meta_jack_set_process_thread(meta_jack_client_t* client, JackThreadCallback thread_callback, void *arg) JACK_OPTIONAL_WEAK_EXPORT;
 
 /*@}*/
 

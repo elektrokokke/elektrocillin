@@ -1,14 +1,15 @@
 #include <jack/jack.h>
 #include <stdarg.h>
 #include <QString>
+#include "metajackcontext.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef struct _jack_port meta_jack_port_t;
-typedef struct _jack_client meta_jack_client_t;
+//typedef struct _jack_port meta_jack_port_t;
+//typedef struct _jack_client meta_jack_client_t;
 
 /*
   All notes regard what is to be done to make meta_jack work,
@@ -30,24 +31,26 @@ const char * meta_jack_get_version_string()
 /*
   Note: the type meta_jack_client_t (_jack_client) has to be defined.
   A new instance has to be created in the current meta_jack_context.
+
+  Status update is not yet implemented... as is any option except JackUseExactName.
   */
 meta_jack_client_t * meta_jack_client_open (const char *client_name, jack_options_t options, jack_status_t *status, ...)
 {
-    // for now, just ignore the optional JackServerName parameter:
-//    QString clientName = QString("meta_%1").arg(client_name);
-//    return jack_client_open(clientName.toAscii().data(), options, status);
-    return jack_client_open(client_name, options, status);
+    //return jack_client_open(client_name, options, status);
+    return MetaJackContext::instance->client_open(client_name, options);
 }
 
 int meta_jack_client_close (meta_jack_client_t *client)
 {
-    return jack_client_close(client);
+    //return jack_client_close(client);
+    return client->context->client_close(client);
 }
 
 // Note: no real need to reimplement this
 int meta_jack_client_name_size (void)
 {
-    return jack_client_name_size();
+    //return jack_client_name_size();
+    return MetaJackContext::instance->client_get_name_size();
 }
 
 /*
@@ -57,7 +60,8 @@ int meta_jack_client_name_size (void)
   */
 char * meta_jack_get_client_name (meta_jack_client_t *client)
 {
-    return jack_get_client_name(client);
+    //return jack_get_client_name(client);
+    return (char*)client->context->client_get_name(client).c_str();
 }
 
 /*
@@ -68,7 +72,8 @@ char * meta_jack_get_client_name (meta_jack_client_t *client)
   */
 int meta_jack_activate (meta_jack_client_t *client)
 {
-    return jack_activate(client);
+    //return jack_activate(client);
+    return client->context->client_activate(client);
 }
 
 /*
@@ -78,7 +83,8 @@ int meta_jack_activate (meta_jack_client_t *client)
   */
 int meta_jack_deactivate (meta_jack_client_t *client)
 {
-    return jack_deactivate(client);
+    //return jack_deactivate(client);
+    return client->context->client_deactivate(client);
 }
 
 /*
@@ -88,7 +94,8 @@ int meta_jack_deactivate (meta_jack_client_t *client)
   */
 int meta_jack_get_client_pid (const char *name)
 {
-    return jack_get_client_pid(name);
+    //return jack_get_client_pid(name);
+    return MetaJackContext::instance->get_pid();
 }
 
 /*
@@ -99,7 +106,8 @@ int meta_jack_get_client_pid (const char *name)
   */
 pthread_t meta_jack_client_thread_id (meta_jack_client_t *client)
 {
-    return jack_client_thread_id(client);
+    //return jack_client_thread_id(client);
+    return client->context->get_thread_id();
 }
 
 /*
@@ -109,7 +117,8 @@ pthread_t meta_jack_client_thread_id (meta_jack_client_t *client)
   */
 int meta_jack_is_realtime (meta_jack_client_t *client)
 {
-    return jack_is_realtime(client);
+    //return jack_is_realtime(client);
+    return client->context->is_realtime();
 }
 
 /*
@@ -120,7 +129,8 @@ int meta_jack_is_realtime (meta_jack_client_t *client)
   */
 int meta_jack_set_thread_init_callback (meta_jack_client_t *client, JackThreadInitCallback thread_init_callback, void *arg)
 {
-    return jack_set_thread_init_callback(client, thread_init_callback, arg);
+    //return jack_set_thread_init_callback(client, thread_init_callback, arg);
+    return client->context->set_thread_init_callback(client, thread_init_callback, arg);
 }
 
 /*
@@ -131,7 +141,8 @@ int meta_jack_set_thread_init_callback (meta_jack_client_t *client, JackThreadIn
   */
 void meta_jack_on_shutdown (meta_jack_client_t *client, JackShutdownCallback shutdown_callback, void *arg)
 {
-    jack_on_shutdown(client, shutdown_callback, arg);
+    //jack_on_shutdown(client, shutdown_callback, arg);
+    client->context->set_shutdown_callback(client, shutdown_callback, arg);
 }
 
 /*
@@ -142,7 +153,8 @@ void meta_jack_on_shutdown (meta_jack_client_t *client, JackShutdownCallback shu
   */
 void meta_jack_on_info_shutdown (meta_jack_client_t *client, JackInfoShutdownCallback shutdown_callback, void *arg)
 {
-    jack_on_info_shutdown(client, shutdown_callback, arg);
+    //jack_on_info_shutdown(client, shutdown_callback, arg);
+    client->context->set_info_shutdown_callback(client, shutdown_callback, arg);
 }
 
 /*
@@ -151,7 +163,8 @@ void meta_jack_on_info_shutdown (meta_jack_client_t *client, JackInfoShutdownCal
   */
 int meta_jack_set_process_callback (meta_jack_client_t *client, JackProcessCallback process_callback, void *arg)
 {
-    return jack_set_process_callback(client, process_callback, arg);
+    //return jack_set_process_callback(client, process_callback, arg);
+    return client->context->set_process_callback(client, process_callback, arg);
 }
 
 /*
@@ -162,7 +175,8 @@ int meta_jack_set_process_callback (meta_jack_client_t *client, JackProcessCallb
   */
 int meta_jack_set_freewheel_callback (meta_jack_client_t *client, JackFreewheelCallback freewheel_callback, void *arg)
 {
-    return jack_set_freewheel_callback(client, freewheel_callback, arg);
+    //return jack_set_freewheel_callback(client, freewheel_callback, arg);
+    return client->context->set_freewheel_callback(client, freewheel_callback, arg);
 }
 
 /*
@@ -173,7 +187,8 @@ int meta_jack_set_freewheel_callback (meta_jack_client_t *client, JackFreewheelC
   */
 int meta_jack_set_buffer_size_callback (meta_jack_client_t *client, JackBufferSizeCallback bufsize_callback, void *arg)
 {
-    return jack_set_buffer_size_callback(client, bufsize_callback, arg);
+    //return jack_set_buffer_size_callback(client, bufsize_callback, arg);
+    return client->context->set_buffer_size_callback(client, bufsize_callback, arg);
 }
 
 /*
@@ -184,7 +199,8 @@ int meta_jack_set_buffer_size_callback (meta_jack_client_t *client, JackBufferSi
   */
 int meta_jack_set_sample_rate_callback (meta_jack_client_t *client, JackSampleRateCallback srate_callback, void *arg)
 {
-    return jack_set_sample_rate_callback(client, srate_callback, arg);
+    //return jack_set_sample_rate_callback(client, srate_callback, arg);
+    return client->context->set_sample_rate_callback(client, srate_callback, arg);
 }
 
 /*
@@ -194,31 +210,36 @@ int meta_jack_set_sample_rate_callback (meta_jack_client_t *client, JackSampleRa
   */
 int meta_jack_set_client_registration_callback (meta_jack_client_t *client, JackClientRegistrationCallback registration_callback, void *arg)
 {
-    return jack_set_client_registration_callback(client, registration_callback, arg);
+    //return jack_set_client_registration_callback(client, registration_callback, arg);
+    return client->context->set_client_registration_callback(client, registration_callback, arg);
 }
 
 // Note: see meta_jack_set_client_registration_callback
 int meta_jack_set_port_registration_callback (meta_jack_client_t *client, JackPortRegistrationCallback registration_callback, void *arg)
 {
-    return jack_set_port_registration_callback(client, registration_callback, arg);
+    //return jack_set_port_registration_callback(client, registration_callback, arg);
+    return client->context->set_port_registration_callback(client, registration_callback, arg);
 }
 
 // Note: see meta_jack_set_client_registration_callback
 int meta_jack_set_port_connect_callback (meta_jack_client_t *client, JackPortConnectCallback connect_callback, void *arg)
 {
-    return jack_set_port_connect_callback(client, connect_callback, arg);
+    //return jack_set_port_connect_callback(client, connect_callback, arg);
+    return client->context->set_port_connect_callback(client, connect_callback, arg);
 }
 
 // Note: see meta_jack_set_client_registration_callback
 int meta_jack_set_port_rename_callback (meta_jack_client_t *client, JackPortRenameCallback rename_callback, void *arg)
 {
-    return jack_set_port_rename_callback(client, rename_callback, arg);
+    //return jack_set_port_rename_callback(client, rename_callback, arg);
+    return client->context->set_port_rename_callback(client, rename_callback, arg);
 }
 
 // Note: see meta_jack_set_client_registration_callback
 int meta_jack_set_graph_order_callback (meta_jack_client_t *client, JackGraphOrderCallback graph_callback, void *arg)
 {
-    return jack_set_graph_order_callback(client, graph_callback, arg);
+    //return jack_set_graph_order_callback(client, graph_callback, arg);
+    return client->context->set_graph_order_callback(client, graph_callback, arg);
 }
 
 /*
@@ -229,7 +250,8 @@ int meta_jack_set_graph_order_callback (meta_jack_client_t *client, JackGraphOrd
   */
 int meta_jack_set_xrun_callback (meta_jack_client_t *client, JackXRunCallback xrun_callback, void *arg)
 {
-    return jack_set_xrun_callback(client, xrun_callback, arg);
+    //return jack_set_xrun_callback(client, xrun_callback, arg);
+    return client->context->set_xrun_callback(client, xrun_callback, arg);
 }
 
 /*
@@ -238,7 +260,8 @@ int meta_jack_set_xrun_callback (meta_jack_client_t *client, JackXRunCallback xr
   */
 int meta_jack_set_freewheel(meta_jack_client_t* client, int onoff)
 {
-    return jack_set_freewheel(client, onoff);
+    //return jack_set_freewheel(client, onoff);
+    return client->context->set_freewheel(onoff);
 }
 
 /*
@@ -247,7 +270,8 @@ int meta_jack_set_freewheel(meta_jack_client_t* client, int onoff)
   */
 int meta_jack_set_buffer_size (meta_jack_client_t *client, jack_nframes_t nframes)
 {
-    return jack_set_buffer_size(client, nframes);
+    //return jack_set_buffer_size(client, nframes);
+    return client->context->set_buffer_size(nframes);
 }
 
 /*
@@ -256,7 +280,8 @@ int meta_jack_set_buffer_size (meta_jack_client_t *client, jack_nframes_t nframe
   */
 jack_nframes_t meta_jack_get_sample_rate (meta_jack_client_t *client)
 {
-    return jack_get_sample_rate(client);
+    //return jack_get_sample_rate(client);
+    return client->context->get_sample_rate();
 }
 
 /*
@@ -265,7 +290,8 @@ jack_nframes_t meta_jack_get_sample_rate (meta_jack_client_t *client)
   */
 jack_nframes_t meta_jack_get_buffer_size (meta_jack_client_t *client)
 {
-    return jack_get_buffer_size(client);
+    //return jack_get_buffer_size(client);
+    return client->context->get_buffer_size();
 }
 
 /*
@@ -274,7 +300,8 @@ jack_nframes_t meta_jack_get_buffer_size (meta_jack_client_t *client)
   */
 float meta_jack_cpu_load (meta_jack_client_t *client)
 {
-    return jack_cpu_load(client);
+    //return jack_cpu_load(client);
+    return client->context->get_cpu_load();
 }
 
 /*
@@ -284,7 +311,8 @@ float meta_jack_cpu_load (meta_jack_client_t *client)
   */
 meta_jack_port_t * meta_jack_port_register (meta_jack_client_t *client, const char *port_name, const char *port_type, unsigned long flags, unsigned long buffer_size)
 {
-    return jack_port_register(client, port_name, port_type, flags, buffer_size);
+    //return jack_port_register(client, port_name, port_type, flags, buffer_size);
+    return client->context->port_register(client, port_name, port_type, flags, buffer_size);
 }
 
 /*
@@ -292,7 +320,8 @@ meta_jack_port_t * meta_jack_port_register (meta_jack_client_t *client, const ch
   */
 int meta_jack_port_unregister (meta_jack_client_t *client, meta_jack_port_t *port)
 {
-    return jack_port_unregister(client, port);
+    //return jack_port_unregister(client, port);
+    return client->context->port_unregister(port);
 }
 
 /*
@@ -301,7 +330,8 @@ int meta_jack_port_unregister (meta_jack_client_t *client, meta_jack_port_t *por
   */
 void * meta_jack_port_get_buffer (meta_jack_port_t *port, jack_nframes_t nframes)
 {
-    return jack_port_get_buffer(port, nframes);
+    //return jack_port_get_buffer(port, nframes);
+    return port->client->context->port_get_buffer(port, nframes);
 }
 
 /*
@@ -313,7 +343,8 @@ void * meta_jack_port_get_buffer (meta_jack_port_t *port, jack_nframes_t nframes
   */
 const char * meta_jack_port_name (const meta_jack_port_t *port)
 {
-    return jack_port_name(port);
+    //return jack_port_name(port);
+    return port->client->context->port_get_name(port).c_str();
 }
 
 /*
@@ -323,7 +354,8 @@ const char * meta_jack_port_name (const meta_jack_port_t *port)
   */
 const char * meta_jack_port_short_name (const meta_jack_port_t *port)
 {
-    return jack_port_short_name(port);
+    //return jack_port_short_name(port);
+    return port->client->context->port_get_short_name(port).c_str();
 }
 
 /*
@@ -332,7 +364,8 @@ const char * meta_jack_port_short_name (const meta_jack_port_t *port)
   */
 int meta_jack_port_flags (const meta_jack_port_t *port)
 {
-    return jack_port_flags(port);
+    //return jack_port_flags(port);
+    return port->client->context->port_get_flags(port);
 }
 
 /*
@@ -341,7 +374,8 @@ int meta_jack_port_flags (const meta_jack_port_t *port)
   */
 const char * meta_jack_port_type (const meta_jack_port_t *port)
 {
-    return jack_port_type(port);
+    //return jack_port_type(port);
+    return port->client->context->port_get_type(port).c_str();
 }
 
 /*
@@ -350,7 +384,8 @@ const char * meta_jack_port_type (const meta_jack_port_t *port)
   */
 jack_port_type_id_t meta_jack_port_type_id (const meta_jack_port_t *port)
 {
-    return jack_port_type_id(port);
+    //return jack_port_type_id(port);
+    return port->client->context->port_get_type_id(port);
 }
 
 /*
@@ -359,7 +394,8 @@ jack_port_type_id_t meta_jack_port_type_id (const meta_jack_port_t *port)
   */
 int meta_jack_port_is_mine (const meta_jack_client_t *client, const meta_jack_port_t *port)
 {
-    return jack_port_is_mine(client, port);
+    //return jack_port_is_mine(client, port);
+    return client->context->port_is_mine(client, port);
 }
 
 /*
@@ -368,7 +404,8 @@ int meta_jack_port_is_mine (const meta_jack_client_t *client, const meta_jack_po
   */
 int meta_jack_port_connected (const meta_jack_port_t *port)
 {
-    return jack_port_connected(port);
+    //return jack_port_connected(port);
+    return port->client->context->port_get_connection_count(port);
 }
 
 /*
@@ -377,7 +414,8 @@ int meta_jack_port_connected (const meta_jack_port_t *port)
   */
 int meta_jack_port_connected_to (const meta_jack_port_t *port, const char *port_name)
 {
-    return jack_port_connected_to(port, port_name);
+    //return jack_port_connected_to(port, port_name);
+    return port->client->context->port_is_connected_to(port, port_name);
 }
 
 /*
@@ -388,7 +426,8 @@ int meta_jack_port_connected_to (const meta_jack_port_t *port, const char *port_
   */
 const char ** meta_jack_port_get_connections (const meta_jack_port_t *port)
 {
-    return jack_port_get_connections(port);
+    //return jack_port_get_connections(port);
+    return port->client->context->port_get_connections(port);
 }
 
 /*
@@ -399,7 +438,8 @@ const char ** meta_jack_port_get_connections (const meta_jack_port_t *port)
   */
 const char ** meta_jack_port_get_all_connections (const meta_jack_client_t *client, const meta_jack_port_t *port)
 {
-    return jack_port_get_all_connections(client, port);
+    //return jack_port_get_all_connections(client, port);
+    return client->context->port_get_all_connections(port);
 }
 
 /*
@@ -407,7 +447,8 @@ const char ** meta_jack_port_get_all_connections (const meta_jack_client_t *clie
   */
 jack_nframes_t meta_jack_port_get_latency (meta_jack_port_t *port)
 {
-    return jack_port_get_latency(port);
+    //return jack_port_get_latency(port);
+    return port->client->context->port_get_latency(port);
 }
 
 /*
@@ -417,7 +458,8 @@ jack_nframes_t meta_jack_port_get_latency (meta_jack_port_t *port)
   */
 jack_nframes_t meta_jack_port_get_total_latency (meta_jack_client_t *client, meta_jack_port_t *port)
 {
-    return jack_port_get_total_latency(client, port);
+    //return jack_port_get_total_latency(client, port);
+    return client->context->port_get_total_latency(port);
 }
 
 /*
@@ -426,7 +468,7 @@ jack_nframes_t meta_jack_port_get_total_latency (meta_jack_client_t *client, met
   */
 void meta_jack_port_set_latency (meta_jack_port_t *port, jack_nframes_t nframes)
 {
-    jack_port_set_latency(port, nframes);
+    //jack_port_set_latency(port, nframes);
 }
 
 /*
@@ -435,7 +477,8 @@ void meta_jack_port_set_latency (meta_jack_port_t *port, jack_nframes_t nframes)
   */
 int meta_jack_recompute_total_latency (meta_jack_client_t *client, meta_jack_port_t* port)
 {
-    return jack_recompute_total_latency(client, port);
+    //return jack_recompute_total_latency(client, port);
+    return 1;
 }
 
 /*
@@ -444,7 +487,8 @@ int meta_jack_recompute_total_latency (meta_jack_client_t *client, meta_jack_por
   */
 int meta_jack_recompute_total_latencies (meta_jack_client_t *client)
 {
-    return jack_recompute_total_latencies(client);
+    //return jack_recompute_total_latencies(client);
+    return 1;
 }
 
 /*
@@ -454,7 +498,8 @@ int meta_jack_recompute_total_latencies (meta_jack_client_t *client)
   */
 int meta_jack_port_set_name (meta_jack_port_t *port, const char *port_name)
 {
-    return jack_port_set_name(port, port_name);
+    //return jack_port_set_name(port, port_name);
+    return port->client->context->port_set_name(port, port_name);
 }
 
 /*
@@ -464,7 +509,8 @@ int meta_jack_port_set_name (meta_jack_port_t *port, const char *port_name)
   */
 int meta_jack_port_set_alias (meta_jack_port_t *port, const char *alias)
 {
-    return jack_port_set_alias(port, alias);
+    //return jack_port_set_alias(port, alias);
+    return port->client->context->port_set_alias(port, alias);
 }
 
 /*
@@ -472,7 +518,8 @@ int meta_jack_port_set_alias (meta_jack_port_t *port, const char *alias)
   */
 int meta_jack_port_unset_alias (meta_jack_port_t *port, const char *alias)
 {
-    return jack_port_unset_alias(port, alias);
+    //return jack_port_unset_alias(port, alias);
+    return port->client->context->port_unset_alias(port, alias);
 }
 
 /*
@@ -480,7 +527,8 @@ int meta_jack_port_unset_alias (meta_jack_port_t *port, const char *alias)
   */
 int meta_jack_port_get_aliases (const meta_jack_port_t *port, char* const aliases[2])
 {
-    return jack_port_get_aliases(port, aliases);
+    //return jack_port_get_aliases(port, aliases);
+    return port->client->context->port_get_aliases(port, aliases);
 }
 
 /*
@@ -488,7 +536,8 @@ int meta_jack_port_get_aliases (const meta_jack_port_t *port, char* const aliase
   */
 int meta_jack_port_request_monitor (meta_jack_port_t *port, int onoff)
 {
-    return jack_port_request_monitor(port, onoff);
+    //return jack_port_request_monitor(port, onoff);
+    return 1;
 }
 
 /*
@@ -496,7 +545,8 @@ int meta_jack_port_request_monitor (meta_jack_port_t *port, int onoff)
   */
 int meta_jack_port_request_monitor_by_name (meta_jack_client_t *client, const char *port_name, int onoff)
 {
-    return jack_port_request_monitor_by_name(client, port_name, onoff);
+    //return jack_port_request_monitor_by_name(client, port_name, onoff);
+    return 1;
 }
 
 /*
@@ -504,7 +554,8 @@ int meta_jack_port_request_monitor_by_name (meta_jack_client_t *client, const ch
   */
 int meta_jack_port_ensure_monitor (meta_jack_port_t *port, int onoff)
 {
-    return jack_port_ensure_monitor(port, onoff);
+    //return jack_port_ensure_monitor(port, onoff);
+    return 1;
 }
 
 /*
@@ -512,7 +563,8 @@ int meta_jack_port_ensure_monitor (meta_jack_port_t *port, int onoff)
   */
 int meta_jack_port_monitoring_input (meta_jack_port_t *port)
 {
-    return jack_port_monitoring_input(port);
+    //return jack_port_monitoring_input(port);
+    return 0;
 }
 
 /*
@@ -521,10 +573,8 @@ int meta_jack_port_monitoring_input (meta_jack_port_t *port)
   */
 int meta_jack_connect (meta_jack_client_t *client, const char *source_port, const char *destination_port)
 {
-//    QString port1 = QString("meta_%1").arg(source_port);
-//    QString port2 = QString("meta_%1").arg(destination_port);
-//    return jack_connect(client, port1.toAscii().data(), port2.toAscii().data());
-    return jack_connect(client, source_port, destination_port);
+    //return jack_connect(client, source_port, destination_port);
+    return client->context->port_connect(source_port, destination_port);
 }
 
 /*
@@ -533,7 +583,8 @@ int meta_jack_connect (meta_jack_client_t *client, const char *source_port, cons
   */
 int meta_jack_disconnect (meta_jack_client_t *client, const char *source_port, const char *destination_port)
 {
-    return jack_disconnect(client, source_port, destination_port);
+    //return jack_disconnect(client, source_port, destination_port);
+    return client->context->port_disconnect(source_port, destination_port);
 }
 
 /*
@@ -542,19 +593,22 @@ int meta_jack_disconnect (meta_jack_client_t *client, const char *source_port, c
   */
 int meta_jack_port_disconnect (meta_jack_client_t *client, meta_jack_port_t *port)
 {
-    return jack_port_disconnect(client, port);
+    //return jack_port_disconnect(client, port);
+    return client->context->port_disconnect(client, port);
 }
 
 // Note: no need to reimplement this
 int meta_jack_port_name_size(void)
 {
-    return jack_port_name_size();
+    //return jack_port_name_size();
+    return MetaJackContext::instance->port_get_name_size();
 }
 
 // Note: no need to reimplement this
 int meta_jack_port_type_size(void)
 {
-    return jack_port_type_size();
+    //return jack_port_type_size();
+    return MetaJackContext::instance->port_get_type_size();
 }
 
 /*
@@ -566,7 +620,8 @@ int meta_jack_port_type_size(void)
   */
 const char ** meta_jack_get_ports (meta_jack_client_t *client, const char *port_name_pattern, const char *type_name_pattern, unsigned long flags)
 {
-    return jack_get_ports(client, port_name_pattern, type_name_pattern, flags);
+    //return jack_get_ports(client, port_name_pattern, type_name_pattern, flags);
+    return client->context->get_ports(port_name_pattern, type_name_pattern, flags);
 }
 
 /*
@@ -574,7 +629,8 @@ const char ** meta_jack_get_ports (meta_jack_client_t *client, const char *port_
   */
 meta_jack_port_t * meta_jack_port_by_name (meta_jack_client_t *client, const char *port_name)
 {
-    return jack_port_by_name(client, port_name);
+    //return jack_port_by_name(client, port_name);
+    return client->context->get_port_by_name(port_name);
 }
 
 /*
@@ -582,7 +638,8 @@ meta_jack_port_t * meta_jack_port_by_name (meta_jack_client_t *client, const cha
   */
 meta_jack_port_t * meta_jack_port_by_id (meta_jack_client_t *client, jack_port_id_t port_id)
 {
-    return jack_port_by_id(client, port_id);
+    //return jack_port_by_id(client, port_id);
+    return client->context->get_port_by_id(port_id);
 }
 
 /*
@@ -591,7 +648,8 @@ meta_jack_port_t * meta_jack_port_by_id (meta_jack_client_t *client, jack_port_i
   */
 jack_nframes_t meta_jack_frames_since_cycle_start (const meta_jack_client_t *client)
 {
-    return jack_frames_since_cycle_start(client);
+    //return jack_frames_since_cycle_start(client);
+    return client->context->get_frames_since_cycle_start();
 }
 
 /*
@@ -600,7 +658,8 @@ jack_nframes_t meta_jack_frames_since_cycle_start (const meta_jack_client_t *cli
   */
 jack_nframes_t meta_jack_frame_time (const meta_jack_client_t *client)
 {
-    return jack_frame_time(client);
+    //return jack_frame_time(client);
+    return client->context->get_frame_time();
 }
 
 /*
@@ -609,7 +668,8 @@ jack_nframes_t meta_jack_frame_time (const meta_jack_client_t *client)
   */
 jack_nframes_t meta_jack_last_frame_time (const meta_jack_client_t *client)
 {
-    return jack_last_frame_time(client);
+    //return jack_last_frame_time(client);
+    return client->context->get_last_frame_time();
 }
 
 /*
@@ -618,7 +678,8 @@ jack_nframes_t meta_jack_last_frame_time (const meta_jack_client_t *client)
   */
 jack_time_t meta_jack_frames_to_time(const meta_jack_client_t *client, jack_nframes_t nframes)
 {
-    return jack_frames_to_time(client, nframes);
+    //return jack_frames_to_time(client, nframes);
+    return client->context->convert_frames_to_time(nframes);
 }
 
 /*
@@ -627,13 +688,15 @@ jack_time_t meta_jack_frames_to_time(const meta_jack_client_t *client, jack_nfra
   */
 jack_nframes_t meta_jack_time_to_frames(const meta_jack_client_t *client, jack_time_t time)
 {
-    return jack_time_to_frames(client, time);
+    //return jack_time_to_frames(client, time);
+    return client->context->convert_time_to_frames(time);
 }
 
 // Note: probably no need to reimplement this
 jack_time_t meta_jack_get_time()
 {
-    return jack_get_time();
+    //return jack_get_time();
+    return MetaJackContext::instance->get_time();
 }
 
 /*
@@ -641,7 +704,7 @@ jack_time_t meta_jack_get_time()
   */
 void meta_jack_set_error_function (void (*func)(const char *))
 {
-    jack_set_error_function(func);
+    //jack_set_error_function(func);
 }
 
 /*
@@ -649,7 +712,7 @@ void meta_jack_set_error_function (void (*func)(const char *))
   */
 void meta_jack_set_info_function (void (*func)(const char *))
 {
-    jack_set_info_function(func);
+    //jack_set_info_function(func);
 }
 
 /*
@@ -661,7 +724,8 @@ void meta_jack_set_info_function (void (*func)(const char *))
   */
 void meta_jack_free(void* ptr)
 {
-    jack_free(ptr);
+    //jack_free(ptr);
+    MetaJackContext::instance->free(ptr);
 }
 
 #ifdef __cplusplus
