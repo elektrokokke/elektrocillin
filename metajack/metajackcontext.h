@@ -35,10 +35,10 @@
   */
 
 class MetaJackClient;
-class MetaJackPort;
 
 struct MetaJackGraphEvent {
     enum {
+        SET_PROCESS_CALLBACK,
         ACTIVATE_CLIENT,
         DEACTIVATE_CLIENT,
         REGISTER_PORT,
@@ -116,6 +116,8 @@ public:
     static jack_midi_data_t*   midi_event_reserve(void *port_buffer, jack_nframes_t  time, size_t data_size);
     static int                 midi_event_write(void *port_buffer, jack_nframes_t time, const jack_midi_data_t *data, size_t data_size);
     static jack_nframes_t      midi_get_lost_event_count(void *port_buffer);
+
+    static size_t getClientNameSize();
 
     jack_port_id_t createUniquePortId();
 

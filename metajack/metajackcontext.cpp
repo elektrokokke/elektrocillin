@@ -33,11 +33,6 @@ MetaJackClient::~MetaJackClient()
     }
 }
 
-size_t MetaJackClient::getNameSize()
-{
-    return jack_client_name_size();
-}
-
 const std::string & MetaJackClient::getName() const
 {
     return name;
@@ -497,8 +492,8 @@ void MetaJackPort::mergeConnectedBuffers()
     }
 }
 
-MetaJackContext * MetaJackContext::instance = &MetaJackContext::instance_;
-MetaJackContext MetaJackContext::instance_("meta_jack");
+//MetaJackContext * MetaJackContext::instance = &MetaJackContext::instance_;
+//MetaJackContext MetaJackContext::instance_("meta_jack");
 
 MetaJackContext::MetaJackContext(const std::string &name) :
     wrapperClient(0),
@@ -561,7 +556,7 @@ MetaJackClient * MetaJackContext::openClient(const std::string &name, jack_optio
         return 0;
     }
     // test if the name is not too long:
-    if (name.length() > (size_t)MetaJackClient::getNameSize()) {
+    if (name.length() > (size_t)getClientNameSize()) {
         return 0;
     }
     // test if the requested name is already taken:
@@ -921,6 +916,11 @@ jack_nframes_t MetaJackContext::midi_get_lost_event_count(void *port_buffer)
     return head->lostMidiEvents;
 }
 
+size_t MetaJackContext::getClientNameSize()
+{
+    return jack_client_name_size();
+}
+
 jack_port_id_t MetaJackContext::createUniquePortId()
 {
     return uniquePortId++;
@@ -1113,7 +1113,7 @@ int MetaJackContext::process(jack_nframes_t nframes)
     }
     // wake the other thread(s):
     waitCondition.wakeAll();
-    // TODO: evaluate the graph structure and call all process callbacks registered by internal clients
+    // evaluate the graph structure and call all process callbacks registered by internal clients:
     std::set<MetaJackClient*> unprocessedClients = activeClients;
     bool success = true;
     for (; success && unprocessedClients.size(); ) {
