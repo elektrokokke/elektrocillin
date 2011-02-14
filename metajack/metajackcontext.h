@@ -37,10 +37,11 @@
 class MetaJackClient;
 class MetaJackPort;
 
-struct MetaJackContextEvent {
+struct MetaJackGraphEvent {
     enum {
         ACTIVATE_CLIENT,
         DEACTIVATE_CLIENT,
+        REGISTER_PORT,
         UNREGISTER_PORT,
         CONNECT_PORTS,
         DISCONNECT_PORTS
@@ -63,12 +64,15 @@ public:
     MetaJackContext(const std::string &name);
     ~MetaJackContext();
 
-    // client-related methods:
-    MetaJackClient * client_open(const std::string &name, jack_options_t options);
-    void addClient(MetaJackClient *client);
-    void removeClient(MetaJackClient *client);
-    void addPort(MetaJackPort *port);
-    void removePort(MetaJackPort *port);
+    bool isActive() const;
+
+    // client- and port-related methods:
+    MetaJackClient * openClient(const std::string &name, jack_options_t options);
+    int connectPorts(const std::string &source_port, const std::string &destination_port);
+    int disconnectPorts(const std::string &source_port, const std::string &destination_port);
+    const char ** getPortsbyPattern(const std::string &port_name_pattern, const std::string &type_name_pattern, unsigned long flags);
+    MetaJackPort * getPortByName(const std::string &port_name) const;
+    MetaJackPort * getPortById(jack_port_id_t port_id);
 
     int get_pid();
     pthread_t get_thread_id();
@@ -88,25 +92,13 @@ public:
     int     set_graph_order_callback (MetaJackClient *, JackGraphOrderCallback graph_callback, void *);
     int     set_xrun_callback (MetaJackClient *, JackXRunCallback xrun_callback, void *arg);
 
+    // server-related methods:
     int set_freewheel(int onoff);
     int set_buffer_size(jack_nframes_t nframes);
     jack_nframes_t get_sample_rate();
     jack_nframes_t get_buffer_size();
     float get_cpu_load();
 
-    // port-related methods:
-    void *  port_get_buffer(MetaJackPort *port, jack_nframes_t);
-    const std::string & port_get_name(const MetaJackPort *port);
-    const std::string & port_get_short_name(const MetaJackPort *port);
-    int     port_get_flags(const MetaJackPort *port);
-    const std::string & port_get_type(const MetaJackPort *port);
-    const char ** port_get_all_connections(const MetaJackPort *port);
-    int     port_connect(const std::string &source_port, const std::string &destination_port);
-    int     port_disconnect(const std::string &source_port, const std::string &destination_port);
-
-    const char ** get_ports(const std::string &port_name_pattern, const std::string &type_name_pattern, unsigned long flags);
-    MetaJackPort * get_port_by_name(const std::string &port_name) const;
-    MetaJackPort * get_port_by_id(jack_port_id_t port_id);
 
     // time handling methods:
     jack_nframes_t  get_frames_since_cycle_start() const;
@@ -114,8 +106,9 @@ public:
     jack_nframes_t  get_last_frame_time() const;
     jack_time_t     convert_frames_to_time(jack_nframes_t nframes) const;
     jack_nframes_t  convert_time_to_frames(jack_time_t time) const;
-    jack_time_t     get_time();
+    static jack_time_t get_time();
 
+    // MIDI-related methods:
     static jack_nframes_t      midi_get_event_count(void* port_buffer);
     static int                 midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index);
     static void                midi_clear_buffer(void *port_buffer);
@@ -129,22 +122,21 @@ public:
     // for all methods returning const char **:
     void free(void* ptr);
 
-    // invoke callbacks:
-    void invokeJackClientRegistrationCallbacks(const std::string &clientName, bool registered);
-    void invokeJackPortRegistrationCallbacks(jack_port_id_t id, bool registered);
-    void invokeJackPortRenameCallbacks(jack_port_id_t id, const std::string &oldName, const std::string &newName);
-    void invokeJackPortConnectCallbacks(jack_port_id_t a, jack_port_id_t b, bool connected);
-
-    // signal graph change:
-    void sendGraphChangeEvent(const MetaJackContextEvent &event);
+    // methods to signal changes in the process graph:
+    void registeredClient(MetaJackClient *client);
+    void unregisteredClient(MetaJackClient *client);
+    void activatedClient(MetaJackClient *client);
+    void deactivatedClient(MetaJackClient *client);
+    void registeredPort(MetaJackPort *port);
+    void unregisteredPort(MetaJackPort *port);
+    void renamedPort(const std::string &oldFullName, const std::string &newFullName);
+    void connectedPorts(MetaJackPort *a, MetaJackPort *b);
+    void disconnectedPorts(MetaJackPort *a, MetaJackPort *b);
 
 private:
-    std::string name;
-    jack_client_t *jackClient;
-    jack_port_t *audioIn, *audioOut, *midiIn, *midiOut;
-    bool active;
-    jack_port_id_t currentPortId;
-    MetaJackClient *dummyInputClient, *dummyOutputClient;
+    jack_client_t *wrapperClient;
+    jack_port_t *wrapperAudioInputPort, *wrapperAudioOutputPort, *wrapperMidiInputPort, *wrapperMidiOutputPort;
+    jack_port_id_t uniquePortId;
     std::set<MetaJackClient*> metaClients;
     std::map<std::string, MetaJackClient*> metaClientsByName;
     std::map<jack_port_id_t, MetaJackPort*> metaPortsById;
@@ -161,16 +153,21 @@ private:
     std::map<MetaJackClient*, std::pair<JackPortRenameCallback, void*> > portRenameCallbacks;
     std::map<MetaJackClient*, std::pair<JackGraphOrderCallback, void*> > graphOrderCallbacks;
     std::map<MetaJackClient*, std::pair<JackXRunCallback, void*> > xRunCallbacks;
-
-    std::set<MetaJackClient*> metaClientsForProcess;
-    JackRingBuffer<MetaJackContextEvent> graphChangesRingBuffer;
+    std::set<MetaJackClient*> activeClients;
+    JackRingBuffer<MetaJackGraphEvent> graphChangesRingBuffer;
     QWaitCondition waitCondition;
     QMutex waitMutex;
 
+    // invoke callbacks:
+    void invokeJackClientRegistrationCallbacks(const std::string &clientName, bool registered);
+    void invokeJackPortRegistrationCallbacks(jack_port_id_t id, bool registered);
+    void invokeJackPortRenameCallbacks(jack_port_id_t id, const std::string &oldName, const std::string &newName);
+    void invokeJackPortConnectCallbacks(jack_port_id_t a, jack_port_id_t b, bool connected);
+    // signal graph change:
+    void sendGraphChangeEvent(const MetaJackGraphEvent &event);
+
     int process(jack_nframes_t nframes);
     static int process(jack_nframes_t nframes, void *arg);
-    static int processDummyInputClient(jack_nframes_t nframes, void *arg);
-    static int processDummyOutputClient(jack_nframes_t nframes, void *arg);
 };
 
 class MetaJackClient {
@@ -194,6 +191,7 @@ public:
 
     bool isActive() const;
     MetaJackClient * getTwin();
+    void deleteTwin();
 
     void addPort(MetaJackPort *port);
     void removePort(MetaJackPort *port);
@@ -211,6 +209,26 @@ private:
     std::set<MetaJackPort*> ports;
     MetaJackClient *twin;
     bool processThread;
+};
+
+class MetaJackDummyInputClient : public MetaJackClient {
+public:
+    MetaJackDummyInputClient(MetaJackContext *context, jack_port_t *wrapperAudioInputPort, jack_port_t *wrapperMidiInputPort);
+
+private:
+    MetaJackPort *audioOutputPort, *midiOutputPort;
+    jack_port_t *wrapperAudioInputPort, *wrapperMidiInputPort;
+    static int process(jack_nframes_t nframes, void *arg);
+};
+
+class MetaJackDummyOutputClient : public MetaJackClient {
+public:
+    MetaJackDummyOutputClient(MetaJackContext *context, jack_port_t *wrapperAudioOutputPort, jack_port_t *wrapperMidiOutputPort);
+
+private:
+    MetaJackPort *audioInputPort, *midiInputPort;
+    jack_port_t *wrapperAudioOutputPort, *wrapperMidiOutputPort;
+    static int process(jack_nframes_t nframes, void *arg);
 };
 
 class MetaJackPort {
@@ -248,6 +266,7 @@ public:
     bool residesInProcessThread() const;
 
     MetaJackPort * getTwin();
+    void deleteTwin();
 
     void clearBuffer();
     void mergeConnectedBuffers();

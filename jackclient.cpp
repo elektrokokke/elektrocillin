@@ -107,9 +107,9 @@ QStringList JackClient::getClientPorts(const QString &clientName, unsigned long 
     return portList;
 }
 
-QStringList JackClient::getAllPorts(unsigned long)
+QStringList JackClient::getAllPorts(unsigned long flags)
 {
-    return getClientPorts(".*");
+    return getClientPorts(".*", flags);
 }
 
 QStringList JackClient::getAllConnectedPorts(const QString &fullPortName)

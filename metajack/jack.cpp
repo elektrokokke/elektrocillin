@@ -37,7 +37,7 @@ const char * meta_jack_get_version_string()
 MetaJackClient * meta_jack_client_open (const char *client_name, jack_options_t options, jack_status_t *, ...)
 {
     //return jack_client_open(client_name, options, status);
-    return MetaJackContext::instance->client_open(client_name, options);
+    return MetaJackContext::instance->openClient(client_name, options);
 }
 
 int meta_jack_client_close (MetaJackClient *client)
@@ -519,7 +519,7 @@ int meta_jack_port_monitoring_input (MetaJackPort *)
   */
 int meta_jack_connect (MetaJackClient *client, const char *source_port, const char *destination_port)
 {
-    return client->getContext()->port_connect(source_port, destination_port);
+    return client->getContext()->connectPorts(source_port, destination_port);
 }
 
 /*
@@ -528,7 +528,7 @@ int meta_jack_connect (MetaJackClient *client, const char *source_port, const ch
   */
 int meta_jack_disconnect (MetaJackClient *client, const char *source_port, const char *destination_port)
 {
-    return client->getContext()->port_disconnect(source_port, destination_port);
+    return client->getContext()->disconnectPorts(source_port, destination_port);
 }
 
 /*
@@ -565,7 +565,7 @@ const char ** meta_jack_get_ports (MetaJackClient *client, const char *port_name
     if (client) {
         std::string port_name_pattern_string = (port_name_pattern ? port_name_pattern : "");
         std::string type_name_pattern_string = (type_name_pattern ? type_name_pattern : "");
-        return client->getContext()->get_ports(port_name_pattern_string, type_name_pattern_string, flags);
+        return client->getContext()->getPortsbyPattern(port_name_pattern_string, type_name_pattern_string, flags);
     } else {
         return 0;
     }
@@ -576,7 +576,7 @@ const char ** meta_jack_get_ports (MetaJackClient *client, const char *port_name
   */
 MetaJackPort * meta_jack_port_by_name (MetaJackClient *client, const char *port_name)
 {
-    return client->getContext()->get_port_by_name(port_name);
+    return client->getContext()->getPortByName(port_name);
 }
 
 /*
@@ -584,7 +584,7 @@ MetaJackPort * meta_jack_port_by_name (MetaJackClient *client, const char *port_
   */
 MetaJackPort * meta_jack_port_by_id (MetaJackClient *client, jack_port_id_t port_id)
 {
-    return client->getContext()->get_port_by_id(port_id);
+    return client->getContext()->getPortById(port_id);
 }
 
 /*
