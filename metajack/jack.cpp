@@ -1,15 +1,12 @@
 #include <jack/jack.h>
 #include <stdarg.h>
 #include <cassert>
-#include "metajackcontextnew.h"
+#include "metajackcontext.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-//typedef struct _jack_port MetaJackPortNew;
-//typedef struct _jack_client MetaJackClientNew;
 
 /*
   All notes regard what is to be done to make meta_jack work,

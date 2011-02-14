@@ -66,10 +66,9 @@ SOURCES += main.cpp\
     multiplyprocessor.cpp \
     metajack/jack.cpp \
     metajack/midiport.cpp \
-    metajack/metajackcontext.cpp \
-    metajack/metajackcontextnew.cpp \
     metajack/metajackclient.cpp \
-    metajack/metajackport.cpp
+    metajack/metajackport.cpp \
+    metajack/metajackcontext.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -132,10 +131,9 @@ HEADERS  += mainwindow.h \
     metajack/jack.h \
     metajack/midiport.h \
     metajack/types.h \
-    metajack/metajackcontext.h \
-    metajack/metajackcontextnew.h \
     metajack/metajackclient.h \
-    metajack/metajackport.h
+    metajack/metajackport.h \
+    metajack/metajackcontext.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

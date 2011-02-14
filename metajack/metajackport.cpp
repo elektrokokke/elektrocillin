@@ -1,6 +1,6 @@
 #include "metajackport.h"
 #include "metajackclient.h"
-#include "metajackcontextnew.h"
+#include "metajackcontext.h"
 #include <sstream>
 #include <cassert>
 #include <list>

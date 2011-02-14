@@ -1,6 +1,6 @@
 #include "metajackclient.h"
 #include "metajackport.h"
-#include "metajackcontextnew.h"
+#include "metajackcontext.h"
 
 MetaJackClientBase::MetaJackClientBase(const std::string &name_) :
     name(name_)
