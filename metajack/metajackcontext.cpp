@@ -228,7 +228,7 @@ MetaJackPort::~MetaJackPort()
     // disconnect the port:
     disconnect();
     client->removePort(this);
-    if (!residesInProcessThread()) {
+    if (!residesInProcessThread() && isActive()) {
         // tell the process thread that the port is unregistered:
         MetaJackContextEvent event;
         event.type = MetaJackContextEvent::UNREGISTER_PORT;
@@ -500,7 +500,8 @@ void MetaJackPort::mergeConnectedBuffers()
     }
 }
 
-MetaJackContext * MetaJackContext::instance = new MetaJackContext("meta_jack");
+MetaJackContext * MetaJackContext::instance = &MetaJackContext::instance_;
+MetaJackContext MetaJackContext::instance_("meta_jack");
 
 MetaJackContext::MetaJackContext(const std::string &name_) :
     name(name_),
@@ -549,8 +550,8 @@ MetaJackContext::~MetaJackContext()
 {
     if (jackClient) {
         // first close all clients:
-        for (std::set<MetaJackClient*>::iterator i = metaClients.begin(); i != metaClients.end(); i++) {
-            MetaJackClient *client = *i;
+        for (; metaClients.size(); ) {
+            MetaJackClient *client = *metaClients.begin();
             delete client;
         }
         // then shutdown the wrapper client:

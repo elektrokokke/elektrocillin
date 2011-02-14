@@ -58,6 +58,7 @@ class MetaJackContext
 {
 public:
     static MetaJackContext *instance;
+    static MetaJackContext instance_;
 
     MetaJackContext(const std::string &name);
     ~MetaJackContext();

@@ -154,7 +154,7 @@ void meta_jack_on_info_shutdown (MetaJackClient *client, JackInfoShutdownCallbac
   */
 int meta_jack_set_process_callback (MetaJackClient *client, JackProcessCallback process_callback, void *arg)
 {
-    return client->setProcessCallback(process_callback, arg);
+    return (client->setProcessCallback(process_callback, arg) ? 0 : 1);
 }
 
 /*
@@ -293,7 +293,7 @@ MetaJackPort * meta_jack_port_register (MetaJackClient *client, const char *port
 /*
   Note: remove all connections from the port and free the buffer associated with the port.
   */
-int meta_jack_port_unregister (MetaJackClient *client, MetaJackPort *port)
+int meta_jack_port_unregister (MetaJackClient *, MetaJackPort *port)
 {
     assert(port);
     delete port;
@@ -393,7 +393,7 @@ const char ** meta_jack_port_get_connections (const MetaJackPort *port)
   Also: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-const char ** meta_jack_port_get_all_connections (const MetaJackClient *client, const MetaJackPort *port)
+const char ** meta_jack_port_get_all_connections (const MetaJackClient *, const MetaJackPort *port)
 {
     return port->getConnections();
 }
@@ -401,7 +401,7 @@ const char ** meta_jack_port_get_all_connections (const MetaJackClient *client, 
 /*
   Note: probably just return 0 here?
   */
-jack_nframes_t meta_jack_port_get_latency (MetaJackPort *port)
+jack_nframes_t meta_jack_port_get_latency (MetaJackPort *)
 {
    return 0;
 }
@@ -411,7 +411,7 @@ jack_nframes_t meta_jack_port_get_latency (MetaJackPort *port)
   a meta_jack_context will have the JackPortIsTerminal flag set.
   Just return 0 or pass on to the real JACK server?
   */
-jack_nframes_t meta_jack_port_get_total_latency (MetaJackClient *client, MetaJackPort *port)
+jack_nframes_t meta_jack_port_get_total_latency (MetaJackClient *, MetaJackPort *)
 {
     return 0;
 }
@@ -460,7 +460,7 @@ int meta_jack_port_set_name (MetaJackPort *port, const char *port_name)
   Assure that each port has two aliases at most. Also assure that
   no two ports have the same alias.
   */
-int meta_jack_port_set_alias (MetaJackPort *port, const char *alias)
+int meta_jack_port_set_alias (MetaJackPort *, const char *)
 {
     return 1;
 }
@@ -468,7 +468,7 @@ int meta_jack_port_set_alias (MetaJackPort *port, const char *alias)
 /*
   Note: probably have a map of such aliases in a meta_jack_context.
   */
-int meta_jack_port_unset_alias (MetaJackPort *port, const char *alias)
+int meta_jack_port_unset_alias (MetaJackPort *, const char *)
 {
     return 1;
 }
@@ -476,7 +476,7 @@ int meta_jack_port_unset_alias (MetaJackPort *port, const char *alias)
 /*
   Note: probably have a map of such aliases in a meta_jack_context.
   */
-int meta_jack_port_get_aliases (const MetaJackPort *port, char* const aliases[2])
+int meta_jack_port_get_aliases (const MetaJackPort *, char* const [])
 {
     return 0;
 }
@@ -535,7 +535,7 @@ int meta_jack_disconnect (MetaJackClient *client, const char *source_port, const
   Note: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-int meta_jack_port_disconnect (MetaJackClient *client, MetaJackPort *port)
+int meta_jack_port_disconnect (MetaJackClient *, MetaJackPort *)
 {
     return 1;
 }
