@@ -156,9 +156,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // port connection test setup:
     QStringList connectionList;
-    connectionList.append("system_in:capture_midi::Oscillator:Midi in");
-    connectionList.append("system_in:capture_midi::ADSR envelope:Midi in");
-    connectionList.append("system_in:capture_midi::Moog filter:Midi in");
+    connectionList.append("system_in:midi::Oscillator:Midi in");
+    connectionList.append("system_in:midi::ADSR envelope:Midi in");
+    connectionList.append("system_in:midi::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Oscillator:Midi in");
     connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Moog filter:Midi in");
@@ -168,7 +168,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("Multiplier:Product out::Moog filter:Audio in");
     connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
     connectionList.append("LFO 2:Audio out::Oscillator:Pulse width modulation");
-    connectionList.append("Moog filter:Audio out::system_out:playback_audio");
+    connectionList.append("Moog filter:Audio out::system_out:audio");
     connectionList.append("Moog filter:Audio out::Record:Audio in");
     nullClient.restoreConnections(connectionList);
     // end port connection test setup

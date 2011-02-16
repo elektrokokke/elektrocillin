@@ -322,7 +322,7 @@ int meta_jack_port_unregister (MetaJackClient *client, MetaJackPort *port)
   */
 void * meta_jack_port_get_buffer (MetaJackPort *port, jack_nframes_t nframes)
 {
-    return port->getProcessPort()->getBuffer(nframes);
+    return MetaJackContext::instance->getPortBuffer(port, nframes);
 }
 
 /*

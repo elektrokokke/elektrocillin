@@ -3,6 +3,7 @@
 
 #include <string>
 #include <set>
+#include <map>
 #include <jack/jack.h>
 
 class MetaJackPortBase;
@@ -46,23 +47,17 @@ private:
 
 class MetaJackContext;
 
-class MetaJackDummyInputClient : public MetaJackClient {
+class MetaJackInterfaceClient : public MetaJackClient {
 public:
-    MetaJackDummyInputClient(MetaJackContext *context, jack_port_t *wrapperAudioInputPort, jack_port_t *wrapperMidiInputPort);
+    MetaJackInterfaceClient(MetaJackContext *context, int flags);
 private:
-    MetaJackPort *audioOutputPort, *midiOutputPort;
-    jack_port_t *wrapperAudioInputPort, *wrapperMidiInputPort;
+    MetaJackContext *context;
+    std::map<MetaJackPort*, jack_port_t*> connectedPorts;
+    std::set<MetaJackPort*> freePorts;
+    int wrapperSuffix, audioSuffix, midiSuffix;
     static int process(jack_nframes_t nframes, void *arg);
+    static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
+    std::string createPortName(const std::string &shortName, int suffix);
 };
-
-class MetaJackDummyOutputClient : public MetaJackClient {
-public:
-    MetaJackDummyOutputClient(MetaJackContext *context, jack_port_t *wrapperAudioOutputPort, jack_port_t *wrapperMidiOutputPort);
-private:
-    MetaJackPort *audioInputPort, *midiInputPort;
-    jack_port_t *wrapperAudioOutputPort, *wrapperMidiOutputPort;
-    static int process(jack_nframes_t nframes, void *arg);
-};
-
 
 #endif // METAJACKCLIENT_H

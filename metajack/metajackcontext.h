@@ -22,6 +22,8 @@ public:
     MetaJackContext(const std::string &name);
     ~MetaJackContext();
 
+    jack_port_t * createWrapperPort(const std::string &shortName, const std::string &type, unsigned long flags);
+
     bool isActive() const;
 
     static size_t getClientNameSize();
@@ -48,6 +50,7 @@ public:
     const char ** getPortsByPattern(const std::string &port_name_pattern, const std::string &type_name_pattern, unsigned long flags);
     MetaJackPort * getPortByName(const std::string &name) const;
     MetaJackPort * getPortById(jack_port_id_t id);
+    void * getPortBuffer(MetaJackPort *port, jack_nframes_t nframes);
 
     int get_pid();
     pthread_t get_thread_id();
@@ -110,6 +113,7 @@ private:
         } type;
         MetaJackClientProcess *client;
         MetaJackPortProcess *port, *connectedPort;
+        MetaJackPort *nonProcessPort;
         JackProcessCallback processCallback;
         void * processCallbackArgument;
         std::string shortName;
@@ -121,6 +125,7 @@ private:
     std::map<std::string, MetaJackClient*> clients;
     std::map<std::string, MetaJackPort*> portsByName;
     std::map<jack_port_id_t, MetaJackPort*> portsById;
+    std::map<MetaJackPort*,MetaJackPortProcess*> processPorts;
     std::set<MetaJackClientProcess*> activeClients;
     JackRingBuffer<MetaJackGraphEvent> graphChangesRingBuffer;
     bool shutdown;
@@ -129,8 +134,8 @@ private:
     void setProcessCallback(MetaJackClientProcess *client, JackProcessCallback processCallback, void *processCallbackArgument);
     void activateClient(MetaJackClientProcess *client);
     void deactivateClient(MetaJackClientProcess *client);
-    void registerPort(MetaJackClientProcess *client, MetaJackPortProcess *port);
-    void unregisterPort(MetaJackPortProcess *port);
+    void registerPort(MetaJackClientProcess *client, MetaJackPortProcess *port, MetaJackPort *nonProcessPort);
+    void unregisterPort(MetaJackPortProcess *port, MetaJackPort *nonProcessPort);
     void renamePort(MetaJackPortProcess *port, const std::string &shortName);
     void connectPorts(MetaJackPortProcess *source, MetaJackPortProcess *dest);
     void disconnectPorts(MetaJackPortProcess *source, MetaJackPortProcess *dest);

@@ -1,6 +1,8 @@
 #include "metajackclient.h"
 #include "metajackport.h"
 #include "metajackcontext.h"
+#include <sstream>
+#include <cassert>
 
 MetaJackClientBase::MetaJackClientBase(const std::string &name_) :
     name(name_)
@@ -110,70 +112,102 @@ MetaJackClientProcess * MetaJackClient::getProcessClient()
     return twin;
 }
 
-MetaJackDummyInputClient::MetaJackDummyInputClient(MetaJackContext *context, jack_port_t *wrapperAudioInputPort_, jack_port_t *wrapperMidiInputPort_) :
-    MetaJackClient("system_in"),
-    wrapperAudioInputPort(wrapperAudioInputPort_),
-    wrapperMidiInputPort(wrapperMidiInputPort_)
+MetaJackInterfaceClient::MetaJackInterfaceClient(MetaJackContext *context_, int flags) :
+    MetaJackClient((flags & JackPortIsOutput) ? "system_in" : "system_out"),
+    context(context_),
+    wrapperSuffix(1),
+    audioSuffix(2),
+    midiSuffix(2)
 {
-    audioOutputPort = context->registerPort(this, "capture_audio", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-    midiOutputPort = context->registerPort(this, "capture_midi", JACK_DEFAULT_MIDI_TYPE, JackPortIsOutput, 0);
+    assert((flags & JackPortIsInput) || (flags & JackPortIsOutput));
+    freePorts.insert(context->registerPort(this, "audio", JACK_DEFAULT_AUDIO_TYPE, flags, 0));
+    freePorts.insert(context->registerPort(this, "midi", JACK_DEFAULT_MIDI_TYPE, flags, 0));
     context->setProcessCallback(this, process, this);
-
+    context->portConnectCallbackHandler[this] = std::make_pair(portConnectCallback, this);
 }
 
-MetaJackDummyOutputClient::MetaJackDummyOutputClient(MetaJackContext *context, jack_port_t *wrapperAudioOutputPort_, jack_port_t *wrapperMidiOutputPort_) :
-    MetaJackClient("system_out"),
-    wrapperAudioOutputPort(wrapperAudioOutputPort_),
-    wrapperMidiOutputPort(wrapperMidiOutputPort_)
-{
-    audioInputPort = context->registerPort(this, "playback_audio", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-    midiInputPort = context->registerPort(this, "playback_midi", JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-    context->setProcessCallback(this, process, this);
-
-}
-
-int MetaJackDummyInputClient::process(jack_nframes_t nframes, void *arg)
+int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
 {
     // the purpose of the dummy input client is to make the wrapper client inputs available to clients inside the wrapper
-    MetaJackDummyInputClient *me = (MetaJackDummyInputClient*)arg;
-   // copy audio:
-    jack_default_audio_sample_t *wrapperAudioInputBuffer = (jack_default_audio_sample_t*)jack_port_get_buffer(me->wrapperAudioInputPort, nframes);
-    jack_default_audio_sample_t *audioOutputBuffer = (jack_default_audio_sample_t*)me->audioOutputPort->getProcessPort()->getBuffer(nframes);
-    for (jack_nframes_t i = 0; i < nframes; i++) {
-        audioOutputBuffer[i] = wrapperAudioInputBuffer[i];
-    }
-    // copy midi:
-    void *wrapperMidiInputBuffer = jack_port_get_buffer(me->wrapperMidiInputPort, nframes);
-    void *midiOutputBuffer = me->midiOutputPort->getProcessPort()->getBuffer(nframes);
-    MetaJackContext::midi_clear_buffer(midiOutputBuffer);
-    jack_nframes_t midiEventCount = jack_midi_get_event_count(wrapperMidiInputBuffer);
-    for (jack_nframes_t i = 0; i < midiEventCount; i++) {
-        jack_midi_event_t event;
-        jack_midi_event_get(&event, wrapperMidiInputBuffer, i);
-        MetaJackContext::midi_event_write(midiOutputBuffer, event.time, event.buffer, event.size);
+    MetaJackInterfaceClient *me = (MetaJackInterfaceClient*)arg;
+    for (std::map<MetaJackPort*, jack_port_t*>::iterator i = me->connectedPorts.begin(); i != me->connectedPorts.end(); i++) {
+        // for each connected port, copy from the wrapper client's port to the corresponding internal port:
+        MetaJackPort *port = i->first;
+        jack_port_t *wrapperPort = i->second;
+        if (port && wrapperPort) {
+            if (port->getType() == JACK_DEFAULT_AUDIO_TYPE) {
+                // copy audio:
+                jack_default_audio_sample_t *wrapperAudioBuffer = (jack_default_audio_sample_t*)jack_port_get_buffer(wrapperPort, nframes);
+                jack_default_audio_sample_t *audioBuffer = (jack_default_audio_sample_t*)me->context->getPortBuffer(port, nframes);
+                if (port->isInput()) {
+                    for (jack_nframes_t i = 0; i < nframes; i++) {
+                        wrapperAudioBuffer[i] = audioBuffer[i];
+                    }
+                } else {
+                    for (jack_nframes_t i = 0; i < nframes; i++) {
+                        audioBuffer[i] = wrapperAudioBuffer[i];
+                    }
+                }
+            } else if (port->getType() == JACK_DEFAULT_MIDI_TYPE) {
+                // copy midi:
+                void *wrapperMidiBuffer = jack_port_get_buffer(wrapperPort, nframes);
+                void *midiBuffer = me->context->getPortBuffer(port, nframes);
+                if (port->isInput()) {
+                    jack_midi_clear_buffer(wrapperMidiBuffer);
+                    jack_nframes_t midiEventCount = MetaJackContext::midi_get_event_count(midiBuffer);
+                    for (jack_nframes_t i = 0; i < midiEventCount; i++) {
+                        jack_midi_event_t event;
+                        MetaJackContext::midi_event_get(&event, midiBuffer, i);
+                        jack_midi_event_write(wrapperMidiBuffer, event.time, event.buffer, event.size);
+                    }
+                } else {
+                    MetaJackContext::midi_clear_buffer(midiBuffer);
+                    jack_nframes_t midiEventCount = jack_midi_get_event_count(wrapperMidiBuffer);
+                    for (jack_nframes_t i = 0; i < midiEventCount; i++) {
+                        jack_midi_event_t event;
+                        jack_midi_event_get(&event, wrapperMidiBuffer, i);
+                        MetaJackContext::midi_event_write(midiBuffer, event.time, event.buffer, event.size);
+                    }
+                }
+            }
+        }
     }
     return 0;
 }
 
-int MetaJackDummyOutputClient::process(jack_nframes_t nframes, void *arg)
+void MetaJackInterfaceClient::portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg)
 {
-    // the purpose of the dummy output client is to make the wrapper client outputs available to clients inside the wrapper
-    MetaJackDummyOutputClient *me = (MetaJackDummyOutputClient*)arg;
-    // copy audio:
-    jack_default_audio_sample_t *audioInputBuffer = (jack_default_audio_sample_t*)me->audioInputPort->getProcessPort()->getBuffer(nframes);
-    jack_default_audio_sample_t *wrapperAudioOutputBuffer = (jack_default_audio_sample_t*)jack_port_get_buffer(me->wrapperAudioOutputPort, nframes);
-    for (jack_nframes_t i = 0; i < nframes; i++) {
-        wrapperAudioOutputBuffer[i] = audioInputBuffer[i];
+    MetaJackInterfaceClient *me = (MetaJackInterfaceClient*)arg;
+    MetaJackPort *portA = me->context->getPortById(a);
+    MetaJackPort *portB = me->context->getPortById(b);
+    if (connect) {
+        MetaJackPort *freePort = 0;
+        MetaJackPort *otherPort = 0;
+        if (me->freePorts.find(portA) != me->freePorts.end()) {
+            freePort = portA;
+            otherPort = portB;
+        } else if (me->freePorts.find(portB) != me->freePorts.end()) {
+            freePort = portB;
+            otherPort = portA;
+        }
+        // if anything connects to one of the free output ports, put it into the connected ports list and create a new free one:
+        if (freePort) {
+            // one of the unconnected output port has been connected, create a corresponding real jack input port:
+            jack_port_t *wrapperPort = me->context->createWrapperPort(me->createPortName(otherPort->getShortName(), me->wrapperSuffix++), freePort->getType(), freePort->isInput() ? JackPortIsOutput : JackPortIsInput);
+            me->connectedPorts[freePort] = wrapperPort;
+            me->freePorts.erase(freePort);
+            // create a new free port:
+            me->freePorts.insert(me->context->registerPort(me, freePort->getType() == JACK_DEFAULT_AUDIO_TYPE ? me->createPortName("audio", me->audioSuffix++) : me->createPortName("midi", me->midiSuffix++), freePort->getType(), freePort->getFlags(), 0));
+        }
+    } else {
+        // if a port is freed by disconnecting, we make it the new free port and delete the current free port:
+        // TODO
     }
-    // copy midi:
-    void *midiInputBuffer = me->midiInputPort->getProcessPort()->getBuffer(nframes);
-    void *wrapperMidiOutputBuffer = jack_port_get_buffer(me->wrapperMidiOutputPort, nframes);
-    jack_midi_clear_buffer(wrapperMidiOutputBuffer);
-    jack_nframes_t midiEventCount = MetaJackContext::midi_get_event_count(midiInputBuffer);
-    for (jack_nframes_t i = 0; i < midiEventCount; i++) {
-        jack_midi_event_t event;
-        MetaJackContext::midi_event_get(&event, midiInputBuffer, i);
-        jack_midi_event_write(wrapperMidiOutputBuffer, event.time, event.buffer, event.size);
-    }
-    return 0;
+}
+
+std::string MetaJackInterfaceClient::createPortName(const std::string &shortName, int suffix)
+{
+    std::stringstream portNameStream;
+    portNameStream << shortName << " " << suffix;
+    return portNameStream.str();
 }
