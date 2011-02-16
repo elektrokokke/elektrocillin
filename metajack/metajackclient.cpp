@@ -1,6 +1,7 @@
 #include "metajackclient.h"
 #include "metajackport.h"
 #include "metajackcontext.h"
+#include <jack/midiport.h>
 #include <sstream>
 #include <cassert>
 

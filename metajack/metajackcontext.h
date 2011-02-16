@@ -11,13 +11,12 @@
 class MetaJackContext
 {
 public:
+    static MetaJackContext * getInstance();
+
     struct MetaJackContextMidiBufferHead {
         size_t bufferSize, midiEventCount, midiDataSize;
         jack_nframes_t lostMidiEvents;
     };
-
-    static MetaJackContext *instance;
-    static MetaJackContext instance_;
 
     MetaJackContext(const std::string &name);
     ~MetaJackContext();
@@ -98,6 +97,8 @@ public:
     JackGraphOrderCallbackHandler graphOrderCallbackHandler;
     JackXRunCallbackHandler xRunCallbackHandler;
 private:
+    static MetaJackContext instance;
+
     class MetaJackGraphEvent {
     public:
         enum {

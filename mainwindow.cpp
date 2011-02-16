@@ -25,12 +25,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     settings("settings.ini", QSettings::IniFormat),
     midiSignalClient("Virtual keyboard"),
-    synthesizerClient("Synthesizer", &synthesizer),
     moogFilter(44100, 1),
     moogFilterCopy(44100, 1),
     moogFilterClient("Moog filter", &moogFilter),
     lfoClient1("LFO", &lfo1),
     lfoClient2("LFO 2", &lfo2),
+    noiseClient("White noise", &noiseGenerator),
     adsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3),
     multiplierClient("Multiplier", &multiplier),
     linearWaveShapingClient("Linear waveshaping"),
@@ -40,34 +40,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {   
     ui->setupUi(this);
     QGraphicsScene * scene = new QGraphicsScene();
-
-//    // interpolation test:
-//    QVector<double> controlPointsX, controlPointsY;
-//    controlPointsX.append(0);
-//    controlPointsY.append(0);
-//    controlPointsX.append(0.4);
-//    controlPointsY.append(1);
-//    controlPointsX.append(0.6);
-//    controlPointsY.append(1);
-//    controlPointsX.append(1);
-//    controlPointsY.append(0);
-//    controlPointsX.append(1.4);
-//    controlPointsY.append(-1);
-//    controlPointsX.append(1.6);
-//    controlPointsY.append(-1);
-//    controlPointsX.append(2);
-//    controlPointsY.append(0);
-//    LinearInterpolator linearInterpolator(controlPointsX, controlPointsY);
-//    CubicSplineInterpolator splineInterpolator(controlPointsX, controlPointsY);
-//    GraphicsInterpolationItem *interpolationItem = new GraphicsInterpolationItem(&linearInterpolator, 0.01);
-//    interpolationItem->setScale(100);
-//    interpolationItem->setPos(0, -200);
-//    scene->addItem(interpolationItem);
-//    GraphicsInterpolationItem *splineItem = new GraphicsInterpolationItem(&splineInterpolator, 0.01);
-//    splineItem->setScale(100);
-//    splineItem->setPos(200, -200);
-//    scene->addItem(splineItem);
-//    // end interpolation test
 
     // moog filter client and gui test setup:
     frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 600, 600), 22050.0 / 512.0, 22050, -60, 30);
@@ -108,13 +80,13 @@ MainWindow::MainWindow(QWidget *parent) :
     linearOscillatorClient.activate();
     // end piecewise linear oscillator test setup
 
-    // monophonic synthesizer and lfo test setup:
-    synthesizerClient.activate();
+    // lfo test setup:
     lfo1.setFrequency(0.11);
     lfo2.setFrequency(0.12);
     lfoClient1.activate();
     lfoClient2.activate();
-    // end monophonic synthesizer and lfo test setup
+    noiseClient.activate();
+    // end lfo test setup
 
     // ADSR envelope test setup:
     adsrClient.activate();
@@ -163,13 +135,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Record:Midi in");
-    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
+    //connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
+    connectionList.append("White noise:Noise out::Multiplier:Factor 1");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
     connectionList.append("Multiplier:Product out::Moog filter:Audio in");
     connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
     connectionList.append("LFO 2:Audio out::Oscillator:Pulse width modulation");
     connectionList.append("Moog filter:Audio out::system_out:audio");
     connectionList.append("Moog filter:Audio out::Record:Audio in");
+    connectionList.append("Moog filter:Audio out::system:playback_1");
+    connectionList.append("Moog filter:Audio out::system:playback_2");
     nullClient.restoreConnections(connectionList);
     // end port connection test setup
 

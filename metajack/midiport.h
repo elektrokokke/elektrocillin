@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "metajack/jack.h"
+#include <jack/types.h>
 #include <stdlib.h>
 #include <jack/weakmacros.h>
 

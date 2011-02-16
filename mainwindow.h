@@ -18,6 +18,7 @@
 #include "record2memoryclient.h"
 #include "adsrclient.h"
 #include "multiplyprocessor.h"
+#include "whitenoisegenerator.h"
 
 class GraphicsNodeItem;
 class GraphView;
@@ -64,13 +65,12 @@ private:
     GraphicsNodeItem *cutoffResonanceNode;
     FrequencyResponseGraphicsItem *frequencyResponse;
     MidiSignalClient midiSignalClient;
-    MonophonicSynthesizer synthesizer;
-    MidiProcessorClient synthesizerClient;
     IirMoogFilter moogFilter;
     IirMoogFilter moogFilterCopy;
     IirMoogFilterClient moogFilterClient;
     Oscillator lfo1, lfo2;
-    AudioProcessorClient lfoClient1, lfoClient2;
+    WhiteNoiseGenerator noiseGenerator;
+    AudioProcessorClient lfoClient1, lfoClient2, noiseClient;
     AdsrClient adsrClient;
     MultiplyProcessor multiplier;
     AudioProcessorClient multiplierClient;

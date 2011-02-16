@@ -4,8 +4,12 @@
 #include <list>
 #include <boost/xpressive/xpressive_dynamic.hpp>
 
-MetaJackContext * MetaJackContext::instance = &MetaJackContext::instance_;
-MetaJackContext MetaJackContext::instance_("meta_jack");
+MetaJackContext MetaJackContext::instance("metajack");
+
+MetaJackContext * MetaJackContext::getInstance()
+{
+    return &instance;
+}
 
 MetaJackContext::MetaJackContext(const std::string &name) :
     wrapperClient(0),

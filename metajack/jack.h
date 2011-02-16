@@ -2,7 +2,7 @@
 #define META_JACK_H
 
 /**
-  This is just a stub which can be used instead of the original <jack/jack.h>
+  This is just a stub which can be used instead of the original "metajack/jack.h"
   header to not use the real JACK server but capsule all clients in one
   meta_jack_context (they will appear as a single client to the JACK server).
   */

@@ -1,5 +1,5 @@
 #include "jackaudiomodel.h"
-#include "metajack/types.h"
+#include "metajack/jack.h"
 
 JackAudioModel::JackAudioModel(QObject *parent) :
     FloatTableModel(parent)
