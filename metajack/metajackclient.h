@@ -6,7 +6,7 @@
 #include <jack/jack.h>
 
 class MetaJackPortBase;
-class MetaJackPortNew;
+class MetaJackPort;
 
 class MetaJackClientBase {
 public:
@@ -33,9 +33,9 @@ private:
     void * processCallbackArgument;
 };
 
-class MetaJackClientNew : public MetaJackClientBase {
+class MetaJackClient : public MetaJackClientBase {
 public:
-    MetaJackClientNew(const std::string &name);
+    MetaJackClient(const std::string &name);
     void setActive(bool active);
     bool isActive() const;
     MetaJackClientProcess * getProcessClient();
@@ -44,22 +44,22 @@ private:
     MetaJackClientProcess *twin;
 };
 
-class MetaJackContextNew;
+class MetaJackContext;
 
-class MetaJackDummyInputClientNew : public MetaJackClientNew {
+class MetaJackDummyInputClient : public MetaJackClient {
 public:
-    MetaJackDummyInputClientNew(MetaJackContextNew *context, jack_port_t *wrapperAudioInputPort, jack_port_t *wrapperMidiInputPort);
+    MetaJackDummyInputClient(MetaJackContext *context, jack_port_t *wrapperAudioInputPort, jack_port_t *wrapperMidiInputPort);
 private:
-    MetaJackPortNew *audioOutputPort, *midiOutputPort;
+    MetaJackPort *audioOutputPort, *midiOutputPort;
     jack_port_t *wrapperAudioInputPort, *wrapperMidiInputPort;
     static int process(jack_nframes_t nframes, void *arg);
 };
 
-class MetaJackDummyOutputClientNew : public MetaJackClientNew {
+class MetaJackDummyOutputClient : public MetaJackClient {
 public:
-    MetaJackDummyOutputClientNew(MetaJackContextNew *context, jack_port_t *wrapperAudioOutputPort, jack_port_t *wrapperMidiOutputPort);
+    MetaJackDummyOutputClient(MetaJackContext *context, jack_port_t *wrapperAudioOutputPort, jack_port_t *wrapperMidiOutputPort);
 private:
-    MetaJackPortNew *audioInputPort, *midiInputPort;
+    MetaJackPort *audioInputPort, *midiInputPort;
     jack_port_t *wrapperAudioOutputPort, *wrapperMidiOutputPort;
     static int process(jack_nframes_t nframes, void *arg);
 };

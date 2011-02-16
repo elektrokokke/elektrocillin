@@ -7,7 +7,7 @@
 
 class MetaJackClientBase;
 class MetaJackClientProcess;
-class MetaJackClientNew;
+class MetaJackClient;
 
 class MetaJackPortBase {
 public:
@@ -53,9 +53,9 @@ private:
     char * buffer;
 };
 
-class MetaJackPortNew : public MetaJackPortBase {
+class MetaJackPort : public MetaJackPortBase {
 public:
-    MetaJackPortNew(MetaJackClientNew *client, jack_port_id_t id, const std::string &shortName, const std::string &type, int flags);
+    MetaJackPort(MetaJackClient *client, jack_port_id_t id, const std::string &shortName, const std::string &type, int flags);
     void createProcessPort(jack_nframes_t bufferSize);
     MetaJackPortProcess * getProcessPort();
 private:

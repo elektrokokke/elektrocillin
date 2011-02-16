@@ -4,10 +4,10 @@
 #include <list>
 #include <QRegExp>
 
-MetaJackContextNew * MetaJackContextNew::instance = &MetaJackContextNew::instance_;
-MetaJackContextNew MetaJackContextNew::instance_("meta_jack");
+MetaJackContext * MetaJackContext::instance = &MetaJackContext::instance_;
+MetaJackContext MetaJackContext::instance_("meta_jack");
 
-MetaJackContextNew::MetaJackContextNew(const std::string &name) :
+MetaJackContext::MetaJackContext(const std::string &name) :
     wrapperClient(0),
     uniquePortId(1),
     graphChangesRingBuffer(1024),
@@ -42,51 +42,51 @@ MetaJackContextNew::MetaJackContextNew(const std::string &name) :
             jack_client_close(wrapperClient);
             wrapperClient = 0;
         } else {
-            MetaJackDummyInputClientNew *dummyInputClient = new MetaJackDummyInputClientNew(this, wrapperAudioInputPort, wrapperMidiInputPort);
+            MetaJackDummyInputClient *dummyInputClient = new MetaJackDummyInputClient(this, wrapperAudioInputPort, wrapperMidiInputPort);
             activateClient(dummyInputClient);
-            MetaJackDummyOutputClientNew *dummyOutputClient = new MetaJackDummyOutputClientNew(this, wrapperAudioOutputPort, wrapperMidiOutputPort);
+            MetaJackDummyOutputClient *dummyOutputClient = new MetaJackDummyOutputClient(this, wrapperAudioOutputPort, wrapperMidiOutputPort);
             activateClient(dummyOutputClient);
         }
     }
 }
 
-MetaJackContextNew::~MetaJackContextNew()
+MetaJackContext::~MetaJackContext()
 {
     // close all clients:
     for (; clients.size(); ) {
-        MetaJackClientNew *client = clients.begin()->second;
+        MetaJackClient *client = clients.begin()->second;
         closeClient(client);
     }
     // close the wrapper client:
     jack_client_close(wrapperClient);
 }
 
-bool MetaJackContextNew::isActive() const
+bool MetaJackContext::isActive() const
 {
     return wrapperClient && !shutdown;
 }
 
-size_t MetaJackContextNew::getClientNameSize()
+size_t MetaJackContext::getClientNameSize()
 {
     return jack_client_name_size();
 }
 
-size_t MetaJackContextNew::getPortNameSize()
+size_t MetaJackContext::getPortNameSize()
 {
     return jack_port_name_size();
 }
 
-size_t MetaJackContextNew::getPortTypeSize()
+size_t MetaJackContext::getPortTypeSize()
 {
     return jack_port_type_size();
 }
 
-jack_port_id_t MetaJackContextNew::createUniquePortId()
+jack_port_id_t MetaJackContext::createUniquePortId()
 {
     return uniquePortId++;
 }
 
-MetaJackClientNew * MetaJackContextNew::openClient(const std::string &name, jack_options_t options)
+MetaJackClient * MetaJackContext::openClient(const std::string &name, jack_options_t options)
 {
     // meta clients can only be created if the wrapper client could be activated:
     if (!isActive()) {
@@ -110,13 +110,13 @@ MetaJackClientNew * MetaJackContextNew::openClient(const std::string &name, jack
         clientName = stream.str();
         nameIsTaken = (clients.find(clientName) != clients.end());
     }
-    MetaJackClientNew *client = new MetaJackClientNew(clientName);
+    MetaJackClient *client = new MetaJackClient(clientName);
     clients[clientName] = client;
     clientRegistrationCallbackHandler.invokeCallbacksWithArgs(clientName.c_str(), 1);
     return client;
 }
 
-bool MetaJackContextNew::closeClient(MetaJackClientNew *client)
+bool MetaJackContext::closeClient(MetaJackClient *client)
 {
     assert(client && client->getProcessClient());
     deactivateClient(client);
@@ -127,14 +127,14 @@ bool MetaJackContextNew::closeClient(MetaJackClientNew *client)
     return true;
 }
 
-bool MetaJackContextNew::setProcessCallback(MetaJackClientNew *client, JackProcessCallback processCallback, void *processCallbackArgument)
+bool MetaJackContext::setProcessCallback(MetaJackClient *client, JackProcessCallback processCallback, void *processCallbackArgument)
 {
     assert(client);
     if (client->isActive()) {
         return false;
     }
-    MetaJackGraphEventNew event;
-    event.type = MetaJackGraphEventNew::SET_PROCESS_CALLBACK;
+    MetaJackGraphEvent event;
+    event.type = MetaJackGraphEvent::SET_PROCESS_CALLBACK;
     event.client = client->getProcessClient();
     event.processCallback = processCallback;
     event.processCallbackArgument = processCallbackArgument;
@@ -143,27 +143,27 @@ bool MetaJackContextNew::setProcessCallback(MetaJackClientNew *client, JackProce
     return true;
 }
 
-void MetaJackContextNew::setProcessCallback(MetaJackClientProcess *client, JackProcessCallback processCallback, void *processCallbackArgument)
+void MetaJackContext::setProcessCallback(MetaJackClientProcess *client, JackProcessCallback processCallback, void *processCallbackArgument)
 {
     assert(client);
     client->setProcessCallback(processCallback, processCallbackArgument);
 }
 
-bool MetaJackContextNew::activateClient(MetaJackClientNew *client)
+bool MetaJackContext::activateClient(MetaJackClient *client)
 {
     assert(client);
     if (client->isActive()) {
         return false;
     }
     // activate that client's buffer size callback, if it has any:
-    std::map<MetaJackClientNew*, std::pair<JackBufferSizeCallback, void*> >::iterator find = bufferSizeCallbackHandler.find(client);
+    std::map<MetaJackClient*, std::pair<JackBufferSizeCallback, void*> >::iterator find = bufferSizeCallbackHandler.find(client);
     if (find != bufferSizeCallbackHandler.end()) {
         JackBufferSizeCallback callback = find->second.first;
         void *arg = find->second.second;
         callback(bufferSize, arg);
     }
-    MetaJackGraphEventNew event;
-    event.type = MetaJackGraphEventNew::ACTIVATE_CLIENT;
+    MetaJackGraphEvent event;
+    event.type = MetaJackGraphEvent::ACTIVATE_CLIENT;
     event.client = client->getProcessClient();
     // the following will call the process thread's activateClient() method:
     sendGraphChangeEvent(event);
@@ -171,20 +171,20 @@ bool MetaJackContextNew::activateClient(MetaJackClientNew *client)
     return true;
 }
 
-void MetaJackContextNew::activateClient(MetaJackClientProcess *client)
+void MetaJackContext::activateClient(MetaJackClientProcess *client)
 {
     assert(client);
     activeClients.insert(client);
 }
 
-bool MetaJackContextNew::deactivateClient(MetaJackClientNew *client)
+bool MetaJackContext::deactivateClient(MetaJackClient *client)
 {
     assert(client);
     if (!client->isActive()) {
         return false;
     }
-    MetaJackGraphEventNew event;
-    event.type = MetaJackGraphEventNew::DEACTIVATE_CLIENT;
+    MetaJackGraphEvent event;
+    event.type = MetaJackGraphEvent::DEACTIVATE_CLIENT;
     event.client = client->getProcessClient();
     // the following will call the process thread's deactivateClient() method:
     sendGraphChangeEvent(event);
@@ -192,14 +192,14 @@ bool MetaJackContextNew::deactivateClient(MetaJackClientNew *client)
     return true;
 }
 
-void MetaJackContextNew::deactivateClient(MetaJackClientProcess *client)
+void MetaJackContext::deactivateClient(MetaJackClientProcess *client)
 {
     assert(client);
     activeClients.erase(client);
     client->disconnect();
 }
 
-MetaJackPortNew * MetaJackContextNew::registerPort(MetaJackClientNew *client, const std::string & shortName, const std::string &type, unsigned long flags, unsigned long)
+MetaJackPort * MetaJackContext::registerPort(MetaJackClient *client, const std::string & shortName, const std::string &type, unsigned long flags, unsigned long)
 {
     assert(client);
     // check if the given port name is not too long:
@@ -221,10 +221,10 @@ MetaJackPortNew * MetaJackContextNew::registerPort(MetaJackClientNew *client, co
     if (!(flags & JackPortIsInput) && !(flags & JackPortIsOutput)) {
         return 0;
     }
-    MetaJackPortNew *port = new MetaJackPortNew(client, createUniquePortId(), shortName, type, flags);
+    MetaJackPort *port = new MetaJackPort(client, createUniquePortId(), shortName, type, flags);
     port->createProcessPort(bufferSize);
-    MetaJackGraphEventNew event;
-    event.type = MetaJackGraphEventNew::REGISTER_PORT;
+    MetaJackGraphEvent event;
+    event.type = MetaJackGraphEvent::REGISTER_PORT;
     event.client = client->getProcessClient();
     event.port = port->getProcessPort();
     // the following will call the process thread's registerPort() method:
@@ -234,17 +234,17 @@ MetaJackPortNew * MetaJackContextNew::registerPort(MetaJackClientNew *client, co
     return port;
 }
 
-void MetaJackContextNew::registerPort(MetaJackClientProcess *client, MetaJackPortProcess *port)
+void MetaJackContext::registerPort(MetaJackClientProcess *client, MetaJackPortProcess *port)
 {
     assert(client && port);
     port->setClient(client);
 }
 
-bool MetaJackContextNew::unregisterPort(MetaJackPortNew *port)
+bool MetaJackContext::unregisterPort(MetaJackPort *port)
 {
     assert(port && port->getProcessPort());
-    MetaJackGraphEventNew event;
-    event.type = MetaJackGraphEventNew::UNREGISTER_PORT;
+    MetaJackGraphEvent event;
+    event.type = MetaJackGraphEvent::UNREGISTER_PORT;
     event.port = port->getProcessPort();
     // the following will call the process thread's unregisterPort() method:
     sendGraphChangeEvent(event);
@@ -255,13 +255,13 @@ bool MetaJackContextNew::unregisterPort(MetaJackPortNew *port)
     return true;
 }
 
-void MetaJackContextNew::unregisterPort(MetaJackPortProcess *port)
+void MetaJackContext::unregisterPort(MetaJackPortProcess *port)
 {
     assert(port);
     delete port;
 }
 
-bool MetaJackContextNew::renamePort(MetaJackPortNew *port, const std::string &shortName)
+bool MetaJackContext::renamePort(MetaJackPort *port, const std::string &shortName)
 {
     assert(port && port->getProcessPort());
     std::string oldShortName = port->getShortName();
@@ -272,8 +272,8 @@ bool MetaJackContextNew::renamePort(MetaJackPortNew *port, const std::string &sh
         port->setShortName(oldShortName);
         return false;
     }
-    MetaJackGraphEventNew event;
-    event.type = MetaJackGraphEventNew::RENAME_PORT;
+    MetaJackGraphEvent event;
+    event.type = MetaJackGraphEvent::RENAME_PORT;
     event.port = port->getProcessPort();
     event.shortName = shortName;
     // the following will call the process thread's renamePort() method:
@@ -284,19 +284,19 @@ bool MetaJackContextNew::renamePort(MetaJackPortNew *port, const std::string &sh
     return true;
 }
 
-void MetaJackContextNew::renamePort(MetaJackPortProcess *port, const std::string &shortName)
+void MetaJackContext::renamePort(MetaJackPortProcess *port, const std::string &shortName)
 {
     assert(port);
     port->setShortName(shortName);
 }
 
-bool MetaJackContextNew::connectPorts(const std::string &sourceName, const std::string &destinationName)
+bool MetaJackContext::connectPorts(const std::string &sourceName, const std::string &destinationName)
 {
     if (!isActive()) {
         return false;
     }
-    MetaJackPortNew *source = getPortByName(sourceName);
-    MetaJackPortNew *dest = getPortByName(destinationName);
+    MetaJackPort *source = getPortByName(sourceName);
+    MetaJackPort *dest = getPortByName(destinationName);
     if (!source || !dest) {
         // ports could not be found by name
         return false;
@@ -310,8 +310,8 @@ bool MetaJackContextNew::connectPorts(const std::string &sourceName, const std::
         return false;
     }
     source->connect(dest);
-    MetaJackGraphEventNew event;
-    event.type = MetaJackGraphEventNew::CONNECT_PORTS;
+    MetaJackGraphEvent event;
+    event.type = MetaJackGraphEvent::CONNECT_PORTS;
     event.port = source->getProcessPort();
     event.connectedPort = dest->getProcessPort();
     // the following will call the process thread's connectPorts() method:
@@ -320,19 +320,19 @@ bool MetaJackContextNew::connectPorts(const std::string &sourceName, const std::
     return true;
 }
 
-void MetaJackContextNew::connectPorts(MetaJackPortProcess *source, MetaJackPortProcess *dest)
+void MetaJackContext::connectPorts(MetaJackPortProcess *source, MetaJackPortProcess *dest)
 {
     assert(source && dest);
     source->connect(dest);
 }
 
-bool MetaJackContextNew::disconnectPorts(const std::string &sourceName, const std::string &destinationName)
+bool MetaJackContext::disconnectPorts(const std::string &sourceName, const std::string &destinationName)
 {
     if (!isActive()) {
         return false;
     }
-    MetaJackPortNew *source = getPortByName(sourceName);
-    MetaJackPortNew *dest = getPortByName(destinationName);
+    MetaJackPort *source = getPortByName(sourceName);
+    MetaJackPort *dest = getPortByName(destinationName);
     if (!source || !dest) {
         // ports could not be found by name
         return false;
@@ -342,8 +342,8 @@ bool MetaJackContextNew::disconnectPorts(const std::string &sourceName, const st
         return false;
     }
     source->disconnect(dest);
-    MetaJackGraphEventNew event;
-    event.type = MetaJackGraphEventNew::DISCONNECT_PORTS;
+    MetaJackGraphEvent event;
+    event.type = MetaJackGraphEvent::DISCONNECT_PORTS;
     event.port = source->getProcessPort();
     event.connectedPort = dest->getProcessPort();
     // the following will call the process thread's disconnectPorts() method:
@@ -352,19 +352,19 @@ bool MetaJackContextNew::disconnectPorts(const std::string &sourceName, const st
     return true;
 }
 
-void MetaJackContextNew::disconnectPorts(MetaJackPortProcess *source, MetaJackPortProcess *dest)
+void MetaJackContext::disconnectPorts(MetaJackPortProcess *source, MetaJackPortProcess *dest)
 {
     assert(source && dest);
     source->disconnect(dest);
 }
 
-const char ** MetaJackContextNew::getPortsByPattern(const std::string &port_name_pattern, const std::string &type_name_pattern, unsigned long flags)
+const char ** MetaJackContext::getPortsByPattern(const std::string &port_name_pattern, const std::string &type_name_pattern, unsigned long flags)
 {
     QRegExp regExpPortNames(port_name_pattern.c_str());
     QRegExp regExpTypeNames(type_name_pattern.c_str());
-    std::list<MetaJackPortNew*> matchingPorts;
-    for (std::map<std::string, MetaJackPortNew*>::iterator i = portsByName.begin(); i != portsByName.end(); i++) {
-        MetaJackPortNew *port = i->second;
+    std::list<MetaJackPort*> matchingPorts;
+    for (std::map<std::string, MetaJackPort*>::iterator i = portsByName.begin(); i != portsByName.end(); i++) {
+        MetaJackPort *port = i->second;
         QString qstringPortName(port->getFullName().c_str());
         QString qstringTypeName(port->getType().c_str());
         if (((port->getFlags() & flags) == flags) && ((port_name_pattern.length() == 0) || regExpPortNames.exactMatch(qstringPortName)) && ((type_name_pattern.length() == 0) || regExpTypeNames.exactMatch(qstringTypeName))) {
@@ -375,8 +375,8 @@ const char ** MetaJackContextNew::getPortsByPattern(const std::string &port_name
     if (matchingPorts.size()) {
         char ** names = new char*[matchingPorts.size() + 1];
         size_t index = 0;
-        for (std::list<MetaJackPortNew*>::iterator i = matchingPorts.begin(); i != matchingPorts.end(); i++, index++) {
-            MetaJackPortNew *port = *i;
+        for (std::list<MetaJackPort*>::iterator i = matchingPorts.begin(); i != matchingPorts.end(); i++, index++) {
+            MetaJackPort *port = *i;
             names[index] = new char[port->getFullName().length() + 1];
             memcpy(names[index], port->getFullName().c_str(), port->getFullName().length() + 1);
         }
@@ -387,8 +387,8 @@ const char ** MetaJackContextNew::getPortsByPattern(const std::string &port_name
     }
 }
 
-MetaJackPortNew * MetaJackContextNew::getPortByName(const std::string &name) const {
-    std::map<std::string, MetaJackPortNew*>::const_iterator i = portsByName.find(name);
+MetaJackPort * MetaJackContext::getPortByName(const std::string &name) const {
+    std::map<std::string, MetaJackPort*>::const_iterator i = portsByName.find(name);
     if (i != portsByName.end()) {
         return i->second;
     } else {
@@ -396,9 +396,9 @@ MetaJackPortNew * MetaJackContextNew::getPortByName(const std::string &name) con
     }
 }
 
-MetaJackPortNew * MetaJackContextNew::getPortById(jack_port_id_t id)
+MetaJackPort * MetaJackContext::getPortById(jack_port_id_t id)
 {
-    std::map<jack_port_id_t, MetaJackPortNew*>::const_iterator i = portsById.find(id);
+    std::map<jack_port_id_t, MetaJackPort*>::const_iterator i = portsById.find(id);
     if (i != portsById.end()) {
         return i->second;
     } else {
@@ -406,96 +406,96 @@ MetaJackPortNew * MetaJackContextNew::getPortById(jack_port_id_t id)
     }
 }
 
-int MetaJackContextNew::get_pid()
+int MetaJackContext::get_pid()
 {
     assert(isActive());
     return jack_get_client_pid(jack_get_client_name(wrapperClient));
 }
 
-pthread_t MetaJackContextNew::get_thread_id()
+pthread_t MetaJackContext::get_thread_id()
 {
     assert(isActive());
     return jack_client_thread_id(wrapperClient);
 }
 
-bool MetaJackContextNew::is_realtime()
+bool MetaJackContext::is_realtime()
 {
     assert(isActive());
     return jack_is_realtime(wrapperClient);
 }
 
-int MetaJackContextNew::set_freewheel(int onoff)
+int MetaJackContext::set_freewheel(int onoff)
 {
     assert(isActive());
     return jack_set_freewheel(wrapperClient, onoff);
 }
 
-int MetaJackContextNew::set_buffer_size(jack_nframes_t nframes)
+int MetaJackContext::set_buffer_size(jack_nframes_t nframes)
 {
     assert(isActive());
     return jack_set_buffer_size(wrapperClient, nframes);
 }
 
-jack_nframes_t MetaJackContextNew::get_sample_rate()
+jack_nframes_t MetaJackContext::get_sample_rate()
 {
     assert(isActive());
     return jack_get_sample_rate(wrapperClient);
 }
 
-jack_nframes_t MetaJackContextNew::get_buffer_size()
+jack_nframes_t MetaJackContext::get_buffer_size()
 {
     assert(isActive());
     return jack_get_buffer_size(wrapperClient);
 }
 
-float MetaJackContextNew::get_cpu_load()
+float MetaJackContext::get_cpu_load()
 {
     assert(isActive());
     return jack_cpu_load(wrapperClient);
 }
 
-jack_nframes_t MetaJackContextNew::get_frames_since_cycle_start() const
+jack_nframes_t MetaJackContext::get_frames_since_cycle_start() const
 {
     assert(isActive());
     return jack_frames_since_cycle_start(wrapperClient);
 }
 
-jack_nframes_t MetaJackContextNew::get_frame_time() const
+jack_nframes_t MetaJackContext::get_frame_time() const
 {
     assert(isActive());
     return jack_frame_time(wrapperClient);
 }
 
-jack_nframes_t MetaJackContextNew::get_last_frame_time() const
+jack_nframes_t MetaJackContext::get_last_frame_time() const
 {
     assert(isActive());
     return jack_last_frame_time(wrapperClient);
 }
 
-jack_time_t MetaJackContextNew::convert_frames_to_time(jack_nframes_t nframes) const
+jack_time_t MetaJackContext::convert_frames_to_time(jack_nframes_t nframes) const
 {
     assert(isActive());
     return jack_frames_to_time(wrapperClient, nframes);
 }
 
-jack_nframes_t MetaJackContextNew::convert_time_to_frames(jack_time_t time) const
+jack_nframes_t MetaJackContext::convert_time_to_frames(jack_time_t time) const
 {
     assert(isActive());
     return jack_time_to_frames(wrapperClient, time);
 }
 
-jack_time_t MetaJackContextNew::get_time()
+jack_time_t MetaJackContext::get_time()
 {
     return jack_get_time();
 }
 
-jack_nframes_t MetaJackContextNew::midi_get_event_count(void* port_buffer)
+jack_nframes_t MetaJackContext::midi_get_event_count(void* port_buffer)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
     return head->midiEventCount;
 }
 
-int MetaJackContextNew::midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index)
+int MetaJackContext::midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index)
 {
     // skip the buffer head:
     char *charBuffer = (char*)port_buffer + sizeof(MetaJackContextMidiBufferHead);;
@@ -504,19 +504,19 @@ int MetaJackContextNew::midi_event_get(jack_midi_event_t *event, void *port_buff
     return 0;
 }
 
-void MetaJackContextNew::midi_clear_buffer(void *port_buffer)
+void MetaJackContext::midi_clear_buffer(void *port_buffer)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
     head->midiDataSize = head->midiEventCount = head->lostMidiEvents = 0;
 }
 
-size_t MetaJackContextNew::midi_max_event_size(void* port_buffer)
+size_t MetaJackContext::midi_max_event_size(void* port_buffer)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
     return head->bufferSize - head->midiEventCount * sizeof(jack_midi_data_t) - head->midiDataSize;
 }
 
-jack_midi_data_t* MetaJackContextNew::midi_event_reserve(void *port_buffer, jack_nframes_t  time, size_t data_size)
+jack_midi_data_t* MetaJackContext::midi_event_reserve(void *port_buffer, jack_nframes_t  time, size_t data_size)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
     char *charBuffer = (char*)port_buffer + sizeof(MetaJackContextMidiBufferHead);
@@ -537,7 +537,7 @@ jack_midi_data_t* MetaJackContextNew::midi_event_reserve(void *port_buffer, jack
     }
 }
 
-int MetaJackContextNew::midi_event_write(void *port_buffer, jack_nframes_t time, const jack_midi_data_t *data, size_t data_size)
+int MetaJackContext::midi_event_write(void *port_buffer, jack_nframes_t time, const jack_midi_data_t *data, size_t data_size)
 {
     jack_midi_data_t *buffer = midi_event_reserve(port_buffer, time, data_size);
     if (buffer) {
@@ -550,17 +550,17 @@ int MetaJackContextNew::midi_event_write(void *port_buffer, jack_nframes_t time,
     }
 }
 
-jack_nframes_t MetaJackContextNew::midi_get_lost_event_count(void *port_buffer)
+jack_nframes_t MetaJackContext::midi_get_lost_event_count(void *port_buffer)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
     return head->lostMidiEvents;
 }
 
-bool MetaJackContextNew::compare_midi_events(const jack_midi_event_t &event1, const jack_midi_event_t &event2) {
+bool MetaJackContext::compare_midi_events(const jack_midi_event_t &event1, const jack_midi_event_t &event2) {
     return event1.time < event2.time;
 }
 
-void MetaJackContextNew::free(void* ptr)
+void MetaJackContext::free(void* ptr)
 {
     if (ptr) {
         char **names = (char**)ptr;
@@ -571,7 +571,7 @@ void MetaJackContextNew::free(void* ptr)
     }
 }
 
-void MetaJackContextNew::sendGraphChangeEvent(const MetaJackGraphEventNew &event)
+void MetaJackContext::sendGraphChangeEvent(const MetaJackGraphEvent &event)
 {
     // write the event to the ring buffer:
     graphChangesRingBuffer.write(event);
@@ -581,26 +581,26 @@ void MetaJackContextNew::sendGraphChangeEvent(const MetaJackGraphEventNew &event
     waitMutex.unlock();
 }
 
-int MetaJackContextNew::process(jack_nframes_t nframes)
+int MetaJackContext::process(jack_nframes_t nframes)
 {
     // first get all changes to the graph since the last call:
     for (; graphChangesRingBuffer.readSpace(); ) {
-        MetaJackGraphEventNew event = graphChangesRingBuffer.read();
-        if (event.type == MetaJackGraphEventNew::SET_PROCESS_CALLBACK) {
+        MetaJackGraphEvent event = graphChangesRingBuffer.read();
+        if (event.type == MetaJackGraphEvent::SET_PROCESS_CALLBACK) {
             setProcessCallback(event.client, event.processCallback, event.processCallbackArgument);
-        } else if (event.type == MetaJackGraphEventNew::ACTIVATE_CLIENT) {
+        } else if (event.type == MetaJackGraphEvent::ACTIVATE_CLIENT) {
             activateClient(event.client);
-        } else if (event.type == MetaJackGraphEventNew::DEACTIVATE_CLIENT) {
+        } else if (event.type == MetaJackGraphEvent::DEACTIVATE_CLIENT) {
             deactivateClient(event.client);
-        } else if (event.type == MetaJackGraphEventNew::REGISTER_PORT) {
+        } else if (event.type == MetaJackGraphEvent::REGISTER_PORT) {
             registerPort(event.client, event.port);
-        } else if (event.type == MetaJackGraphEventNew::UNREGISTER_PORT) {
+        } else if (event.type == MetaJackGraphEvent::UNREGISTER_PORT) {
             unregisterPort(event.port);
-        } else if (event.type == MetaJackGraphEventNew::RENAME_PORT) {
+        } else if (event.type == MetaJackGraphEvent::RENAME_PORT) {
             renamePort(event.port, event.shortName);
-        } else if (event.type == MetaJackGraphEventNew::CONNECT_PORTS) {
+        } else if (event.type == MetaJackGraphEvent::CONNECT_PORTS) {
             connectPorts(event.port, event.connectedPort);
-        } else if (event.type == MetaJackGraphEventNew::DISCONNECT_PORTS) {
+        } else if (event.type == MetaJackGraphEvent::DISCONNECT_PORTS) {
             disconnectPorts(event.port, event.connectedPort);
         }
     }
@@ -617,15 +617,15 @@ int MetaJackContextNew::process(jack_nframes_t nframes)
     return (success ? 0 : 1);
 }
 
-int MetaJackContextNew::process(jack_nframes_t nframes, void *arg)
+int MetaJackContext::process(jack_nframes_t nframes, void *arg)
 {
-    MetaJackContextNew *context = (MetaJackContextNew*)arg;
+    MetaJackContext *context = (MetaJackContext*)arg;
     return context->process(nframes);
 }
 
-void MetaJackContextNew::infoShutdownCallback(jack_status_t statusCode, const char* reason, void *arg)
+void MetaJackContext::infoShutdownCallback(jack_status_t statusCode, const char* reason, void *arg)
 {
-    MetaJackContextNew *context = (MetaJackContextNew*)arg;
+    MetaJackContext *context = (MetaJackContext*)arg;
     // calling jack_client_close() from this callback is not allowed... remember that server is being shutdown for later invocation:
     context->shutdown = true;
     // notify the internal clients:
@@ -635,13 +635,13 @@ void MetaJackContextNew::infoShutdownCallback(jack_status_t statusCode, const ch
     context->infoShutdownCallbackHandler.invokeCallbacksWithArgs(statusCode, reason);
 }
 
-int MetaJackContextNew::bufferSizeCallback(jack_nframes_t bufferSize, void *arg)
+int MetaJackContext::bufferSizeCallback(jack_nframes_t bufferSize, void *arg)
 {
-    MetaJackContextNew *context = (MetaJackContextNew*)arg;
+    MetaJackContext *context = (MetaJackContext*)arg;
     context->bufferSize = bufferSize;
     // change all ports' buffer sizes:
-    for (std::map<jack_port_id_t, MetaJackPortNew*>::iterator i = context->portsById.begin(); i != context->portsById.end(); i++) {
-        MetaJackPortNew *port = i->second;
+    for (std::map<jack_port_id_t, MetaJackPort*>::iterator i = context->portsById.begin(); i != context->portsById.end(); i++) {
+        MetaJackPort *port = i->second;
         port->getProcessPort()->changeBufferSize(bufferSize);
     }
     // now invoke all callbacks registered by the internal clients:

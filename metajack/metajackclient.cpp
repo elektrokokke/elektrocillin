@@ -89,29 +89,29 @@ bool MetaJackClientProcess::process(std::set<MetaJackClientProcess*> &unprocesse
     return true;
 }
 
-MetaJackClientNew::MetaJackClientNew(const std::string &name) :
+MetaJackClient::MetaJackClient(const std::string &name) :
     MetaJackClientBase(name),
     active(false),
     twin(new MetaJackClientProcess(name))
 {}
 
-void MetaJackClientNew::setActive(bool active)
+void MetaJackClient::setActive(bool active)
 {
     this->active = active;
 }
 
-bool MetaJackClientNew::isActive() const
+bool MetaJackClient::isActive() const
 {
     return active;
 }
 
-MetaJackClientProcess * MetaJackClientNew::getProcessClient()
+MetaJackClientProcess * MetaJackClient::getProcessClient()
 {
     return twin;
 }
 
-MetaJackDummyInputClientNew::MetaJackDummyInputClientNew(MetaJackContextNew *context, jack_port_t *wrapperAudioInputPort_, jack_port_t *wrapperMidiInputPort_) :
-    MetaJackClientNew("system_in"),
+MetaJackDummyInputClient::MetaJackDummyInputClient(MetaJackContext *context, jack_port_t *wrapperAudioInputPort_, jack_port_t *wrapperMidiInputPort_) :
+    MetaJackClient("system_in"),
     wrapperAudioInputPort(wrapperAudioInputPort_),
     wrapperMidiInputPort(wrapperMidiInputPort_)
 {
@@ -121,8 +121,8 @@ MetaJackDummyInputClientNew::MetaJackDummyInputClientNew(MetaJackContextNew *con
 
 }
 
-MetaJackDummyOutputClientNew::MetaJackDummyOutputClientNew(MetaJackContextNew *context, jack_port_t *wrapperAudioOutputPort_, jack_port_t *wrapperMidiOutputPort_) :
-    MetaJackClientNew("system_out"),
+MetaJackDummyOutputClient::MetaJackDummyOutputClient(MetaJackContext *context, jack_port_t *wrapperAudioOutputPort_, jack_port_t *wrapperMidiOutputPort_) :
+    MetaJackClient("system_out"),
     wrapperAudioOutputPort(wrapperAudioOutputPort_),
     wrapperMidiOutputPort(wrapperMidiOutputPort_)
 {
@@ -132,10 +132,10 @@ MetaJackDummyOutputClientNew::MetaJackDummyOutputClientNew(MetaJackContextNew *c
 
 }
 
-int MetaJackDummyInputClientNew::process(jack_nframes_t nframes, void *arg)
+int MetaJackDummyInputClient::process(jack_nframes_t nframes, void *arg)
 {
     // the purpose of the dummy input client is to make the wrapper client inputs available to clients inside the wrapper
-    MetaJackDummyInputClientNew *me = (MetaJackDummyInputClientNew*)arg;
+    MetaJackDummyInputClient *me = (MetaJackDummyInputClient*)arg;
    // copy audio:
     jack_default_audio_sample_t *wrapperAudioInputBuffer = (jack_default_audio_sample_t*)jack_port_get_buffer(me->wrapperAudioInputPort, nframes);
     jack_default_audio_sample_t *audioOutputBuffer = (jack_default_audio_sample_t*)me->audioOutputPort->getProcessPort()->getBuffer(nframes);
@@ -145,20 +145,20 @@ int MetaJackDummyInputClientNew::process(jack_nframes_t nframes, void *arg)
     // copy midi:
     void *wrapperMidiInputBuffer = jack_port_get_buffer(me->wrapperMidiInputPort, nframes);
     void *midiOutputBuffer = me->midiOutputPort->getProcessPort()->getBuffer(nframes);
-    MetaJackContextNew::midi_clear_buffer(midiOutputBuffer);
+    MetaJackContext::midi_clear_buffer(midiOutputBuffer);
     jack_nframes_t midiEventCount = jack_midi_get_event_count(wrapperMidiInputBuffer);
     for (jack_nframes_t i = 0; i < midiEventCount; i++) {
         jack_midi_event_t event;
         jack_midi_event_get(&event, wrapperMidiInputBuffer, i);
-        MetaJackContextNew::midi_event_write(midiOutputBuffer, event.time, event.buffer, event.size);
+        MetaJackContext::midi_event_write(midiOutputBuffer, event.time, event.buffer, event.size);
     }
     return 0;
 }
 
-int MetaJackDummyOutputClientNew::process(jack_nframes_t nframes, void *arg)
+int MetaJackDummyOutputClient::process(jack_nframes_t nframes, void *arg)
 {
     // the purpose of the dummy output client is to make the wrapper client outputs available to clients inside the wrapper
-    MetaJackDummyOutputClientNew *me = (MetaJackDummyOutputClientNew*)arg;
+    MetaJackDummyOutputClient *me = (MetaJackDummyOutputClient*)arg;
     // copy audio:
     jack_default_audio_sample_t *audioInputBuffer = (jack_default_audio_sample_t*)me->audioInputPort->getProcessPort()->getBuffer(nframes);
     jack_default_audio_sample_t *wrapperAudioOutputBuffer = (jack_default_audio_sample_t*)jack_port_get_buffer(me->wrapperAudioOutputPort, nframes);
@@ -169,10 +169,10 @@ int MetaJackDummyOutputClientNew::process(jack_nframes_t nframes, void *arg)
     void *midiInputBuffer = me->midiInputPort->getProcessPort()->getBuffer(nframes);
     void *wrapperMidiOutputBuffer = jack_port_get_buffer(me->wrapperMidiOutputPort, nframes);
     jack_midi_clear_buffer(wrapperMidiOutputBuffer);
-    jack_nframes_t midiEventCount = MetaJackContextNew::midi_get_event_count(midiInputBuffer);
+    jack_nframes_t midiEventCount = MetaJackContext::midi_get_event_count(midiInputBuffer);
     for (jack_nframes_t i = 0; i < midiEventCount; i++) {
         jack_midi_event_t event;
-        MetaJackContextNew::midi_event_get(&event, midiInputBuffer, i);
+        MetaJackContext::midi_event_get(&event, midiInputBuffer, i);
         jack_midi_event_write(wrapperMidiOutputBuffer, event.time, event.buffer, event.size);
     }
     return 0;

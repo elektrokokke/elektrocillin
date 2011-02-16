@@ -5,9 +5,9 @@
 #include <map>
 #include <utility>
 
-template<class T> class CallbackHandler : public std::map<MetaJackClientNew*, typename std::pair<T, void*> > {
+template<class T> class CallbackHandler : public std::map<MetaJackClient*, typename std::pair<T, void*> > {
 public:
-    void setCallback(MetaJackClientNew *client, T callback, void *callbackArgument) {
+    void setCallback(MetaJackClient *client, T callback, void *callbackArgument) {
         if (callback) {
             (*this)[client] = std::make_pair(callback, callbackArgument);
         } else {
@@ -15,7 +15,7 @@ public:
         }
     }
     void invokeCallbacks() {
-        for (typename std::map<MetaJackClientNew*, typename std::pair<T, void*> >::iterator i = this->begin(); i != this->end(); i++) {
+        for (typename std::map<MetaJackClient*, typename std::pair<T, void*> >::iterator i = this->begin(); i != this->end(); i++) {
             invokeCallback(i->second.first, i->second.second);
         }
     }

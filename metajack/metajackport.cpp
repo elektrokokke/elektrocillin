@@ -170,8 +170,8 @@ void MetaJackPortProcess::changeBufferSize(jack_nframes_t bufferSize)
         buffer = new char [bufferSizeInBytes];
         // if this is a MIDI port, write its size to the head of the buffer:
         if (getType() == JACK_DEFAULT_MIDI_TYPE) {
-            MetaJackContextNew::MetaJackContextMidiBufferHead *head = (MetaJackContextNew::MetaJackContextMidiBufferHead*)buffer;
-            head->bufferSize = bufferSizeInBytes - sizeof(MetaJackContextNew::MetaJackContextMidiBufferHead);
+            MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)buffer;
+            head->bufferSize = bufferSizeInBytes - sizeof(MetaJackContext::MetaJackContextMidiBufferHead);
             head->midiDataSize = head->midiEventCount = head->lostMidiEvents = 0;
         }
     }
@@ -184,7 +184,7 @@ bool MetaJackPortProcess::clearBuffer()
         memset(buffer, 0, bufferSizeInBytes);
         return true;
     } else if (getType() == JACK_DEFAULT_MIDI_TYPE) {
-        MetaJackContextNew::midi_clear_buffer(buffer);
+        MetaJackContext::midi_clear_buffer(buffer);
         return true;
     } else {
         return false;
@@ -216,18 +216,18 @@ bool MetaJackPortProcess::mergeConnectedBuffers()
         for (std::set<MetaJackPortBase*>::iterator i = connectedPorts.begin(); i != connectedPorts.end(); i++) {
             MetaJackPortProcess *connectedPort = (MetaJackPortProcess*)*i;
             void *midiOutputBuffer = connectedPort->buffer;
-            for (jack_nframes_t j = 0; j < MetaJackContextNew::midi_get_event_count(midiOutputBuffer); j++) {
+            for (jack_nframes_t j = 0; j < MetaJackContext::midi_get_event_count(midiOutputBuffer); j++) {
                 jack_midi_event_t event;
-                MetaJackContextNew::midi_event_get(&event, midiOutputBuffer, j);
+                MetaJackContext::midi_event_get(&event, midiOutputBuffer, j);
                 events.push_back(event);
             }
         }
         // now sort the events by time:
-        events.sort(MetaJackContextNew::compare_midi_events);
+        events.sort(MetaJackContext::compare_midi_events);
         // write them to the input buffer:
         void *midiInputBuffer = buffer;
         for (std::list<jack_midi_event_t>::iterator i = events.begin(); i != events.end(); i++) {
-            MetaJackContextNew::midi_event_write(midiInputBuffer, i->time, i->buffer, i->size);
+            MetaJackContext::midi_event_write(midiInputBuffer, i->time, i->buffer, i->size);
         }
         return true;
     } else {
@@ -252,21 +252,21 @@ bool MetaJackPortProcess::process(std::set<MetaJackClientProcess*> &unprocessedC
     return mergeConnectedBuffers();
 }
 
-MetaJackPortNew::MetaJackPortNew(MetaJackClientNew *client, jack_port_id_t id, const std::string &shortName, const std::string &type, int flags) :
+MetaJackPort::MetaJackPort(MetaJackClient *client, jack_port_id_t id, const std::string &shortName, const std::string &type, int flags) :
     MetaJackPortBase(id, shortName, type, flags),
     twin(0)
 {
     setClient(client);
 }
 
-void MetaJackPortNew::createProcessPort(jack_nframes_t bufferSize)
+void MetaJackPort::createProcessPort(jack_nframes_t bufferSize)
 {
     if (!twin) {
         twin = new MetaJackPortProcess(getId(), getShortName(), getType(), getFlags(), bufferSize);
     }
 }
 
-MetaJackPortProcess * MetaJackPortNew::getProcessPort()
+MetaJackPortProcess * MetaJackPort::getProcessPort()
 {
     return twin;
 }
