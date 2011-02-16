@@ -24,6 +24,11 @@ protected:
 };
 
 class JackThreadInitCallbackHandler : public CallbackHandler<JackThreadInitCallback> {
+public:
+    static void invokeCallbacksWithoutArgs(void *arg) {
+        JackThreadInitCallbackHandler *callbackHandler = (JackThreadInitCallbackHandler*)arg;
+        callbackHandler->invokeCallbacks();
+    }
 protected:
     void invokeCallback(JackThreadInitCallback callback, void *arg) {
         callback(arg);
@@ -59,6 +64,10 @@ public:
         this->starting = starting;
         invokeCallbacks();
     }
+    static void invokeCallbacksWithArgs(int starting, void *arg) {
+        JackFreewheelCallbackHandler *callbackHandler = (JackFreewheelCallbackHandler*)arg;
+        callbackHandler->invokeCallbacksWithArgs(starting);
+    }
 protected:
     virtual void invokeCallback(JackFreewheelCallback callback, void *arg) {
         callback(starting, arg);
@@ -86,6 +95,11 @@ public:
     void invokeCallbacksWithArgs(jack_nframes_t sampleRate) {
         this->sampleRate = sampleRate;
         invokeCallbacks();
+    }
+    static int invokeCallbacksWithArgs(jack_nframes_t sampleRate, void *arg) {
+        JackSampleRateCallbackHandler *callbackHandler = (JackSampleRateCallbackHandler*)arg;
+        callbackHandler->invokeCallbacksWithArgs(sampleRate);
+        return 0;
     }
 protected:
     virtual void invokeCallback(JackSampleRateCallback callback, void *arg) {
@@ -169,6 +183,12 @@ protected:
 };
 
 class JackXRunCallbackHandler : public CallbackHandler<JackXRunCallback> {
+public:
+    static int invokeCallbacksWithoutArgs(void *arg) {
+        JackXRunCallbackHandler *callbackHandler = (JackXRunCallbackHandler*)arg;
+        callbackHandler->invokeCallbacks();
+        return 0;
+    }
 protected:
     virtual void invokeCallback(JackXRunCallback callback, void *arg) {
         callback(arg);

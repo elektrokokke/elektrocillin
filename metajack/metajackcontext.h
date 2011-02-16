@@ -66,7 +66,7 @@ public:
     JackPortConnectCallbackHandler portConnectCallbackHandler;
     JackPortRenameCallbackHandler portRenameCallbackHandler;
     JackGraphOrderCallbackHandler graphOrderCallbackHandler;
-    JackXRunCallbackHandler xrunCallbackHandler;
+    JackXRunCallbackHandler xRunCallbackHandler;
 
     // server-related methods:
     int set_freewheel(int onoff);
@@ -126,6 +126,7 @@ private:
     JackRingBuffer<MetaJackGraphEventNew> graphChangesRingBuffer;
     QWaitCondition waitCondition;
     QMutex waitMutex;
+    bool shutdown;
 
     void setProcessCallback(MetaJackClientProcess *client, JackProcessCallback processCallback, void *processCallbackArgument);
     void activateClient(MetaJackClientProcess *client);
@@ -147,6 +148,7 @@ private:
 
     int process(jack_nframes_t nframes);
     static int process(jack_nframes_t nframes, void *arg);
+    static void infoShutdownCallback(jack_status_t statusCode, const char* reason, void *arg);
     static int bufferSizeCallback(jack_nframes_t bufferSize, void *arg);
 };
 

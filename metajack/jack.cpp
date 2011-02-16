@@ -132,7 +132,10 @@ int meta_jack_set_thread_init_callback (MetaJackClientNew *client, JackThreadIni
   */
 void meta_jack_on_shutdown (MetaJackClientNew *client, JackShutdownCallback shutdown_callback, void *arg)
 {
-    MetaJackContextNew::instance->shutdownCallbackHandler.setCallback(client, shutdown_callback, arg);
+    // if the client has an info shutdown, do not register this callback (it wouldn't be called anyway):
+    if (MetaJackContextNew::instance->shutdownCallbackHandler.find(client) == MetaJackContextNew::instance->shutdownCallbackHandler.end()) {
+        MetaJackContextNew::instance->shutdownCallbackHandler.setCallback(client, shutdown_callback, arg);
+    }
 }
 
 /*
@@ -144,6 +147,8 @@ void meta_jack_on_shutdown (MetaJackClientNew *client, JackShutdownCallback shut
 void meta_jack_on_info_shutdown (MetaJackClientNew *client, JackInfoShutdownCallback shutdown_callback, void *arg)
 {
     MetaJackContextNew::instance->infoShutdownCallbackHandler.setCallback(client, shutdown_callback, arg);
+    // remove any existing "simple" shutdown callback for this client (it shouldn't be called if the client registers an info shutdown callback):
+    MetaJackContextNew::instance->shutdownCallbackHandler.erase(client);
 }
 
 /*
@@ -238,7 +243,7 @@ int meta_jack_set_graph_order_callback (MetaJackClientNew *client, JackGraphOrde
   */
 int meta_jack_set_xrun_callback (MetaJackClientNew *client, JackXRunCallback xrun_callback, void *arg)
 {
-    MetaJackContextNew::instance->xrunCallbackHandler.setCallback(client, xrun_callback, arg);
+    MetaJackContextNew::instance->xRunCallbackHandler.setCallback(client, xrun_callback, arg);
     return 0;
 }
 

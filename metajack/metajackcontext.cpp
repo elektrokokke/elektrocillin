@@ -10,17 +10,28 @@ MetaJackContextNew MetaJackContextNew::instance_("meta_jack");
 MetaJackContextNew::MetaJackContextNew(const std::string &name) :
     wrapperClient(0),
     uniquePortId(1),
-    graphChangesRingBuffer(1024)
+    graphChangesRingBuffer(1024),
+    shutdown(false)
 {
     // register at the real JACK server:
     wrapperClient = jack_client_open(name.c_str(), JackNullOption, 0);
     if (wrapperClient) {
         // get the buffer size:
         bufferSize = jack_get_buffer_size(wrapperClient);
-        // set the buffer size callback to be informed of any buffer size changed:
-        jack_set_buffer_size_callback(wrapperClient, bufferSizeCallback, this);
-        // register the process callback:
+        // register the process callback (this gets special treatment):
         jack_set_process_callback(wrapperClient, process, this);
+        // register the thread init callback:
+        jack_set_thread_init_callback(wrapperClient, JackThreadInitCallbackHandler::invokeCallbacksWithoutArgs, &threadInitCallbackHandler);
+        // register the shutdown info callback (this gets special treatment):
+        jack_on_info_shutdown(wrapperClient, infoShutdownCallback, this);
+        // register the freewheel callback:
+        jack_set_freewheel_callback(wrapperClient, JackFreewheelCallbackHandler::invokeCallbacksWithArgs, &freewheelCallbackHandler);
+        // set the buffer size callback to be informed of any buffer size changed (this gets special treatment):
+        jack_set_buffer_size_callback(wrapperClient, bufferSizeCallback, this);
+        // register the sample rate callback:
+        jack_set_sample_rate_callback(wrapperClient, JackSampleRateCallbackHandler::invokeCallbacksWithArgs, &sampleRateCallbackHandler);
+        // register the xrun callback:
+        jack_set_xrun_callback(wrapperClient, JackXRunCallbackHandler::invokeCallbacksWithoutArgs, &xRunCallbackHandler);
         // register some ports:
         jack_port_t *wrapperAudioInputPort = jack_port_register(wrapperClient, "Audio in", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
         jack_port_t *wrapperAudioOutputPort = jack_port_register(wrapperClient, "Audio out", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
@@ -52,7 +63,7 @@ MetaJackContextNew::~MetaJackContextNew()
 
 bool MetaJackContextNew::isActive() const
 {
-    return wrapperClient;
+    return wrapperClient && !shutdown;
 }
 
 size_t MetaJackContextNew::getClientNameSize()
@@ -610,6 +621,18 @@ int MetaJackContextNew::process(jack_nframes_t nframes, void *arg)
 {
     MetaJackContextNew *context = (MetaJackContextNew*)arg;
     return context->process(nframes);
+}
+
+void MetaJackContextNew::infoShutdownCallback(jack_status_t statusCode, const char* reason, void *arg)
+{
+    MetaJackContextNew *context = (MetaJackContextNew*)arg;
+    // calling jack_client_close() from this callback is not allowed... remember that server is being shutdown for later invocation:
+    context->shutdown = true;
+    // notify the internal clients:
+    // first notify the clients which registered a simple shutdown callback:
+    context->shutdownCallbackHandler.invokeCallbacks();
+    // now those with the more complex callback (both sets should be mutually exclusive):
+    context->infoShutdownCallbackHandler.invokeCallbacksWithArgs(statusCode, reason);
 }
 
 int MetaJackContextNew::bufferSizeCallback(jack_nframes_t bufferSize, void *arg)
