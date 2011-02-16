@@ -7,8 +7,6 @@
 #include "jackringbuffer.h"
 #include <jack/midiport.h>
 #include <map>
-#include <QWaitCondition>
-#include <QMutex>
 
 class MetaJackContext
 {
@@ -34,9 +32,9 @@ public:
 
     // create and delete clients:
     MetaJackClient * openClient(const std::string &name, jack_options_t options);
-    bool closeClient(MetaJackClient *client);
     // methods to change the process graph
     // each of the following methods has a corresponding method which is called from the process thread
+    bool closeClient(MetaJackClient *client);
     bool setProcessCallback(MetaJackClient *client, JackProcessCallback processCallback, void *processCallbackArgument);
     bool activateClient(MetaJackClient *client);
     bool deactivateClient(MetaJackClient *client);
@@ -100,6 +98,7 @@ private:
     class MetaJackGraphEvent {
     public:
         enum {
+            CLOSE_CLIENT,
             SET_PROCESS_CALLBACK,
             ACTIVATE_CLIENT,
             DEACTIVATE_CLIENT,
@@ -124,10 +123,9 @@ private:
     std::map<jack_port_id_t, MetaJackPort*> portsById;
     std::set<MetaJackClientProcess*> activeClients;
     JackRingBuffer<MetaJackGraphEvent> graphChangesRingBuffer;
-    QWaitCondition waitCondition;
-    QMutex waitMutex;
     bool shutdown;
 
+    void closeClient(MetaJackClientProcess *client);
     void setProcessCallback(MetaJackClientProcess *client, JackProcessCallback processCallback, void *processCallbackArgument);
     void activateClient(MetaJackClientProcess *client);
     void deactivateClient(MetaJackClientProcess *client);

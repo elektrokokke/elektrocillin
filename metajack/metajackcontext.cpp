@@ -52,13 +52,18 @@ MetaJackContext::MetaJackContext(const std::string &name) :
 
 MetaJackContext::~MetaJackContext()
 {
+    // invoke the internal clients' shutdown callbacks:
+    // (note: no status is set, because there is no one that really fits this situation)
+    infoShutdownCallbackHandler.invokeCallbacksWithArgs((jack_status_t)0, "Your MetaJack instance is being deleted");
+    shutdownCallbackHandler.invokeCallbacks();
+    // close the wrapper client:
+    jack_client_close(wrapperClient);
+    wrapperClient = 0;
     // close all clients:
     for (; clients.size(); ) {
         MetaJackClient *client = clients.begin()->second;
         closeClient(client);
     }
-    // close the wrapper client:
-    jack_client_close(wrapperClient);
 }
 
 bool MetaJackContext::isActive() const
@@ -120,11 +125,25 @@ bool MetaJackContext::closeClient(MetaJackClient *client)
 {
     assert(client && client->getProcessClient());
     deactivateClient(client);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::CLOSE_CLIENT;
+        event.client = client->getProcessClient();
+        // the following will call the process thread's closeClient() method:
+        sendGraphChangeEvent(event);
+    } else {
+        closeClient(client->getProcessClient());
+    }
     clientRegistrationCallbackHandler.invokeCallbacksWithArgs(client->getName().c_str(), 0);
     clients.erase(client->getName());
-    delete client->getProcessClient();
     delete client;
     return true;
+}
+
+void MetaJackContext::closeClient(MetaJackClientProcess *client)
+{
+    assert(activeClients.find(client) == activeClients.end());
+    delete client;
 }
 
 bool MetaJackContext::setProcessCallback(MetaJackClient *client, JackProcessCallback processCallback, void *processCallbackArgument)
@@ -133,13 +152,17 @@ bool MetaJackContext::setProcessCallback(MetaJackClient *client, JackProcessCall
     if (client->isActive()) {
         return false;
     }
-    MetaJackGraphEvent event;
-    event.type = MetaJackGraphEvent::SET_PROCESS_CALLBACK;
-    event.client = client->getProcessClient();
-    event.processCallback = processCallback;
-    event.processCallbackArgument = processCallbackArgument;
-    // the following will call the process thread's setProcessCallback() method:
-    sendGraphChangeEvent(event);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::SET_PROCESS_CALLBACK;
+        event.client = client->getProcessClient();
+        event.processCallback = processCallback;
+        event.processCallbackArgument = processCallbackArgument;
+        // the following will call the process thread's setProcessCallback() method:
+        sendGraphChangeEvent(event);
+    } else {
+        setProcessCallback(client->getProcessClient(), processCallback, processCallbackArgument);
+    }
     return true;
 }
 
@@ -162,11 +185,15 @@ bool MetaJackContext::activateClient(MetaJackClient *client)
         void *arg = find->second.second;
         callback(bufferSize, arg);
     }
-    MetaJackGraphEvent event;
-    event.type = MetaJackGraphEvent::ACTIVATE_CLIENT;
-    event.client = client->getProcessClient();
-    // the following will call the process thread's activateClient() method:
-    sendGraphChangeEvent(event);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::ACTIVATE_CLIENT;
+        event.client = client->getProcessClient();
+        // the following will call the process thread's activateClient() method:
+        sendGraphChangeEvent(event);
+    } else {
+        activateClient(client->getProcessClient());
+    }
     client->setActive(true);
     return true;
 }
@@ -183,11 +210,15 @@ bool MetaJackContext::deactivateClient(MetaJackClient *client)
     if (!client->isActive()) {
         return false;
     }
-    MetaJackGraphEvent event;
-    event.type = MetaJackGraphEvent::DEACTIVATE_CLIENT;
-    event.client = client->getProcessClient();
-    // the following will call the process thread's deactivateClient() method:
-    sendGraphChangeEvent(event);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::DEACTIVATE_CLIENT;
+        event.client = client->getProcessClient();
+        // the following will call the process thread's deactivateClient() method:
+        sendGraphChangeEvent(event);
+    } else {
+        deactivateClient(client->getProcessClient());
+    }
     client->setActive(false);
     return true;
 }
@@ -223,12 +254,16 @@ MetaJackPort * MetaJackContext::registerPort(MetaJackClient *client, const std::
     }
     MetaJackPort *port = new MetaJackPort(client, createUniquePortId(), shortName, type, flags);
     port->createProcessPort(bufferSize);
-    MetaJackGraphEvent event;
-    event.type = MetaJackGraphEvent::REGISTER_PORT;
-    event.client = client->getProcessClient();
-    event.port = port->getProcessPort();
-    // the following will call the process thread's registerPort() method:
-    sendGraphChangeEvent(event);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::REGISTER_PORT;
+        event.client = client->getProcessClient();
+        event.port = port->getProcessPort();
+        // the following will call the process thread's registerPort() method:
+        sendGraphChangeEvent(event);
+    } else {
+        registerPort(client->getProcessClient(), port->getProcessPort());
+    }
     portsById[port->getId()] = portsByName[port->getFullName()] = port;
     portRegistrationCallbackHandler.invokeCallbacksWithArgs(port->getId(), 1);
     return port;
@@ -243,11 +278,15 @@ void MetaJackContext::registerPort(MetaJackClientProcess *client, MetaJackPortPr
 bool MetaJackContext::unregisterPort(MetaJackPort *port)
 {
     assert(port && port->getProcessPort());
-    MetaJackGraphEvent event;
-    event.type = MetaJackGraphEvent::UNREGISTER_PORT;
-    event.port = port->getProcessPort();
-    // the following will call the process thread's unregisterPort() method:
-    sendGraphChangeEvent(event);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::UNREGISTER_PORT;
+        event.port = port->getProcessPort();
+        // the following will call the process thread's unregisterPort() method:
+        sendGraphChangeEvent(event);
+    } else {
+        unregisterPort(port->getProcessPort());
+    }
     portRegistrationCallbackHandler.invokeCallbacksWithArgs(port->getId(), 0);
     portsById.erase(port->getId());
     portsByName.erase(port->getFullName());
@@ -272,12 +311,16 @@ bool MetaJackContext::renamePort(MetaJackPort *port, const std::string &shortNam
         port->setShortName(oldShortName);
         return false;
     }
-    MetaJackGraphEvent event;
-    event.type = MetaJackGraphEvent::RENAME_PORT;
-    event.port = port->getProcessPort();
-    event.shortName = shortName;
-    // the following will call the process thread's renamePort() method:
-    sendGraphChangeEvent(event);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::RENAME_PORT;
+        event.port = port->getProcessPort();
+        event.shortName = shortName;
+        // the following will call the process thread's renamePort() method:
+        sendGraphChangeEvent(event);
+    } else {
+        renamePort(port->getProcessPort(), shortName);
+    }
     portRenameCallbackHandler.invokeCallbacksWithArgs(port->getId(), oldFullName.c_str(), port->getFullName().c_str());
     portsByName.erase(oldFullName);
     portsByName[port->getFullName()] = port;
@@ -310,12 +353,16 @@ bool MetaJackContext::connectPorts(const std::string &sourceName, const std::str
         return false;
     }
     source->connect(dest);
-    MetaJackGraphEvent event;
-    event.type = MetaJackGraphEvent::CONNECT_PORTS;
-    event.port = source->getProcessPort();
-    event.connectedPort = dest->getProcessPort();
-    // the following will call the process thread's connectPorts() method:
-    sendGraphChangeEvent(event);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::CONNECT_PORTS;
+        event.port = source->getProcessPort();
+        event.connectedPort = dest->getProcessPort();
+        // the following will call the process thread's connectPorts() method:
+        sendGraphChangeEvent(event);
+    } else {
+        connectPorts(source->getProcessPort(), dest->getProcessPort());
+    }
     portConnectCallbackHandler.invokeCallbacksWithArgs(source->getId(), dest->getId(), 1);
     return true;
 }
@@ -342,12 +389,16 @@ bool MetaJackContext::disconnectPorts(const std::string &sourceName, const std::
         return false;
     }
     source->disconnect(dest);
-    MetaJackGraphEvent event;
-    event.type = MetaJackGraphEvent::DISCONNECT_PORTS;
-    event.port = source->getProcessPort();
-    event.connectedPort = dest->getProcessPort();
-    // the following will call the process thread's disconnectPorts() method:
-    sendGraphChangeEvent(event);
+    if (isActive()) {
+        MetaJackGraphEvent event;
+        event.type = MetaJackGraphEvent::DISCONNECT_PORTS;
+        event.port = source->getProcessPort();
+        event.connectedPort = dest->getProcessPort();
+        // the following will call the process thread's disconnectPorts() method:
+        sendGraphChangeEvent(event);
+    } else {
+        disconnectPorts(source->getProcessPort(), dest->getProcessPort());
+    }
     portConnectCallbackHandler.invokeCallbacksWithArgs(source->getId(), dest->getId(), 0);
     return true;
 }
@@ -575,10 +626,6 @@ void MetaJackContext::sendGraphChangeEvent(const MetaJackGraphEvent &event)
 {
     // write the event to the ring buffer:
     graphChangesRingBuffer.write(event);
-    // wait for the process thread to process it:
-    waitMutex.lock();
-    waitCondition.wait(&waitMutex);
-    waitMutex.unlock();
 }
 
 int MetaJackContext::process(jack_nframes_t nframes)
@@ -586,7 +633,9 @@ int MetaJackContext::process(jack_nframes_t nframes)
     // first get all changes to the graph since the last call:
     for (; graphChangesRingBuffer.readSpace(); ) {
         MetaJackGraphEvent event = graphChangesRingBuffer.read();
-        if (event.type == MetaJackGraphEvent::SET_PROCESS_CALLBACK) {
+        if (event.type == MetaJackGraphEvent::CLOSE_CLIENT) {
+            closeClient(event.client);
+        } else if (event.type == MetaJackGraphEvent::SET_PROCESS_CALLBACK) {
             setProcessCallback(event.client, event.processCallback, event.processCallbackArgument);
         } else if (event.type == MetaJackGraphEvent::ACTIVATE_CLIENT) {
             activateClient(event.client);
@@ -604,8 +653,6 @@ int MetaJackContext::process(jack_nframes_t nframes)
             disconnectPorts(event.port, event.connectedPort);
         }
     }
-    // wake the other thread(s):
-    waitCondition.wakeAll();
     // evaluate the graph structure and call all process callbacks registered by internal clients:
     std::set<MetaJackClientProcess*> unprocessedClients = activeClients;
     bool success = true;
