@@ -12,9 +12,21 @@ extern "C"
 {
 #endif
 
-#include "types.h"
+#include <jack/types.h>
 #include <jack/systemdeps.h>
 #include <jack/weakmacros.h>
+
+/**
+ *  meta_jack_port_t is an opaque type.  You may only access it using the
+ *  API provided.
+ */
+typedef struct MetaJackPort meta_jack_port_t;
+
+/**
+ *  meta_jack_client_t is an opaque type.  You may only access it using the
+ *  API provided.
+ */
+typedef struct MetaJackClient meta_jack_client_t;
 
 #define jack_port_t                             meta_jack_port_t
 #define jack_client_t                           meta_jack_client_t

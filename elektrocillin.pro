@@ -64,11 +64,11 @@ SOURCES += main.cpp\
     pulseoscillator.cpp \
     adsrclient.cpp \
     multiplyprocessor.cpp \
-    metajack/jack.cpp \
     metajack/midiport.cpp \
     metajack/metajackclient.cpp \
     metajack/metajackport.cpp \
-    metajack/metajackcontext.cpp
+    metajack/metajackcontext.cpp \
+    metajack/metajack.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -128,13 +128,12 @@ HEADERS  += mainwindow.h \
     pulseoscillator.h \
     adsrclient.h \
     multiplyprocessor.h \
-    metajack/jack.h \
     metajack/midiport.h \
-    metajack/types.h \
     metajack/metajackclient.h \
     metajack/metajackport.h \
     metajack/metajackcontext.h \
-    metajack/callbackhandlers.h
+    metajack/callbackhandlers.h \
+    metajack/jack.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
