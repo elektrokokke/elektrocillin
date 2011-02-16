@@ -80,6 +80,7 @@ private:
     Record2MemoryClient recordClient;
     GraphView *recordClientGraphView;
     JackNullClient nullClient;
+    QRectF allClientsRect;
     GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard, *graphicsClientItemWaveShaping, *graphicsClientItemCubicSplineWaveShaping, *graphicsClientItemLinearOscillator, *graphicsClientItemRecord;
 };
 

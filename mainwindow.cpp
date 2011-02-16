@@ -109,21 +109,27 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemFilter = new GraphicsClientItem(&moogFilterClient, rect);
     graphicsClientItemFilter->setInnerItem(frequencyResponse);
     scene->addItem(graphicsClientItemFilter);
+    allClientsRect = frequencyResponse->sceneBoundingRect();
     graphicsClientItemKeyboard = new GraphicsClientItem(&midiSignalClient, rect.translated(rect.width(), 0));
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
+    allClientsRect |= keyboard->sceneBoundingRect();
     graphicsClientItemWaveShaping = new GraphicsClientItem(&linearWaveShapingClient, rect.translated(0, rect.height()));
     graphicsClientItemWaveShaping->setInnerItem(waveShapingItem);
     scene->addItem(graphicsClientItemWaveShaping);
+    allClientsRect |= waveShapingItem->sceneBoundingRect();
     graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem(&cubicSplineWaveShapingClient, rect.translated(rect.width(), rect.height()));
     graphicsClientItemCubicSplineWaveShaping->setInnerItem(cubicSplineWaveShapingItem);
     scene->addItem(graphicsClientItemCubicSplineWaveShaping);
+    allClientsRect |= cubicSplineWaveShapingItem->sceneBoundingRect();
     graphicsClientItemLinearOscillator = new GraphicsClientItem(&linearOscillatorClient, rect.translated(rect.width() * 2, 0));
     graphicsClientItemLinearOscillator->setInnerItem(linearOscillatorGraphicsItem);
     scene->addItem(graphicsClientItemLinearOscillator);
+    allClientsRect |= linearOscillatorGraphicsItem->sceneBoundingRect();
     graphicsClientItemRecord = new GraphicsClientItem(&recordClient, rect.translated(rect.width() * 2, rect.height()));
     graphicsClientItemRecord->setInnerItem(recordClientRect);
     scene->addItem(graphicsClientItemRecord);
+    allClientsRect |= recordClientRect->sceneBoundingRect();
     // end client graphics item test setup
 
     // port connection test setup:
@@ -135,8 +141,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Record:Midi in");
-    //connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
-    connectionList.append("White noise:Noise out::Multiplier:Factor 1");
+    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
+    //connectionList.append("White noise:Noise out::Multiplier:Factor 1");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
     connectionList.append("Multiplier:Product out::Moog filter:Audio in");
     connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
@@ -148,7 +154,7 @@ MainWindow::MainWindow(QWidget *parent) :
     nullClient.restoreConnections(connectionList);
     // end port connection test setup
 
-    //ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+//    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-200, -200, 200, 200));
 
@@ -269,7 +275,7 @@ void MainWindow::on_actionVirtual_keyboard_triggered()
 
 void MainWindow::on_actionAll_triggered()
 {
-    ui->graphicsView->animateToVisibleSceneRect(ui->graphicsView->scene()->sceneRect());
+    ui->graphicsView->animateToVisibleSceneRect(allClientsRect);
 }
 
 void MainWindow::on_actionLinear_waveshaping_triggered()
@@ -291,19 +297,19 @@ void MainWindow::onRecordFinished()
 {
     recordClientGraphView->setModel(recordClient.popAudioModel());
     recordClientGraphView->model()->setParent(recordClientGraphView);
-    double min = -1, max = 1;
-    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {
-        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
-        if (value < min) {
-            min = value;
-        } else if (value > max) {
-            max = value;
-        }
-    }
-    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {
-        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
-        recordClientGraphView->model()->setData(recordClientGraphView->model()->index(i, 0), (value - min) / (max - min) * 2.0 - 1.0, Qt::DisplayRole);
-    }
+//    double min = -1, max = 1;
+//    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {
+//        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
+//        if (value < min) {
+//            min = value;
+//        } else if (value > max) {
+//            max = value;
+//        }
+//    }
+//    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {
+//        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
+//        recordClientGraphView->model()->setData(recordClientGraphView->model()->index(i, 0), (value - min) / (max - min) * 2.0 - 1.0, Qt::DisplayRole);
+//    }
 }
 
 void MainWindow::onAnimationFinished()

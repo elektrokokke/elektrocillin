@@ -1,7 +1,6 @@
 #include "linearoscillatorclient.h"
 #include "graphicsnodeitem.h"
 #include <cmath>
-#include <QPen>
 
 LinearOscillatorClient::LinearOscillatorClient(const QString &clientName, size_t ringBufferSize) :
     EventProcessorClient<LinearOscillatorParameters>(clientName, new LinearOscillator(), ringBufferSize),
@@ -75,36 +74,42 @@ void LinearOscillatorClient::processEvent(const LinearOscillatorParameters &even
     getLinearOscillator()->setLinearInterpolator(interpolator);
 }
 
-LinearOscillatorGraphicsItem::LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client_, QGraphicsItem *parent) :
-    QGraphicsRectItem(rect, parent),
+LinearOscillatorGraphicsItem::LinearOscillatorGraphicsItem(const QRectF &rectangle, LinearOscillatorClient *client_, QGraphicsItem *parent) :
+    QGraphicsRectItem(rectangle, parent),
     client(client_),
     interpolator(client->getLinearOscillator()->getLinearInterpolator()),
     interpolatorIntegral(client->getLinearOscillator()->getLinearIntegralInterpolator())
 {
     setPen(QPen(QBrush(Qt::black), 2));
     setBrush(QBrush(Qt::white));
+
+    (new PulseWaveGraphicsItem(QRectF(0, 0, rect().width() * 0.08, rect().height() * 0.08), this))->setPos(rect().width() * 0.01, rect().height() * 0.01);
+    (new SawtoothWaveGraphicsItem(QRectF(0, 0, rect().width() * 0.08, rect().height() * 0.08), this))->setPos(rect().width() * 0.11, rect().height() * 0.01);
+    (new TriangleWaveGraphicsItem(QRectF(0, 0, rect().width() * 0.08, rect().height() * 0.08), this))->setPos(rect().width() * 0.21, rect().height() * 0.01);
+
     // create dotted vertical lines:
     for (int i = 0; i <= 10; i++) {
-        qreal x = (double)i / 10.0 * (rect.right() - rect.left()) + rect.left();
-        (new QGraphicsLineItem(x, rect.top(), x, rect.bottom(), this))->setPen(QPen(Qt::DotLine));
+        qreal x = (double)i / 10.0 * (rect().right() - rect().left()) + rect().left();
+        (new QGraphicsLineItem(x, rect().top() + (rect().bottom() - rect().top()) * 0.1, x, rect().bottom(), this))->setPen(QPen(Qt::DotLine));
     }
     // create dotted horizontal lines:
     for (int i = 0; i <= 10; i++) {
-        qreal y = (double)i / 10.0 * (rect.top() - rect.bottom()) + rect.bottom();
-        (new QGraphicsLineItem(rect.left(), y, rect.right(), y, this))->setPen(QPen(Qt::DotLine));
+        qreal y = (double)i / 10.0 * 0.9 * (rect().top() - rect().bottom()) + rect().bottom();
+        (new QGraphicsLineItem(rect().left(), y, rect().right(), y, this))->setPen(QPen(Qt::DotLine));
     }
     for (int i = 0; i < interpolator.getX().size(); i++) {
         nodes.append(createNode(interpolator.getX()[i], interpolator.getY()[i]));
         mapSenderToControlPointIndex[nodes.back()] = i;
     }
-    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, -1, 1, rect.width() * 0.5 / M_PI, -rect.height() * 0.5, this);
+    interpolationItem = new GraphicsInterpolationItem(&interpolator, 0.01, -1, 1, rect().width() * 0.5 / M_PI, -rect().height() * 0.9 * 0.5, this);
     interpolationItem->setPen(QPen(QBrush(Qt::black), 2));
-    interpolationItem->setPos(0, 0.5 * (rect.top() + rect.bottom()));
+    interpolationItem->setPos(0, 0.55 * (rect().top() + rect().bottom()));
 
-    //interpolationIntegralItem = new GraphicsInterpolationItem(&interpolatorIntegral, 0.01, -1, 1, rect.width() * 0.5 / M_PI, -rect.height() * 0.5, this);
-    interpolationIntegralItem = new GraphicsInterpolationItem(&interpolatorIntegral, 0.01, -1, 1, rect.width() * 0.5 / M_PI, -rect.height() * 0.5, this);
+    interpolationIntegralItem = new GraphicsInterpolationItem(&interpolatorIntegral, 0.01, -1, 1, rect().width() * 0.5 / M_PI, -rect().height() * 0.9 * 0.5, this);
     interpolationIntegralItem->setPen(QPen(QBrush(Qt::black), 2, Qt::DotLine));
-    interpolationIntegralItem->setPos(0, 0.5 * (rect.top() + rect.bottom()));
+    interpolationIntegralItem->setPos(0, 0.55 * (rect().top() + rect().bottom()));
+
+
 
     // create the context menu:
     contextMenu.addAction(tr("Add a control point"), this, SLOT(increaseControlPoints()));
@@ -191,7 +196,7 @@ GraphicsNodeItem * LinearOscillatorGraphicsItem::createNode(qreal x, qreal y)
     nodeItem->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
     nodeItem->setBrush(QBrush(qRgb(52, 101, 164)));
     nodeItem->setZValue(1);
-    nodeItem->setBounds(rect());
+    nodeItem->setBounds(QRectF(rect().left(), rect().top() + 0.1 * rect().height(), rect().width(), rect().height() * 0.9));
     nodeItem->setBoundsScaled(QRectF(QPointF(0, 1), QPointF(2 * M_PI, -1)));
     nodeItem->setXScaled(x);
     nodeItem->setYScaled(y);
