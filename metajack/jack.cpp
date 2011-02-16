@@ -97,6 +97,7 @@ int meta_jack_get_client_pid (const char *)
   */
 pthread_t meta_jack_client_thread_id (MetaJackClientNew *client)
 {
+    assert(client);
     return MetaJackContextNew::instance->get_thread_id();
 }
 
@@ -107,6 +108,7 @@ pthread_t meta_jack_client_thread_id (MetaJackClientNew *client)
   */
 int meta_jack_is_realtime (MetaJackClientNew *client)
 {
+    assert(client);
     return MetaJackContextNew::instance->is_realtime();
 }
 
@@ -118,7 +120,8 @@ int meta_jack_is_realtime (MetaJackClientNew *client)
   */
 int meta_jack_set_thread_init_callback (MetaJackClientNew *client, JackThreadInitCallback thread_init_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_thread_init_callback(client, thread_init_callback, arg);
+    MetaJackContextNew::instance->threadInitCallbackHandler.setCallback(client, thread_init_callback, arg);
+    return 0;
 }
 
 /*
@@ -129,7 +132,7 @@ int meta_jack_set_thread_init_callback (MetaJackClientNew *client, JackThreadIni
   */
 void meta_jack_on_shutdown (MetaJackClientNew *client, JackShutdownCallback shutdown_callback, void *arg)
 {
-    MetaJackContextNew::instance->set_shutdown_callback(client, shutdown_callback, arg);
+    MetaJackContextNew::instance->shutdownCallbackHandler.setCallback(client, shutdown_callback, arg);
 }
 
 /*
@@ -140,7 +143,7 @@ void meta_jack_on_shutdown (MetaJackClientNew *client, JackShutdownCallback shut
   */
 void meta_jack_on_info_shutdown (MetaJackClientNew *client, JackInfoShutdownCallback shutdown_callback, void *arg)
 {
-    MetaJackContextNew::instance->set_info_shutdown_callback(client, shutdown_callback, arg);
+    MetaJackContextNew::instance->infoShutdownCallbackHandler.setCallback(client, shutdown_callback, arg);
 }
 
 /*
@@ -160,7 +163,8 @@ int meta_jack_set_process_callback (MetaJackClientNew *client, JackProcessCallba
   */
 int meta_jack_set_freewheel_callback (MetaJackClientNew *client, JackFreewheelCallback freewheel_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_freewheel_callback(client, freewheel_callback, arg);
+    MetaJackContextNew::instance->freewheelCallbackHandler.setCallback(client, freewheel_callback, arg);
+    return 0;
 }
 
 /*
@@ -171,7 +175,8 @@ int meta_jack_set_freewheel_callback (MetaJackClientNew *client, JackFreewheelCa
   */
 int meta_jack_set_buffer_size_callback (MetaJackClientNew *client, JackBufferSizeCallback bufsize_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_buffer_size_callback(client, bufsize_callback, arg);
+    MetaJackContextNew::instance->bufferSizeCallbackHandler.setCallback(client, bufsize_callback, arg);
+    return 0;
 }
 
 /*
@@ -182,7 +187,8 @@ int meta_jack_set_buffer_size_callback (MetaJackClientNew *client, JackBufferSiz
   */
 int meta_jack_set_sample_rate_callback (MetaJackClientNew *client, JackSampleRateCallback srate_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_sample_rate_callback(client, srate_callback, arg);
+    MetaJackContextNew::instance->sampleRateCallbackHandler.setCallback(client, srate_callback, arg);
+    return 0;
 }
 
 /*
@@ -192,31 +198,36 @@ int meta_jack_set_sample_rate_callback (MetaJackClientNew *client, JackSampleRat
   */
 int meta_jack_set_client_registration_callback (MetaJackClientNew *client, JackClientRegistrationCallback registration_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_client_registration_callback(client, registration_callback, arg);
+    MetaJackContextNew::instance->clientRegistrationCallbackHandler.setCallback(client, registration_callback, arg);
+    return 0;
 }
 
 // Note: see meta_jack_set_client_registration_callback
 int meta_jack_set_port_registration_callback (MetaJackClientNew *client, JackPortRegistrationCallback registration_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_port_registration_callback(client, registration_callback, arg);
+    MetaJackContextNew::instance->portRegistrationCallbackHandler.setCallback(client, registration_callback, arg);
+    return 0;
 }
 
 // Note: see meta_jack_set_client_registration_callback
 int meta_jack_set_port_connect_callback (MetaJackClientNew *client, JackPortConnectCallback connect_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_port_connect_callback(client, connect_callback, arg);
+    MetaJackContextNew::instance->portConnectCallbackHandler.setCallback(client, connect_callback, arg);
+    return 0;
 }
 
 // Note: see meta_jack_set_client_registration_callback
 int meta_jack_set_port_rename_callback (MetaJackClientNew *client, JackPortRenameCallback rename_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_port_rename_callback(client, rename_callback, arg);
+    MetaJackContextNew::instance->portRenameCallbackHandler.setCallback(client, rename_callback, arg);
+    return 0;
 }
 
 // Note: see meta_jack_set_client_registration_callback
 int meta_jack_set_graph_order_callback (MetaJackClientNew *client, JackGraphOrderCallback graph_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_graph_order_callback(client, graph_callback, arg);
+    MetaJackContextNew::instance->graphOrderCallbackHandler.setCallback(client, graph_callback, arg);
+    return 0;
 }
 
 /*
@@ -227,15 +238,17 @@ int meta_jack_set_graph_order_callback (MetaJackClientNew *client, JackGraphOrde
   */
 int meta_jack_set_xrun_callback (MetaJackClientNew *client, JackXRunCallback xrun_callback, void *arg)
 {
-    return MetaJackContextNew::instance->set_xrun_callback(client, xrun_callback, arg);
+    MetaJackContextNew::instance->xrunCallbackHandler.setCallback(client, xrun_callback, arg);
+    return 0;
 }
 
 /*
   Note: get the real client associated with the given client's
   meta_jack_context and pass on the call using that client.
   */
-int meta_jack_set_freewheel(MetaJackClientNew* client, int onoff)
+int meta_jack_set_freewheel(MetaJackClientNew *client, int onoff)
 {
+    assert(client);
     return MetaJackContextNew::instance->set_freewheel(onoff);
 }
 
@@ -245,6 +258,7 @@ int meta_jack_set_freewheel(MetaJackClientNew* client, int onoff)
   */
 int meta_jack_set_buffer_size (MetaJackClientNew *client, jack_nframes_t nframes)
 {
+    assert(client);
     return MetaJackContextNew::instance->set_buffer_size(nframes);
 }
 
@@ -254,6 +268,7 @@ int meta_jack_set_buffer_size (MetaJackClientNew *client, jack_nframes_t nframes
   */
 jack_nframes_t meta_jack_get_sample_rate (MetaJackClientNew *client)
 {
+    assert(client);
     return MetaJackContextNew::instance->get_sample_rate();
 }
 
@@ -263,6 +278,7 @@ jack_nframes_t meta_jack_get_sample_rate (MetaJackClientNew *client)
   */
 jack_nframes_t meta_jack_get_buffer_size (MetaJackClientNew *client)
 {
+    assert(client);
     return MetaJackContextNew::instance->get_buffer_size();
 }
 
@@ -272,6 +288,7 @@ jack_nframes_t meta_jack_get_buffer_size (MetaJackClientNew *client)
   */
 float meta_jack_cpu_load (MetaJackClientNew *client)
 {
+    assert(client);
     return MetaJackContextNew::instance->get_cpu_load();
 }
 
@@ -288,8 +305,9 @@ MetaJackPortNew * meta_jack_port_register (MetaJackClientNew *client, const char
 /*
   Note: remove all connections from the port and free the buffer associated with the port.
   */
-int meta_jack_port_unregister (MetaJackClientNew *, MetaJackPortNew *port)
+int meta_jack_port_unregister (MetaJackClientNew *client, MetaJackPortNew *port)
 {
+    assert(client);
     return (MetaJackContextNew::instance->unregisterPort(port) ? 0 : 1);
 }
 
@@ -391,8 +409,9 @@ const char ** meta_jack_port_get_connections (const MetaJackPortNew *port)
   Also: how to implement this depends on how the meta_jack_context's
   meta client graph will bedefined.
   */
-const char ** meta_jack_port_get_all_connections (const MetaJackClientNew *, const MetaJackPortNew *port)
+const char ** meta_jack_port_get_all_connections (const MetaJackClientNew *client, const MetaJackPortNew *port)
 {
+    assert(client);
     return port->getConnections();
 }
 
@@ -458,24 +477,27 @@ int meta_jack_port_set_name (MetaJackPortNew *port, const char *port_name)
   Assure that each port has two aliases at most. Also assure that
   no two ports have the same alias.
   */
-int meta_jack_port_set_alias (MetaJackPortNew *, const char *)
+int meta_jack_port_set_alias (MetaJackPortNew *client, const char *)
 {
+    assert(client);
     return 1;
 }
 
 /*
   Note: probably have a map of such aliases in a meta_jack_context.
   */
-int meta_jack_port_unset_alias (MetaJackPortNew *, const char *)
+int meta_jack_port_unset_alias (MetaJackPortNew *client, const char *)
 {
+    assert(client);
     return 1;
 }
 
 /*
   Note: probably have a map of such aliases in a meta_jack_context.
   */
-int meta_jack_port_get_aliases (const MetaJackPortNew *, char* const [])
+int meta_jack_port_get_aliases (const MetaJackPortNew *client, char* const [])
 {
+    assert(client);
     return 0;
 }
 
@@ -517,6 +539,7 @@ int meta_jack_port_monitoring_input (MetaJackPortNew *)
   */
 int meta_jack_connect (MetaJackClientNew *client, const char *source_port, const char *destination_port)
 {
+    assert(client);
     return (MetaJackContextNew::instance->connectPorts(source_port, destination_port) ? 0 : 1);
 }
 
@@ -526,6 +549,7 @@ int meta_jack_connect (MetaJackClientNew *client, const char *source_port, const
   */
 int meta_jack_disconnect (MetaJackClientNew *client, const char *source_port, const char *destination_port)
 {
+    assert(client);
     return (MetaJackContextNew::instance->disconnectPorts(source_port, destination_port) ? 0 : 1);
 }
 
@@ -574,6 +598,7 @@ const char ** meta_jack_get_ports (MetaJackClientNew *client, const char *port_n
   */
 MetaJackPortNew * meta_jack_port_by_name (MetaJackClientNew *client, const char *port_name)
 {
+    assert(client);
     return MetaJackContextNew::instance->getPortByName(port_name);
 }
 
@@ -582,6 +607,7 @@ MetaJackPortNew * meta_jack_port_by_name (MetaJackClientNew *client, const char 
   */
 MetaJackPortNew * meta_jack_port_by_id (MetaJackClientNew *client, jack_port_id_t port_id)
 {
+    assert(client);
     return MetaJackContextNew::instance->getPortById(port_id);
 }
 
@@ -591,6 +617,7 @@ MetaJackPortNew * meta_jack_port_by_id (MetaJackClientNew *client, jack_port_id_
   */
 jack_nframes_t meta_jack_frames_since_cycle_start (const MetaJackClientNew *client)
 {
+    assert(client);
     return MetaJackContextNew::instance->get_frames_since_cycle_start();
 }
 
@@ -600,6 +627,7 @@ jack_nframes_t meta_jack_frames_since_cycle_start (const MetaJackClientNew *clie
   */
 jack_nframes_t meta_jack_frame_time (const MetaJackClientNew *client)
 {
+    assert(client);
     return MetaJackContextNew::instance->get_frame_time();
 }
 
@@ -609,6 +637,7 @@ jack_nframes_t meta_jack_frame_time (const MetaJackClientNew *client)
   */
 jack_nframes_t meta_jack_last_frame_time (const MetaJackClientNew *client)
 {
+    assert(client);
     return MetaJackContextNew::instance->get_last_frame_time();
 }
 
@@ -618,6 +647,7 @@ jack_nframes_t meta_jack_last_frame_time (const MetaJackClientNew *client)
   */
 jack_time_t meta_jack_frames_to_time(const MetaJackClientNew *client, jack_nframes_t nframes)
 {
+    assert(client);
     return MetaJackContextNew::instance->convert_frames_to_time(nframes);
 }
 
@@ -627,6 +657,7 @@ jack_time_t meta_jack_frames_to_time(const MetaJackClientNew *client, jack_nfram
   */
 jack_nframes_t meta_jack_time_to_frames(const MetaJackClientNew *client, jack_time_t time)
 {
+    assert(client);
     return MetaJackContextNew::instance->convert_time_to_frames(time);
 }
 

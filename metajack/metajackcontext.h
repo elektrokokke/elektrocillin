@@ -3,6 +3,7 @@
 
 #include "metajackclient.h"
 #include "metajackport.h"
+#include "callbackhandlers.h"
 #include "jackringbuffer.h"
 #include <jack/midiport.h>
 #include <map>
@@ -16,7 +17,6 @@ public:
         size_t bufferSize, midiEventCount, midiDataSize;
         jack_nframes_t lostMidiEvents;
     };
-
 
     static MetaJackContextNew *instance;
     static MetaJackContextNew instance_;
@@ -55,19 +55,18 @@ public:
     pthread_t get_thread_id();
     bool is_realtime();
 
-    // callback setting methods:
-    int     set_thread_init_callback (MetaJackClientNew *client, JackThreadInitCallback thread_init_callback, void *arg);
-    void    set_shutdown_callback (MetaJackClientNew *client, JackShutdownCallback shutdown_callback, void *arg);
-    void    set_info_shutdown_callback (MetaJackClientNew *client, JackInfoShutdownCallback shutdown_callback, void *arg);
-    int     set_freewheel_callback (MetaJackClientNew *client, JackFreewheelCallback freewheel_callback, void *arg);
-    int     set_buffer_size_callback (MetaJackClientNew *client, JackBufferSizeCallback bufsize_callback, void *arg);
-    int     set_sample_rate_callback (MetaJackClientNew *client, JackSampleRateCallback srate_callback, void *arg);
-    int     set_client_registration_callback (MetaJackClientNew *, JackClientRegistrationCallback registration_callback, void *arg);
-    int     set_port_registration_callback (MetaJackClientNew *, JackPortRegistrationCallback registration_callback, void *arg);
-    int     set_port_connect_callback (MetaJackClientNew *, JackPortConnectCallback connect_callback, void *arg);
-    int     set_port_rename_callback (MetaJackClientNew *, JackPortRenameCallback rename_callback, void *arg);
-    int     set_graph_order_callback (MetaJackClientNew *, JackGraphOrderCallback graph_callback, void *);
-    int     set_xrun_callback (MetaJackClientNew *, JackXRunCallback xrun_callback, void *arg);
+    JackThreadInitCallbackHandler threadInitCallbackHandler;
+    JackShutdownCallbackHandler shutdownCallbackHandler;
+    JackInfoShutdownCallbackHandler infoShutdownCallbackHandler;
+    JackFreewheelCallbackHandler freewheelCallbackHandler;
+    JackBufferSizeCallbackHandler bufferSizeCallbackHandler;
+    JackSampleRateCallbackHandler sampleRateCallbackHandler;
+    JackClientRegistrationCallbackHandler clientRegistrationCallbackHandler;
+    JackPortRegistrationCallbackHandler portRegistrationCallbackHandler;
+    JackPortConnectCallbackHandler portConnectCallbackHandler;
+    JackPortRenameCallbackHandler portRenameCallbackHandler;
+    JackGraphOrderCallbackHandler graphOrderCallbackHandler;
+    JackXRunCallbackHandler xrunCallbackHandler;
 
     // server-related methods:
     int set_freewheel(int onoff);
@@ -94,7 +93,6 @@ public:
     static jack_nframes_t      midi_get_lost_event_count(void *port_buffer);
     static bool                compare_midi_events(const jack_midi_event_t &event1, const jack_midi_event_t &event2);
 
-
     // for all methods returning const char **:
     void free(void* ptr);
 
@@ -119,22 +117,11 @@ private:
     };
 
     jack_client_t *wrapperClient;
+    jack_nframes_t bufferSize;
     jack_port_id_t uniquePortId;
     std::map<std::string, MetaJackClientNew*> clients;
     std::map<std::string, MetaJackPortNew*> portsByName;
     std::map<jack_port_id_t, MetaJackPortNew*> portsById;
-    std::map<MetaJackClientNew*, std::pair<JackThreadInitCallback, void*> > threadInitCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackShutdownCallback, void*> > shutdownCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackInfoShutdownCallback, void*> > infoShutdownCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackFreewheelCallback, void*> > freewheelCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackBufferSizeCallback, void*> > bufferSizeCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackSampleRateCallback, void*> > sampleRateCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackClientRegistrationCallback, void*> > clientRegistrationCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackPortRegistrationCallback, void*> > portRegistrationCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackPortConnectCallback, void*> > portConnectCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackPortRenameCallback, void*> > portRenameCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackGraphOrderCallback, void*> > graphOrderCallbacks;
-    std::map<MetaJackClientNew*, std::pair<JackXRunCallback, void*> > xRunCallbacks;
     std::set<MetaJackClientProcess*> activeClients;
     JackRingBuffer<MetaJackGraphEventNew> graphChangesRingBuffer;
     QWaitCondition waitCondition;
@@ -154,11 +141,13 @@ private:
     void invokeJackPortRegistrationCallbacks(jack_port_id_t id, bool registered);
     void invokeJackPortRenameCallbacks(jack_port_id_t id, const std::string &oldName, const std::string &newName);
     void invokeJackPortConnectCallbacks(jack_port_id_t a, jack_port_id_t b, bool connected);
+    void invokeJackBufferSizeCallbacks(jack_nframes_t bufferSize);
     // signal graph change:
     void sendGraphChangeEvent(const MetaJackGraphEventNew &event);
 
     int process(jack_nframes_t nframes);
     static int process(jack_nframes_t nframes, void *arg);
+    static int bufferSizeCallback(jack_nframes_t bufferSize, void *arg);
 };
 
 #endif // METAJACKCONTEXTNEW_H

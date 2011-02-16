@@ -133,7 +133,8 @@ HEADERS  += mainwindow.h \
     metajack/types.h \
     metajack/metajackclient.h \
     metajack/metajackport.h \
-    metajack/metajackcontext.h
+    metajack/metajackcontext.h \
+    metajack/callbackhandlers.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

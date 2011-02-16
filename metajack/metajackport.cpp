@@ -4,6 +4,7 @@
 #include <sstream>
 #include <cassert>
 #include <list>
+#include <memory.h>
 
 MetaJackPortBase::MetaJackPortBase(jack_port_id_t id_, const std::string &shortName_, const std::string &type_, int flags_) :
     client(0),
@@ -141,21 +142,32 @@ MetaJackClientBase * MetaJackPortBase::getClient()
     return client;
 }
 
-MetaJackPortProcess::MetaJackPortProcess(jack_port_id_t id, const std::string &shortName, const std::string &type, int flags) :
+MetaJackPortProcess::MetaJackPortProcess(jack_port_id_t id, const std::string &shortName, const std::string &type, int flags, jack_nframes_t bufferSize_) :
     MetaJackPortBase(id, shortName, type, flags),
     bufferSize(0),
     buffer(0)
-{}
+{
+    changeBufferSize(bufferSize_);
+}
+
+MetaJackPortProcess::~MetaJackPortProcess()
+{
+    delete [] buffer;
+}
 
 void * MetaJackPortProcess::getBuffer(jack_nframes_t nframes)
 {
-    // resize the buffer if necessary:
-    if (nframes * sizeof(jack_default_audio_sample_t) > bufferSize) {
-        if (buffer) {
-            delete [] buffer;
-        }
-        bufferSize = nframes * sizeof(jack_default_audio_sample_t);
-        buffer = new char[bufferSize];
+    // this will be called from the process thread, so no memory allocation must be done here!
+    assert(nframes <= bufferSize);
+    return buffer;
+}
+
+void MetaJackPortProcess::changeBufferSize(jack_nframes_t bufferSize)
+{
+    if (bufferSize != this->bufferSize) {
+        if (buffer) delete [] buffer;
+        this->bufferSize = bufferSize;
+        buffer = new char [bufferSize * sizeof(jack_default_audio_sample_t)];
         // if this is a MIDI port, write its size to the head of the buffer:
         if (getType() == JACK_DEFAULT_MIDI_TYPE) {
             MetaJackContextNew::MetaJackContextMidiBufferHead *head = (MetaJackContextNew::MetaJackContextMidiBufferHead*)buffer;
@@ -163,7 +175,6 @@ void * MetaJackPortProcess::getBuffer(jack_nframes_t nframes)
             head->midiDataSize = head->midiEventCount = head->lostMidiEvents = 0;
         }
     }
-    return buffer;
 }
 
 bool MetaJackPortProcess::clearBuffer()
@@ -248,10 +259,10 @@ MetaJackPortNew::MetaJackPortNew(MetaJackClientNew *client, jack_port_id_t id, c
     setClient(client);
 }
 
-void MetaJackPortNew::createProcessPort()
+void MetaJackPortNew::createProcessPort(jack_nframes_t bufferSize)
 {
     if (!twin) {
-        twin = new MetaJackPortProcess(getId(), getShortName(), getType(), getFlags());
+        twin = new MetaJackPortProcess(getId(), getShortName(), getType(), getFlags(), bufferSize);
     }
 }
 
