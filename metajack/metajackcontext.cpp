@@ -2,7 +2,7 @@
 #include <sstream>
 #include <cassert>
 #include <list>
-#include <QRegExp>
+#include <boost/xpressive/xpressive_dynamic.hpp>
 
 MetaJackContext * MetaJackContext::instance = &MetaJackContext::instance_;
 MetaJackContext MetaJackContext::instance_("meta_jack");
@@ -411,14 +411,12 @@ void MetaJackContext::disconnectPorts(MetaJackPortProcess *source, MetaJackPortP
 
 const char ** MetaJackContext::getPortsByPattern(const std::string &port_name_pattern, const std::string &type_name_pattern, unsigned long flags)
 {
-    QRegExp regExpPortNames(port_name_pattern.c_str());
-    QRegExp regExpTypeNames(type_name_pattern.c_str());
+    boost::xpressive::sregex regexPortNames = boost::xpressive::sregex::compile(port_name_pattern);
+    boost::xpressive::sregex regexTypeNames = boost::xpressive::sregex::compile(type_name_pattern);
     std::list<MetaJackPort*> matchingPorts;
     for (std::map<std::string, MetaJackPort*>::iterator i = portsByName.begin(); i != portsByName.end(); i++) {
         MetaJackPort *port = i->second;
-        QString qstringPortName(port->getFullName().c_str());
-        QString qstringTypeName(port->getType().c_str());
-        if (((port->getFlags() & flags) == flags) && ((port_name_pattern.length() == 0) || regExpPortNames.exactMatch(qstringPortName)) && ((type_name_pattern.length() == 0) || regExpTypeNames.exactMatch(qstringTypeName))) {
+        if (((port->getFlags() & flags) == flags) && ((port_name_pattern.length() == 0) || boost::xpressive::regex_match(port->getFullName(), regexPortNames)) && ((type_name_pattern.length() == 0) || boost::xpressive::regex_match(port->getType(), regexTypeNames))) {
             // flags, port name and type match:
             matchingPorts.push_back(port);
         }
