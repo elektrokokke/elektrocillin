@@ -142,12 +142,12 @@ MetaJackClientBase * MetaJackPortBase::getClient()
     return client;
 }
 
-MetaJackPortProcess::MetaJackPortProcess(jack_port_id_t id, const std::string &shortName, const std::string &type, int flags, jack_nframes_t bufferSize_) :
+MetaJackPortProcess::MetaJackPortProcess(jack_port_id_t id, const std::string &shortName, const std::string &type, int flags, jack_nframes_t bufferSize) :
     MetaJackPortBase(id, shortName, type, flags),
-    bufferSize(0),
+    bufferSizeInBytes(0),
     buffer(0)
 {
-    changeBufferSize(bufferSize_);
+    changeBufferSize(bufferSize);
 }
 
 MetaJackPortProcess::~MetaJackPortProcess()
@@ -158,20 +158,20 @@ MetaJackPortProcess::~MetaJackPortProcess()
 void * MetaJackPortProcess::getBuffer(jack_nframes_t nframes)
 {
     // this will be called from the process thread, so no memory allocation must be done here!
-    assert(nframes <= bufferSize);
+    assert(nframes * sizeof(jack_default_audio_sample_t) <= bufferSizeInBytes);
     return buffer;
 }
 
 void MetaJackPortProcess::changeBufferSize(jack_nframes_t bufferSize)
 {
-    if (bufferSize != this->bufferSize) {
+    if (bufferSizeInBytes != bufferSize * sizeof(jack_default_audio_sample_t)) {
         if (buffer) delete [] buffer;
-        this->bufferSize = bufferSize;
-        buffer = new char [bufferSize * sizeof(jack_default_audio_sample_t)];
+        bufferSizeInBytes = bufferSize * sizeof(jack_default_audio_sample_t);
+        buffer = new char [bufferSizeInBytes];
         // if this is a MIDI port, write its size to the head of the buffer:
         if (getType() == JACK_DEFAULT_MIDI_TYPE) {
             MetaJackContextNew::MetaJackContextMidiBufferHead *head = (MetaJackContextNew::MetaJackContextMidiBufferHead*)buffer;
-            head->bufferSize = bufferSize - sizeof(MetaJackContextNew::MetaJackContextMidiBufferHead);
+            head->bufferSize = bufferSizeInBytes - sizeof(MetaJackContextNew::MetaJackContextMidiBufferHead);
             head->midiDataSize = head->midiEventCount = head->lostMidiEvents = 0;
         }
     }
@@ -181,7 +181,7 @@ bool MetaJackPortProcess::clearBuffer()
 {
     if (getType() == JACK_DEFAULT_AUDIO_TYPE) {
         // clearing means setting everything to zero:
-        memset(buffer, 0, bufferSize);
+        memset(buffer, 0, bufferSizeInBytes);
         return true;
     } else if (getType() == JACK_DEFAULT_MIDI_TYPE) {
         MetaJackContextNew::midi_clear_buffer(buffer);
@@ -200,7 +200,7 @@ bool MetaJackPortProcess::mergeConnectedBuffers()
     }
     if (getType() == JACK_DEFAULT_AUDIO_TYPE) {
         jack_default_audio_sample_t *destBuffer = (jack_default_audio_sample_t*)buffer;
-        size_t nframes = bufferSize / sizeof(jack_default_audio_sample_t);
+        size_t nframes = bufferSizeInBytes / sizeof(jack_default_audio_sample_t);
         // add audio from all connected output buffers:
         for (std::set<MetaJackPortBase*>::iterator i = connectedPorts.begin(); i != connectedPorts.end(); i++) {
             MetaJackPortProcess *connectedPort = (MetaJackPortProcess*)*i;

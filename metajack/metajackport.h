@@ -41,7 +41,7 @@ private:
 
 class MetaJackPortProcess : public MetaJackPortBase {
 public:
-    MetaJackPortProcess(jack_port_id_t id, const std::string &shortName, const std::string &type, int flags, size_t bufferSize);
+    MetaJackPortProcess(jack_port_id_t id, const std::string &shortName, const std::string &type, int flags, jack_nframes_t bufferSize);
     ~MetaJackPortProcess();
     void * getBuffer(jack_nframes_t nframes);
     void changeBufferSize(jack_nframes_t bufferSize);
@@ -49,7 +49,7 @@ public:
     bool mergeConnectedBuffers();
     bool process(std::set<MetaJackClientProcess*> &unprocessedClients, jack_nframes_t nframes);
 private:
-    jack_nframes_t bufferSize;
+    size_t bufferSizeInBytes;
     char * buffer;
 };
 

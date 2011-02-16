@@ -74,8 +74,8 @@ bool Record2MemoryClient::init()
     }
     isRecording_process = false;
     // setup the audio and midi input ports:
-    audioIn = registerAudioPort("audio in", JackPortIsInput);
-    midiIn = registerMidiPort("midi in", JackPortIsInput);
+    audioIn = registerAudioPort("Audio in", JackPortIsInput);
+    midiIn = registerMidiPort("Midi in", JackPortIsInput);
     return (ringBuffer && audioIn && midiIn);
 }
 
