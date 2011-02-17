@@ -41,8 +41,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QGraphicsScene * scene = new QGraphicsScene();
 
+    QRectF rect(0, 0, 600, 420);
+
     // moog filter client and gui test setup:
-    frequencyResponse = new FrequencyResponseGraphicsItem(QRectF(0, 0, 600, 600), 22050.0 / 512.0, 22050, -60, 30);
+    frequencyResponse = new FrequencyResponseGraphicsItem(rect, 22050.0 / 512.0, 22050, -30, 30);
     IirMoogFilter::Parameters moogFilterParameters = moogFilter.getParameters();
     moogFilterParameters.frequency = frequencyResponse->getLowestHertz();
     moogFilter.setParameters(moogFilterParameters);
@@ -69,14 +71,14 @@ MainWindow::MainWindow(QWidget *parent) :
     // end virtual keyboard and midi signal client test setup
 
     // waveshaping clients test setup:
-    LinearWaveShapingGraphicsItem *waveShapingItem = new LinearWaveShapingGraphicsItem(QRectF(0, 0, 600, 600), &linearWaveShapingClient);
+    LinearWaveShapingGraphicsItem *waveShapingItem = new LinearWaveShapingGraphicsItem(&linearWaveShapingClient, rect);
     linearWaveShapingClient.activate();
-    CubicSplineWaveShapingGraphicsItem *cubicSplineWaveShapingItem = new CubicSplineWaveShapingGraphicsItem(QRectF(0, 0, 600, 600), &cubicSplineWaveShapingClient);
+    CubicSplineWaveShapingGraphicsItem *cubicSplineWaveShapingItem = new CubicSplineWaveShapingGraphicsItem(&cubicSplineWaveShapingClient, rect);
     cubicSplineWaveShapingClient.activate();
     // end waveshaping client test setup
 
     // piecewise linear oscillator test setup:
-    LinearOscillatorGraphicsItem *linearOscillatorGraphicsItem = new LinearOscillatorGraphicsItem(QRectF(0, 0, 600, 600), &linearOscillatorClient);
+    LinearOscillatorGraphicsItem *linearOscillatorGraphicsItem = new LinearOscillatorGraphicsItem(rect, &linearOscillatorClient);
     linearOscillatorClient.activate();
     // end piecewise linear oscillator test setup
 
@@ -94,10 +96,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // end ADSR envelope test setup
 
     // record client test setup:
-    QGraphicsRectItem *recordClientRect = new QGraphicsRectItem(0, 0, 500, 500);
+    QGraphicsRectItem *recordClientRect = new QGraphicsRectItem(rect);
     recordClient.activate();
     recordClientGraphView = new GraphView(0);
-    recordClientGraphView->resize(500, 500);
+    recordClientGraphView->resize(500, 400);
     QGraphicsProxyWidget *recordClientGraphicsItem = new QGraphicsProxyWidget(recordClientRect);
     recordClientGraphicsItem->setWidget(recordClientGraphView);
     recordClientGraphicsItem->setFlag(QGraphicsItem::ItemIgnoresTransformations);
@@ -105,7 +107,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // end record client test setup
 
     // client graphics item test setup:
-    QRectF rect(0, 0, 100, 100);
     graphicsClientItemFilter = new GraphicsClientItem(&moogFilterClient, rect);
     graphicsClientItemFilter->setInnerItem(frequencyResponse);
     scene->addItem(graphicsClientItemFilter);
@@ -141,22 +142,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Record:Midi in");
-    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
-    //connectionList.append("White noise:Noise out::Multiplier:Factor 1");
+    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
+    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
-    connectionList.append("Multiplier:Product out::Moog filter:Audio in");
-    connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
-    connectionList.append("LFO 2:Audio out::Oscillator:Pulse width modulation");
-    connectionList.append("Moog filter:Audio out::system_out:audio");
-    connectionList.append("Moog filter:Audio out::Record:Audio in");
-    connectionList.append("Moog filter:Audio out::system:playback_1");
-    connectionList.append("Moog filter:Audio out::system:playback_2");
+//    connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
+//    connectionList.append("LFO 2:Audio out::Oscillator:Pulse width modulation");
+//    connectionList.append("Multiplier:Product out::Moog filter:Audio in");
+//    connectionList.append("Moog filter:Audio out::system_out:audio");
+//    connectionList.append("Moog filter:Audio out::Record:Audio in");
+    connectionList.append("Multiplier:Product out::system_out:audio");
+    connectionList.append("Multiplier:Product out::Record:Audio in");
     nullClient.restoreConnections(connectionList);
     // end port connection test setup
 
 //    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
-    ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-200, -200, 200, 200));
+    ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-1000, -1000, 1000, 1000));
+    ui->graphicsView->centerOn(allClientsRect.center());
 
     onAnimationFinished();
     QObject::connect(ui->graphicsView, SIGNAL(animationFinished()), this, SLOT(onAnimationFinished()));
@@ -253,8 +255,8 @@ void MainWindow::onChangedParameters(double frequency, double resonance)
 
 void MainWindow::on_actionStore_connections_triggered()
 {
-    qDebug() << nullClient.getAllConnections();
-    settings.setValue("connections", nullClient.getAllConnections());
+    qDebug() << nullClient.getConnections();
+    settings.setValue("connections", nullClient.getConnections());
 }
 
 void MainWindow::on_actionRestore_connections_triggered()

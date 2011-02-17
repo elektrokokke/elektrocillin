@@ -11,6 +11,8 @@ public:
     GraphicsInterpolationItem(Interpolator *interpolator, double samplingInterval, double xscale, double yscale, QGraphicsItem *parent = 0);
     GraphicsInterpolationItem(Interpolator *interpolator, double samplingInterval, double ymin, double ymax, double xscale, double yscale, QGraphicsItem *parent = 0);
 
+    Interpolator * getInterpolator();
+
     void updatePath();
 
 private:

@@ -1,5 +1,6 @@
 #include "oscillator.h"
 #include <cmath>
+#include <QtGlobal>
 
 Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, const QStringList &additionalInputPortNames) :
     MidiProcessor(QStringList("Pitch modulation") + QStringList("Pulse width modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
@@ -44,16 +45,18 @@ void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframe
     frequencyModulationFactor = pow(1 + frequencyModulationIntensity, inputs[0]);
     computePhaseIncrement();
     // consider pulse width modulation input:
-    double pulseWidth = (std::max(std::min(inputs[1], 1.0), -1.0) + 1.0) * M_PI;
-    pulseWidthInterpolator.getX()[1] = pulseWidth;
+//    double pulseWidth = (qMax(qMin(inputs[1], 1.0), -1.0) + 1.0) * M_PI;
+//    pulseWidthInterpolator.getX()[1] = pulseWidth;
     // get previous and current phase (considering pulse width modulation):
-    double previousPhaseAfterPm = pulseWidthInterpolator.evaluate(phase);
+    //double previousPhaseAfterPm = pulseWidthInterpolator.evaluate(phase);
+    double previousPhaseAfterPm = phase;
     // advance phase:
     phase += phaseIncrement;
     if (phase >= 2.0 * M_PI) {
         phase -= 2.0 * M_PI;
     }
-    double phaseAfterPm = pulseWidthInterpolator.evaluate(phase);
+    //double phaseAfterPm = pulseWidthInterpolator.evaluate(phase);
+    double phaseAfterPm = phase;
     // compute the oscillator output:
     outputs[0] = valueAtPhase(phaseAfterPm, previousPhaseAfterPm);
 }
@@ -81,6 +84,8 @@ double Oscillator::valueAtPhase(double phase, double)
 
 void Oscillator::computePhaseIncrement()
 {
-    phaseIncrement = frequency * frequencyPitchBendFactor * frequencyModulationFactor * 2.0 * M_PI / getSampleRate();
+//    int frequencyFraction = qRound(getSampleRate() / (frequency * frequencyPitchBendFactor * frequencyModulationFactor));
+//    phaseIncrement = 2.0 * M_PI / (double)frequencyFraction;
+    phaseIncrement = 2.0 * M_PI * frequency * frequencyPitchBendFactor * frequencyModulationFactor / getSampleRate();
 }
 

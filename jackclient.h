@@ -99,12 +99,13 @@ public:
       */
     bool disconnectPorts(const QString &sourcePortName, const QString &destPortName);
 
-    QString getShortPortname(jack_port_t *port);
-    QString getFullPortname(jack_port_t *port);
-    QStringList getClientPorts(const QString &clientName, unsigned long flags = 0);
-    QStringList getAllPorts(unsigned long flags = 0);
-    QStringList getAllConnectedPorts(const QString &fullPortName);
-    QStringList getAllConnections();
+    QString getPortType(const QString &fullPortName);
+
+    QStringList getMyPorts(const char *typeNamePattern = 0, unsigned long flags = 0);
+    QStringList getPorts(const char *clientNamePattern = 0, const char *typeNamePattern = 0, unsigned long flags = 0);
+
+    QStringList getConnectedPorts(const QString &fullPortName);
+    QStringList getConnections();
     void restoreConnections(const QStringList &connections);
 
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
@@ -190,8 +191,6 @@ private:
     jack_client_t *client;
 
     static int process(jack_nframes_t nframes, void *arg);
-
-    friend class JackNullClient;
 };
 
 #endif // JACKCLIENT_H

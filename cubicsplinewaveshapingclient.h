@@ -3,44 +3,41 @@
 
 #include "eventprocessorclient.h"
 #include "cubicsplineinterpolator.h"
-#include "graphicsinterpolationitem.h"
-#include <QObject>
-#include <QGraphicsRectItem>
+#include "graphicsinterpolatoredititem.h"
 
-struct CubicSplineWaveShapingParameters {
-    double x[4], y[4], y2[4];
-};
-
-class CubicSplineWaveShapingClient : public EventProcessorClient<CubicSplineWaveShapingParameters>
+class CubicSplineWaveShapingClient : public EventProcessorClient<InterpolatorParameters>
 {
 public:
     CubicSplineWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~CubicSplineWaveShapingClient();
 
-    const CubicSplineInterpolator & getInterpolator() const;
+    CubicSplineInterpolator * getInterpolator();
+
+    void postIncreaseControlPoints();
+    void postDecreaseControlPoints();
+    void postChangeControlPoint(int index, int nrOfControlPoints, double x, double y);
 
 protected:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
-    virtual void processEvent(const CubicSplineWaveShapingParameters &event, jack_nframes_t time);
+    virtual void processEvent(const InterpolatorParameters &event, jack_nframes_t time);
 
 private:
-    CubicSplineInterpolator interpolator;
+    CubicSplineInterpolator interpolator, interpolatorProcess;
 };
 
-class CubicSplineWaveShapingGraphicsItem : public QObject, public QGraphicsRectItem
+class CubicSplineWaveShapingGraphicsItem : public GraphicsInterpolatorEditItem
 {
     Q_OBJECT
 public:
-    CubicSplineWaveShapingGraphicsItem(const QRectF &rect, CubicSplineWaveShapingClient *client, QGraphicsItem *parent = 0);
+    CubicSplineWaveShapingGraphicsItem(CubicSplineWaveShapingClient *client, const QRectF &rect, QGraphicsItem *parent = 0);
 
-private slots:
-    void onNodePositionChanged1(QPointF position);
-    void onNodePositionChanged2(QPointF position);
+protected:
+    virtual void increaseControlPoints();
+    virtual void decreaseControlPoints();
+    virtual void changeControlPoint(int index, int nrOfControlPoints, double x, double y);
 
 private:
     CubicSplineWaveShapingClient *client;
-    CubicSplineInterpolator interpolator;
-    GraphicsInterpolationItem *interpolationItem;
 };
 
 #endif // SPLINEWAVESHAPINGCLIENT_H

@@ -83,20 +83,20 @@ bool JackClient::disconnectPorts(const QString &sourcePortName, const QString &d
     return (jack_disconnect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data()) == 0);
 }
 
-QString JackClient::getShortPortname(jack_port_t *port)
+QString JackClient::getPortType(const QString &fullPortName)
 {
-    return QString(jack_port_short_name(port));
+    return QString(jack_port_type(jack_port_by_name(client, fullPortName.toAscii().data())));
 }
 
-QString JackClient::getFullPortname(jack_port_t *port)
+QStringList JackClient::getMyPorts(const char *typeNamePattern, unsigned long flags)
 {
-    return QString(jack_port_name(port));
+    return getPorts(QString("%1:.*").arg(getClientName()).toAscii().data(), typeNamePattern, flags);
 }
 
-QStringList JackClient::getClientPorts(const QString &clientName, unsigned long flags)
+QStringList JackClient::getPorts(const char *clientNamePattern, const char *typeNamePattern, unsigned long flags)
 {
     QStringList portList;
-    const char **ports = jack_get_ports(client, QString("%1:.*").arg(clientName).toAscii().data(), 0, flags);
+    const char **ports = jack_get_ports(client, clientNamePattern, typeNamePattern, flags);
     if (ports) {
         for (int i = 0; ports[i]; i++) {
             portList.append(QString(ports[i]));
@@ -107,12 +107,7 @@ QStringList JackClient::getClientPorts(const QString &clientName, unsigned long 
     return portList;
 }
 
-QStringList JackClient::getAllPorts(unsigned long flags)
-{
-    return getClientPorts(".*", flags);
-}
-
-QStringList JackClient::getAllConnectedPorts(const QString &fullPortName)
+QStringList JackClient::getConnectedPorts(const QString &fullPortName)
 {
     QStringList portList;
     // get the port with the given name:
@@ -130,14 +125,14 @@ QStringList JackClient::getAllConnectedPorts(const QString &fullPortName)
     return portList;
 }
 
-QStringList JackClient::getAllConnections()
+QStringList JackClient::getConnections()
 {
     QStringList connectionList;
     // get all output ports:
-    QStringList outputPortList = getAllPorts(JackPortIsOutput);
+    QStringList outputPortList = getPorts(0, 0, JackPortIsOutput);
     // get all connected ports:
     for (int i = 0; i < outputPortList.size(); i++) {
-        QStringList connectedPortsList = getAllConnectedPorts(outputPortList[i]);
+        QStringList connectedPortsList = getConnectedPorts(outputPortList[i]);
         for (int j = 0; j < connectedPortsList.size(); j++) {
             connectionList.append(outputPortList[i] + "::" + connectedPortsList[j]);
         }

@@ -3,64 +3,44 @@
 
 #include "eventprocessorclient.h"
 #include "linearoscillator.h"
-#include "graphicsinterpolationitem.h"
-#include <QObject>
-#include <QGraphicsRectItem>
-#include <QGraphicsSceneMouseEvent>
-#include <QMenu>
+#include "graphicsinterpolatoredititem.h"
 #include <QPen>
 
 class GraphicsNodeItem;
 
-struct LinearOscillatorParameters {
-    int controlPoints, index;
-    double x, y;
-};
-
-class LinearOscillatorClient : public EventProcessorClient<LinearOscillatorParameters>
+class LinearOscillatorClient : public EventProcessorClient<InterpolatorParameters>
 {
 public:
     LinearOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~LinearOscillatorClient();
 
     LinearOscillator * getLinearOscillator();
+    LinearInterpolator * getLinearInterpolator();
 
-    const LinearInterpolator & postIncreaseControlPoints();
-    const LinearInterpolator & postDecreaseControlPoints();
+    void postIncreaseControlPoints();
+    void postDecreaseControlPoints();
+    void postChangeControlPoint(int index, int nrOfControlPoints, double x, double y);
 
 protected:
-    virtual void processEvent(const LinearOscillatorParameters &event, jack_nframes_t time);
+    virtual void processEvent(const InterpolatorParameters &event, jack_nframes_t time);
 
 private:
-    LinearInterpolator interpolator;
+    LinearInterpolator interpolator, interpolatorProcess;
 };
 
-class LinearOscillatorGraphicsItem : public QObject, public QGraphicsRectItem
+class LinearOscillatorGraphicsItem : public GraphicsInterpolatorEditItem
 {
     Q_OBJECT
 public:
     LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client, QGraphicsItem *parent = 0);
 
-public slots:
-    void increaseControlPoints();
-    void decreaseControlPoints();
-
 protected:
-    virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
-
-private slots:
-    void onNodePositionChangedScaled(QPointF position);
+    virtual void increaseControlPoints();
+    virtual void decreaseControlPoints();
+    virtual void changeControlPoint(int index, int nrOfControlPoints, double x, double y);
 
 private:
     LinearOscillatorClient *client;
-    QMap<QObject*, int> mapSenderToControlPointIndex;
-    QVector<GraphicsNodeItem*> nodes;
-    LinearInterpolator interpolator;
-    LinearIntegralInterpolator interpolatorIntegral;
-    GraphicsInterpolationItem *interpolationItem, *interpolationIntegralItem;
-    QMenu contextMenu;
-
-    GraphicsNodeItem * createNode(qreal x, qreal y);
 };
 
 class PulseWaveGraphicsItem : public QGraphicsRectItem {

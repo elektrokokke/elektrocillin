@@ -32,6 +32,11 @@ GraphicsInterpolationItem::GraphicsInterpolationItem(Interpolator *interpolator_
     updatePath();
 }
 
+Interpolator * GraphicsInterpolationItem::getInterpolator()
+{
+    return interpolator;
+}
+
 void GraphicsInterpolationItem::updatePath()
 {
     // set the path according to the given spline:

@@ -34,6 +34,13 @@ QVector<double> & LinearInterpolator::getY()
   */
 double LinearInterpolator::interpolate(int j, double x)
 {
+    Q_ASSERT(xx.size() >= 2);
+    if (j < 0) {
+        j = 0;
+    }
+    if (j + 1 >= xx.size()) {
+        j = xx.size() - 2;
+    }
     if (xx[j] == xx[j + 1]) {   // Table is defective, but we can recover.
         return yy[j];
     } else {

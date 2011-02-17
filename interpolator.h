@@ -3,6 +3,11 @@
 
 #include <QVector>
 
+struct InterpolatorParameters {
+    int controlPoints, index;
+    double x, y;
+};
+
 class Interpolator
 {
 public:

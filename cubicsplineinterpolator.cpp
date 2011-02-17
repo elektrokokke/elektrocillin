@@ -41,6 +41,12 @@ const QVector<double> & CubicSplineInterpolator::getY2() const
   */
 double CubicSplineInterpolator::interpolate(int jl, double x)
 {
+    if (jl < 0) {
+        return yy[0];
+    }
+    if (jl + 1 >= xx.size()) {
+        return yy[xx.size() - 1];
+    }
     int klo = jl, khi = jl + 1;
     double y, h, b, a;
     h = xx[khi] - xx[klo];
