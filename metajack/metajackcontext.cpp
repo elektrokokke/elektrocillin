@@ -220,6 +220,10 @@ bool MetaJackContext::deactivateClient(MetaJackClient *client)
         event.client = client->getProcessClient();
         // the following will call the process thread's deactivateClient() method:
         sendGraphChangeEvent(event);
+        // this event has to be synchronous, thus we wait here for the event to be processed before returning:
+        waitMutex.lock();
+        waitCondition.wait(&waitMutex);
+        waitMutex.unlock();
     } else {
         deactivateClient(client->getProcessClient());
     }
@@ -658,6 +662,7 @@ int MetaJackContext::process(jack_nframes_t nframes)
             activateClient(event.client);
         } else if (event.type == MetaJackGraphEvent::DEACTIVATE_CLIENT) {
             deactivateClient(event.client);
+            waitCondition.wakeAll();
         } else if (event.type == MetaJackGraphEvent::REGISTER_PORT) {
             registerPort(event.client, event.port, event.nonProcessPort);
         } else if (event.type == MetaJackGraphEvent::UNREGISTER_PORT) {

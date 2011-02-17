@@ -7,6 +7,8 @@
 #include "jackringbuffer.h"
 #include <jack/midiport.h>
 #include <map>
+#include <QWaitCondition>
+#include <QMutex>
 
 class MetaJackContext
 {
@@ -129,6 +131,8 @@ private:
     std::map<MetaJackPort*,MetaJackPortProcess*> processPorts;
     std::set<MetaJackClientProcess*> activeClients;
     JackRingBuffer<MetaJackGraphEvent> graphChangesRingBuffer;
+    QWaitCondition waitCondition;
+    QMutex waitMutex;
     bool shutdown;
 
     void closeClient(MetaJackClientProcess *client);
