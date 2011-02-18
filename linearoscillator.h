@@ -3,11 +3,13 @@
 
 #include "oscillator.h"
 #include "linearintegralinterpolator.h"
+#include <QQueue>
+#include <QVector>
 
 class LinearOscillator : public Oscillator
 {
 public:
-    LinearOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
+    LinearOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList(), int sincWindowSize = 16);
     /**
       @param interpolator has to span the interval [0..2 * pi]
       */
@@ -23,7 +25,8 @@ protected:
 private:
     LinearInterpolator interpolator;
     LinearIntegralInterpolator integral;
-
+    QQueue<double> integralValuesQueue;
+    QVector<double> sincIntegralValues;
 };
 
 #endif // LINEAROSCILLATOR_H

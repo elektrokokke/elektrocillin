@@ -147,9 +147,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
 //    connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
 //    connectionList.append("LFO 2:Audio out::Oscillator:Pulse width modulation");
-    connectionList.append("Multiplier:Product out::Moog filter:Audio in");
-    connectionList.append("Moog filter:Audio out::system_out:audio");
-    connectionList.append("Moog filter:Audio out::Record:Audio in");
+//    connectionList.append("Multiplier:Product out::Moog filter:Audio in");
+//    connectionList.append("Moog filter:Audio out::system_out:audio");
+//    connectionList.append("Moog filter:Audio out::Record:Audio in");
+    connectionList.append("Multiplier:Product out::system_out:audio");
+    connectionList.append("Multiplier:Product out::Record:Audio in");
     nullClient.restoreConnections(connectionList);
     // end port connection test setup
 
