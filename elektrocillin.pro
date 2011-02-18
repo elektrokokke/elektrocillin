@@ -71,7 +71,8 @@ SOURCES += main.cpp\
     metajack/metajack.cpp \
     whitenoisegenerator.cpp \
     graphicsportitem.cpp \
-    graphicsinterpolatoredititem.cpp
+    graphicsinterpolatoredititem.cpp \
+    cisi.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -139,7 +140,8 @@ HEADERS  += mainwindow.h \
     metajack/jack.h \
     whitenoisegenerator.h \
     graphicsportitem.h \
-    graphicsinterpolatoredititem.h
+    graphicsinterpolatoredititem.h \
+    cisi.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
