@@ -18,10 +18,30 @@ LinearMorphOscillator::LinearMorphOscillator(const LinearInterpolator &state1_, 
     computeMorphedState(0);
 }
 
+const LinearInterpolator & LinearMorphOscillator::getState1() const
+{
+    return state1;
+}
+
+void LinearMorphOscillator::setState1(const LinearInterpolator &interpolator)
+{
+    state1 = interpolator;
+}
+
+const LinearInterpolator & LinearMorphOscillator::getState2() const
+{
+    return state2;
+}
+
+void LinearMorphOscillator::setState2(const LinearInterpolator &interpolator)
+{
+    state2 = interpolator;
+}
+
 void LinearMorphOscillator::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
 {
     // compute the morphed state:
-    computeMorphedState(inputs[2]);
+    computeMorphedState(inputs[1]);
     // call the base implementation:
     LinearOscillator::processAudio(inputs, outputs, time);
 }

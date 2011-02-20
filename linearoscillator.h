@@ -10,7 +10,7 @@
 class LinearOscillator : public Oscillator
 {
 public:
-    LinearOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList(), int sincWindowSize = 8);
+    LinearOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList(), int sincWindowSize = 4);
     /**
       @param interpolator has to span the interval [0..2 * pi]
       */
@@ -18,18 +18,16 @@ public:
 
     const LinearInterpolator & getLinearInterpolator() const;
     void setLinearInterpolator(const LinearInterpolator &interpolator);
-    const LinearIntegralInterpolator & getLinearIntegralInterpolator() const;
 
 protected:
-    double valueAtPhase(double phase, double previousPhase);
+    double valueAtPhase(double phase);
 
 private:
     LinearInterpolator interpolator;
-    LinearIntegralInterpolator integral;
-    CubicSplineInterpolator sineIntegral;
-    QQueue<QList<QPair<double, double> > > integralValuesQueue;
+    int sincWindowSize;
+    CubicSplineInterpolator siInterpolator;
 
-    void initializeSineIntegral(int sincWindowSize);
+    void initializeSiInterpolator();
 };
 
 #endif // LINEAROSCILLATOR_H

@@ -31,7 +31,7 @@ void LinearOscillatorClient::postIncreaseControlPoints()
     interpolator.getX().append(2 * M_PI);
     interpolator.getY().append(1);
     QVector<InterpolatorParameters> parameterVector;
-    for (int i = 0; i < size; i++) {
+    for (int i = size - 1; i >= 0; i--) {
         if (i < size - 1) {
             interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
         }
@@ -53,7 +53,7 @@ void LinearOscillatorClient::postDecreaseControlPoints()
         interpolator.getY().resize(size);
         double stretchFactor = 2 * M_PI / interpolator.getX().back();
         QVector<InterpolatorParameters> parameterVector;
-        for (int i = 0; i < size; i++) {
+        for (int i = size - 1; i >= 0; i--) {
             interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
             InterpolatorParameters parameters;
             parameters.controlPoints = size;

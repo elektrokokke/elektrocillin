@@ -3,27 +3,26 @@
 #include <cmath>
 #include <QDebug>
 
-LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate, const QStringList &additionalInputPortNames, int sincWindowSize) :
+LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate, const QStringList &additionalInputPortNames, int sincWindowSize_) :
     Oscillator(frequencyModulationIntensity, sampleRate, additionalInputPortNames),
     interpolator(QVector<double>(1), QVector<double>(1)),
-    integral(interpolator),
-    sineIntegral(QVector<double>(0), QVector<double>(0), QVector<double>(0))
+    sincWindowSize(sincWindowSize_),
+    siInterpolator(QVector<double>(), QVector<double>(), QVector<double>())
 {
     interpolator.getX()[0] = 0;
     interpolator.getY()[0] = -1;
-    interpolator.getX().append(2 * M_PI);
+    interpolator.getX().append(2.0 * M_PI);
     interpolator.getY().append(1);
-    integral = LinearIntegralInterpolator(interpolator);
-    initializeSineIntegral(sincWindowSize);
+    initializeSiInterpolator();
 }
 
-LinearOscillator::LinearOscillator(const LinearInterpolator &interpolator_, double frequencyModulationIntensity, double sampleRate, int sincWindowSize) :
+LinearOscillator::LinearOscillator(const LinearInterpolator &interpolator_, double frequencyModulationIntensity, double sampleRate, int sincWindowSize_) :
     Oscillator(frequencyModulationIntensity, sampleRate),
     interpolator(interpolator_),
-    integral(interpolator_),
-    sineIntegral(QVector<double>(0), QVector<double>(0), QVector<double>(0))
+    sincWindowSize(sincWindowSize_),
+    siInterpolator(QVector<double>(), QVector<double>(), QVector<double>())
 {
-    initializeSineIntegral(sincWindowSize);
+    initializeSiInterpolator();
 }
 
 const LinearInterpolator & LinearOscillator::getLinearInterpolator() const
@@ -33,82 +32,63 @@ const LinearInterpolator & LinearOscillator::getLinearInterpolator() const
 
 void LinearOscillator::setLinearInterpolator(const LinearInterpolator &interpolator)
 {
+    Q_ASSERT(interpolator.getX()[0] == 0);
+    Q_ASSERT(interpolator.getX().back() == 2 * M_PI);
     this->interpolator = interpolator;
-    integral = LinearIntegralInterpolator(interpolator);
 }
 
-const LinearIntegralInterpolator & LinearOscillator::getLinearIntegralInterpolator() const
+double LinearOscillator::valueAtPhase(double phase)
 {
-    return integral;
-}
-
-double LinearOscillator::valueAtPhase(double phase, double previousPhase)
-{
-    // remove the oldest value from the queue:
-    integralValuesQueue.dequeue();
-    // calculate the news value and add it to the queue:
-    if (phase == previousPhase) {
-        QList<QPair<double, double> > list;
-        list.append(QPair<double, double>(0, 1));
-        integralValuesQueue.enqueue(list);
-    } else {
-        QList<QPair<double, double> > list;
-        double phaseDifference = phase - previousPhase;
-        int previousIndex, index;
-        double previousIntegralValue = integral.evaluate(previousPhase, &previousIndex);
-        double integralValue = integral.evaluate(phase, &index);
-        for (int i = previousIndex; i != index; ) {
-            double intermediatePhase = integral.getX()[i + 1];
-            if (intermediatePhase != previousPhase) {
-                double intermediateIntegralValue = integral.interpolate(i, intermediatePhase);
-                list.append(QPair<double, double>((intermediateIntegralValue - previousIntegralValue) / (intermediatePhase - previousPhase), (intermediatePhase - previousPhase) / phaseDifference));
-                previousPhase = intermediatePhase;
-                previousIntegralValue = intermediateIntegralValue;
-            }
-            i++;
-            if (i == integral.getX().size() - 1) {
-                i = 0;
-                previousPhase = integral.getX()[0];
-                previousIntegralValue = integral.interpolate(0, previousPhase);
-            }
-        }
-        if (phase != previousPhase) {
-            list.append(QPair<double, double>((integralValue - previousIntegralValue) / (phase - previousPhase), (phase - previousPhase) / phaseDifference));
-        }
-        integralValuesQueue.enqueue(list);
+    double tmax = (double)sincWindowSize;
+    double t1 = -tmax;
+    double x1 = t1 * getNormalizedAngularFrequency() + phase;
+    for (; x1 < 0.0; ) {
+        phase += 2 * M_PI;
+        x1 += 2 * M_PI;
     }
-    // now band-limit the signal using the sinc function:
-    double output = 0;
-    for (int i = 0; i < integralValuesQueue.size(); i++) {
-        double x = sineIntegral.getX()[i];
-        double previousSincIntegralValue = sineIntegral.evaluate(x);
-        QList<QPair<double, double> > &list = integralValuesQueue[i];
-        for (int j = 0; j < list.size(); j++) {
-            double oscillatorIntegralValue = list[j].first;
-            x += list[j].second;
-            double sincIntegralValue = sineIntegral.evaluate(x);
-            output += oscillatorIntegralValue * (sincIntegralValue - previousSincIntegralValue);
-            previousSincIntegralValue = sincIntegralValue;
+    int i;
+    interpolator.evaluate(x1, &i);
+//    double si1 = Cisi::si(t1 * M_PI);
+    double si1 = siInterpolator.evaluate(t1);
+    double integral = 0.0;
+    for (; t1 < tmax; ) {
+        Q_ASSERT(i < interpolator.getX().size() - 1);
+        double x2 = interpolator.getX()[i + 1];
+        double t2 = (x2 - phase) / getNormalizedAngularFrequency();
+        if (t2 > tmax) {
+            t2 = tmax;
+            x2 = tmax * getNormalizedAngularFrequency() + phase;
         }
+//        double si2 = Cisi::si(t2 * M_PI);
+        double si2 = siInterpolator.evaluate(t2);
+        // ignore intervals that have zero width:
+        if (x2 != x1) {
+            double a = (interpolator.getY()[i + 1] - interpolator.getY()[i]) / (interpolator.getX()[i + 1] - interpolator.getX()[i]);
+            double b = interpolator.getY()[i] - interpolator.getX()[i] * a;
+            double integral1 = (a * phase + b) * si1 - a * getNormalizedAngularFrequency() * cos(t1 * M_PI) / M_PI;
+            double integral2 = (a * phase + b) * si2 - a * getNormalizedAngularFrequency() * cos(t2 * M_PI) / M_PI;
+            integral += integral2 - integral1;
+        }
+        i++;
+        if (i == interpolator.getX().size() - 1) {
+            i = 0;
+            phase -= 2 * M_PI;
+            x1 = 0.0;
+        } else {
+            x1 = x2;
+        }
+        t1 = t2;
+        si1 = si2;
     }
-    return output;
+    return integral / M_PI;
 }
 
-void LinearOscillator::initializeSineIntegral(int sincWindowSize)
+void LinearOscillator::initializeSiInterpolator()
 {
-    // create a cubic spline that approximates the cardinal sine integral:
     QVector<double> xx, yy;
-    for (int i = -sincWindowSize; i <= sincWindowSize; i++) {
-        double x = M_PI * i;
-        std::complex<double> cs;
-        cisi(x, cs);
-        xx.append(i);
-        yy.append(cs.imag() / M_PI);
-        if (i < sincWindowSize) {
-            QList<QPair<double, double> > list;
-            list.append(QPair<double, double>(0, 1));
-            integralValuesQueue.append(list);
-        }
+    for (double t = -sincWindowSize; t <= sincWindowSize; t += 0.25) {
+        xx.append(t);
+        yy.append(Cisi::si(t * M_PI));
     }
-    sineIntegral = CubicSplineInterpolator(xx, yy);
+    siInterpolator = CubicSplineInterpolator(xx, yy);
 }

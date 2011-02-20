@@ -1,6 +1,7 @@
 #include "cubicsplinewaveshapingclient.h"
 #include "graphicsnodeitem.h"
 #include "graphicslineitem.h"
+#include "cisi.h"
 #include <QPen>
 
 CubicSplineWaveShapingClient::CubicSplineWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
@@ -9,12 +10,17 @@ CubicSplineWaveShapingClient::CubicSplineWaveShapingClient(const QString &client
     interpolatorProcess(QVector<double>(), QVector<double>(), QVector<double>())
 {
     QVector<double> xx, yy;
-    xx.append(-1);
-    yy.append(-1);
-    xx.append(0);
-    yy.append(0);
-    xx.append(1);
-    yy.append(1);
+    for (double t = -1.0; t <= 1.0; t += 0.125) {
+        xx.append(t);
+        yy.append(Cisi::si(t * 4.0 * M_PI) / M_PI);
+    }
+//    QVector<double> xx, yy;
+//    xx.append(-1);
+//    yy.append(-1);
+//    xx.append(0);
+//    yy.append(0);
+//    xx.append(1);
+//    yy.append(1);
     interpolator = interpolatorProcess = CubicSplineInterpolator(xx, yy);
     activateMidiInput(false);
 }

@@ -16,16 +16,15 @@ public:
 
     void setFrequency(double hertz);
     double getFrequency() const;
-    double getPhaseIncrement() const;
+    double getNormalizedAngularFrequency() const;
 
 protected:
-    virtual double valueAtPhase(double phase, double previousPhase);
+    virtual double valueAtPhase(double phase);
 
 private:
-    double frequency, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, phaseIncrement;
-    LinearInterpolator pulseWidthInterpolator;
+    double frequency, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, normalizedAngularFrequency;
 
-    void computePhaseIncrement();
+    void computeNormalizedAngularFrequency();
 };
 
 #endif // OSCILLATOR_H

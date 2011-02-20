@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     lfoClient1("LFO", &lfo1),
     lfoClient2("LFO 2", &lfo2),
     noiseClient("White noise", &noiseGenerator),
-    adsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3),
+    adsrClient("ADSR envelope", 0, 0.2, 0.2, 0.3),
     multiplierClient("Multiplier", &multiplier),
     linearWaveShapingClient("Linear waveshaping"),
     linearOscillatorClient("Oscillator"),
@@ -144,13 +144,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("Virtual keyboard:Midi out::Record:Midi in");
 //    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
 //    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
+    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
 //    connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
 //    connectionList.append("LFO 2:Audio out::Oscillator:Pulse width modulation");
 //    connectionList.append("Multiplier:Product out::Moog filter:Audio in");
 //    connectionList.append("Moog filter:Audio out::system_out:audio");
 //    connectionList.append("Moog filter:Audio out::Record:Audio in");
-    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
     connectionList.append("Multiplier:Product out::system_out:audio");
     connectionList.append("Multiplier:Product out::Record:Audio in");
     nullClient.restoreConnections(connectionList);

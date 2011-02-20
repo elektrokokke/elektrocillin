@@ -3,68 +3,55 @@
 #include <QtGlobal>
 
 Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, const QStringList &additionalInputPortNames) :
-    MidiProcessor(QStringList("Pitch modulation") + QStringList("Pulse width modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
-    frequency(0),
+    MidiProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
+    frequency(441),
     frequencyPitchBendFactor(1),
     frequencyModulationFactor(1),
     frequencyModulationIntensity(frequencyModulationIntensity_),
     phase(0),
-    phaseIncrement(0),
-    pulseWidthInterpolator(QVector<double>(), QVector<double>())
+    normalizedAngularFrequency(0)
 {
-    pulseWidthInterpolator.getX().append(0);
-    pulseWidthInterpolator.getY().append(0);
-    pulseWidthInterpolator.getX().append(M_PI);
-    pulseWidthInterpolator.getY().append(M_PI);
-    pulseWidthInterpolator.getX().append(2 * M_PI);
-    pulseWidthInterpolator.getY().append(2 * M_PI);
 }
 
 void Oscillator::setSampleRate(double sampleRate)
 {
     MidiProcessor::setSampleRate(sampleRate);
     // recompute phase increment:
-    computePhaseIncrement();
+    computeNormalizedAngularFrequency();
 }
 
 void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
     frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
-    computePhaseIncrement();
+    computeNormalizedAngularFrequency();
+    phase = 0;
 }
 
 void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
 {
     frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(value);
-    computePhaseIncrement();
+    computeNormalizedAngularFrequency();
 }
 
 void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     // consider frequency modulation input:
     frequencyModulationFactor = pow(1 + frequencyModulationIntensity, inputs[0]);
-    computePhaseIncrement();
-    // consider pulse width modulation input:
-//    double pulseWidth = (qMax(qMin(inputs[1], 1.0), -1.0) + 1.0) * M_PI;
-//    pulseWidthInterpolator.getX()[1] = pulseWidth;
-    // get previous and current phase (considering pulse width modulation):
-    //double previousPhaseAfterPm = pulseWidthInterpolator.evaluate(phase);
-    double previousPhaseAfterPm = phase;
-    // advance phase:
-    phase += phaseIncrement;
-    if (phase >= 2.0 * M_PI) {
-        phase -= 2.0 * M_PI;
+    computeNormalizedAngularFrequency();
+    double phase2 = phase + normalizedAngularFrequency;
+    if (phase2 >= 2.0 * M_PI) {
+        phase2 -= 2.0 * M_PI;
     }
-    //double phaseAfterPm = pulseWidthInterpolator.evaluate(phase);
-    double phaseAfterPm = phase;
     // compute the oscillator output:
-    outputs[0] = valueAtPhase(phaseAfterPm, previousPhaseAfterPm);
+    //outputs[0] = valueAtPhase(0.5 * (phase + phase2));
+    outputs[0] = valueAtPhase(phase);
+    phase = phase2;
 }
 
 void Oscillator::setFrequency(double hertz)
 {
     frequency = hertz;
-    computePhaseIncrement();
+    computeNormalizedAngularFrequency();
 }
 
 double Oscillator::getFrequency() const
@@ -72,20 +59,18 @@ double Oscillator::getFrequency() const
     return frequency;
 }
 
-double Oscillator::getPhaseIncrement() const
+double Oscillator::getNormalizedAngularFrequency() const
 {
-    return phaseIncrement;
+    return normalizedAngularFrequency;
 }
 
-double Oscillator::valueAtPhase(double phase, double)
+double Oscillator::valueAtPhase(double phase)
 {
     return sin(phase);
 }
 
-void Oscillator::computePhaseIncrement()
+void Oscillator::computeNormalizedAngularFrequency()
 {
-//    int frequencyFraction = qRound(getSampleRate() / (frequency * frequencyPitchBendFactor * frequencyModulationFactor));
-//    phaseIncrement = 2.0 * M_PI / (double)frequencyFraction;
-    phaseIncrement = 2.0 * M_PI * frequency * frequencyPitchBendFactor * frequencyModulationFactor / getSampleRate();
+    normalizedAngularFrequency = 2.0 * M_PI * frequency * frequencyPitchBendFactor * frequencyModulationFactor / getSampleRate();
 }
 

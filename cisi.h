@@ -3,6 +3,11 @@
 
 #include <complex>
 
-void cisi(const double x, std::complex<double> &cs);
+class Cisi {
+public:
+    static double si(const double x);
+    static void cisi(const double x, std::complex<double> &cs);
+};
+
 
 #endif // CISI_H
