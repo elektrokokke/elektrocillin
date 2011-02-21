@@ -14,6 +14,10 @@ void MidiProcessor::processNoteOff(unsigned char, unsigned char, unsigned char, 
 {
 }
 
+void MidiProcessor::processAfterTouch(unsigned char, unsigned char, unsigned char, jack_nframes_t)
+{
+}
+
 void MidiProcessor::processController(unsigned char, unsigned char, unsigned char, jack_nframes_t)
 {
 }

@@ -143,9 +143,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Record:Midi in");
-    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
-    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
-//    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
+//    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
+//    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
+    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
 //    connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
     connectionList.append("LFO 2:Audio out::Oscillator:Morph modulation");

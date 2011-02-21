@@ -1,18 +1,20 @@
 #include "midiprocessorclient.h"
 
-MidiProcessorClient::MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_) :
+MidiProcessorClient::MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, unsigned int channels_) :
     AudioProcessorClient(clientName, midiProcessor_),
     midiProcessor(midiProcessor_),
     midiInput(true),
-    midiOutput(false)
+    midiOutput(false),
+    channels(channels_)
 {
 }
 
-MidiProcessorClient::MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames) :
+MidiProcessorClient::MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, unsigned int channels_) :
     AudioProcessorClient(clientName, inputPortNames, outputPortNames),
     midiProcessor(0),
     midiInput(true),
-    midiOutput(false)
+    midiOutput(false),
+    channels(channels_)
 {
 }
 
@@ -91,40 +93,43 @@ void MidiProcessorClient::processMidi(const MidiProcessorClient::MidiEvent &midi
     unsigned char statusByte = midiEvent.buffer[0];
     unsigned char highNibble = statusByte >> 4;
     unsigned char channel = statusByte & 0x0F;
-    if (highNibble == 0x08) {
-        unsigned char noteNumber = midiEvent.buffer[1];
-        unsigned char velocity = midiEvent.buffer[2];
-        processNoteOff(channel, noteNumber, velocity, time);
-    } else if (highNibble == 0x09) {
-        unsigned char noteNumber = midiEvent.buffer[1];
-        unsigned char velocity = midiEvent.buffer[2];
-        if (velocity) {
-            // note on event:
-            processNoteOn(channel, noteNumber, velocity, time);
-        } else {
-            // note off event:
+    // only hand down the midi event if it has the right channel:
+    if ((channels >> channel) & 1) {
+        if (highNibble == 0x08) {
+            unsigned char noteNumber = midiEvent.buffer[1];
+            unsigned char velocity = midiEvent.buffer[2];
             processNoteOff(channel, noteNumber, velocity, time);
+        } else if (highNibble == 0x09) {
+            unsigned char noteNumber = midiEvent.buffer[1];
+            unsigned char velocity = midiEvent.buffer[2];
+            if (velocity) {
+                // note on event:
+                processNoteOn(channel, noteNumber, velocity, time);
+            } else {
+                // note off event:
+                processNoteOff(channel, noteNumber, velocity, time);
+            }
+        } else if (highNibble == 0x0A) {
+           // aftertouch:
+           unsigned char note = midiEvent.buffer[1];
+           unsigned char pressure = midiEvent.buffer[2];
+           processAfterTouch(channel, note, pressure, time);
+        } else if (highNibble == 0x0B) {
+            // control change:
+            unsigned char controller = midiEvent.buffer[1];
+            unsigned char value = midiEvent.buffer[2];
+            processController(channel, controller, value, time);
+        } else if (highNibble == 0x0E) {
+            // pitch wheel:
+            unsigned char low = midiEvent.buffer[1];
+            unsigned char high = midiEvent.buffer[2];
+            unsigned int pitch = (high << 7) + low;
+            processPitchBend(channel, pitch, time);
+        } else if (highNibble == 0x0D) {
+            // channel pressure:
+            unsigned char pressure = midiEvent.buffer[1];
+            processChannelPressure(channel, pressure, time);
         }
-    } else if (highNibble == 0x0A) {
-       // aftertouch:
-//       unsigned char note = midiEvent.buffer[1];
-//       unsigned char pressure = midiEvent.buffer[2];
-//       processAfterTouch(channel, note, pressure, time);
-    } else if (highNibble == 0x0B) {
-        // control change:
-        unsigned char controller = midiEvent.buffer[1];
-        unsigned char value = midiEvent.buffer[2];
-        processController(channel, controller, value, time);
-    } else if (highNibble == 0x0E) {
-        // pitch wheel:
-        unsigned char low = midiEvent.buffer[1];
-        unsigned char high = midiEvent.buffer[2];
-        unsigned int pitch = (high << 7) + low;
-        processPitchBend(channel, pitch, time);
-    } else if (highNibble == 0x0D) {
-        // channel pressure:
-        unsigned char pressure = midiEvent.buffer[1];
-        processChannelPressure(channel, pressure, time);
     }
 }
 
@@ -138,6 +143,12 @@ void MidiProcessorClient::processNoteOff(unsigned char channel, unsigned char no
 {
     Q_ASSERT(midiProcessor);
     midiProcessor->processNoteOff(channel, noteNumber, velocity, time);
+}
+
+void MidiProcessorClient::processAfterTouch(unsigned char channel, unsigned char noteNumber, unsigned char pressure, jack_nframes_t time)
+{
+    Q_ASSERT(midiProcessor);
+    midiProcessor->processAfterTouch(channel, noteNumber, pressure, time);
 }
 
 void MidiProcessorClient::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)

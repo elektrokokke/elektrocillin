@@ -13,7 +13,7 @@ public:
         jack_midi_data_t buffer[3];
     };
 
-    MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor);
+    MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor, unsigned int channels = (1 << 16) - 1);
     virtual ~MidiProcessorClient();
 
     MidiProcessor * getMidiProcessor();
@@ -37,7 +37,7 @@ protected:
       See AudioProcessorClient::AudioProcessorClient(const QString &, const QStringList &, const QStringList &)
       for a description of the parameters.
       */
-    MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames);
+    MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, unsigned int channels = (1 << 16) - 1);
 
     void activateMidiInput(bool active);
     void activateMidiOutput(bool active);
@@ -50,6 +50,7 @@ protected:
     // Override these in subclasses:
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processAfterTouch(unsigned char channel, unsigned char noteNumber, unsigned char pressure, jack_nframes_t time);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
     virtual void processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time);
@@ -73,6 +74,7 @@ private:
     jack_nframes_t midiEventCount;
     jack_nframes_t nframes;
     bool midiInput, midiOutput;
+    unsigned int channels;
 };
 
 #endif // NOTETRIGGEREDCLIENT_H

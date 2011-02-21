@@ -132,6 +132,7 @@ void MidiSignalThread::sendProgramChange(unsigned char channel, unsigned char pr
         event.size = 2;
         event.buffer[0] = 0xC0 + channel;
         event.buffer[1] = program;
+        event.buffer[2] = 0;
         getMidiSignalClient()->postEvent(event);
     }
 }
@@ -144,6 +145,7 @@ void MidiSignalThread::sendChannelPressure(unsigned char channel, unsigned char 
         event.size = 2;
         event.buffer[0] = 0xD0 + channel;
         event.buffer[1] = pressure;
+        event.buffer[2] = 0;
         getMidiSignalClient()->postEvent(event);
     }
 }
