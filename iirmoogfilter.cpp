@@ -1,15 +1,18 @@
 #include "iirmoogfilter.h"
 #include <cmath>
+#include <QDebug>
 
 IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     IirFilter(1 + zeros, 4, QStringList("Cutoff modulation"), sampleRate)
 {
-    parameters.frequency = sampleRate * 0.5;
-    parameters.frequencyOffsetFactor = 16; // two octaves difference from MIDI input note
+    parameters.frequency = sampleRate * 0.25;
+    qDebug() << parameters.frequency;
+    parameters.frequencyOffsetFactor = 8; // three octaves difference from MIDI input note
     parameters.frequencyPitchBendFactor = 1;
     parameters.frequencyModulationFactor = 1;
     parameters.frequencyModulationIntensity = 1;
     parameters.resonance = 0;
+    computeCoefficients();
 }
 
 void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
@@ -37,8 +40,16 @@ void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nfr
 void IirMoogFilter::processController(unsigned char, unsigned char controller, unsigned char value, jack_nframes_t)
 {
     if (controller == 1) {
-        // set resonance according to pressure:
+        // set resonance according to the given controller value:
         parameters.resonance = (double)value / 127.0;
+        computeCoefficients();
+    } else if (controller == 2) {
+        parameters.frequency /= parameters.frequencyOffsetFactor;
+        // set cutoff frequency according to the given controller value:
+        // 0 means cutoff frequency is one octave above note frequency;
+        // 127 means cutoff frequency is 6 octaves above note frequency
+        parameters.frequencyOffsetFactor = pow(2.0, (double)value / 127.0 * 5.0 + 1);
+        parameters.frequency *= parameters.frequencyOffsetFactor;
         computeCoefficients();
     }
 }
