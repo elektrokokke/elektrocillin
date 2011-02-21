@@ -34,7 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     adsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3),
     multiplierClient("Multiplier", &multiplier),
     linearWaveShapingClient("Linear waveshaping"),
-    linearMorphOscillatorClient("Oscillator"),
+    fmClient("FM", &fm),
+    linearMorphOscillatorClient("Oscillator", 2.0),
     cubicSplineWaveShapingClient("Cubic spline waveshaping"),
     recordClient("Record")
 {   
@@ -79,10 +80,11 @@ MainWindow::MainWindow(QWidget *parent) :
     // piecewise linear oscillator test setup:
     LinearMorphOscillatorGraphicsItem *linearMorphOscillatorGraphicsItem = new LinearMorphOscillatorGraphicsItem(rect, &linearMorphOscillatorClient);
     linearMorphOscillatorClient.activate();
+    fmClient.activate();
     // end piecewise linear oscillator test setup
 
     // lfo test setup:
-    lfo1.setFrequency(0.11);
+    lfo1.setFrequency(0.1);
     lfo2.setFrequency(0.12);
     lfoClient1.activate();
     lfoClient2.activate();
@@ -135,18 +137,20 @@ MainWindow::MainWindow(QWidget *parent) :
     // port connection test setup:
     QStringList connectionList;
     connectionList.append("system_in:midi::Oscillator:Midi in");
+    connectionList.append("system_in:midi::FM:Midi in");
     connectionList.append("system_in:midi::Record:Midi in");
     connectionList.append("system_in:midi::ADSR envelope:Midi in");
     connectionList.append("system_in:midi::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Oscillator:Midi in");
+    connectionList.append("Virtual keyboard:Midi out::FM:Midi in");
     connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Record:Midi in");
 //    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
 //    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
     connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
+    connectionList.append("FM:Audio out::Oscillator:Pitch modulation");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
-//    connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
     connectionList.append("LFO 2:Audio out::Oscillator:Morph modulation");
     connectionList.append("Multiplier:Product out::Moog filter:Audio in");
     connectionList.append("Moog filter:Audio out::system_out:audio");

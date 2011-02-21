@@ -8,7 +8,7 @@
 class LinearMorphOscillatorClient : public EventProcessorClient<LinearMorphOscillatorParameters>
 {
 public:
-    LinearMorphOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
+    LinearMorphOscillatorClient(const QString &clientName, double frequencyModulationIntensity = 2.0/12.0, size_t ringBufferSize = 1024);
     virtual ~LinearMorphOscillatorClient();
 
     LinearMorphOscillator * getLinearMorphOscillator();

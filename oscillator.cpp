@@ -13,6 +13,7 @@ Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, 
     phase(0),
     normalizedAngularFrequency(0)
 {
+    computeNormalizedAngularFrequency();
 }
 
 void Oscillator::setSampleRate(double sampleRate)

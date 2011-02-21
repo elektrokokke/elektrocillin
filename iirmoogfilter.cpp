@@ -1,12 +1,10 @@
 #include "iirmoogfilter.h"
 #include <cmath>
-#include <QDebug>
 
 IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     IirFilter(1 + zeros, 4, QStringList("Cutoff modulation"), sampleRate)
 {
     parameters.frequency = sampleRate * 0.25;
-    qDebug() << parameters.frequency;
     parameters.frequencyOffsetFactor = 8; // three octaves difference from MIDI input note
     parameters.frequencyPitchBendFactor = 1;
     parameters.frequencyModulationFactor = 1;

@@ -2,8 +2,8 @@
 #include <cmath>
 #include <QPen>
 
-LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient<LinearMorphOscillatorParameters>(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator()), ringBufferSize)
+LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientName, double frequencyModulationIntensity, size_t ringBufferSize) :
+    EventProcessorClient<LinearMorphOscillatorParameters>(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator(), frequencyModulationIntensity), ringBufferSize)
 {
     state[0].getX().append(0);
     state[0].getY().append(-1);
