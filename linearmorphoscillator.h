@@ -17,14 +17,17 @@ public:
     const LinearInterpolator & getState(int state) const;
     void setState(int state, const LinearInterpolator &interpolator);
 
-    // Reimplemented from Oscillator, to evaluate morph input:
+    // Reimplemented from Oscillator, to make the morph value controllable by MIDI:
+    virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
+    // Reimplemented from Oscillator, to control morph by audio input:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     virtual void processEvent(const LinearMorphOscillatorParameters &event, jack_nframes_t time);
 
 private:
     LinearInterpolator state[2], morphedState;
+    double morphAudio, morphMidi;
 
-    void computeMorphedState(double morph);
+    void computeMorphedState();
 };
 
 #endif // LINEARMORPHOSCILLATOR_H

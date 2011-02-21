@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // lfo test setup:
     lfo1.setFrequency(0.1);
-    lfo2.setFrequency(0.12);
+    lfo2.setFrequency(0.1);
     lfoClient1.activate();
     lfoClient2.activate();
     noiseClient.activate();
@@ -149,7 +149,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
 //    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
     connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
-    connectionList.append("FM:Audio out::Oscillator:Pitch modulation");
+//    connectionList.append("FM:Audio out::Oscillator:Pitch modulation");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
     connectionList.append("LFO 2:Audio out::Oscillator:Morph modulation");
     connectionList.append("Multiplier:Product out::Moog filter:Audio in");
