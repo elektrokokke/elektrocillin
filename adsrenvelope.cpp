@@ -2,6 +2,7 @@
 
 AdsrEnvelope::AdsrEnvelope(double attackTime_, double decayTime_, double sustainLevel_, double releaseTime_, double sampleRate) :
     MidiProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
+    preAttackTime(0.001),
     attackTime(attackTime_),
     decayTime(decayTime_),
     sustainLevel(sustainLevel_),
@@ -35,16 +36,17 @@ void AdsrEnvelope::setReleaseTime(double value)
     releaseTime = value;
 }
 
-void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t)
+void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t time)
 {
-    this->velocity = velocity / 127.0;
+    double newVelocity = velocity / 127.0;
     currentSegmentTime = 0.0;
     currentSegment = ATTACK;
-    attackStartLevel = previousLevel;
+    attackStartLevel = previousLevel * this->velocity / newVelocity;
+    this->velocity = newVelocity;
     release = false;
 }
 
-void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char, jack_nframes_t)
+void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char, jack_nframes_t time)
 {
     release = true;
 }
@@ -57,7 +59,7 @@ void AdsrEnvelope::processAudio(const double *, double *outputs, jack_nframes_t)
             currentSegmentTime = 0.0;
             currentSegment = DECAY;
         } else {
-            // fade from attackStartLevel to 1:
+            // fade from last level to 1:
             level = attackStartLevel + (1.0 - attackStartLevel) * currentSegmentTime / attackTime;
         }
     }

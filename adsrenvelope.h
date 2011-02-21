@@ -15,6 +15,7 @@ public:
 
     enum CurrentSegment {
         NONE,
+        PREATTACK,
         ATTACK,
         DECAY,
         SUSTAIN,
@@ -27,7 +28,7 @@ public:
 
 private:
     // all times are in seconds, all levels between 0 and 1:
-    double attackTime, decayTime, sustainLevel, releaseTime;
+    double preAttackTime, attackTime, decayTime, sustainLevel, releaseTime;
     double currentSegmentTime;
     double previousLevel, attackStartLevel;
     double velocity;

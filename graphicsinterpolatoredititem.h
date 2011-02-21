@@ -14,6 +14,8 @@ class GraphicsInterpolatorEditItem : public QObject, public QGraphicsRectItem
 public:
     GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0);
 
+    void interpolatorChanged();
+
 protected:
     virtual void increaseControlPoints() = 0;
     virtual void decreaseControlPoints() = 0;

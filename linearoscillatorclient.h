@@ -6,8 +6,6 @@
 #include "graphicsinterpolatoredititem.h"
 #include <QPen>
 
-class GraphicsNodeItem;
-
 class LinearOscillatorClient : public EventProcessorClient<InterpolatorParameters>
 {
 public:
@@ -25,7 +23,7 @@ protected:
     virtual void processEvent(const InterpolatorParameters &event, jack_nframes_t time);
 
 private:
-    LinearInterpolator interpolator, interpolatorProcess;
+    LinearInterpolator interpolator;
 };
 
 class LinearOscillatorGraphicsItem : public GraphicsInterpolatorEditItem

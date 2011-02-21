@@ -25,10 +25,30 @@ GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpo
     }
     interpolationItem = new GraphicsInterpolationItem(interpolator, 0.01, rectScaled.bottom(), rectScaled.top(), rect().width() / rectScaled.width(), rect().height() / rectScaled.height(), this);
     interpolationItem->setPen(QPen(QBrush(Qt::black), 2));
-    interpolationItem->setPos(-rectScaled.left() * rect().width() / rectScaled.width(), -rectScaled.top() * rect().height() / rectScaled.height());
+    interpolationItem->setPos(-rectScaled.left() * rect().width() / rectScaled.width() + rect().left(), -rectScaled.top() * rect().height() / rectScaled.height() + rect().top());
     // create the context menu:
     contextMenu.addAction(tr("Increase nr. of control points"), this, SLOT(onIncreaseControlPoints()));
     contextMenu.addAction(tr("Decrease nr. of control points"), this, SLOT(onDecreaseControlPoints()));
+}
+
+void GraphicsInterpolatorEditItem::interpolatorChanged()
+{
+    interpolationItem->updatePath();
+    for (; nodes.size() > interpolator->getX().size(); ) {
+        mapSenderToControlPointIndex.remove(nodes.back());
+        delete nodes.back();
+        nodes.remove(nodes.size() - 1);
+    }
+    for (int i = 0; i < nodes.size(); i++) {
+        nodes[i]->setXScaled(interpolator->getX()[i]);
+        nodes[i]->setYScaled(interpolator->interpolate(i, interpolator->getX()[i]));
+        mapSenderToControlPointIndex[nodes[i]] = i;
+    }
+    for (int i = nodes.size(); i < interpolator->getX().size(); i++) {
+        // add a new node:
+        nodes.append(createNode(interpolator->getX()[i], interpolator->interpolate(i, interpolator->getX()[i]), rectScaled));
+        mapSenderToControlPointIndex[nodes[i]] = i;
+    }
 }
 
 void GraphicsInterpolatorEditItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )

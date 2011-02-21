@@ -7,6 +7,7 @@
 class LinearInterpolator : public Interpolator
 {
 public:
+    LinearInterpolator();
     LinearInterpolator(const QVector<double> &xx, const QVector<double> &yy);
 
     const QVector<double> & getX() const;

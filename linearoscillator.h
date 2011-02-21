@@ -19,6 +19,7 @@ public:
     const LinearInterpolator & getLinearInterpolator() const;
     void setLinearInterpolator(const LinearInterpolator &interpolator);
 
+    virtual void processEvent(const InterpolatorParameters &event, jack_nframes_t time);
 protected:
     double valueAtPhase(double phase);
 

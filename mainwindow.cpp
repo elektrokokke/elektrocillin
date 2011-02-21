@@ -31,10 +31,10 @@ MainWindow::MainWindow(QWidget *parent) :
     lfoClient1("LFO", &lfo1),
     lfoClient2("LFO 2", &lfo2),
     noiseClient("White noise", &noiseGenerator),
-    adsrClient("ADSR envelope", 0, 0.2, 0.2, 0.3),
+    adsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3),
     multiplierClient("Multiplier", &multiplier),
     linearWaveShapingClient("Linear waveshaping"),
-    linearOscillatorClient("Oscillator"),
+    linearMorphOscillatorClient("Oscillator"),
     cubicSplineWaveShapingClient("Cubic spline waveshaping"),
     recordClient("Record")
 {   
@@ -78,8 +78,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // end waveshaping client test setup
 
     // piecewise linear oscillator test setup:
-    LinearOscillatorGraphicsItem *linearOscillatorGraphicsItem = new LinearOscillatorGraphicsItem(rect, &linearOscillatorClient);
-    linearOscillatorClient.activate();
+    LinearMorphOscillatorGraphicsItem *linearMorphOscillatorGraphicsItem = new LinearMorphOscillatorGraphicsItem(rect, &linearMorphOscillatorClient);
+    linearMorphOscillatorClient.activate();
     // end piecewise linear oscillator test setup
 
     // lfo test setup:
@@ -123,10 +123,10 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemCubicSplineWaveShaping->setInnerItem(cubicSplineWaveShapingItem);
     scene->addItem(graphicsClientItemCubicSplineWaveShaping);
     allClientsRect |= cubicSplineWaveShapingItem->sceneBoundingRect();
-    graphicsClientItemLinearOscillator = new GraphicsClientItem(&linearOscillatorClient, rect.translated(rect.width() * 2, 0));
-    graphicsClientItemLinearOscillator->setInnerItem(linearOscillatorGraphicsItem);
+    graphicsClientItemLinearOscillator = new GraphicsClientItem(&linearMorphOscillatorClient, rect.translated(rect.width() * 2, 0));
+    graphicsClientItemLinearOscillator->setInnerItem(linearMorphOscillatorGraphicsItem);
     scene->addItem(graphicsClientItemLinearOscillator);
-    allClientsRect |= linearOscillatorGraphicsItem->sceneBoundingRect();
+    allClientsRect |= linearMorphOscillatorGraphicsItem->sceneBoundingRect();
     graphicsClientItemRecord = new GraphicsClientItem(&recordClient, rect.translated(rect.width() * 2, rect.height()));
     graphicsClientItemRecord->setInnerItem(recordClientRect);
     scene->addItem(graphicsClientItemRecord);
@@ -136,23 +136,24 @@ MainWindow::MainWindow(QWidget *parent) :
     // port connection test setup:
     QStringList connectionList;
     connectionList.append("system_in:midi::Oscillator:Midi in");
+    connectionList.append("system_in:midi::Record:Midi in");
     connectionList.append("system_in:midi::ADSR envelope:Midi in");
     connectionList.append("system_in:midi::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Oscillator:Midi in");
     connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Record:Midi in");
-//    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
-//    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
-    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
+    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
+    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
+//    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
 //    connectionList.append("LFO:Audio out::Moog filter:Cutoff modulation");
-//    connectionList.append("LFO 2:Audio out::Oscillator:Pulse width modulation");
-//    connectionList.append("Multiplier:Product out::Moog filter:Audio in");
-//    connectionList.append("Moog filter:Audio out::system_out:audio");
-//    connectionList.append("Moog filter:Audio out::Record:Audio in");
-    connectionList.append("Multiplier:Product out::system_out:audio");
-    connectionList.append("Multiplier:Product out::Record:Audio in");
+    connectionList.append("LFO 2:Audio out::Oscillator:Morph modulation");
+    connectionList.append("Multiplier:Product out::Moog filter:Audio in");
+    connectionList.append("Moog filter:Audio out::system_out:audio");
+    connectionList.append("Moog filter:Audio out::Record:Audio in");
+//    connectionList.append("Multiplier:Product out::system_out:audio");
+//    connectionList.append("Multiplier:Product out::Record:Audio in");
     nullClient.restoreConnections(connectionList);
     // end port connection test setup
 

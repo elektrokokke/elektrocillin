@@ -24,7 +24,6 @@ void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned
 {
     frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
     computeNormalizedAngularFrequency();
-    phase = 0;
 }
 
 void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)

@@ -1,5 +1,10 @@
 #include "linearinterpolator.h"
 
+LinearInterpolator::LinearInterpolator() :
+    Interpolator(QVector<double>(), 2)
+{
+}
+
 LinearInterpolator::LinearInterpolator(const QVector<double> &xx, const QVector<double> &yy_) :
     Interpolator(xx, 2),
     yy(yy_)

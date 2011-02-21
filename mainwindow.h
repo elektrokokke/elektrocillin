@@ -13,7 +13,7 @@
 #include "jacknullclient.h"
 #include "graphicsclientitem.h"
 #include "linearwaveshapingclient.h"
-#include "linearoscillatorclient.h"
+#include "linearmorphoscillatorclient.h"
 #include "cubicsplinewaveshapingclient.h"
 #include "record2memoryclient.h"
 #include "adsrclient.h"
@@ -75,7 +75,7 @@ private:
     MultiplyProcessor multiplier;
     AudioProcessorClient multiplierClient;
     LinearWaveShapingClient linearWaveShapingClient;
-    LinearOscillatorClient linearOscillatorClient;
+    LinearMorphOscillatorClient linearMorphOscillatorClient;
     CubicSplineWaveShapingClient cubicSplineWaveShapingClient;
     Record2MemoryClient recordClient;
     GraphView *recordClientGraphView;

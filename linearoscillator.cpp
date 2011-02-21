@@ -5,12 +5,11 @@
 
 LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate, const QStringList &additionalInputPortNames, int sincWindowSize_) :
     Oscillator(frequencyModulationIntensity, sampleRate, additionalInputPortNames),
-    interpolator(QVector<double>(1), QVector<double>(1)),
     sincWindowSize(sincWindowSize_),
     siInterpolator(QVector<double>(), QVector<double>(), QVector<double>())
 {
-    interpolator.getX()[0] = 0;
-    interpolator.getY()[0] = -1;
+    interpolator.getX().append(0);
+    interpolator.getY().append(-1);
     interpolator.getX().append(2.0 * M_PI);
     interpolator.getY().append(1);
     initializeSiInterpolator();
@@ -35,6 +34,16 @@ void LinearOscillator::setLinearInterpolator(const LinearInterpolator &interpola
     Q_ASSERT(interpolator.getX()[0] == 0);
     Q_ASSERT(interpolator.getX().back() == 2 * M_PI);
     this->interpolator = interpolator;
+}
+
+void LinearOscillator::processEvent(const InterpolatorParameters &event, jack_nframes_t)
+{
+    // set the interpolator's nr of control points:
+    interpolator.getX().resize(event.controlPoints);
+    interpolator.getY().resize(event.controlPoints);
+    // set the interpolator control point at "index" accordingly:
+    interpolator.getX()[event.index] = event.x;
+    interpolator.getY()[event.index] = event.y;
 }
 
 double LinearOscillator::valueAtPhase(double phase)

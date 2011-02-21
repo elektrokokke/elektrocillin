@@ -72,7 +72,8 @@ SOURCES += main.cpp\
     whitenoisegenerator.cpp \
     graphicsportitem.cpp \
     graphicsinterpolatoredititem.cpp \
-    cisi.cpp
+    cisi.cpp \
+    linearmorphoscillatorclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -141,7 +142,8 @@ HEADERS  += mainwindow.h \
     whitenoisegenerator.h \
     graphicsportitem.h \
     graphicsinterpolatoredititem.h \
-    cisi.h
+    cisi.h \
+    linearmorphoscillatorclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

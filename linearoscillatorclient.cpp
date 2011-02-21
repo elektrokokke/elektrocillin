@@ -4,8 +4,7 @@
 
 LinearOscillatorClient::LinearOscillatorClient(const QString &clientName, size_t ringBufferSize) :
     EventProcessorClient<InterpolatorParameters>(clientName, new LinearOscillator(), ringBufferSize),
-    interpolator(getLinearOscillator()->getLinearInterpolator()),
-    interpolatorProcess(getLinearOscillator()->getLinearInterpolator())
+    interpolator(getLinearOscillator()->getLinearInterpolator())
 {
 }
 
@@ -88,16 +87,9 @@ void LinearOscillatorClient::postChangeControlPoint(int index, int nrOfControlPo
     postEvent(parameters);
 }
 
-void LinearOscillatorClient::processEvent(const InterpolatorParameters &event, jack_nframes_t)
+void LinearOscillatorClient::processEvent(const InterpolatorParameters &event, jack_nframes_t time)
 {
-    // set the interpolator's nr of control points:
-    interpolatorProcess.getX().resize(event.controlPoints);
-    interpolatorProcess.getY().resize(event.controlPoints);
-    // set the interpolator control point at "index" accordingly:
-    interpolatorProcess.getX()[event.index] = event.x;
-    interpolatorProcess.getY()[event.index] = event.y;
-    // update the integral:
-    getLinearOscillator()->setLinearInterpolator(interpolatorProcess);
+    getLinearOscillator()->processEvent(event, time);
 }
 
 LinearOscillatorGraphicsItem::LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client_, QGraphicsItem *parent) :
