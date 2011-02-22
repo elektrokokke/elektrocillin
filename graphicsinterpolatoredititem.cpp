@@ -1,10 +1,11 @@
 #include "graphicsinterpolatoredititem.h"
 #include <QGraphicsSceneMouseEvent>
-#include <QPen>
 
-GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, QGraphicsItem *parent) :
+GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, QGraphicsItem *parent, const QPen &nodePen_, const QBrush &nodeBrush_) :
     QGraphicsRectItem(rectangle, parent),
     rectScaled(rectScaled_),
+    nodePen(nodePen_),
+    nodeBrush(nodeBrush_),
     interpolator(interpolator_)
 {
     setPen(QPen(QBrush(Qt::black), 2));
@@ -110,8 +111,8 @@ void GraphicsInterpolatorEditItem::onNodePositionChangedScaled(QPointF position)
 GraphicsNodeItem * GraphicsInterpolatorEditItem::createNode(qreal x, qreal y, const QRectF &rectScaled)
 {
     GraphicsNodeItem *nodeItem = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
-    nodeItem->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
-    nodeItem->setBrush(QBrush(qRgb(52, 101, 164)));
+    nodeItem->setPen(nodePen);
+    nodeItem->setBrush(nodeBrush);
     nodeItem->setZValue(1);
     nodeItem->setBounds(QRectF(rect().left(), rect().top(), rect().width(), rect().height()));
     nodeItem->setBoundsScaled(rectScaled);

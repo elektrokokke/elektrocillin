@@ -151,7 +151,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
 //    connectionList.append("FM:Audio out::Oscillator:Pitch modulation");
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
-    connectionList.append("LFO 2:Audio out::Oscillator:Morph modulation");
+//    connectionList.append("LFO 2:Audio out::Oscillator:Morph modulation");
     connectionList.append("Multiplier:Product out::Moog filter:Audio in");
     connectionList.append("Moog filter:Audio out::system_out:audio");
     connectionList.append("Moog filter:Audio out::Record:Audio in");
@@ -160,7 +160,7 @@ MainWindow::MainWindow(QWidget *parent) :
     nullClient.restoreConnections(connectionList);
     // end port connection test setup
 
-//    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-1000, -1000, 1000, 1000));
     ui->graphicsView->centerOn(allClientsRect.center());

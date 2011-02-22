@@ -110,8 +110,8 @@ void LinearMorphOscillatorClient::processEvent(const LinearMorphOscillatorParame
     getLinearMorphOscillator()->processEvent(event, time);
 }
 
-LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent) :
-    GraphicsInterpolatorEditItem(client_->getState(state_), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent),
+LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
+    GraphicsInterpolatorEditItem(client_->getState(state_), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent, nodePen, nodeBrush),
     client(client_),
     state(state_),
     twin(0)
@@ -147,8 +147,8 @@ LinearMorphOscillatorGraphicsItem::LinearMorphOscillatorGraphicsItem(const QRect
     QGraphicsRectItem(rect, parent)
 {
     setPen(QPen(Qt::NoPen));
-    LinearMorphOscillatorGraphicsSubItem *state1 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x(), rect.y(), rect.width() * 0.49, rect.height()), client, 0, this);
-    LinearMorphOscillatorGraphicsSubItem *state2 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x() + rect.width() * 0.51, rect.y(), rect.width() * 0.49, rect.height()), client, 1, this);
+    LinearMorphOscillatorGraphicsSubItem *state1 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x(), rect.y(), rect.width() * 0.49, rect.height()), client, 0, this, QPen(QBrush(Qt::red), 3), QBrush(Qt::darkRed));
+    LinearMorphOscillatorGraphicsSubItem *state2 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x() + rect.width() * 0.51, rect.y(), rect.width() * 0.49, rect.height()), client, 1, this, QPen(QBrush(Qt::green), 3), QBrush(Qt::darkGreen));
     state1->setTwin(state2);
     state2->setTwin(state1);
 }

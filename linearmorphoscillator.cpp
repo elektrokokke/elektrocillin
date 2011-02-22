@@ -34,7 +34,6 @@ void LinearMorphOscillator::processController(unsigned char channel, unsigned ch
 {
     if (controller == 4) {
         morphMidi = (double)value / 127.0 * 2.0 - 1.0;
-        computeMorphedState();
     } else {
         LinearOscillator::processController(channel, controller, value, time);
     }

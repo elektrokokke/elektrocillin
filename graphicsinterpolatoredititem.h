@@ -7,12 +7,13 @@
 #include <QObject>
 #include <QGraphicsRectItem>
 #include <QMenu>
+#include <QPen>
 
 class GraphicsInterpolatorEditItem : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
-    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0);
+    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 
     void interpolatorChanged();
 
@@ -29,6 +30,8 @@ private slots:
 
 private:
     QRectF rectScaled;
+    QPen nodePen;
+    QBrush nodeBrush;
     QMap<QObject*, int> mapSenderToControlPointIndex;
     QVector<GraphicsNodeItem*> nodes;
     Interpolator *interpolator;
