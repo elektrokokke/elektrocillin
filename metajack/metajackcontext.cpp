@@ -2,7 +2,8 @@
 #include <sstream>
 #include <cassert>
 #include <list>
-#include <boost/xpressive/xpressive_dynamic.hpp>
+#include <memory.h>
+//#include <boost/xpressive/xpressive_dynamic.hpp>
 
 MetaJackContext MetaJackContext::instance("metajack");
 
@@ -423,16 +424,16 @@ void MetaJackContext::disconnectPorts(MetaJackPortProcess *source, MetaJackPortP
 
 const char ** MetaJackContext::getPortsByPattern(const std::string &port_name_pattern, const std::string &type_name_pattern, unsigned long flags)
 {
-    boost::xpressive::sregex regexPortNames = boost::xpressive::sregex::compile(port_name_pattern);
-    boost::xpressive::sregex regexTypeNames = boost::xpressive::sregex::compile(type_name_pattern);
+//    boost::xpressive::sregex regexPortNames = boost::xpressive::sregex::compile(port_name_pattern);
+//    boost::xpressive::sregex regexTypeNames = boost::xpressive::sregex::compile(type_name_pattern);
     std::list<MetaJackPort*> matchingPorts;
-    for (std::map<std::string, MetaJackPort*>::iterator i = portsByName.begin(); i != portsByName.end(); i++) {
-        MetaJackPort *port = i->second;
-        if (((port->getFlags() & flags) == flags) && ((port_name_pattern.length() == 0) || boost::xpressive::regex_match(port->getFullName(), regexPortNames)) && ((type_name_pattern.length() == 0) || boost::xpressive::regex_match(port->getType(), regexTypeNames))) {
-            // flags, port name and type match:
-            matchingPorts.push_back(port);
-        }
-    }
+//    for (std::map<std::string, MetaJackPort*>::iterator i = portsByName.begin(); i != portsByName.end(); i++) {
+//        MetaJackPort *port = i->second;
+//        if (((port->getFlags() & flags) == flags) && ((port_name_pattern.length() == 0) || boost::xpressive::regex_match(port->getFullName(), regexPortNames)) && ((type_name_pattern.length() == 0) || boost::xpressive::regex_match(port->getType(), regexTypeNames))) {
+//            // flags, port name and type match:
+//            matchingPorts.push_back(port);
+//        }
+//    }
     if (matchingPorts.size()) {
         char ** names = new char*[matchingPorts.size() + 1];
         size_t index = 0;
