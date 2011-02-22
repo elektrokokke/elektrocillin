@@ -17,6 +17,11 @@ public:
 
     IirMoogFilter(double sampleRate = 44100, int zeros = 0);
 
+    void setFrequencyController(unsigned char controller);
+    unsigned char getFrequencyController() const;
+    void setResonanceController(unsigned char controller);
+    unsigned char getResonanceController() const;
+
     // reimplemented from IIRFilter:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplemented from MidiProcessor:
@@ -31,6 +36,7 @@ public:
 
     void computeCoefficients();
 private:
+    unsigned char frequencyController, resonanceController;
     Parameters parameters;
 };
 

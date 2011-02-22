@@ -38,6 +38,16 @@ MidiProcessor * MidiProcessorClient::getMidiProcessor()
     return (MidiProcessor*)getAudioProcessor();
 }
 
+void MidiProcessorClient::setChannelMask(unsigned int channelMask)
+{
+    channels = channelMask;
+}
+
+unsigned int MidiProcessorClient::getChannelMask() const
+{
+    return channels;
+}
+
 bool MidiProcessorClient::init()
 {
     return AudioProcessorClient::init()

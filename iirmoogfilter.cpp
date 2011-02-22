@@ -2,7 +2,9 @@
 #include <cmath>
 
 IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
-    IirFilter(1 + zeros, 4, QStringList("Cutoff modulation"), sampleRate)
+    IirFilter(1 + zeros, 4, QStringList("Cutoff modulation"), sampleRate),
+    frequencyController(1),
+    resonanceController(2)
 {
     parameters.frequency = sampleRate * 0.25;
     parameters.frequencyOffsetFactor = 8; // three octaves difference from MIDI input note
@@ -11,6 +13,26 @@ IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     parameters.frequencyModulationIntensity = 1;
     parameters.resonance = 0;
     computeCoefficients();
+}
+
+void IirMoogFilter::setFrequencyController(unsigned char controller)
+{
+    frequencyController = controller;
+}
+
+unsigned char IirMoogFilter::getFrequencyController() const
+{
+    return frequencyController;
+}
+
+void IirMoogFilter::setResonanceController(unsigned char controller)
+{
+    resonanceController = controller;
+}
+
+unsigned char IirMoogFilter::getResonanceController() const
+{
+    return resonanceController;
 }
 
 void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
@@ -35,13 +57,13 @@ void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nfr
     computeCoefficients();
 }
 
-void IirMoogFilter::processController(unsigned char, unsigned char controller, unsigned char value, jack_nframes_t)
+void IirMoogFilter::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
-    if (controller == 1) {
+    if (controller == resonanceController) {
         // set resonance according to the given controller value:
         parameters.resonance = (double)value / 127.0;
         computeCoefficients();
-    } else if (controller == 2) {
+    } else if (controller == frequencyController) {
         parameters.frequency /= parameters.frequencyOffsetFactor;
         // set cutoff frequency according to the given controller value:
         // 0 means cutoff frequency is one octave above note frequency;
@@ -49,6 +71,8 @@ void IirMoogFilter::processController(unsigned char, unsigned char controller, u
         parameters.frequencyOffsetFactor = pow(2.0, (double)value / 127.0 * 5.0 + 1);
         parameters.frequency *= parameters.frequencyOffsetFactor;
         computeCoefficients();
+    } else {
+        IirFilter::processController(channel, controller, value, time);
     }
 }
 

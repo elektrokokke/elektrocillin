@@ -160,7 +160,7 @@ MainWindow::MainWindow(QWidget *parent) :
     nullClient.restoreConnections(connectionList);
     // end port connection test setup
 
-    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+//    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-1000, -1000, 1000, 1000));
     ui->graphicsView->centerOn(allClientsRect.center());

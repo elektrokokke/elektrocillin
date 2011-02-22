@@ -4,6 +4,7 @@
 
 Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, const QStringList &additionalInputPortNames) :
     MidiProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
+    detuneController(3),
     frequency(441),
     frequencyDetuneFactor(1),
     detuneInCents(0),
@@ -14,6 +15,16 @@ Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, 
     normalizedAngularFrequency(0)
 {
     computeNormalizedAngularFrequency();
+}
+
+void Oscillator::setDetuneController(unsigned char controller)
+{
+    detuneController = controller;
+}
+
+unsigned char Oscillator::getDetuneController() const
+{
+    return detuneController;
 }
 
 void Oscillator::setSampleRate(double sampleRate)
@@ -35,10 +46,12 @@ void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframe
     computeNormalizedAngularFrequency();
 }
 
-void Oscillator::processController(unsigned char, unsigned char controller, unsigned char value, jack_nframes_t)
+void Oscillator::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
-    if (controller == 3) {
+    if (controller == detuneController) {
         setDetune(((double)value - 64.0) / 128.0 * 200.0);
+    } else {
+        MidiProcessor::processController(channel, controller, value, time);
     }
 }
 

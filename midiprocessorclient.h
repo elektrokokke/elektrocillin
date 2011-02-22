@@ -13,10 +13,13 @@ public:
         jack_midi_data_t buffer[3];
     };
 
-    MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor, unsigned int channels = (1 << 16) - 1);
+    MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor, unsigned int channelMask = (1 << 16) - 1);
     virtual ~MidiProcessorClient();
 
     MidiProcessor * getMidiProcessor();
+
+    void setChannelMask(unsigned int channelMask = (1 << 16) - 1);
+    unsigned int getChannelMask() const;
 
 protected:
     /**
