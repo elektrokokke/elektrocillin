@@ -22,7 +22,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QRectF &rect, 
     QList<GraphicsPortItem*> inputPortItems;
     qreal inputsHeight = 0;
     for (int i = 0; i < inputPorts.size(); i++) {
-        GraphicsPortItem *portItem = new GraphicsPortItem(inputPorts[i], this);
+        GraphicsPortItem *portItem = new GraphicsPortItem(client, inputPorts[i], this);
         inputsHeight += portItem->rect().height();
         inputPortItems.append(portItem);
     }
@@ -33,7 +33,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QRectF &rect, 
     QList<GraphicsPortItem*> outputPortItems;
     qreal outputsHeight = 0;
     for (int i = 0; i < outputPorts.size(); i++) {
-        GraphicsPortItem *portItem = new GraphicsPortItem(outputPorts[i], this);
+        GraphicsPortItem *portItem = new GraphicsPortItem(client, outputPorts[i], this);
         outputsHeight += portItem->rect().height();
         outputPortItems.append(portItem);
     }

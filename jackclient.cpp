@@ -151,6 +151,11 @@ void JackClient::restoreConnections(const QStringList &connections)
     }
 }
 
+QString JackClient::getPortNameById(jack_port_id_t id)
+{
+    return jack_port_name(jack_port_by_id(client, id));
+}
+
 QString JackClient::getFullPortName(const QString &clientName, const QString &shortPortName)
 {
     return clientName + ":" + shortPortName;

@@ -108,6 +108,8 @@ public:
     QStringList getConnections();
     void restoreConnections(const QStringList &connections);
 
+    QString getPortNameById(jack_port_id_t id);
+
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
     static int getMaximumPortNameLength();
 
