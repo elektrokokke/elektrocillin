@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     lfo2.setFrequency(0.1);
 //    lfoClient1.activate();
 //    lfoClient2.activate();
-//    noiseClient.activate();
+    noiseClient.activate();
     // end lfo test setup
 
     // ADSR envelope test setup:
@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // record client test setup:
     QGraphicsRectItem *recordClientRect = new QGraphicsRectItem(rect);
-//    recordClient.activate();
+    recordClient.activate();
     recordClientGraphView = new GraphView(0);
     recordClientGraphView->resize(500, 400);
     QGraphicsProxyWidget *recordClientGraphicsItem = new QGraphicsProxyWidget(recordClientRect);
@@ -106,32 +106,6 @@ MainWindow::MainWindow(QWidget *parent) :
     recordClientGraphicsItem->setFlag(QGraphicsItem::ItemIgnoresTransformations);
     QObject::connect(&recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
     // end record client test setup
-
-    // port connection test setup:
-    QStringList connectionList;
-    connectionList.append("system_in:midi 1::Oscillator:Midi in");
-    connectionList.append("system_in:midi 1::FM:Midi in");
-    connectionList.append("system_in:midi 1::Record:Midi in");
-    connectionList.append("system_in:midi 1::ADSR envelope:Midi in");
-    connectionList.append("system_in:midi 1::Moog filter:Midi in");
-    connectionList.append("Virtual keyboard:Midi out::Oscillator:Midi in");
-    connectionList.append("Virtual keyboard:Midi out::FM:Midi in");
-    connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
-    connectionList.append("Virtual keyboard:Midi out::Moog filter:Midi in");
-    connectionList.append("Virtual keyboard:Midi out::Record:Midi in");
-//    connectionList.append("Oscillator:Audio out::Cubic spline waveshaping:Audio in");
-//    connectionList.append("Cubic spline waveshaping:Audio out::Multiplier:Factor 1");
-    connectionList.append("Oscillator:Audio out::Multiplier:Factor 1");
-//    connectionList.append("FM:Audio out::Oscillator:Pitch modulation");
-    connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
-//    connectionList.append("LFO 2:Audio out::Oscillator:Morph modulation");
-    connectionList.append("Multiplier:Product out::Moog filter:Audio in");
-    connectionList.append("Moog filter:Audio out::system_out:audio 1");
-    connectionList.append("Moog filter:Audio out::Record:Audio in");
-//    connectionList.append("Multiplier:Product out::system_out:audio 1");
-//    connectionList.append("Multiplier:Product out::Record:Audio in");
-    nullClient.restoreConnections(connectionList);
-    // end port connection test setup
 
     // client graphics item test setup:
     graphicsClientItemFilter = new GraphicsClientItem(&moogFilterClient, rect);
@@ -158,6 +132,15 @@ MainWindow::MainWindow(QWidget *parent) :
     graphicsClientItemRecord->setInnerItem(recordClientRect);
     scene->addItem(graphicsClientItemRecord);
     allClientsRect |= recordClientRect->sceneBoundingRect();
+    GraphicsClientItem *graphicsClientItemAdsr = new GraphicsClientItem(&adsrClient, rect.translated(rect.width() * 0, rect.height() * 2));
+    graphicsClientItemAdsr->setInnerItem(new QGraphicsSimpleTextItem(adsrClient.getClientName()));
+    scene->addItem(graphicsClientItemAdsr);
+    GraphicsClientItem *graphicsClientItemMultiplier = new GraphicsClientItem(&multiplierClient, rect.translated(rect.width() * 1, rect.height() * 2));
+    graphicsClientItemMultiplier->setInnerItem(new QGraphicsSimpleTextItem(multiplierClient.getClientName()));
+    scene->addItem(graphicsClientItemMultiplier);
+    GraphicsClientItem *graphicsClientItemNoise = new GraphicsClientItem(&noiseClient, rect.translated(rect.width() * 2, rect.height() * 2));
+    graphicsClientItemNoise->setInnerItem(new QGraphicsSimpleTextItem(noiseClient.getClientName()));
+    scene->addItem(graphicsClientItemNoise);
     // end client graphics item test setup
 
 //    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
