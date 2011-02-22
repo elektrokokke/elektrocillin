@@ -54,7 +54,7 @@ private:
     MetaJackContext *context;
     std::map<MetaJackPort*, jack_port_t*> connectedPorts;
     std::set<MetaJackPort*> freePorts;
-    int wrapperSuffix, audioSuffix, midiSuffix;
+    int wrapperAudioSuffix, wrapperMidiSuffix, audioSuffix, midiSuffix;
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
     std::string createPortName(const std::string &shortName, int suffix);

@@ -2,6 +2,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QBrush>
 #include <QFont>
+#include <QSet>
 
 GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, QGraphicsItem *parent) :
     QGraphicsRectItem(parent),
@@ -14,15 +15,58 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     portNameItem->setFont(QFont("Helvetica", 8));
     setRect(portNameItem->boundingRect().adjusted(0, 0, 4, 2));
     portNameItem->setPos(2, 1);
+    // get port info:
+    type = client->getPortType(fullPortName);
+    isInput = (client->getPortFlags(fullPortName) & JackPortIsInput);
     // create the context menu:
     connectMenu = contextMenu.addMenu("Connect");
     disconnectMenu = contextMenu.addMenu("Disconnect");
     QStringList connectedPorts = client->getConnectedPorts(fullPortName);
+    QSet<QString> connectedPortsSet;
     for (int i = 0; i < connectedPorts.size(); i++) {
         QAction *action = disconnectMenu->addAction(connectedPorts[i]);
+        action->setData(connectedPorts[i]);
+        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onDisconnectAction()));
         mapPortNamesToActions[connectedPorts[i]] = action;
-        mapActionsToPortNames[action] = connectedPorts[i];
+        connectedPortsSet.insert(connectedPorts[i]);
     }
+    // get all available ports that can be connected to this:
+    QStringList connectablePorts = client->getPorts(0, type.toAscii().data(), isInput ? JackPortIsOutput : JackPortIsInput);
+    for (int i = 0; i < connectablePorts.size(); i++) {
+        // skip ports that are already connected:
+        if (!connectedPorts.contains(connectablePorts[i])) {
+            QAction *action = connectMenu->addAction(connectablePorts[i]);
+            action->setData(connectablePorts[i]);
+            QObject::connect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
+            mapPortNamesToActions[connectablePorts[i]] = action;
+        }
+    }
+    disconnectMenu->setEnabled(disconnectMenu->actions().size());
+    connectMenu->setEnabled(connectMenu->actions().size());
+    // register the port connection callback at the jack server:
+    client->registerPortConnectInterface(fullPortName, this);
+}
+
+void GraphicsPortItem::connectedTo(const QString &otherPort)
+{
+    connectMenu->removeAction(mapPortNamesToActions[otherPort]);
+    QAction *action = disconnectMenu->addAction(otherPort);
+    action->setData(otherPort);
+    QObject::connect(action, SIGNAL(triggered()), this, SLOT(onDisconnectAction()));
+    mapPortNamesToActions[otherPort] = action;
+    disconnectMenu->setEnabled(disconnectMenu->actions().size());
+    connectMenu->setEnabled(connectMenu->actions().size());
+}
+
+void GraphicsPortItem::disconnectedFrom(const QString &otherPort)
+{
+    disconnectMenu->removeAction(mapPortNamesToActions[otherPort]);
+    QAction *action = connectMenu->addAction(otherPort);
+    action->setData(otherPort);
+    QObject::connect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
+    mapPortNamesToActions[otherPort] = action;
+    disconnectMenu->setEnabled(disconnectMenu->actions().size());
+    connectMenu->setEnabled(connectMenu->actions().size());
 }
 
 void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
@@ -38,55 +82,13 @@ void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 void GraphicsPortItem::onConnectAction()
 {
     // determine which port is being connected:
-    QString otherPort = mapActionsToPortNames[(QAction*)sender()];
+    QString otherPort = ((QAction*)sender())->data().toString();
     client->connectPorts(fullPortName, otherPort);
 }
 
 void GraphicsPortItem::onDisconnectAction()
 {
     // determine which port is being disconnected:
-    QString otherPort = mapActionsToPortNames[(QAction*)sender()];
+    QString otherPort = ((QAction*)sender())->data().toString();
     client->disconnectPorts(fullPortName, otherPort);
-}
-
-void GraphicsPortItem::portConnected(const QString &otherPort)
-{
-    connectMenu->removeAction(mapPortNamesToActions[otherPort]);
-    QAction *action = disconnectMenu->addAction(otherPort);
-    mapPortNamesToActions[otherPort] = action;
-    mapActionsToPortNames[action] = otherPort;
-}
-
-void GraphicsPortItem::portDisconnected(const QString &otherPort)
-{
-    disconnectMenu->removeAction(mapPortNamesToActions[otherPort]);
-    QAction *action = connectMenu->addAction(otherPort);
-    mapPortNamesToActions[otherPort] = action;
-    mapActionsToPortNames[action] = otherPort;
-}
-
-void GraphicsPortItem::portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect)
-{
-    // get the full port names:
-    QString aName = client->getPortNameById(a);
-    QString bName = client->getPortNameById(b);
-    if (aName == fullPortName) {
-        if (connect) {
-            portConnected(bName);
-        } else {
-            portDisconnected(bName);
-        }
-    } else if (bName == fullPortName) {
-        if (connect) {
-            portConnected(aName);
-        } else {
-            portDisconnected(aName);
-        }
-    }
-}
-
-void GraphicsPortItem::portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void* arg)
-{
-    GraphicsPortItem *portItem = (GraphicsPortItem*)arg;
-    portItem->portConnectCallback(a, b, connect);
 }

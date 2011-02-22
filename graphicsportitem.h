@@ -9,11 +9,14 @@
 #include <QMap>
 #include <QObject>
 
-class GraphicsPortItem : public QObject, public QGraphicsRectItem
+class GraphicsPortItem : public QObject, public QGraphicsRectItem, public PortConnectInterface
 {
     Q_OBJECT
 public:
     GraphicsPortItem(JackClient *client, const QString &fullPortName, QGraphicsItem *parent = 0);
+
+    void connectedTo(const QString &fullPortName);
+    void disconnectedFrom(const QString &fullPortName);
 protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );
 private slots:
@@ -21,16 +24,11 @@ private slots:
     void onDisconnectAction();
 private:
     JackClient *client;
-    QString fullPortName, shortPortName;
+    QString fullPortName, shortPortName, type;
+    bool isInput;
     QGraphicsSimpleTextItem *portNameItem;
     QMenu contextMenu, *connectMenu, *disconnectMenu;
     QMap<QString, QAction*> mapPortNamesToActions;
-    QMap<QAction*, QString> mapActionsToPortNames;
-
-    void portConnected(const QString &fullPortName);
-    void portDisconnected(const QString &fullPortName);
-    void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect);
-    static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void* arg);
 };
 
 #endif // GRAPHICSPORTITEM_H

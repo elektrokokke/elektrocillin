@@ -109,11 +109,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // port connection test setup:
     QStringList connectionList;
-    connectionList.append("system_in:midi::Oscillator:Midi in");
-    connectionList.append("system_in:midi::FM:Midi in");
-    connectionList.append("system_in:midi::Record:Midi in");
-    connectionList.append("system_in:midi::ADSR envelope:Midi in");
-    connectionList.append("system_in:midi::Moog filter:Midi in");
+    connectionList.append("system_in:midi 1::Oscillator:Midi in");
+    connectionList.append("system_in:midi 1::FM:Midi in");
+    connectionList.append("system_in:midi 1::Record:Midi in");
+    connectionList.append("system_in:midi 1::ADSR envelope:Midi in");
+    connectionList.append("system_in:midi 1::Moog filter:Midi in");
     connectionList.append("Virtual keyboard:Midi out::Oscillator:Midi in");
     connectionList.append("Virtual keyboard:Midi out::FM:Midi in");
     connectionList.append("Virtual keyboard:Midi out::ADSR envelope:Midi in");
@@ -126,9 +126,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connectionList.append("ADSR envelope:Envelope out::Multiplier:Factor 2");
 //    connectionList.append("LFO 2:Audio out::Oscillator:Morph modulation");
     connectionList.append("Multiplier:Product out::Moog filter:Audio in");
-    connectionList.append("Moog filter:Audio out::system_out:audio");
+    connectionList.append("Moog filter:Audio out::system_out:audio 1");
     connectionList.append("Moog filter:Audio out::Record:Audio in");
-//    connectionList.append("Multiplier:Product out::system_out:audio");
+//    connectionList.append("Multiplier:Product out::system_out:audio 1");
 //    connectionList.append("Multiplier:Product out::Record:Audio in");
     nullClient.restoreConnections(connectionList);
     // end port connection test setup

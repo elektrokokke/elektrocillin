@@ -3,6 +3,13 @@
 
 #include "metajack/jack.h"
 #include <QStringList>
+#include <QMap>
+
+class PortConnectInterface {
+public:
+    virtual void connectedTo(const QString &fullPortName) = 0;
+    virtual void disconnectedFrom(const QString &fullPortName) = 0;
+};
 
 /**
   This is an abstract class which should simplify the creation of arbitrary Jack clients.
@@ -99,7 +106,10 @@ public:
       */
     bool disconnectPorts(const QString &sourcePortName, const QString &destPortName);
 
+    void registerPortConnectInterface(const QString &fullPortName, PortConnectInterface *portConnectInterface);
+
     QString getPortType(const QString &fullPortName);
+    int getPortFlags(const QString &fullPortName);
 
     QStringList getMyPorts(const char *typeNamePattern = 0, unsigned long flags = 0);
     QStringList getPorts(const char *clientNamePattern = 0, const char *typeNamePattern = 0, unsigned long flags = 0);
@@ -191,8 +201,10 @@ protected:
 private:
     QString requestedName, actualName;
     jack_client_t *client;
+    QMap<QString, PortConnectInterface*> portConnectInterfaces;
 
     static int process(jack_nframes_t nframes, void *arg);
+    static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
 };
 
 #endif // JACKCLIENT_H

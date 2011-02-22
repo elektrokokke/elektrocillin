@@ -31,6 +31,8 @@ bool JackClient::activate()
         client = 0;
         return false;
     }
+    // register the port connect callback:
+    jack_set_port_connect_callback(client, portConnectCallback, this);
     // setup input and output ports:
     if (!init()) {
         jack_client_close(client);
@@ -75,6 +77,9 @@ jack_nframes_t JackClient::getEstimatedCurrentTime()
 bool JackClient::connectPorts(const QString &sourcePortName, const QString &destPortName)
 {
     int connect = jack_connect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data());
+    if (connect) {
+        qDebug() << QString("bool JackClient::connectPorts(\"%1\", \"%2\")").arg(sourcePortName).arg(destPortName) << "could not connect...";
+    }
     return (connect == 0);// || (connect == EEXIST);
 }
 
@@ -83,9 +88,19 @@ bool JackClient::disconnectPorts(const QString &sourcePortName, const QString &d
     return (jack_disconnect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data()) == 0);
 }
 
+void JackClient::registerPortConnectInterface(const QString &fullPortName, PortConnectInterface *portConnectInterface)
+{
+    portConnectInterfaces.insert(fullPortName, portConnectInterface);
+}
+
 QString JackClient::getPortType(const QString &fullPortName)
 {
     return QString(jack_port_type(jack_port_by_name(client, fullPortName.toAscii().data())));
+}
+
+int JackClient::getPortFlags(const QString &fullPortName)
+{
+    return jack_port_flags(jack_port_by_name(client, fullPortName.toAscii().data()));
 }
 
 QStringList JackClient::getMyPorts(const char *typeNamePattern, unsigned long flags)
@@ -145,9 +160,7 @@ void JackClient::restoreConnections(const QStringList &connections)
     for (int i = 0; i < connections.size(); i++) {
         QStringList connection = connections[i].split("::");
         Q_ASSERT(connection.size() == 2);
-        if (!connectPorts(connection[0], connection[1])) {
-            qDebug() << "void JackClient::restoreConnections(const QStringList &connections)" << "could not restore connection" << connections[i];
-        }
+        connectPorts(connection[0], connection[1]);
     }
 }
 
@@ -196,4 +209,29 @@ jack_port_t * JackClient::registerAudioPort(const QString &name, unsigned long f
 jack_port_t * JackClient::registerMidiPort(const QString &name, unsigned long flags)
 {
     return jack_port_register(client, name.toAscii().data(), JACK_DEFAULT_MIDI_TYPE, flags, 0);
+}
+
+void JackClient::portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg)
+{
+    JackClient *jackClient = reinterpret_cast<JackClient*>(arg);
+    // get the port names:
+    QString aName = jackClient->getPortNameById(a);
+    QString bName = jackClient->getPortNameById(b);
+    // notify the corresponding port connect interfaces, if there are any:
+    PortConnectInterface *aInterface = jackClient->portConnectInterfaces.value(aName, 0);
+    if (aInterface) {
+        if (connect) {
+            aInterface->connectedTo(bName);
+        } else {
+            aInterface->disconnectedFrom(bName);
+        }
+    }
+    PortConnectInterface *bInterface = jackClient->portConnectInterfaces.value(bName, 0);
+    if (bInterface) {
+        if (connect) {
+            bInterface->connectedTo(aName);
+        } else {
+            bInterface->disconnectedFrom(aName);
+        }
+    }
 }
