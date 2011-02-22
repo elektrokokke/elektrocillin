@@ -36,7 +36,7 @@ void AdsrEnvelope::setReleaseTime(double value)
     releaseTime = value;
 }
 
-void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t time)
+void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t)
 {
     double newVelocity = velocity / 127.0;
     currentSegmentTime = 0.0;
@@ -46,7 +46,7 @@ void AdsrEnvelope::processNoteOn(unsigned char, unsigned char, unsigned char vel
     release = false;
 }
 
-void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char, jack_nframes_t time)
+void AdsrEnvelope::processNoteOff(unsigned char, unsigned char, unsigned char, jack_nframes_t)
 {
     release = true;
 }
