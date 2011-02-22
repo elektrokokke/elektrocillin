@@ -9,6 +9,8 @@ class PortConnectInterface {
 public:
     virtual void connectedTo(const QString &fullPortName) = 0;
     virtual void disconnectedFrom(const QString &fullPortName) = 0;
+    virtual void registeredPort(const QString &fullPortname, const QString &type, int flags) = 0;
+    virtual void unregisteredPort(const QString &fullPortname, const QString &type, int flags) = 0;
 };
 
 /**
@@ -205,6 +207,7 @@ private:
 
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
+    static void portRegisterCallback(jack_port_id_t id, int registered, void *arg);
 };
 
 #endif // JACKCLIENT_H

@@ -31,8 +31,9 @@ bool JackClient::activate()
         client = 0;
         return false;
     }
-    // register the port connect callback:
+    // register the port connect and register callback:
     jack_set_port_connect_callback(client, portConnectCallback, this);
+    jack_set_port_registration_callback(client, portRegisterCallback, this);
     // setup input and output ports:
     if (!init()) {
         jack_client_close(client);
@@ -232,6 +233,25 @@ void JackClient::portConnectCallback(jack_port_id_t a, jack_port_id_t b, int con
             bInterface->connectedTo(aName);
         } else {
             bInterface->disconnectedFrom(aName);
+        }
+    }
+}
+
+void JackClient::portRegisterCallback(jack_port_id_t id, int registered, void *arg)
+{
+    JackClient *jackClient = reinterpret_cast<JackClient*>(arg);
+    // get the port:
+    jack_port_t *port = jack_port_by_id(jackClient->client, id);
+    // get name, type and flags:
+    QString fullPortName(jack_port_name(port));
+    QString type(jack_port_type(port));
+    int flags = jack_port_flags(port);
+    // notify all registered PortConnectInterfaces from the new or removed port:
+    for (QMap<QString, PortConnectInterface*>::iterator i = jackClient->portConnectInterfaces.begin(); i != jackClient->portConnectInterfaces.end(); i++) {
+        if (registered) {
+            i.value()->registeredPort(fullPortName, type, flags);
+        } else {
+            i.value()->unregisteredPort(fullPortName, type, flags);
         }
     }
 }

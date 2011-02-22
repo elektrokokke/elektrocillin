@@ -17,6 +17,8 @@ public:
 
     void connectedTo(const QString &fullPortName);
     void disconnectedFrom(const QString &fullPortName);
+    void registeredPort(const QString &fullPortname, const QString &type, int flags);
+    void unregisteredPort(const QString &fullPortname, const QString &type, int flags);
 protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );
 private slots:

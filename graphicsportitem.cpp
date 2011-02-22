@@ -69,6 +69,32 @@ void GraphicsPortItem::disconnectedFrom(const QString &otherPort)
     connectMenu->setEnabled(connectMenu->actions().size());
 }
 
+void GraphicsPortItem::registeredPort(const QString &fullPortname, const QString &type, int flags)
+{
+    bool portIsInput = (flags & JackPortIsInput);
+    if ((this->type == type) && (portIsInput != isInput)) {
+        // put the port into our connection menu:
+        QAction *action = connectMenu->addAction(fullPortname);
+        action->setData(fullPortname);
+        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
+        mapPortNamesToActions[fullPortname] = action;
+        connectMenu->setEnabled(connectMenu->actions().size());
+    }
+}
+
+void GraphicsPortItem::unregisteredPort(const QString &fullPortname, const QString &type, int flags)
+{
+    QAction *action = mapPortNamesToActions.value(fullPortname, 0);
+    if (action) {
+        // remove the port from our menus:
+        connectMenu->removeAction(action);
+        disconnectMenu->removeAction(action);
+        mapPortNamesToActions.remove(fullPortName);
+        disconnectMenu->setEnabled(disconnectMenu->actions().size());
+        connectMenu->setEnabled(connectMenu->actions().size());
+    }
+}
+
 void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     QGraphicsRectItem::mousePressEvent(event);
