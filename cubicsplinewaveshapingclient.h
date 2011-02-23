@@ -17,6 +17,8 @@ public:
     void postDecreaseControlPoints();
     void postChangeControlPoint(int index, int nrOfControlPoints, double x, double y);
 
+    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+
 protected:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     virtual void processEvent(const InterpolatorParameters &event, jack_nframes_t time);

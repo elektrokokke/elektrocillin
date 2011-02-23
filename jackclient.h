@@ -4,6 +4,7 @@
 #include "metajack/jack.h"
 #include <QStringList>
 #include <QMap>
+#include <QRectF>
 
 class QGraphicsItem;
 
@@ -170,9 +171,10 @@ public:
     /**
       Returns a QGraphicsItem object that serves as the graphical user interface
       for this client. The default implementation returns 0, which means that the
-      client has no GUI.
+      client has no GUI. Subclasses may reimplement this to provide their own
+      GUI.
       */
-    QGraphicsItem * createGraphicsItem();
+    QGraphicsItem * createGraphicsItem(const QRectF &rect);
 
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
     static int getMaximumPortNameLength();

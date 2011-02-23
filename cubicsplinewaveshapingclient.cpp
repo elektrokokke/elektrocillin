@@ -116,6 +116,10 @@ void CubicSplineWaveShapingClient::postChangeControlPoint(int index, int nrOfCon
     interpolator = CubicSplineInterpolator(xx, yy);
 }
 
+QGraphicsItem * CubicSplineWaveShapingClient::createGraphicsItem(const QRectF &rect)
+{
+    return new CubicSplineWaveShapingGraphicsItem(this, rect);
+}
 
 void CubicSplineWaveShapingClient::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
