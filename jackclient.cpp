@@ -109,10 +109,10 @@ QStringList JackClient::getMyPorts(const char *typeNamePattern, unsigned long fl
     return getPorts(QString("%1:.*").arg(getClientName()).toAscii().data(), typeNamePattern, flags);
 }
 
-QStringList JackClient::getPorts(const char *clientNamePattern, const char *typeNamePattern, unsigned long flags)
+QStringList JackClient::getPorts(const char *fullPortNamePattern, const char *typeNamePattern, unsigned long flags)
 {
     QStringList portList;
-    const char **ports = jack_get_ports(client, clientNamePattern, typeNamePattern, flags);
+    const char **ports = jack_get_ports(client, fullPortNamePattern, typeNamePattern, flags);
     if (ports) {
         for (int i = 0; ports[i]; i++) {
             portList.append(QString(ports[i]));
@@ -168,6 +168,11 @@ void JackClient::restoreConnections(const QStringList &connections)
 QString JackClient::getPortNameById(jack_port_id_t id)
 {
     return jack_port_name(jack_port_by_id(client, id));
+}
+
+QGraphicsItem * JackClient::createGraphicsItem()
+{
+    return 0;
 }
 
 QString JackClient::getFullPortName(const QString &clientName, const QString &shortPortName)

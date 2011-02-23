@@ -5,6 +5,8 @@
 #include <QStringList>
 #include <QMap>
 
+class QGraphicsItem;
+
 class PortConnectInterface {
 public:
     virtual void connectedTo(const QString &fullPortName) = 0;
@@ -108,19 +110,69 @@ public:
       */
     bool disconnectPorts(const QString &sourcePortName, const QString &destPortName);
 
+    /**
+      Enables notification when a given port is registered, unregistered, connected or disconnected.
+      Note: the port registering/unregistering notifications should probably be moved to another
+      function and notification interface (e.g., "PortRegisterInterface").
+
+      @param fullPortName the full port name of the port that should be monitored. That port will be
+        notified when another port gets connected to it, or a port gets disconnected from it, or when
+        any port gets registered or unregistered
+      @param portConnectInterface a pointer to the object which gets notified by calling the corresponding
+        methods on its PortConnectInterface
+      */
     void registerPortConnectInterface(const QString &fullPortName, PortConnectInterface *portConnectInterface);
 
+    /**
+      @param fullPortName the full port name of the port whose type should be returned.
+        This can be any port of any client
+      @return the port type of the given port, e.g. "JACK_DEFAULT_AUDIO_TYPE"
+        or "JACK_DEFAULT_MIDI_TYPE"
+      */
     QString getPortType(const QString &fullPortName);
+    /**
+      @param fullPortName the full port name of the port whose flags should be returned.
+        This can be any port of any client
+      @return the flags of the given port, most notably including JackPortIsInput or
+        JackPortIsOutput
+      */
     int getPortFlags(const QString &fullPortName);
 
+    /**
+      Returns a list of ports that belong to this client and that match the given criteria.
+
+      @param typeNamePattern a regular expression describing the type of the requested ports, e.g.,
+        "JACK_DEFAULT_AUDIO_TYPE" will return all audio ports. A value of zero means all types are valid
+      @param flags the flags of the requested ports. Only ports who have all the given flags set will be
+        returned
+      */
     QStringList getMyPorts(const char *typeNamePattern = 0, unsigned long flags = 0);
-    QStringList getPorts(const char *clientNamePattern = 0, const char *typeNamePattern = 0, unsigned long flags = 0);
+    /**
+      Returns a list of ports that match the given criteria. This includes ports of other clients
+      that match the given full port name regular expression.
+
+      @param fullPortNamePattern a regular expression describing the full port names of the requested
+        ports. E.g., "clientname:*" will match all ports belonging to the client with name "clientname";
+        "*:portname" will match ports with the short name "portname" belonging to any client
+      @param typeNamePattern a regular expression describing the type of the requested ports. E.g.,
+        "JACK_DEFAULT_AUDIO_TYPE" will return all audio ports. A value of zero means all types are valid
+      @param flags the flags of the requested ports. Only ports who have all the given flags set will be
+        returned
+      */
+    QStringList getPorts(const char *fullPortNamePattern = 0, const char *typeNamePattern = 0, unsigned long flags = 0);
 
     QStringList getConnectedPorts(const QString &fullPortName);
     QStringList getConnections();
     void restoreConnections(const QStringList &connections);
 
     QString getPortNameById(jack_port_id_t id);
+
+    /**
+      Returns a QGraphicsItem object that serves as the graphical user interface
+      for this client. The default implementation returns 0, which means that the
+      client has no GUI.
+      */
+    QGraphicsItem * createGraphicsItem();
 
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
     static int getMaximumPortNameLength();
