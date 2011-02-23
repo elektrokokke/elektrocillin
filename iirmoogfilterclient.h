@@ -6,6 +6,8 @@
 #include "jackthreadeventprocessorclient.h"
 #include "iirmoogfilter.h"
 #include "jackringbuffer.h"
+#include "frequencyresponsegraphicsitem.h"
+#include "graphicsnodeitem.h"
 #include <QObject>
 
 class IirMoogFilterClient;
@@ -24,7 +26,8 @@ private:
     JackRingBuffer<IirMoogFilter::Parameters> *ringBufferFromClient;
 };
 
-class IirMoogFilterClient : public JackThreadEventProcessorClient<IirMoogFilter::Parameters> {
+class IirMoogFilterClient : public JackThreadEventProcessorClient<IirMoogFilter::Parameters>
+{
 public:
     IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter, size_t ringBufferSize = 1024);
     virtual ~IirMoogFilterClient();
@@ -32,6 +35,7 @@ public:
     IirMoogFilter * getMoogFilter();
     IirMoogFilterThread * getMoogFilterThread();
 
+    QGraphicsItem * createGraphicsItem(const QRectF &rect);
 protected:
     // reimplemented from EventProcessorClient:
     virtual void processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t time);
@@ -41,6 +45,20 @@ protected:
 
 private:
     JackRingBuffer<IirMoogFilter::Parameters> ringBufferToThread;
+};
+
+class IirMoogFilterGraphicsItem : public QObject, public FrequencyResponseGraphicsItem
+{
+    Q_OBJECT
+public:
+    IirMoogFilterGraphicsItem(IirMoogFilterClient *client, const QRectF &rect, QGraphicsItem *parent = 0);
+private:
+    IirMoogFilterClient *client;
+    IirMoogFilter filterCopy;
+    GraphicsNodeItem *cutoffResonanceNode;
+private slots:
+    void onGuiChangedFilterParameters(const QPointF &cutoffResonance);
+    void onClientChangedFilterParameters(double frequency, double resonance);
 };
 
 #endif // IIRMOOGFILTERCLIENT_H

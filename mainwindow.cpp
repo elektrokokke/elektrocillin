@@ -45,21 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QRectF rect(0, 0, 600, 420);
 
     // moog filter client and gui test setup:
-    frequencyResponse = new FrequencyResponseGraphicsItem(rect, 22050.0 / 512.0, 22050, -30, 30);
-    IirMoogFilter::Parameters moogFilterParameters = moogFilter.getParameters();
-    moogFilterCopy.setParameters(moogFilterParameters);
-    frequencyResponse->addFrequencyResponse(&moogFilterCopy);
-    cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, frequencyResponse);
-    cutoffResonanceNode->setScale(GraphicsNodeItem::LOGARITHMIC, GraphicsNodeItem::LINEAR);
-    cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
-    cutoffResonanceNode->setBrush(QBrush(qRgb(52, 101, 164)));
-    cutoffResonanceNode->setZValue(10);
-    cutoffResonanceNode->setBounds(QRectF(frequencyResponse->getFrequencyResponseRectangle().topLeft(), QPointF(frequencyResponse->getFrequencyResponseRectangle().right(), frequencyResponse->getZeroDecibelY())));
-    cutoffResonanceNode->setBoundsScaled(QRectF(QPointF(frequencyResponse->getLowestHertz(), 1), QPointF(frequencyResponse->getHighestHertz(), 0)));
-    //cutoffResonanceNode->setPos(frequencyResponse->getFrequencyResponseRectangle().left(), frequencyResponse->getZeroDecibelY());
-    onChangedParameters(moogFilterParameters.frequency, moogFilterParameters.resonance);
-    QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onChangeCutoff(QPointF)));
-    QObject::connect(moogFilterClient.getMoogFilterThread(), SIGNAL(changedParameters(double, double)), this, SLOT(onChangedParameters(double, double)));
+    moogFilterGraphicsItem = moogFilterClient.createGraphicsItem(rect);
     moogFilterClient.activate();
     // end moog filter client and gui test setup
 
@@ -109,9 +95,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // client graphics item test setup:
     graphicsClientItemFilter = new GraphicsClientItem(&moogFilterClient, rect);
-    graphicsClientItemFilter->setInnerItem(frequencyResponse);
+    graphicsClientItemFilter->setInnerItem(moogFilterGraphicsItem);
     scene->addItem(graphicsClientItemFilter);
-    allClientsRect = frequencyResponse->sceneBoundingRect();
+    allClientsRect = moogFilterGraphicsItem->sceneBoundingRect();
     graphicsClientItemKeyboard = new GraphicsClientItem(&midiSignalClient, rect.translated(rect.width(), 0));
     graphicsClientItemKeyboard->setInnerItem(keyboard);
     scene->addItem(graphicsClientItemKeyboard);
@@ -218,27 +204,6 @@ MainWindow::~MainWindow()
 void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char m3)
 {
     qDebug() << "received midi message" << m1 << m2 << m3;
-}
-
-void MainWindow::onChangeCutoff(QPointF cutoffResonance)
-{
-    IirMoogFilter::Parameters parameters = moogFilterCopy.getParameters();
-    parameters.frequency = cutoffResonance.x();
-    parameters.resonance = cutoffResonance.y();
-    moogFilterClient.postEvent(parameters);
-    moogFilterCopy.setParameters(parameters);
-    frequencyResponse->updateFrequencyResponse(0);
-}
-
-void MainWindow::onChangedParameters(double frequency, double resonance)
-{
-    IirMoogFilter::Parameters parameters = moogFilterCopy.getParameters();
-    parameters.frequency = frequency;
-    parameters.resonance = resonance;
-    moogFilterCopy.setParameters(parameters);
-    cutoffResonanceNode->setXScaled(parameters.frequency);
-    cutoffResonanceNode->setYScaled(parameters.resonance);
-    frequencyResponse->updateFrequencyResponse(0);
 }
 
 void MainWindow::on_actionStore_connections_triggered()

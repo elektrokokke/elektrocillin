@@ -11,6 +11,16 @@ AudioProcessor::AudioProcessor(const QStringList &inputPortNames_, const QString
 {
 }
 
+AudioProcessor::AudioProcessor(const AudioProcessor &tocopy) :
+    sampleRate(tocopy.sampleRate),
+    sampleDuration(tocopy.sampleDuration),
+    inputPortNames(tocopy.inputPortNames),
+    outputPortNames(tocopy.outputPortNames),
+    inputs(tocopy.inputs),
+    outputs(tocopy.outputs)
+{
+}
+
 const QStringList & AudioProcessor::getInputPortNames() const
 {
     return inputPortNames;

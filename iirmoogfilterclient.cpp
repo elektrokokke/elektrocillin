@@ -43,6 +43,11 @@ IirMoogFilterThread * IirMoogFilterClient::getMoogFilterThread()
     return (IirMoogFilterThread*)getJackThread();
 }
 
+QGraphicsItem * IirMoogFilterClient::createGraphicsItem(const QRectF &rect)
+{
+    return new IirMoogFilterGraphicsItem(this, rect);
+}
+
 void IirMoogFilterClient::processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t)
 {
     getMoogFilter()->setParameters(event);
@@ -63,4 +68,43 @@ void IirMoogFilterClient::processController(unsigned char channel, unsigned char
     // notify the associated thread:
     ringBufferToThread.write(getMoogFilter()->getParameters());
     wakeJackThread();
+}
+
+IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client_, const QRectF &rect, QGraphicsItem *parent) :
+    FrequencyResponseGraphicsItem(rect, 22050.0 / 512.0, 22050, -30, 30, parent),
+    client(client_),
+    filterCopy(*client->getMoogFilter())
+{
+    addFrequencyResponse(&filterCopy);
+    cutoffResonanceNode = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
+    cutoffResonanceNode->setScale(GraphicsNodeItem::LOGARITHMIC, GraphicsNodeItem::LINEAR);
+    cutoffResonanceNode->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
+    cutoffResonanceNode->setBrush(QBrush(qRgb(52, 101, 164)));
+    cutoffResonanceNode->setZValue(10);
+    cutoffResonanceNode->setBounds(QRectF(getFrequencyResponseRectangle().topLeft(), QPointF(getFrequencyResponseRectangle().right(), getZeroDecibelY())));
+    cutoffResonanceNode->setBoundsScaled(QRectF(QPointF(getLowestHertz(), 1), QPointF(getHighestHertz(), 0)));
+    onClientChangedFilterParameters(filterCopy.getParameters().frequency, filterCopy.getParameters().resonance);
+    QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onGuiChangedFilterParameters(QPointF)));
+    QObject::connect(client->getMoogFilterThread(), SIGNAL(changedParameters(double, double)), this, SLOT(onClientChangedFilterParameters(double,double)));
+}
+
+void IirMoogFilterGraphicsItem::onGuiChangedFilterParameters(const QPointF &cutoffResonance)
+{
+    IirMoogFilter::Parameters parameters = filterCopy.getParameters();
+    parameters.frequency = cutoffResonance.x();
+    parameters.resonance = cutoffResonance.y();
+    client->postEvent(parameters);
+    filterCopy.setParameters(parameters);
+    updateFrequencyResponse(0);
+}
+
+void IirMoogFilterGraphicsItem::onClientChangedFilterParameters(double frequency, double resonance)
+{
+    IirMoogFilter::Parameters parameters = filterCopy.getParameters();
+    parameters.frequency = frequency;
+    parameters.resonance = resonance;
+    filterCopy.setParameters(parameters);
+    cutoffResonanceNode->setXScaled(parameters.frequency);
+    cutoffResonanceNode->setYScaled(parameters.resonance);
+    updateFrequencyResponse(0);
 }

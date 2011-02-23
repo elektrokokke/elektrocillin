@@ -9,6 +9,7 @@ class AudioProcessor
 {
 public:
     AudioProcessor(const QStringList &inputPortNames, const QStringList &outputPortNames, double sampleRate = 44100);
+    AudioProcessor(const AudioProcessor &tocopy);
 
     const QStringList & getInputPortNames() const;
     const QStringList & getOutputPortNames() const;

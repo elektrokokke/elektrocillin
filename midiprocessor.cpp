@@ -6,6 +6,11 @@ MidiProcessor::MidiProcessor(const QStringList &inputPortNames, const QStringLis
 {
 }
 
+MidiProcessor::MidiProcessor(const MidiProcessor &tocopy) :
+    AudioProcessor(tocopy)
+{
+}
+
 void MidiProcessor::processNoteOn(unsigned char, unsigned char, unsigned char, jack_nframes_t)
 {
 }

@@ -11,6 +11,15 @@ IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, cons
     reset();
 }
 
+IirFilter::IirFilter(const IirFilter &tocopy) :
+    MidiProcessor(tocopy),
+    feedForward(tocopy.feedForward),
+    feedBack(tocopy.feedBack),
+    x(tocopy.x),
+    y(tocopy.y)
+{
+}
+
 void IirFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     if (x.size()) {

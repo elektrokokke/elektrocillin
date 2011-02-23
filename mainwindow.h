@@ -40,8 +40,6 @@ public:
 private slots:
     void on_actionOscillator_triggered();
     void onMidiMessage(unsigned char, unsigned char, unsigned char);
-    void onChangeCutoff(QPointF cutoffResonance);
-    void onChangedParameters(double frequency, double resonance);
 
     void on_actionStore_connections_triggered();
 
@@ -64,7 +62,7 @@ private:
     Ui::MainWindow *ui;
     QSettings settings;
     GraphicsNodeItem *cutoffResonanceNode;
-    FrequencyResponseGraphicsItem *frequencyResponse;
+    QGraphicsItem *moogFilterGraphicsItem;
     MidiSignalClient midiSignalClient;
     IirMoogFilter moogFilter;
     IirMoogFilter moogFilterCopy;

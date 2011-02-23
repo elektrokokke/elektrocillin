@@ -15,6 +15,14 @@ IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     computeCoefficients();
 }
 
+IirMoogFilter::IirMoogFilter(const IirMoogFilter &tocopy) :
+    IirFilter(tocopy),
+    frequencyController(tocopy.frequencyController),
+    resonanceController(tocopy.resonanceController),
+    parameters(tocopy.parameters)
+{
+}
+
 void IirMoogFilter::setFrequencyController(unsigned char controller)
 {
     frequencyController = controller;

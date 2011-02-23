@@ -16,6 +16,7 @@ public:
     };
 
     IirMoogFilter(double sampleRate = 44100, int zeros = 0);
+    IirMoogFilter(const IirMoogFilter &tocopy);
 
     void setFrequencyController(unsigned char controller);
     unsigned char getFrequencyController() const;

@@ -11,6 +11,7 @@ class IirFilter : public MidiProcessor, public FrequencyResponse
 {
 public:
     IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames = QStringList(), double sampleRate = 44100);
+    IirFilter(const IirFilter &tocopy);
 
     // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);

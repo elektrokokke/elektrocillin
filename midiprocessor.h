@@ -7,6 +7,7 @@ class MidiProcessor : public AudioProcessor
 {
 public:
     MidiProcessor(const QStringList &inputAudioPortNames, const QStringList &outputAudioPortNames, double sampleRate = 44100);
+    MidiProcessor(const MidiProcessor &tocopy);
 
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
