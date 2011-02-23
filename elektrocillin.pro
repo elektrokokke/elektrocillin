@@ -73,7 +73,8 @@ SOURCES += main.cpp\
     graphicsportitem.cpp \
     graphicsinterpolatoredititem.cpp \
     cisi.cpp \
-    linearmorphoscillatorclient.cpp
+    linearmorphoscillatorclient.cpp \
+    jackringbuffer.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \

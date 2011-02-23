@@ -1,7 +1,11 @@
 #ifndef JACKRINGBUFFER_H
 #define JACKRINGBUFFER_H
 
+#include <QObject>
+#include <QDataStream>
+#include <QByteArray>
 #include <jack/ringbuffer.h>
+#include <jack/types.h>
 
 /**
   This is a C++ abstraction over jack_ringbuffer_t.
@@ -146,6 +150,32 @@ public:
 
 private:
     jack_ringbuffer_t * ringBuffer;
+};
+
+class EventProcessor2;
+
+class RingBufferEvent : public QObject
+{
+    Q_OBJECT
+public:
+    virtual void write(QDataStream &stream) const = 0;
+    virtual void read(const QDataStream &stream) = 0;
+};
+
+class RingBuffer
+{
+public:
+    RingBuffer(size_t ringBufferSize);
+    ~RingBuffer();
+
+    bool hasEvents();
+    jack_nframes_t peekEventTime();
+    bool write(const RingBufferEvent *event, jack_nframes_t time);
+    RingBufferEvent * read(jack_nframes_t &time);
+    RingBufferEvent * read();
+private:
+    jack_ringbuffer_t * ringBuffer;
+    QByteArray byteArray;
 };
 
 #endif // JACKRINGBUFFER_H
