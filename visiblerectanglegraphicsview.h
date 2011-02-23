@@ -20,7 +20,7 @@ public:
     void animateToClientItem(GraphicsClientItem *item, int msecs = 750);
 
 signals:
-    void animationFinished();
+    void animationFinished(QGraphicsView *view);
 
 public slots:
 
@@ -34,6 +34,9 @@ private:
     bool moving;
     QPointF mousePosWhenPressed, previousCenter;
     QCursor previousMouseCursor;
+
+private slots:
+    void animationFinished();
 };
 
 #endif // VISIBLERECTANGLEGRAPHICSVIEW_H

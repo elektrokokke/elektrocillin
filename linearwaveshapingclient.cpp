@@ -96,6 +96,11 @@ void LinearWaveShapingClient::postChangeControlPoint(int index, int nrOfControlP
     postEvent(parameters);
 }
 
+QGraphicsItem * LinearWaveShapingClient::createGraphicsItem(const QRectF &rect)
+{
+    return new LinearWaveShapingGraphicsItem(rect, this);
+}
+
 void LinearWaveShapingClient::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     outputs[0] = interpolatorProcess.evaluate(inputs[0]);
@@ -111,7 +116,7 @@ void LinearWaveShapingClient::processEvent(const InterpolatorParameters &event, 
     interpolatorProcess.getY()[event.index] = event.y;
 }
 
-LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(LinearWaveShapingClient *client_, const QRectF &rect, QGraphicsItem *parent) :
+LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client_, QGraphicsItem *parent) :
     GraphicsInterpolatorEditItem(client_->getLinearInterpolator(), rect, QRectF(-1, 1, 2, -2), parent),
     client(client_)
 {

@@ -57,14 +57,8 @@
     </property>
     <widget class="QMenu" name="menuClients">
      <property name="title">
-      <string>Clients</string>
+      <string>Show client</string>
      </property>
-     <addaction name="actionAll"/>
-     <addaction name="actionMoog_filter"/>
-     <addaction name="actionVirtual_keyboard"/>
-     <addaction name="actionLinear_waveshaping"/>
-     <addaction name="actionCubic_spline_waveshaping"/>
-     <addaction name="actionOscillator"/>
     </widget>
     <addaction name="actionStore_connections"/>
     <addaction name="actionRestore_connections"/>
@@ -80,36 +74,6 @@
   <action name="actionRestore_connections">
    <property name="text">
     <string>Restore connections</string>
-   </property>
-  </action>
-  <action name="actionMoog_filter">
-   <property name="text">
-    <string>Moog filter</string>
-   </property>
-  </action>
-  <action name="actionVirtual_keyboard">
-   <property name="text">
-    <string>Virtual keyboard</string>
-   </property>
-  </action>
-  <action name="actionAll">
-   <property name="text">
-    <string>All</string>
-   </property>
-  </action>
-  <action name="actionLinear_waveshaping">
-   <property name="text">
-    <string>Linear waveshaping</string>
-   </property>
-  </action>
-  <action name="actionCubic_spline_waveshaping">
-   <property name="text">
-    <string>Cubic spline waveshaping</string>
-   </property>
-  </action>
-  <action name="actionOscillator">
-   <property name="text">
-    <string>Oscillator</string>
    </property>
   </action>
  </widget>

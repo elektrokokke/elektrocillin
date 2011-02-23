@@ -105,6 +105,11 @@ void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int ind
     postEvent(parameters);
 }
 
+QGraphicsItem * LinearMorphOscillatorClient::createGraphicsItem(const QRectF &rect)
+{
+    return new LinearMorphOscillatorGraphicsItem(rect, this);
+}
+
 void LinearMorphOscillatorClient::processEvent(const LinearMorphOscillatorParameters &event, jack_nframes_t time)
 {
     getLinearMorphOscillator()->processEvent(event, time);

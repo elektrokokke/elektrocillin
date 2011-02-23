@@ -1,24 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "graphicslineitem.h"
-#include "graphicsloglineitem.h"
-#include "graphicsnodeitem.h"
-#include "midicontroller2audioclient.h"
-#include "frequencyresponsegraphicsitem.h"
-#include "iirbutterworthfilter.h"
-#include "graphicsnodeitem.h"
-#include "graphicskeyboarditem.h"
-#include "eventprocessorclient.h"
-#include "cubicsplineinterpolator.h"
-#include "linearinterpolator.h"
-#include "graphicsinterpolationitem.h"
-#include "linearwaveshapingclient.h"
-#include "graphview.h"
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
 #include <QGraphicsScene>
-#include <QGraphicsProxyWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,15 +11,11 @@ MainWindow::MainWindow(QWidget *parent) :
     settings("settings.ini", QSettings::IniFormat),
     midiSignalClient("Virtual keyboard"),
     moogFilter(44100, 1),
-    moogFilterCopy(44100, 1),
     moogFilterClient("Moog filter", &moogFilter),
-    lfoClient1("LFO", &lfo1),
-    lfoClient2("LFO 2", &lfo2),
     noiseClient("White noise", &noiseGenerator),
     adsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3),
     multiplierClient("Multiplier", &multiplier),
     linearWaveShapingClient("Linear waveshaping"),
-    fmClient("FM", &fm),
     linearMorphOscillatorClient("Oscillator", 2.0),
     cubicSplineWaveShapingClient("Cubic spline waveshaping"),
     recordClient("Record")
@@ -44,98 +25,53 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QRectF rect(0, 0, 600, 420);
 
-    // moog filter client and gui test setup:
-    moogFilterGraphicsItem = moogFilterClient.createGraphicsItem(rect);
-    moogFilterClient.activate();
-    // end moog filter client and gui test setup
+    QVector<JackClient*> clients;
+    clients.append(&moogFilterClient);
+    clients.append(&midiSignalClient);
+    clients.append(&linearWaveShapingClient);
+    clients.append(&cubicSplineWaveShapingClient);
+    clients.append(&linearMorphOscillatorClient);
+    clients.append(&noiseClient);
+    clients.append(&adsrClient);
+    clients.append(&multiplierClient);
+    clients.append(&recordClient);
 
-    // virtual keyboard and midi signal client test setup:
-    GraphicsKeyboardItem *keyboard = new GraphicsKeyboardItem(1);
-    QObject::connect(keyboard, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), midiSignalClient.getMidiSignalThread(), SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
-    QObject::connect(keyboard, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), midiSignalClient.getMidiSignalThread(), SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
-    midiSignalClient.activate();
-    // end virtual keyboard and midi signal client test setup
-
-    // waveshaping clients test setup:
-    LinearWaveShapingGraphicsItem *waveShapingItem = new LinearWaveShapingGraphicsItem(&linearWaveShapingClient, rect);
-    linearWaveShapingClient.activate();
-    CubicSplineWaveShapingGraphicsItem *cubicSplineWaveShapingItem = new CubicSplineWaveShapingGraphicsItem(&cubicSplineWaveShapingClient, rect);
-    cubicSplineWaveShapingClient.activate();
-    // end waveshaping client test setup
-
-    // piecewise linear oscillator test setup:
-    LinearMorphOscillatorGraphicsItem *linearMorphOscillatorGraphicsItem = new LinearMorphOscillatorGraphicsItem(rect, &linearMorphOscillatorClient);
-    linearMorphOscillatorClient.activate();
-//    fmClient.activate();
-    // end piecewise linear oscillator test setup
-
-    // lfo test setup:
-    lfo1.setFrequency(0.1);
-    lfo2.setFrequency(0.1);
-//    lfoClient1.activate();
-//    lfoClient2.activate();
-    noiseClient.activate();
-    // end lfo test setup
-
-    // ADSR envelope test setup:
-    adsrClient.activate();
-    multiplierClient.activate();
-    // end ADSR envelope test setup
-
-    // record client test setup:
-    QGraphicsRectItem *recordClientRect = new QGraphicsRectItem(rect);
-    recordClient.activate();
-    recordClientGraphView = new GraphView(0);
-    recordClientGraphView->resize(500, 400);
-    QGraphicsProxyWidget *recordClientGraphicsItem = new QGraphicsProxyWidget(recordClientRect);
-    recordClientGraphicsItem->setWidget(recordClientGraphView);
-    recordClientGraphicsItem->setFlag(QGraphicsItem::ItemIgnoresTransformations);
-    QObject::connect(&recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
-    // end record client test setup
-
-    // client graphics item test setup:
-    graphicsClientItemFilter = new GraphicsClientItem(&moogFilterClient, rect);
-    graphicsClientItemFilter->setInnerItem(moogFilterGraphicsItem);
-    scene->addItem(graphicsClientItemFilter);
-    allClientsRect = moogFilterGraphicsItem->sceneBoundingRect();
-    graphicsClientItemKeyboard = new GraphicsClientItem(&midiSignalClient, rect.translated(rect.width(), 0));
-    graphicsClientItemKeyboard->setInnerItem(keyboard);
-    scene->addItem(graphicsClientItemKeyboard);
-    allClientsRect |= keyboard->sceneBoundingRect();
-    graphicsClientItemWaveShaping = new GraphicsClientItem(&linearWaveShapingClient, rect.translated(0, rect.height()));
-    graphicsClientItemWaveShaping->setInnerItem(waveShapingItem);
-    scene->addItem(graphicsClientItemWaveShaping);
-    allClientsRect |= waveShapingItem->sceneBoundingRect();
-    graphicsClientItemCubicSplineWaveShaping = new GraphicsClientItem(&cubicSplineWaveShapingClient, rect.translated(rect.width(), rect.height()));
-    graphicsClientItemCubicSplineWaveShaping->setInnerItem(cubicSplineWaveShapingItem);
-    scene->addItem(graphicsClientItemCubicSplineWaveShaping);
-    allClientsRect |= cubicSplineWaveShapingItem->sceneBoundingRect();
-    graphicsClientItemLinearOscillator = new GraphicsClientItem(&linearMorphOscillatorClient, rect.translated(rect.width() * 2, 0));
-    graphicsClientItemLinearOscillator->setInnerItem(linearMorphOscillatorGraphicsItem);
-    scene->addItem(graphicsClientItemLinearOscillator);
-    allClientsRect |= linearMorphOscillatorGraphicsItem->sceneBoundingRect();
-    graphicsClientItemRecord = new GraphicsClientItem(&recordClient, rect.translated(rect.width() * 2, rect.height()));
-    graphicsClientItemRecord->setInnerItem(recordClientRect);
-    scene->addItem(graphicsClientItemRecord);
-    allClientsRect |= recordClientRect->sceneBoundingRect();
-    GraphicsClientItem *graphicsClientItemAdsr = new GraphicsClientItem(&adsrClient, rect.translated(rect.width() * 0, rect.height() * 2));
-    graphicsClientItemAdsr->setInnerItem(new QGraphicsSimpleTextItem(adsrClient.getClientName()));
-    scene->addItem(graphicsClientItemAdsr);
-    GraphicsClientItem *graphicsClientItemMultiplier = new GraphicsClientItem(&multiplierClient, rect.translated(rect.width() * 1, rect.height() * 2));
-    graphicsClientItemMultiplier->setInnerItem(new QGraphicsSimpleTextItem(multiplierClient.getClientName()));
-    scene->addItem(graphicsClientItemMultiplier);
-    GraphicsClientItem *graphicsClientItemNoise = new GraphicsClientItem(&noiseClient, rect.translated(rect.width() * 2, rect.height() * 2));
-    graphicsClientItemNoise->setInnerItem(new QGraphicsSimpleTextItem(noiseClient.getClientName()));
-    scene->addItem(graphicsClientItemNoise);
-    // end client graphics item test setup
+    int gridWidth = 3;
+    for (int i = 0; i < clients.size(); i++) {
+        // activate the Jack client:
+        clients[i]->activate();
+        // create a visual representation and position it in the scene:
+        int x = i % gridWidth;
+        int y = i / gridWidth;
+        QGraphicsItem *graphicsItem = clients[i]->createGraphicsItem(rect);
+        if (graphicsItem == 0) {
+            // create "dummy" representation:
+            graphicsItem = new QGraphicsSimpleTextItem(clients[i]->getClientName());
+        } else if (clients[i] == &recordClient) {
+            // special treatment for the record client (its widget need resize when the scene scale changes):
+            QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), (Record2MemoryGraphicsItem*)graphicsItem, SLOT(resizeForView(QGraphicsView *)));
+            // be notified when something has been recorded (to update audio view):
+            QObject::connect(&recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
+        }
+        GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i], rect.translated(rect.width() * x, rect.height() * y));
+        graphicsClientItem->setInnerItem(graphicsItem);
+        scene->addItem(graphicsClientItem);
+        // create an action to zoom to that client:
+        QAction *action = ui->menuClients->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
+        action->setData(qVariantFromValue(graphicsItem->sceneBoundingRect()));
+        if (i == 0) {
+            allClientsRect = graphicsItem->sceneBoundingRect();
+        } else {
+            allClientsRect |= graphicsItem->sceneBoundingRect();
+        }
+    }
 
 //    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-1000, -1000, 1000, 1000));
     ui->graphicsView->centerOn(allClientsRect.center());
 
-    onAnimationFinished();
-    QObject::connect(ui->graphicsView, SIGNAL(animationFinished()), this, SLOT(onAnimationFinished()));
+    ui->graphicsView->animateToVisibleSceneRect(allClientsRect);
 
 //    // ADSR envelope GUI test:
 //    int nrOfNodes = 5;
@@ -201,9 +137,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onMidiMessage(unsigned char m1, unsigned char m2, unsigned char m3)
+void MainWindow::onActionAnimateToRect()
 {
-    qDebug() << "received midi message" << m1 << m2 << m3;
+    if (sender()->inherits("QAction")) {
+        QAction *action = (QAction*)sender();
+        QRectF rect = action->data().toRectF();
+        ui->graphicsView->animateToVisibleSceneRect(rect);
+    }
 }
 
 void MainWindow::on_actionStore_connections_triggered()
@@ -216,36 +156,6 @@ void MainWindow::on_actionRestore_connections_triggered()
 {
     qDebug() << settings.value("connections").toStringList();
     nullClient.restoreConnections(settings.value("connections").toStringList());
-}
-
-void MainWindow::on_actionMoog_filter_triggered()
-{
-    ui->graphicsView->animateToClientItem(graphicsClientItemFilter);
-}
-
-void MainWindow::on_actionVirtual_keyboard_triggered()
-{
-    ui->graphicsView->animateToClientItem(graphicsClientItemKeyboard);
-}
-
-void MainWindow::on_actionAll_triggered()
-{
-    ui->graphicsView->animateToVisibleSceneRect(allClientsRect);
-}
-
-void MainWindow::on_actionLinear_waveshaping_triggered()
-{
-    ui->graphicsView->animateToClientItem(graphicsClientItemWaveShaping);
-}
-
-void MainWindow::on_actionCubic_spline_waveshaping_triggered()
-{
-    ui->graphicsView->animateToClientItem(graphicsClientItemCubicSplineWaveShaping);
-}
-
-void MainWindow::on_actionOscillator_triggered()
-{
-    ui->graphicsView->animateToClientItem(graphicsClientItemLinearOscillator);
 }
 
 void MainWindow::onRecordFinished()
@@ -265,10 +175,4 @@ void MainWindow::onRecordFinished()
 //        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
 //        recordClientGraphView->model()->setData(recordClientGraphView->model()->index(i, 0), (value - min) / (max - min) * 2.0 - 1.0, Qt::DisplayRole);
 //    }
-}
-
-void MainWindow::onAnimationFinished()
-{
-    QRect recordClientGraphViewRect = ui->graphicsView->mapFromScene(graphicsClientItemRecord->getInnerItem()->sceneBoundingRect()).boundingRect();
-    recordClientGraphView->resize(recordClientGraphViewRect.width(), recordClientGraphViewRect.height());
 }

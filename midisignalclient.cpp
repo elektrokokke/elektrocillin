@@ -182,6 +182,11 @@ MidiSignalThread * MidiSignalClient::getMidiSignalThread()
     return (MidiSignalThread*)getJackThread();
 }
 
+QGraphicsItem * MidiSignalClient::createGraphicsItem(const QRectF &rect)
+{
+    return new MidiSignalGraphicsItem(rect, this);
+}
+
 void MidiSignalClient::processEvent(const MidiProcessorClient::MidiEvent &event, jack_nframes_t time)
 {
     // write this event to the MIDI output buffer:
@@ -193,4 +198,11 @@ void MidiSignalClient::processMidi(const MidiProcessorClient::MidiEvent &event, 
     // notify the associated thread:
     ringBufferToThread.write(event);
     wakeJackThread();
+}
+
+MidiSignalGraphicsItem::MidiSignalGraphicsItem(const QRectF &, MidiSignalClient *client, QGraphicsItem *parent) :
+    GraphicsKeyboardItem(1, parent)
+{
+    QObject::connect(this, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), client->getMidiSignalThread(), SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
+    QObject::connect(this, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), client->getMidiSignalThread(), SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
 }

@@ -17,6 +17,8 @@ public:
     void postDecreaseControlPoints();
     void postChangeControlPoint(int index, int nrOfControlPoints, double x, double y);
 
+    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+
 protected:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     virtual void processEvent(const InterpolatorParameters &event, jack_nframes_t time);
@@ -29,7 +31,7 @@ class LinearWaveShapingGraphicsItem : public GraphicsInterpolatorEditItem
 {
     Q_OBJECT
 public:
-    LinearWaveShapingGraphicsItem(LinearWaveShapingClient *client, const QRectF &rect, QGraphicsItem *parent = 0);
+    LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client, QGraphicsItem *parent = 0);
 
 protected:
     virtual void increaseControlPoints();

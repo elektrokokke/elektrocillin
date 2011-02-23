@@ -18,6 +18,8 @@ public:
     void postDecreaseControlPoints();
     void postChangeControlPoint(int state, int index, int nrOfControlPoints, double x, double y);
 
+    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+
 protected:
     virtual void processEvent(const LinearMorphOscillatorParameters &event, jack_nframes_t time);
 

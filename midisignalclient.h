@@ -4,6 +4,7 @@
 #include "midiprocessorclient.h"
 #include "jackthreadeventprocessorclient.h"
 #include "jackclientwithdeferredprocessing.h"
+#include "graphicskeyboarditem.h"
 
 class MidiSignalClient;
 
@@ -44,6 +45,8 @@ public:
 
     MidiSignalThread * getMidiSignalThread();
 
+    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+
 protected:
     // reimplemented from EventProcessor:
     virtual void processEvent(const MidiProcessorClient::MidiEvent &event, jack_nframes_t time);
@@ -52,6 +55,13 @@ protected:
 
 private:
     JackRingBuffer<MidiProcessorClient::MidiEvent> ringBufferToThread;
+};
+
+class MidiSignalGraphicsItem : public GraphicsKeyboardItem
+{
+    Q_OBJECT
+public:
+    MidiSignalGraphicsItem(const QRectF &rect, MidiSignalClient *client, QGraphicsItem *parent = 0);
 };
 
 struct MidiEventWithTimeStamp {

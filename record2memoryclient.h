@@ -5,8 +5,11 @@
 #include <QVector>
 #include <QWaitCondition>
 #include <QMutex>
+#include <QGraphicsRectItem>
+#include <QGraphicsView>
 #include "jackclient.h"
 #include "jackaudiomodel.h"
+#include "graphview.h"
 #include <jack/ringbuffer.h>
 
 class Record2MemoryClient : public QThread, public JackClient
@@ -19,6 +22,8 @@ public:
     int getNrOfAudioModels();
     JackAudioModel * removeAudioModel(int i);
     JackAudioModel * popAudioModel();
+
+    QGraphicsItem * createGraphicsItem(const QRectF &rect);
 
 signals:
     void recordingStarted();
@@ -53,7 +58,20 @@ private:
     QMutex audioModelsMutex;
 
     static const size_t ringBufferSize;
+};
 
+class Record2MemoryGraphicsItem : public QObject, public QGraphicsRectItem
+{
+    Q_OBJECT
+public:
+    Record2MemoryGraphicsItem(const QRectF &rect, Record2MemoryClient *client, QGraphicsItem *parent = 0);
+
+public slots:
+    void resizeForView(QGraphicsView *view);
+
+private:
+    Record2MemoryClient *client;
+    GraphView *recordClientGraphView;
 };
 
 #endif // RECORD2MEMORYCLIENT_H

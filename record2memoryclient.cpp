@@ -1,6 +1,8 @@
 #include "record2memoryclient.h"
 #include "metajack/midiport.h"
 #include <QApplication>
+#include <QGraphicsProxyWidget>
+#include <QGraphicsScene>
 
 const size_t Record2MemoryClient::ringBufferSize = 2 << 20;
 
@@ -64,6 +66,11 @@ JackAudioModel * Record2MemoryClient::popAudioModel()
     audioModelsMutex.unlock();
     // return the model:
     return model;
+}
+
+QGraphicsItem * Record2MemoryClient::createGraphicsItem(const QRectF &rect)
+{
+    return new Record2MemoryGraphicsItem(rect, this);
 }
 
 bool Record2MemoryClient::init()
@@ -203,4 +210,21 @@ void Record2MemoryClient::run()
     }
     char dummy;
     jack_ringbuffer_read(ringBufferStopThread, &dummy, 1);
+}
+
+Record2MemoryGraphicsItem::Record2MemoryGraphicsItem(const QRectF &rect, Record2MemoryClient *client_, QGraphicsItem *parent) :
+    QGraphicsRectItem(rect, parent),
+    client(client_)
+{
+    recordClientGraphView = new GraphView(0);
+    recordClientGraphView->resize(rect.width(), rect.height());
+    QGraphicsProxyWidget *recordClientGraphicsItem = new QGraphicsProxyWidget(this);
+    recordClientGraphicsItem->setWidget(recordClientGraphView);
+    recordClientGraphicsItem->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+}
+
+void Record2MemoryGraphicsItem::resizeForView(QGraphicsView *view)
+{
+    QRect graphViewRect = view->mapFromScene(sceneBoundingRect()).boundingRect();
+    recordClientGraphView->resize(graphViewRect.width(), graphViewRect.height());
 }

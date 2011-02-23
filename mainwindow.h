@@ -21,9 +21,6 @@
 #include "multiplyprocessor.h"
 #include "whitenoisegenerator.h"
 
-class GraphicsNodeItem;
-class GraphView;
-
 namespace Ui {
     class MainWindow;
 }
@@ -38,51 +35,32 @@ public:
 
 
 private slots:
-    void on_actionOscillator_triggered();
-    void onMidiMessage(unsigned char, unsigned char, unsigned char);
+    void onActionAnimateToRect();
 
     void on_actionStore_connections_triggered();
 
     void on_actionRestore_connections_triggered();
 
-    void on_actionMoog_filter_triggered();
-
-    void on_actionVirtual_keyboard_triggered();
-
-    void on_actionAll_triggered();
-
-    void on_actionLinear_waveshaping_triggered();
-
-    void on_actionCubic_spline_waveshaping_triggered();
-
     void onRecordFinished();
-    void onAnimationFinished();
 
 private:
     Ui::MainWindow *ui;
     QSettings settings;
-    GraphicsNodeItem *cutoffResonanceNode;
-    QGraphicsItem *moogFilterGraphicsItem;
     MidiSignalClient midiSignalClient;
     IirMoogFilter moogFilter;
-    IirMoogFilter moogFilterCopy;
     IirMoogFilterClient moogFilterClient;
-    Oscillator lfo1, lfo2;
     WhiteNoiseGenerator noiseGenerator;
-    AudioProcessorClient lfoClient1, lfoClient2, noiseClient;
+    AudioProcessorClient noiseClient;
     AdsrClient adsrClient;
     MultiplyProcessor multiplier;
     AudioProcessorClient multiplierClient;
     LinearWaveShapingClient linearWaveShapingClient;
-    Oscillator fm;
-    MidiProcessorClient fmClient;
     LinearMorphOscillatorClient linearMorphOscillatorClient;
     CubicSplineWaveShapingClient cubicSplineWaveShapingClient;
     Record2MemoryClient recordClient;
     GraphView *recordClientGraphView;
     JackNullClient nullClient;
     QRectF allClientsRect;
-    GraphicsClientItem *graphicsClientItemFilter, *graphicsClientItemKeyboard, *graphicsClientItemWaveShaping, *graphicsClientItemCubicSplineWaveShaping, *graphicsClientItemLinearOscillator, *graphicsClientItemRecord;
 };
 
 #endif // MAINWINDOW_H

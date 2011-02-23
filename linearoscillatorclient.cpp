@@ -87,6 +87,11 @@ void LinearOscillatorClient::postChangeControlPoint(int index, int nrOfControlPo
     postEvent(parameters);
 }
 
+QGraphicsItem * LinearOscillatorClient::createGraphicsItem(const QRectF &rect)
+{
+    return new LinearOscillatorGraphicsItem(rect, this);
+}
+
 void LinearOscillatorClient::processEvent(const InterpolatorParameters &event, jack_nframes_t time)
 {
     getLinearOscillator()->processEvent(event, time);
