@@ -56,7 +56,7 @@ void GraphicsClientItem::init()
     for (int i = 0; i < outputPorts.size(); i++) {
         outputPortItems[i]->setPos(innerRect.right(), rect().top() + 0.5 * (rect().height() - outputsHeight) + outputsHeight * i / outputPortItems.size());
     }
-    setFlags(QGraphicsItem::ItemIsMovable);
+    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges);
 }
 
 JackClient * GraphicsClientItem::getClient()

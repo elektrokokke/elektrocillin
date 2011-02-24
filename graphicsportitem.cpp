@@ -53,7 +53,7 @@ void GraphicsPortItem::init()
     // register the port connection callback at the jack server:
     client->registerPortConnectInterface(fullPortName, this);
 
-    setFlags(QGraphicsItem::ItemSendsGeometryChanges);
+    setFlags(QGraphicsItem::ItemSendsScenePositionChanges);
 }
 
 void GraphicsPortItem::connectedTo(const QString &otherPort)
@@ -119,8 +119,8 @@ void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 
 QVariant GraphicsPortItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    if (change == ItemPositionChange) {
-        GraphicsPortConnectionItem::setPositions(fullPortName, sceneBoundingRect().center() - pos() + value.toPointF());
+    if (change == ItemScenePositionHasChanged) {
+        GraphicsPortConnectionItem::setPositions(fullPortName, sceneBoundingRect().center());
     }
     return QGraphicsItem::itemChange(change, value);
 }
