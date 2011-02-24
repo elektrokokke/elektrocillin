@@ -3,27 +3,15 @@
 
 #include <QMainWindow>
 #include <QSettings>
-#include "frequencyresponsegraphicsitem.h"
-#include "iirmoogfilterclient.h"
-#include "iirbutterworthfilter.h"
-#include "midiprocessorclient.h"
-#include "monophonicsynthesizer.h"
-#include "midisignalclient.h"
-#include "oscillator.h"
 #include "jacknullclient.h"
-#include "graphicsclientitem.h"
-#include "linearwaveshapingclient.h"
-#include "linearoscillatorclient.h"
-#include "linearmorphoscillatorclient.h"
-#include "cubicsplinewaveshapingclient.h"
-#include "record2memoryclient.h"
-#include "adsrclient.h"
-#include "multiplyprocessor.h"
-#include "whitenoisegenerator.h"
 
 namespace Ui {
     class MainWindow;
 }
+
+class GraphicsClientItem;
+class Record2MemoryClient;
+class GraphView;
 
 class MainWindow : public QMainWindow
 {

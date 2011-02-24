@@ -34,7 +34,7 @@ void LinearOscillatorClient::postIncreaseControlPoints()
             interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
         }
     }
-    LinearOscillator::ChangeAllControlPointsEvent *event = new LinearOscillator::ChangeAllControlPointsEvent();
+    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
     event->xx = interpolator.getX();
     event->yy = interpolator.getY();
     postEvent(event);
@@ -50,7 +50,7 @@ void LinearOscillatorClient::postDecreaseControlPoints()
         for (int i = size - 1; i >= 0; i--) {
             interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
         }
-        LinearOscillator::ChangeAllControlPointsEvent *event = new LinearOscillator::ChangeAllControlPointsEvent();
+        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
         event->xx = interpolator.getX();
         event->yy = interpolator.getY();
         postEvent(event);
@@ -71,7 +71,7 @@ void LinearOscillatorClient::postChangeControlPoint(int index, double x, double 
     if ((index < interpolator.getX().size() - 1) && (x >= interpolator.getX()[index + 1])) {
         x = interpolator.getX()[index + 1];
     }
-    LinearOscillator::ChangeControlPointEvent *event = new LinearOscillator::ChangeControlPointEvent();
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
     event->index = index;
     interpolator.getX()[index] = event->x = x;
     interpolator.getY()[index] = event->y = y;
@@ -91,9 +91,9 @@ QGraphicsItem * LinearOscillatorClient::createGraphicsItem(const QRectF &rect)
 
 void LinearOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const LinearOscillator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const LinearOscillator::ChangeControlPointEvent*>(event)) {
+    if (const Interpolator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
         getLinearOscillator()->processEvent(changeControlPointEvent, time);
-    } else if (const LinearOscillator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const LinearOscillator::ChangeAllControlPointsEvent*>(event)) {
+    } else if (const Interpolator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const Interpolator::ChangeAllControlPointsEvent*>(event)) {
         getLinearOscillator()->processEvent(changeAllControlPointsEvent, time);
     } else {
         OscillatorClient::processEvent(event, time);

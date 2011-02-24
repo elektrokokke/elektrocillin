@@ -7,13 +7,12 @@
 class LinearMorphOscillator : public LinearOscillator
 {
 public:
-    class ChangeControlPointEvent : public LinearOscillator::ChangeControlPointEvent
+    class ChangeControlPointEvent : public LinearInterpolator::ChangeControlPointEvent
     {
     public:
         int state;
     };
-
-    class ChangeAllControlPointsEvent : public LinearOscillator::ChangeAllControlPointsEvent
+    class ChangeAllControlPointsEvent : public LinearInterpolator::ChangeAllControlPointsEvent
     {
     public:
         int state;

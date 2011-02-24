@@ -2,7 +2,6 @@
 #define OSCILLATOR_H
 
 #include "midiprocessor.h"
-#include "linearinterpolator.h"
 
 class Oscillator : public MidiProcessor
 {

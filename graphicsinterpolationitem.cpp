@@ -47,7 +47,11 @@ void GraphicsInterpolationItem::updatePath()
     }
     int previousIndex = 0;
     QPainterPath path(QPointF(x * xscale, y * yscale));
-    for (x += samplingInterval; x < interpolator->getX().back(); x += samplingInterval) {
+    for (; x < interpolator->getX().back(); ) {
+        x += samplingInterval;
+        if (x > interpolator->getX().back()) {
+            x = interpolator->getX().back();
+        }
         int index;
         y = interpolator->evaluate(x, &index);
         if (!bounds.isNull()) {

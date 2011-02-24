@@ -1,6 +1,7 @@
 #ifndef INTERPOLATOR_H
 #define INTERPOLATOR_H
 
+#include "jackringbuffer.h"
 #include <QVector>
 
 struct InterpolatorParameters {
@@ -11,6 +12,18 @@ struct InterpolatorParameters {
 class Interpolator
 {
 public:
+    class ChangeControlPointEvent : public RingBufferEvent
+    {
+    public:
+        int index;
+        double x, y;
+    };
+    class ChangeAllControlPointsEvent : public RingBufferEvent
+    {
+    public:
+        QVector<double> xx, yy;
+    };
+
     /**
       @param index pointer to a variable where the current
         index should be written to, if non-zero
@@ -21,6 +34,9 @@ public:
     int getM() const;
 
     virtual double interpolate(int jlo, double x) = 0;
+
+    virtual void processEvent(const ChangeControlPointEvent *event);
+    virtual void processEvent(const ChangeAllControlPointsEvent *event);
 protected:
     Interpolator(const QVector<double> &xx, int m);
 

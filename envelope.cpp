@@ -3,72 +3,56 @@
 Envelope::Envelope(double sampleRate) :
         MidiProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
         currentPhaseTime(0),
-        sustainLevel(0.5),
+        sustainPosition(0.5),
         previousLevel(0),
         minimumLevel(0),
         velocity(0)
 {
     // initialize the interpolators to represent a simple ASR envelope:
-    QVector<double> xx[2], yy[2];
-    xx[ATTACK].append(0);
-    yy[ATTACK].append(0);
-    xx[ATTACK].append(0.1);
-    yy[ATTACK].append(sustainLevel);
-    xx[RELEASE].append(0);
-    yy[RELEASE].append(sustainLevel);
-    xx[RELEASE].append(1);
-    yy[RELEASE].append(0);
-    for (int i = 0; i < 2; i++) {
-        interpolator[i] = LinearInterpolator(xx[i], yy[i]);
-    }
+    QVector<double> xx, yy;
+    xx.append(0);
+    yy.append(0);
+    xx.append(sustainPosition);
+    yy.append(1);
+    xx.append(1);
+    yy.append(0);
+    interpolator = LinearInterpolator(xx, yy);
 }
 
-const LinearInterpolator & Envelope::getInterpolator(Phase phase) const
+LinearInterpolator * Envelope::getInterpolator()
 {
-    Q_ASSERT((phase == ATTACK) || (phase == RELEASE));
-    return interpolator[phase];
+    return &interpolator;
 }
 
-void Envelope::setSustainLevel(double sustainLevel)
+void Envelope::setSustainPosition(double sustainPosition)
 {
-    this->sustainLevel = sustainLevel;
-    interpolator[ATTACK].getY().back() = sustainLevel;
-    interpolator[RELEASE].getY().first() = sustainLevel;
+    this->sustainPosition = sustainPosition;
 }
 
-double Envelope::getSustainLevel() const
+double Envelope::getSustainPosition() const
 {
-    return sustainLevel;
-}
-
-void Envelope::setDuration(Phase phase, double duration)
-{
-    Q_ASSERT((phase == ATTACK) || (phase == RELEASE));
-    // stretch the attack interpolator to have the given duration:
-    double stretchFactor = duration / getDuration(phase);
-    for (int i = 0; i < interpolator[phase].getX().size(); i++) {
-        interpolator[phase].getX()[i] *= stretchFactor;
-    }
-}
-
-double Envelope::getDuration(Phase phase) const
-{
-    Q_ASSERT((phase == ATTACK) || (phase == RELEASE));
-    return interpolator[phase].getX().back();
+    return sustainPosition;
 }
 
 void Envelope::setDuration(double duration)
 {
-    double attackDuration = getDuration(ATTACK);
-    double releaseDuration = getDuration(RELEASE);
-    double oldDuration = attackDuration + releaseDuration;
-    setDuration(ATTACK, attackDuration * duration / oldDuration);
-    setDuration(RELEASE, releaseDuration * duration / oldDuration);
+    if (duration < interpolator.getX()[interpolator.getX().size() - 2]) {
+        // stretch the interpolator to have the given duration:
+        double stretchFactor = duration / getDuration();
+        for (int i = 0; i < interpolator.getX().size(); i++) {
+            interpolator.getX()[i] *= stretchFactor;
+        }
+    } else {
+        interpolator.getX().back() = duration;
+    }
+    if (sustainPosition > duration) {
+        sustainPosition = duration;
+    }
 }
 
 double Envelope::getDuration() const
 {
-    return getDuration(ATTACK) + getDuration(RELEASE);
+    return interpolator.getX().back();
 }
 
 void Envelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t)
@@ -90,11 +74,16 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
 {
     double level = 0.0;
     if (currentPhase == ATTACK) {
-        if (currentPhaseTime >= interpolator[ATTACK].getX().back()) {
+        if (currentPhaseTime >= sustainPosition) {
             currentPhaseTime = 0.0;
             currentPhase = SUSTAIN;
         } else {
-            level = interpolator[ATTACK].evaluate(currentPhaseTime);
+            level = interpolator.evaluate(currentPhaseTime);
+            if (level < minimumLevel) {
+                level = minimumLevel;
+            } else {
+                minimumLevel = 0;
+            }
         }
     }
     if (currentPhase == SUSTAIN) {
@@ -102,18 +91,38 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
             currentPhaseTime = 0.0;
             currentPhase = RELEASE;
         } else {
-            level = sustainLevel;
+            level = interpolator.evaluate(sustainPosition);
         }
     }
     if (currentPhase == RELEASE) {
-        if (currentPhaseTime >= interpolator[RELEASE].getX().back()) {
+        if (currentPhaseTime + sustainPosition >= getDuration()) {
             currentPhaseTime = 0.0;
             currentPhase = NONE;
         } else {
-            level = interpolator[RELEASE].evaluate(currentPhaseTime);
+            level = interpolator.evaluate(currentPhaseTime + sustainPosition);
         }
     }
     currentPhaseTime += getSampleDuration();
     previousLevel = level;
     outputs[0] = level * velocity;
+}
+
+void Envelope::processEvent(const Interpolator::ChangeControlPointEvent *event, jack_nframes_t)
+{
+    interpolator.processEvent(event);
+}
+
+void Envelope::processEvent(const Interpolator::ChangeAllControlPointsEvent *event, jack_nframes_t)
+{
+    interpolator.processEvent(event);
+}
+
+void Envelope::processEvent(const ChangeDurationEvent *event, jack_nframes_t)
+{
+    setDuration(event->duration);
+}
+
+void Envelope::processEvent(const ChangeSustainPositionEvent *event, jack_nframes_t)
+{
+    setSustainPosition(event->sustainPosition);
 }

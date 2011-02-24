@@ -13,16 +13,24 @@ public:
         NONE,
         SUSTAIN
     };
+    class ChangeDurationEvent : public RingBufferEvent
+    {
+    public:
+        double duration;
+    };
+    class ChangeSustainPositionEvent : public RingBufferEvent
+    {
+    public:
+        double sustainPosition;
+    };
 
     Envelope(double sampleRate = 44100);
 
-    const LinearInterpolator & getInterpolator(Phase phase) const;
+    LinearInterpolator * getInterpolator();
 
-    void setSustainLevel(double sustainLevel);
-    double getSustainLevel() const;
+    void setSustainPosition(double sustainPosition);
+    double getSustainPosition() const;
 
-    void setDuration(Phase phase, double duration);
-    double getDuration(Phase phase) const;
     void setDuration(double duration);
     double getDuration() const;
 
@@ -30,11 +38,15 @@ public:
     void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
+    virtual void processEvent(const Interpolator::ChangeControlPointEvent *event, jack_nframes_t time);
+    virtual void processEvent(const Interpolator::ChangeAllControlPointsEvent *event, jack_nframes_t time);
+    virtual void processEvent(const ChangeDurationEvent *event, jack_nframes_t time);
+    virtual void processEvent(const ChangeSustainPositionEvent *event, jack_nframes_t time);
 private:
-    double currentPhaseTime, sustainLevel, previousLevel, minimumLevel, velocity;
+    double currentPhaseTime, sustainPosition, previousLevel, minimumLevel, velocity;
     Phase currentPhase;
     bool release;
-    LinearInterpolator interpolator[2];
+    LinearInterpolator interpolator;
 };
 
 #endif // ENVELOPE_H

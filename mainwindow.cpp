@@ -1,5 +1,18 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+#include "iirmoogfilterclient.h"
+#include "midisignalclient.h"
+#include "linearwaveshapingclient.h"
+#include "linearoscillatorclient.h"
+#include "linearmorphoscillatorclient.h"
+#include "cubicsplinewaveshapingclient.h"
+#include "record2memoryclient.h"
+#include "adsrclient.h"
+#include "multiplyprocessor.h"
+#include "whitenoisegenerator.h"
+#include "envelopeclient.h"
+
 #include <QDebug>
 #include <QDialog>
 #include <QBoxLayout>
@@ -25,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     addClient(new WhiteNoiseGeneratorClient("White noise"));
     addClient(new AdsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3));
     addClient(new MultiplyClient("Multiplier"));
+    addClient(new EnvelopeClient("Envelope"));
     Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient = new Record2MemoryClient("Record"))->getInnerItem();
 
     // special treatment for the record client (its widget need resize when the scene scale changes):

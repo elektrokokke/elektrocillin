@@ -13,9 +13,20 @@ class GraphicsInterpolatorEditItem : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
-    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    enum ControlPoint {
+        FIRST = 0,
+        LAST = 1
+    };
+
+    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, bool verticalGrid = true, bool horizontalGrid = true, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+
+    void setRect(const QRectF &rect, const QRectF &rectScaled);
+
+    void setVisible(ControlPoint controlPoint, bool visible);
 
     void interpolatorChanged();
+
+    Interpolator * getInterpolator();
 
 protected:
     virtual void increaseControlPoints() = 0;
@@ -37,6 +48,7 @@ private:
     Interpolator *interpolator;
     GraphicsInterpolationItem *interpolationItem;
     QMenu contextMenu;
+    bool visible[2];
 
     GraphicsNodeItem * createNode(qreal x, qreal y, const QRectF &rectScaled);
 };

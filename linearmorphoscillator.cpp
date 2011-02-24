@@ -48,18 +48,16 @@ void LinearMorphOscillator::processAudio(const double *inputs, double *outputs, 
     LinearOscillator::processAudio(inputs, outputs, time);
 }
 
-void LinearMorphOscillator::processEvent(const ChangeControlPointEvent *event, jack_nframes_t time)
+void LinearMorphOscillator::processEvent(const ChangeControlPointEvent *event, jack_nframes_t)
 {
     Q_ASSERT((event->state >= 0) && (event->state < 2));
-    // set the interpolator control point at "index" accordingly:
-    state[event->state].getX()[event->index] = event->x;
-    state[event->state].getY()[event->index] = event->y;
+    state[event->state].processEvent(event);
 }
 
-void LinearMorphOscillator::processEvent(const ChangeAllControlPointsEvent *event, jack_nframes_t time)
+void LinearMorphOscillator::processEvent(const ChangeAllControlPointsEvent *event, jack_nframes_t)
 {
     Q_ASSERT((event->state >= 0) && (event->state < 2));
-    state[event->state] = LinearInterpolator(event->xx, event->yy);
+    state[event->state].processEvent(event);
 }
 
 void LinearMorphOscillator::computeMorphedState()

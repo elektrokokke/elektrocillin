@@ -48,7 +48,6 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(const QRectF &rect, O
     nodeItem->setBounds(QRectF(rect.center().x(), rect.top(), 0, rect.height()));
     nodeItem->setBoundsScaled(QRectF(0, 1, 0, -1));
     nodeItem->setYScaled(1);
-    nodeItem->setSendPositionChanges(true);
     QObject::connect(nodeItem, SIGNAL(yChangedScaled(qreal)), this, SLOT(onNodeYChanged(qreal)));
 }
 
