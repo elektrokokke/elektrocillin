@@ -37,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
     addClient(new EnvelopeClient("Envelope"));
     Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient = new Record2MemoryClient("Record"))->getInnerItem();
 
+    addClient("system_in");
+    addClient("system_out");
+
     // special treatment for the record client (its widget need resize when the scene scale changes):
     QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), record2MemoryGraphicsItem, SLOT(resizeForView(QGraphicsView *)));
     // be notified when something has been recorded (to update audio view):
@@ -173,6 +176,24 @@ GraphicsClientItem * MainWindow::addClient(JackClient *client)
     ui->graphicsView->scene()->addItem(graphicsClientItem);
     // create an action to zoom to that client:
     QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
+    action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
+    return graphicsClientItem;
+}
+
+GraphicsClientItem * MainWindow::addClient(const QString &clientName)
+{
+    QRectF rect(0, 0, 600, 420);
+    int i = clients.size();
+    clients.append(0);
+    // create a visual representation and position it in the scene:
+    int x = i % gridWidth;
+    int y = i / gridWidth;
+    QGraphicsItem *graphicsItem = new QGraphicsSimpleTextItem(clientName);
+    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, rect.translated(rect.width() * x, rect.height() * y));
+    graphicsClientItem->setInnerItem(graphicsItem);
+    ui->graphicsView->scene()->addItem(graphicsClientItem);
+    // create an action to zoom to that client:
+    QAction *action = ui->menuView->addAction(clientName, this, SLOT(onActionAnimateToRect()));
     action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
     return graphicsClientItem;
 }

@@ -44,6 +44,7 @@ private:
     JackNullClient nullClient;
 
     GraphicsClientItem * addClient(JackClient *client);
+    GraphicsClientItem * addClient(const QString &clientName);
 };
 
 #endif // MAINWINDOW_H

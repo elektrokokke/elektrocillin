@@ -9,6 +9,7 @@ class GraphicsClientItem : public QGraphicsEllipseItem
 {
 public:
     GraphicsClientItem(JackClient *client, const QRectF &rect, QGraphicsItem *parent = 0);
+    GraphicsClientItem(JackClient *client, const QString &clientName, const QRectF &rect, QGraphicsItem *parent = 0);
 
     JackClient * getClient();
 
@@ -21,8 +22,11 @@ public:
 
 private:
     JackClient *client;
+    QString clientName;
     QRectF innerRect;
     QGraphicsItem *innerItem;
+
+    void init();
 };
 
 #endif // GRAPHICSCLIENTITEM_H

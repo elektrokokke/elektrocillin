@@ -11,14 +11,30 @@
 GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QRectF &rect, QGraphicsItem *parent) :
     QGraphicsEllipseItem(rect, parent),
     client(client_),
+    clientName(client->getClientName()),
     innerItem(0)
+{
+    init();
+}
+
+GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, const QRectF &rect, QGraphicsItem *parent) :
+    QGraphicsEllipseItem(rect, parent),
+    client(client_),
+    clientName(clientName_),
+    innerItem(0)
+{
+    init();
+}
+
+void GraphicsClientItem::init()
 {
     setPen(QPen(QBrush(Qt::lightGray), 10, Qt::DashLine));
     setBrush(QBrush(Qt::lightGray));
-    QPointF offset = (rect.bottomRight() - rect.topLeft()) * 0.25 * (2 - sqrt(2.0));
-    innerRect = QRectF(rect.topLeft() + offset, rect.bottomRight() - offset);
+    QPointF offset = (rect().bottomRight() - rect().topLeft()) * 0.25 * (2 - sqrt(2.0));
+    innerRect = QRectF(rect().topLeft() + offset, rect().bottomRight() - offset);
 
-    QStringList inputPorts = client->getMyPorts(0, JackPortIsInput);
+    QString portNamePattern = clientName + ":.*";
+    QStringList inputPorts = client->getPorts(portNamePattern.toAscii().data(), 0, JackPortIsInput);
     QList<GraphicsPortItem*> inputPortItems;
     qreal inputsHeight = 0;
     for (int i = 0; i < inputPorts.size(); i++) {
@@ -27,9 +43,9 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QRectF &rect, 
         inputPortItems.append(portItem);
     }
     for (int i = 0; i < inputPorts.size(); i++) {
-        inputPortItems[i]->setPos(innerRect.left() - inputPortItems[i]->rect().width(), rect.top() + 0.5 * (rect.height() - inputsHeight) + inputsHeight * i / inputPortItems.size());
+        inputPortItems[i]->setPos(innerRect.left() - inputPortItems[i]->rect().width(), rect().top() + 0.5 * (rect().height() - inputsHeight) + inputsHeight * i / inputPortItems.size());
     }
-    QStringList outputPorts = client->getMyPorts(0, JackPortIsOutput);
+    QStringList outputPorts = client->getPorts(portNamePattern.toAscii().data(), 0, JackPortIsOutput);
     QList<GraphicsPortItem*> outputPortItems;
     qreal outputsHeight = 0;
     for (int i = 0; i < outputPorts.size(); i++) {
@@ -38,7 +54,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QRectF &rect, 
         outputPortItems.append(portItem);
     }
     for (int i = 0; i < outputPorts.size(); i++) {
-        outputPortItems[i]->setPos(innerRect.right(), rect.top() + 0.5 * (rect.height() - outputsHeight) + outputsHeight * i / outputPortItems.size());
+        outputPortItems[i]->setPos(innerRect.right(), rect().top() + 0.5 * (rect().height() - outputsHeight) + outputsHeight * i / outputPortItems.size());
     }
     setFlags(QGraphicsItem::ItemIsMovable);
 }
