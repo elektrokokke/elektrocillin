@@ -223,6 +223,11 @@ Record2MemoryGraphicsItem::Record2MemoryGraphicsItem(const QRectF &rect, Record2
     recordClientGraphicsItem->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 }
 
+GraphView * Record2MemoryGraphicsItem::getGraphView()
+{
+    return recordClientGraphView;
+}
+
 void Record2MemoryGraphicsItem::resizeForView(QGraphicsView *view)
 {
     QRect graphViewRect = view->mapFromScene(sceneBoundingRect()).boundingRect();

@@ -18,6 +18,9 @@ public:
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
+    void setGain(double gain);
+    double getGain() const;
+
     void setFrequency(double hertz);
     double getFrequency() const;
     void setDetune(double cents);
@@ -29,7 +32,7 @@ protected:
 
 private:
     unsigned char detuneController;
-    double frequency, frequencyDetuneFactor, detuneInCents, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, normalizedAngularFrequency;
+    double gain, frequency, frequencyDetuneFactor, detuneInCents, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, normalizedAngularFrequency;
 
     void computeNormalizedAngularFrequency();
 };

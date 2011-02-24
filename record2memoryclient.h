@@ -66,6 +66,8 @@ class Record2MemoryGraphicsItem : public QObject, public QGraphicsRectItem
 public:
     Record2MemoryGraphicsItem(const QRectF &rect, Record2MemoryClient *client, QGraphicsItem *parent = 0);
 
+    GraphView * getGraphView();
+
 public slots:
     void resizeForView(QGraphicsView *view);
 

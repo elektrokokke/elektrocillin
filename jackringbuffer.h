@@ -152,14 +152,9 @@ private:
     jack_ringbuffer_t * ringBuffer;
 };
 
-class EventProcessor2;
-
-class RingBufferEvent : public QObject
-{
-    Q_OBJECT
+class RingBufferEvent {
 public:
-    virtual void write(QDataStream &stream) const = 0;
-    virtual void read(const QDataStream &stream) = 0;
+    virtual ~RingBufferEvent() {}
 };
 
 class RingBuffer
@@ -170,12 +165,12 @@ public:
 
     bool hasEvents();
     jack_nframes_t peekEventTime();
-    bool write(const RingBufferEvent *event, jack_nframes_t time);
-    RingBufferEvent * read(jack_nframes_t &time);
-    RingBufferEvent * read();
+    bool sendEvent(const RingBufferEvent *event, jack_nframes_t time);
+    RingBufferEvent * readEvent(jack_nframes_t &time);
+    RingBufferEvent * readEvent();
+    void returnEvent(RingBufferEvent *event);
 private:
-    jack_ringbuffer_t * ringBuffer;
-    QByteArray byteArray;
+    jack_ringbuffer_t *ringBuffer, *ringBufferReturn;
 };
 
 #endif // JACKRINGBUFFER_H

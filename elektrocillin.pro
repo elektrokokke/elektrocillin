@@ -74,7 +74,9 @@ SOURCES += main.cpp\
     graphicsinterpolatoredititem.cpp \
     cisi.cpp \
     linearmorphoscillatorclient.cpp \
-    jackringbuffer.cpp
+    jackringbuffer.cpp \
+    oscillatorclient.cpp \
+    eventprocessorclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -144,7 +146,8 @@ HEADERS  += mainwindow.h \
     graphicsportitem.h \
     graphicsinterpolatoredititem.h \
     cisi.h \
-    linearmorphoscillatorclient.h
+    linearmorphoscillatorclient.h \
+    oscillatorclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

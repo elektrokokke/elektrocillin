@@ -1,11 +1,11 @@
 #ifndef LINEARMORPHOSCILLATORCLIENT_H
 #define LINEARMORPHOSCILLATORCLIENT_H
 
-#include "eventprocessorclient.h"
+#include "oscillatorclient.h"
 #include "linearmorphoscillator.h"
 #include "graphicsinterpolatoredititem.h"
 
-class LinearMorphOscillatorClient : public EventProcessorClient<LinearMorphOscillatorParameters>
+class LinearMorphOscillatorClient : public OscillatorClient
 {
 public:
     LinearMorphOscillatorClient(const QString &clientName, double frequencyModulationIntensity = 2.0/12.0, size_t ringBufferSize = 1024);
@@ -21,7 +21,7 @@ public:
     QGraphicsItem * createGraphicsItem(const QRectF &rect);
 
 protected:
-    virtual void processEvent(const LinearMorphOscillatorParameters &event, jack_nframes_t time);
+    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:
     LinearInterpolator state[2];

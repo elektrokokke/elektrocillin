@@ -3,7 +3,7 @@
 #include <cmath>
 
 LinearOscillatorClient::LinearOscillatorClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient<InterpolatorParameters>(clientName, new LinearOscillator(), ringBufferSize),
+    OscillatorClient(clientName, new LinearOscillator(), ringBufferSize),
     interpolator(getLinearOscillator()->getLinearInterpolator())
 {
 }
@@ -15,7 +15,7 @@ LinearOscillatorClient::~LinearOscillatorClient()
 
 LinearOscillator * LinearOscillatorClient::getLinearOscillator()
 {
-    return (LinearOscillator*)getMidiProcessor();
+    return (LinearOscillator*)getAudioProcessor();
 }
 
 LinearInterpolator * LinearOscillatorClient::getLinearInterpolator()
@@ -29,19 +29,15 @@ void LinearOscillatorClient::postIncreaseControlPoints()
     double stretchFactor = (double)(interpolator.getX().size() - 1) / (double)(size - 1);
     interpolator.getX().append(2 * M_PI);
     interpolator.getY().append(1);
-    QVector<InterpolatorParameters> parameterVector;
     for (int i = size - 1; i >= 0; i--) {
         if (i < size - 1) {
             interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
         }
-        InterpolatorParameters parameters;
-        parameters.controlPoints = size;
-        parameters.index = i;
-        parameters.x = interpolator.getX()[i];
-        parameters.y = interpolator.getY()[i];
-        parameterVector.append(parameters);
     }
-    postEvents(parameterVector);
+    LinearOscillator::ChangeAllControlPointsEvent *event = new LinearOscillator::ChangeAllControlPointsEvent();
+    event->xx = interpolator.getX();
+    event->yy = interpolator.getY();
+    postEvent(event);
 }
 
 void LinearOscillatorClient::postDecreaseControlPoints()
@@ -51,21 +47,17 @@ void LinearOscillatorClient::postDecreaseControlPoints()
         interpolator.getX().resize(size);
         interpolator.getY().resize(size);
         double stretchFactor = 2 * M_PI / interpolator.getX().back();
-        QVector<InterpolatorParameters> parameterVector;
         for (int i = size - 1; i >= 0; i--) {
             interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
-            InterpolatorParameters parameters;
-            parameters.controlPoints = size;
-            parameters.index = i;
-            parameters.x = interpolator.getX()[i];
-            parameters.y = interpolator.getY()[i];
-            parameterVector.append(parameters);
         }
-        postEvents(parameterVector);
+        LinearOscillator::ChangeAllControlPointsEvent *event = new LinearOscillator::ChangeAllControlPointsEvent();
+        event->xx = interpolator.getX();
+        event->yy = interpolator.getY();
+        postEvent(event);
     }
 }
 
-void LinearOscillatorClient::postChangeControlPoint(int index, int nrOfControlPoints, double x, double y)
+void LinearOscillatorClient::postChangeControlPoint(int index, double x, double y)
 {
     if (index == 0) {
        x = interpolator.getX()[0];
@@ -79,22 +71,33 @@ void LinearOscillatorClient::postChangeControlPoint(int index, int nrOfControlPo
     if ((index < interpolator.getX().size() - 1) && (x >= interpolator.getX()[index + 1])) {
         x = interpolator.getX()[index + 1];
     }
-    InterpolatorParameters parameters;
-    parameters.controlPoints = nrOfControlPoints;
-    parameters.index = index;
-    interpolator.getX()[index] = parameters.x = x;
-    interpolator.getY()[index] = parameters.y = y;
-    postEvent(parameters);
+    LinearOscillator::ChangeControlPointEvent *event = new LinearOscillator::ChangeControlPointEvent();
+    event->index = index;
+    interpolator.getX()[index] = event->x = x;
+    interpolator.getY()[index] = event->y = y;
+    postEvent(event);
 }
 
 QGraphicsItem * LinearOscillatorClient::createGraphicsItem(const QRectF &rect)
 {
-    return new LinearOscillatorGraphicsItem(rect, this);
+    QGraphicsRectItem *rectItem = new QGraphicsRectItem(rect);
+    rectItem->setPen(QPen(Qt::NoPen));
+    QRectF rectGain(rect.x(), rect.y(), 16, rect.height());
+    QRectF rectOscillator = rect.adjusted(rectGain.width(), 0, 0, 0);
+    (new OscillatorClientGraphicsItem(rectGain, this))->setParentItem(rectItem);
+    (new LinearOscillatorGraphicsItem(rectOscillator, this))->setParentItem(rectItem);
+    return rectItem;
 }
 
-void LinearOscillatorClient::processEvent(const InterpolatorParameters &event, jack_nframes_t time)
+void LinearOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    getLinearOscillator()->processEvent(event, time);
+    if (const LinearOscillator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const LinearOscillator::ChangeControlPointEvent*>(event)) {
+        getLinearOscillator()->processEvent(changeControlPointEvent, time);
+    } else if (const LinearOscillator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const LinearOscillator::ChangeAllControlPointsEvent*>(event)) {
+        getLinearOscillator()->processEvent(changeAllControlPointsEvent, time);
+    } else {
+        OscillatorClient::processEvent(event, time);
+    }
 }
 
 LinearOscillatorGraphicsItem::LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client_, QGraphicsItem *parent) :
@@ -114,5 +117,5 @@ void LinearOscillatorGraphicsItem::decreaseControlPoints()
 
 void LinearOscillatorGraphicsItem::changeControlPoint(int index, int nrOfControlPoints, double x, double y)
 {
-    client->postChangeControlPoint(index, nrOfControlPoints, x, y);
+    client->postChangeControlPoint(index, x, y);
 }

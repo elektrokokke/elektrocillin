@@ -1,12 +1,12 @@
 #ifndef LINEAROSCILLATORCLIENT_H
 #define LINEAROSCILLATORCLIENT_H
 
-#include "eventprocessorclient.h"
+#include "oscillatorclient.h"
 #include "linearoscillator.h"
 #include "graphicsinterpolatoredititem.h"
 #include <QPen>
 
-class LinearOscillatorClient : public EventProcessorClient<InterpolatorParameters>
+class LinearOscillatorClient : public OscillatorClient
 {
 public:
     LinearOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
@@ -17,12 +17,12 @@ public:
 
     void postIncreaseControlPoints();
     void postDecreaseControlPoints();
-    void postChangeControlPoint(int index, int nrOfControlPoints, double x, double y);
+    void postChangeControlPoint(int index, double x, double y);
 
     QGraphicsItem * createGraphicsItem(const QRectF &rect);
 
 protected:
-    virtual void processEvent(const InterpolatorParameters &event, jack_nframes_t time);
+    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:
     LinearInterpolator interpolator;

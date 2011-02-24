@@ -5,6 +5,7 @@
 Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, const QStringList &additionalInputPortNames) :
     MidiProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
     detuneController(3),
+    gain(1),
     frequency(441),
     frequencyDetuneFactor(1),
     detuneInCents(0),
@@ -66,8 +67,18 @@ void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframe
     }
     // compute the oscillator output:
     //outputs[0] = valueAtPhase(0.5 * (phase + phase2));
-    outputs[0] = valueAtPhase(phase);
+    outputs[0] = gain * valueAtPhase(phase);
     phase = phase2;
+}
+
+void Oscillator::setGain(double gain)
+{
+    this->gain = gain;
+}
+
+double Oscillator::getGain() const
+{
+    return gain;
 }
 
 void Oscillator::setFrequency(double hertz)
@@ -106,5 +117,10 @@ double Oscillator::valueAtPhase(double phase)
 void Oscillator::computeNormalizedAngularFrequency()
 {
     normalizedAngularFrequency = 2.0 * M_PI * frequency * frequencyDetuneFactor * frequencyPitchBendFactor * frequencyModulationFactor / getSampleRate();
+    if (normalizedAngularFrequency <= 0.0) {
+        normalizedAngularFrequency = 0.000000000001;
+    } else if (normalizedAngularFrequency >= M_PI) {
+        normalizedAngularFrequency = M_PI;
+    }
 }
 

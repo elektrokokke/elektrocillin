@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     clients.append(&recordClient);
 
     int gridWidth = 3;
+    QAction *actionAllClients = ui->menuClients->addAction("All clients", this, SLOT(onActionAnimateToRect()));
     for (int i = 0; i < clients.size(); i++) {
         // activate the Jack client:
         clients[i]->activate();
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
             QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), (Record2MemoryGraphicsItem*)graphicsItem, SLOT(resizeForView(QGraphicsView *)));
             // be notified when something has been recorded (to update audio view):
             QObject::connect(&recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
+            recordClientGraphView = ((Record2MemoryGraphicsItem*)graphicsItem)->getGraphView();
         }
         GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i], rect.translated(rect.width() * x, rect.height() * y));
         graphicsClientItem->setInnerItem(graphicsItem);
@@ -65,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
             allClientsRect |= graphicsItem->sceneBoundingRect();
         }
     }
+    actionAllClients->setData(qVariantFromValue(allClientsRect));
 
 //    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(scene);

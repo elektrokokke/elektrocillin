@@ -112,36 +112,10 @@ private:
 class EventProcessorClient2 : public MidiProcessorClient
 {
 public:
-    EventProcessorClient2(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = (2 << 16)) :
-        MidiProcessorClient(clientName, midiProcessor_),
-        ringBuffer(ringBufferSize)
-    {}
+    EventProcessorClient2(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = (2 << 16));
 
-    bool postEvent(const RingBufferEvent *event)
-    {
-        if (isActive()) {
-            jack_nframes_t time = getEstimatedCurrentTime();
-            return ringBuffer.write(event, time);
-        } else {
-            return false;
-        }
-    }
-
-    bool postEvents(const QVector<const RingBufferEvent*> &events)
-    {
-        if (isActive()) {
-            int writtenEvents = 0;
-            jack_nframes_t time = getEstimatedCurrentTime();
-            for (int i = 0; i < events.size(); i++) {
-                if (ringBuffer.write(events[i], time)) {
-                    writtenEvents++;
-                }
-            }
-            return (writtenEvents == events.size());
-        } else {
-            return false;
-        }
-    }
+    bool postEvent(const RingBufferEvent *event);
+    bool postEvents(const QVector<const RingBufferEvent*> &events);
 
 protected:
     /**
@@ -162,48 +136,9 @@ protected:
       - processMidi(const MidiEvent &, jack_nframes_t) OR
       - processMidi(jack_nframes_t, jack_nframes_t)
       */
-    EventProcessorClient2(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16)) :
-        MidiProcessorClient(clientName, inputPortNames, outputPortNames),
-        ringBuffer(ringBufferSize)
-    {}
+    EventProcessorClient2(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16));
 
-    virtual bool process(jack_nframes_t nframes)
-    {
-        jack_nframes_t lastFrameTime = getLastFrameTime();
-        // get audio port buffers:
-        getPortBuffers(nframes);
-        // get midi port buffer:
-        getMidiPortBuffer(nframes);
-        for (jack_nframes_t currentFrame = 0; currentFrame < nframes; ) {
-            // get the next event from the ring buffer, if there is any:
-            if (ringBuffer.hasEvents()) {
-                jack_nframes_t eventTime = ringBuffer.peekEventTime();
-                // adjust time relative to the beginning of this frame:
-                if (eventTime + nframes < lastFrameTime) {
-                    // if time is too early, this is in the buffer for too long, adjust time accordingly:
-                    eventTime = 0;
-                } else {
-                    eventTime = eventTime + nframes - lastFrameTime;
-                }
-                if (eventTime < nframes) {
-                    // process everything up to the event's time stamp:
-                    processMidi(currentFrame, eventTime);
-                    currentFrame = eventTime;
-                    // process the event:
-                    RingBufferEvent *event = ringBuffer.read();
-                    processEvent(event, eventTime);
-                } else {
-                    processMidi(currentFrame, nframes);
-                    currentFrame = nframes;
-                }
-            } else {
-                processMidi(currentFrame, nframes);
-                currentFrame = nframes;
-            }
-        }
-        return true;
-    }
-
+    virtual bool process(jack_nframes_t nframes);
     virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time) = 0;
 
 private:

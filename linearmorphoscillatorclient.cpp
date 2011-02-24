@@ -3,7 +3,7 @@
 #include <QPen>
 
 LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientName, double frequencyModulationIntensity, size_t ringBufferSize) :
-    EventProcessorClient<LinearMorphOscillatorParameters>(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator(), frequencyModulationIntensity), ringBufferSize)
+    OscillatorClient(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator(), frequencyModulationIntensity), ringBufferSize)
 {
     state[0].getX().append(0);
     state[0].getY().append(-1);
@@ -24,7 +24,7 @@ LinearMorphOscillatorClient::~LinearMorphOscillatorClient()
 
 LinearMorphOscillator * LinearMorphOscillatorClient::getLinearMorphOscillator()
 {
-    return (LinearMorphOscillator*)getMidiProcessor();
+    return (LinearMorphOscillator*)getAudioProcessor();
 }
 
 LinearInterpolator * LinearMorphOscillatorClient::getState(int stateIndex)
@@ -36,7 +36,7 @@ LinearInterpolator * LinearMorphOscillatorClient::getState(int stateIndex)
 void LinearMorphOscillatorClient::postIncreaseControlPoints()
 {
     int size = state[0].getX().size() + 1;
-    QVector<LinearMorphOscillatorParameters> parameterVector;
+    QVector<const RingBufferEvent*> events;
     for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
         double stretchFactor = (double)(state[stateIndex].getX().size() - 1) / (double)(size - 1);
         state[stateIndex].getX().append(2 * M_PI);
@@ -45,22 +45,20 @@ void LinearMorphOscillatorClient::postIncreaseControlPoints()
             if (i < size - 1) {
                 state[stateIndex].getX()[i] = state[stateIndex].getX()[i] * stretchFactor;
             }
-            LinearMorphOscillatorParameters parameters;
-            parameters.state = stateIndex;
-            parameters.controlPoints = size;
-            parameters.index = i;
-            parameters.x = state[stateIndex].getX()[i];
-            parameters.y = state[stateIndex].getY()[i];
-            parameterVector.append(parameters);
         }
+        LinearMorphOscillator::ChangeAllControlPointsEvent *event = new LinearMorphOscillator::ChangeAllControlPointsEvent();
+        event->state = stateIndex;
+        event->xx = state[stateIndex].getX();
+        event->yy = state[stateIndex].getY();
+        events.append(event);
     }
-    postEvents(parameterVector);
+    postEvents(events);
 }
 
 void LinearMorphOscillatorClient::postDecreaseControlPoints()
 {
     if (state[0].getX().size() > 2) {
-        QVector<LinearMorphOscillatorParameters> parameterVector;
+        QVector<const RingBufferEvent*> events;
         int size = state[0].getX().size() - 1;
         for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
             state[stateIndex].getX().resize(size);
@@ -68,16 +66,14 @@ void LinearMorphOscillatorClient::postDecreaseControlPoints()
             double stretchFactor = 2 * M_PI / state[stateIndex].getX().back();
             for (int i = size - 1; i >= 0; i--) {
                 state[stateIndex].getX()[i] = state[stateIndex].getX()[i] * stretchFactor;
-                LinearMorphOscillatorParameters parameters;
-                parameters.state = stateIndex;
-                parameters.controlPoints = size;
-                parameters.index = i;
-                parameters.x = state[stateIndex].getX()[i];
-                parameters.y = state[stateIndex].getY()[i];
-                parameterVector.append(parameters);
             }
+            LinearMorphOscillator::ChangeAllControlPointsEvent *event = new LinearMorphOscillator::ChangeAllControlPointsEvent();
+            event->state = stateIndex;
+            event->xx = state[stateIndex].getX();
+            event->yy = state[stateIndex].getY();
+            events.append(event);
         }
-        postEvents(parameterVector);
+        postEvents(events);
     }
 }
 
@@ -96,23 +92,34 @@ void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int ind
     if ((index < state[stateIndex].getX().size() - 1) && (x >= state[stateIndex].getX()[index + 1])) {
         x = state[stateIndex].getX()[index + 1];
     }
-    LinearMorphOscillatorParameters parameters;
-    parameters.state = stateIndex;
-    parameters.controlPoints = nrOfControlPoints;
-    parameters.index = index;
-    state[stateIndex].getX()[index] = parameters.x = x;
-    state[stateIndex].getY()[index] = parameters.y = y;
-    postEvent(parameters);
+    LinearMorphOscillator::ChangeControlPointEvent *event = new LinearMorphOscillator::ChangeControlPointEvent();
+    event->state = stateIndex;
+    event->index = index;
+    state[stateIndex].getX()[index] = event->x = x;
+    state[stateIndex].getY()[index] = event->y = y;
+    postEvent(event);
 }
 
 QGraphicsItem * LinearMorphOscillatorClient::createGraphicsItem(const QRectF &rect)
 {
-    return new LinearMorphOscillatorGraphicsItem(rect, this);
+    QGraphicsRectItem *rectItem = new QGraphicsRectItem(rect);
+    rectItem->setPen(QPen(Qt::NoPen));
+    QRectF rectGain(rect.x(), rect.y(), 16, rect.height());
+    QRectF rectOscillator = rect.adjusted(rectGain.width(), 0, 0, 0);
+    (new OscillatorClientGraphicsItem(rectGain, this))->setParentItem(rectItem);
+    (new LinearMorphOscillatorGraphicsItem(rectOscillator, this))->setParentItem(rectItem);
+    return rectItem;
 }
 
-void LinearMorphOscillatorClient::processEvent(const LinearMorphOscillatorParameters &event, jack_nframes_t time)
+void LinearMorphOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    getLinearMorphOscillator()->processEvent(event, time);
+    if (const LinearMorphOscillator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const LinearMorphOscillator::ChangeControlPointEvent*>(event)) {
+        getLinearMorphOscillator()->processEvent(changeControlPointEvent, time);
+    } else if (const LinearMorphOscillator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const LinearMorphOscillator::ChangeAllControlPointsEvent*>(event)) {
+        getLinearMorphOscillator()->processEvent(changeAllControlPointsEvent, time);
+    } else {
+        OscillatorClient::processEvent(event, time);
+    }
 }
 
 LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :

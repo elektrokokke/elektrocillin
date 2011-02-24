@@ -36,14 +36,16 @@ void LinearOscillator::setLinearInterpolator(const LinearInterpolator &interpola
     this->interpolator = interpolator;
 }
 
-void LinearOscillator::processEvent(const InterpolatorParameters &event, jack_nframes_t)
+void LinearOscillator::processEvent(const ChangeControlPointEvent *event, jack_nframes_t time)
 {
-    // set the interpolator's nr of control points:
-    interpolator.getX().resize(event.controlPoints);
-    interpolator.getY().resize(event.controlPoints);
     // set the interpolator control point at "index" accordingly:
-    interpolator.getX()[event.index] = event.x;
-    interpolator.getY()[event.index] = event.y;
+    interpolator.getX()[event->index] = event->x;
+    interpolator.getY()[event->index] = event->y;
+}
+
+void LinearOscillator::processEvent(const ChangeAllControlPointsEvent *event, jack_nframes_t time)
+{
+    interpolator = LinearInterpolator(event->xx, event->yy);
 }
 
 double LinearOscillator::valueAtPhase(double phase)
