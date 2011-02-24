@@ -203,3 +203,20 @@ void EnvelopeGraphicsItem::onSustainNodePositionChanged(qreal x)
     sustainPositionText->setText(QString("Sustain: %1 sec.").arg(client->getEnvelope()->getSustainPosition()));
     sustainPositionText->setPos(nodeItemSustainPosition->x() + 8, nodeItemSustainPosition->y() - 8);
 }
+
+class EnvelopeClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Envelope";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new EnvelopeClient(clientName);
+    }
+private:
+    static EnvelopeClientFactory factory;
+};
+
+EnvelopeClientFactory EnvelopeClientFactory::factory;

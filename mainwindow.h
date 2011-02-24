@@ -23,21 +23,17 @@ public:
 
 
 private slots:
-    void on_actionLinear_oscillator_triggered();
     void onActionAnimateToRect();
-
+    void onActionCreateClient();
     void on_actionStore_connections_triggered();
-
     void on_actionRestore_connections_triggered();
-
     void onRecordFinished();
-
-    void on_actionADSR_envelope_triggered();
 
 private:
     Ui::MainWindow *ui;
     QSettings settings;
     int gridWidth;
+    QRectF clientsRect;
     QVector<JackClient*> clients;
     Record2MemoryClient *record2MemoryClient;
     GraphView *recordClientGraphView;

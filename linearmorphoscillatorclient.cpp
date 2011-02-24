@@ -164,3 +164,20 @@ LinearMorphOscillatorGraphicsItem::LinearMorphOscillatorGraphicsItem(const QRect
     state1->setTwin(state2);
     state2->setTwin(state1);
 }
+
+class LinearMorphOscillatorClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Morph oscillator";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new LinearMorphOscillatorClient(clientName);
+    }
+private:
+    static LinearMorphOscillatorClientFactory factory;
+};
+
+LinearMorphOscillatorClientFactory LinearMorphOscillatorClientFactory::factory;

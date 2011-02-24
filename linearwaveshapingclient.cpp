@@ -133,3 +133,20 @@ void LinearWaveShapingGraphicsItem::decreaseControlPoints() {
 void LinearWaveShapingGraphicsItem::changeControlPoint(int index, int nrOfControlPoints, double x, double y) {
     client->postChangeControlPoint(index, nrOfControlPoints, x, y);
 }
+
+class LinearWaveShapingClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Piecewise linear wave shaper";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new LinearWaveShapingClient(clientName);
+    }
+private:
+    static LinearWaveShapingClientFactory factory;
+};
+
+LinearWaveShapingClientFactory LinearWaveShapingClientFactory::factory;

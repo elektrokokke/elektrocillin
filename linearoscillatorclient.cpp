@@ -119,3 +119,20 @@ void LinearOscillatorGraphicsItem::changeControlPoint(int index, int nrOfControl
 {
     client->postChangeControlPoint(index, x, y);
 }
+
+class LinearOscillatorClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Piecewise linear oscillator";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new LinearOscillatorClient(clientName);
+    }
+private:
+    static LinearOscillatorClientFactory factory;
+};
+
+LinearOscillatorClientFactory LinearOscillatorClientFactory::factory;

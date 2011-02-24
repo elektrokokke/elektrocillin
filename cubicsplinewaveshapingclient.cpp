@@ -155,3 +155,20 @@ void CubicSplineWaveShapingGraphicsItem::decreaseControlPoints() {
 void CubicSplineWaveShapingGraphicsItem::changeControlPoint(int index, int nrOfControlPoints, double x, double y) {
     client->postChangeControlPoint(index, nrOfControlPoints, x, y);
 }
+
+class CubicSplineWaveShapingClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Cubic spline wave shaper";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new CubicSplineWaveShapingClient(clientName);
+    }
+private:
+    static CubicSplineWaveShapingClientFactory factory;
+};
+
+CubicSplineWaveShapingClientFactory CubicSplineWaveShapingClientFactory::factory;

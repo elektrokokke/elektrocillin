@@ -109,3 +109,20 @@ void IirMoogFilterGraphicsItem::onClientChangedFilterParameters(double frequency
     cutoffResonanceNode->setYScaled(parameters.resonance);
     updateFrequencyResponse(0);
 }
+
+class IirMoogFilterClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Lowpass filter";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new IirMoogFilterClient(clientName);
+    }
+private:
+    static IirMoogFilterClientFactory factory;
+};
+
+IirMoogFilterClientFactory IirMoogFilterClientFactory::factory;

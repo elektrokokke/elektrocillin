@@ -21,3 +21,20 @@ WhiteNoiseGeneratorClient::~WhiteNoiseGeneratorClient()
 {
     delete getAudioProcessor();
 }
+
+class WhiteNoiseGeneratorClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "White noise generator";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new WhiteNoiseGeneratorClient(clientName);
+    }
+private:
+    static WhiteNoiseGeneratorClientFactory factory;
+};
+
+WhiteNoiseGeneratorClientFactory WhiteNoiseGeneratorClientFactory::factory;

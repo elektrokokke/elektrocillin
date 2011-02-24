@@ -206,3 +206,20 @@ MidiSignalGraphicsItem::MidiSignalGraphicsItem(const QRectF &, MidiSignalClient 
     QObject::connect(this, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), client->getMidiSignalThread(), SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
     QObject::connect(this, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), client->getMidiSignalThread(), SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
 }
+
+class MidiSignalClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Keyboard";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new MidiSignalClient(clientName);
+    }
+private:
+    static MidiSignalClientFactory factory;
+};
+
+MidiSignalClientFactory MidiSignalClientFactory::factory;

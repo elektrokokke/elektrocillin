@@ -41,3 +41,20 @@ MultiplyClient::~MultiplyClient()
 {
     delete getAudioProcessor();
 }
+
+class MultiplyClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Multiplier";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new MultiplyClient(clientName);
+    }
+private:
+    static MultiplyClientFactory factory;
+};
+
+MultiplyClientFactory MultiplyClientFactory::factory;

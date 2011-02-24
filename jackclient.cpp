@@ -264,3 +264,34 @@ void JackClient::portRegisterCallback(jack_port_id_t id, int registered, void *a
         }
     }
 }
+
+JackClientFactory::JackClientFactory()
+{
+    getOrCreateFactories()->append(this);
+}
+
+const QList<JackClientFactory*> & JackClientFactory::getFactories()
+{
+    return *getOrCreateFactories();
+}
+
+QList<JackClientFactory*> * JackClientFactory::getOrCreateFactories()
+{
+    if (!factories) {
+        factories = new QList<JackClientFactory*>();
+    }
+    return factories;
+}
+
+QList<JackClientFactory*> * JackClientFactory::factories = 0;
+
+JackClientFactoryAction::JackClientFactoryAction(JackClientFactory *factory_, QObject *parent) :
+    QAction(factory_->getName(), parent),
+    factory(factory_)
+{
+}
+
+JackClientFactory * JackClientFactoryAction::getFactory() const
+{
+    return factory;
+}

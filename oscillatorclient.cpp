@@ -2,13 +2,23 @@
 #include "graphicsnodeitem.h"
 
 OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator, size_t ringBufferSize) :
-    EventProcessorClient2(clientName, oscillator, ringBufferSize)
+    EventProcessorClient2(clientName, oscillator, ringBufferSize),
+    oscillator(0)
 {
+}
+
+OscillatorClient::OscillatorClient(const QString &clientName, size_t ringBufferSize) :
+    EventProcessorClient2(clientName, new Oscillator(), ringBufferSize)
+{
+    oscillator = (Oscillator*)getAudioProcessor();
 }
 
 OscillatorClient::~OscillatorClient()
 {
     close();
+    if (oscillator) {
+        delete oscillator;
+    }
 }
 
 Oscillator * OscillatorClient::getOscillator()
@@ -55,3 +65,20 @@ void OscillatorClientGraphicsItem::onNodeYChanged(qreal y)
 {
     client->postChangeGain(y);
 }
+
+class OscillatorClientFactory : public JackClientFactory
+{
+public:
+    QString getName()
+    {
+        return "Sine oscillator";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new OscillatorClient(clientName);
+    }
+private:
+    static OscillatorClientFactory factory;
+};
+
+OscillatorClientFactory OscillatorClientFactory::factory;

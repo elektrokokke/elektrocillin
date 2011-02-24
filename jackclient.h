@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QMap>
 #include <QRectF>
+#include <QAction>
 
 class QGraphicsItem;
 
@@ -263,6 +264,29 @@ private:
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
     static void portRegisterCallback(jack_port_id_t id, int registered, void *arg);
+};
+
+class JackClientFactory
+{
+public:
+    JackClientFactory();
+    virtual QString getName() = 0;
+    virtual JackClient * createClient(const QString &clientName) = 0;
+
+    static const QList<JackClientFactory*> & getFactories();
+private:
+    static QList<JackClientFactory*> *getOrCreateFactories();
+    static QList<JackClientFactory*> *factories;
+};
+
+class JackClientFactoryAction : public QAction
+{
+    Q_OBJECT
+public:
+    JackClientFactoryAction(JackClientFactory *factory, QObject *parent = 0);
+    JackClientFactory * getFactory() const;
+private:
+    JackClientFactory *factory;
 };
 
 #endif // JACKCLIENT_H

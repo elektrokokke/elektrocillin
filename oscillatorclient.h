@@ -17,6 +17,7 @@ public:
     };
 
     OscillatorClient(const QString &clientName, Oscillator *oscillator, size_t ringBufferSize = 1024);
+    OscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~OscillatorClient();
 
     Oscillator * getOscillator();
