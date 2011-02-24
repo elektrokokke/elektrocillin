@@ -40,6 +40,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QRectF &rect, 
     for (int i = 0; i < outputPorts.size(); i++) {
         outputPortItems[i]->setPos(innerRect.right(), rect.top() + 0.5 * (rect.height() - outputsHeight) + outputsHeight * i / outputPortItems.size());
     }
+    setFlags(QGraphicsItem::ItemIsMovable);
 }
 
 JackClient * GraphicsClientItem::getClient()

@@ -35,6 +35,7 @@ public:
 
 
 private slots:
+    void on_actionLinear_oscillator_triggered();
     void onActionAnimateToRect();
 
     void on_actionStore_connections_triggered();

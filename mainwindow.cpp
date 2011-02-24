@@ -175,3 +175,8 @@ GraphicsClientItem * MainWindow::addClient(JackClient *client)
     actionAllClients->setData(qVariantFromValue(allClientsRect));
     return graphicsClientItem;
 }
+
+void MainWindow::on_actionLinear_oscillator_triggered()
+{
+    addClient(new LinearOscillatorClient("Linear oscillator"));
+}

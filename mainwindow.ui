@@ -48,7 +48,7 @@
      <x>0</x>
      <y>0</y>
      <width>731</width>
-     <height>21</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuJACK">
@@ -68,6 +68,7 @@
      <string>Add module</string>
     </property>
     <addaction name="actionADSR_envelope"/>
+    <addaction name="actionLinear_oscillator"/>
    </widget>
    <addaction name="menuJACK"/>
    <addaction name="menuCreate_client"/>
@@ -86,6 +87,11 @@
   <action name="actionADSR_envelope">
    <property name="text">
     <string>ADSR envelope</string>
+   </property>
+  </action>
+  <action name="actionLinear_oscillator">
+   <property name="text">
+    <string>Linear oscillator</string>
    </property>
   </action>
  </widget>
