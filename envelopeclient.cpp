@@ -42,12 +42,13 @@ void EnvelopeClient::postDecreaseControlPoints()
     LinearInterpolator *interpolator = envelope->getInterpolator();
     if (interpolator->getX().size() > 2) {
         int size = interpolator->getX().size() - 1;
+        double stretchFactor = interpolator->getX().back() / interpolator->getX()[size - 1];
         interpolator->getX().resize(size);
         interpolator->getY().resize(size);
-        double stretchFactor = 2 * M_PI / interpolator->getX().back();
         for (int i = size - 1; i >= 0; i--) {
             interpolator->getX()[i] = interpolator->getX()[i] * stretchFactor;
         }
+        interpolator->getY().back() = 0;
         Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
         event->xx = interpolator->getX();
         event->yy = interpolator->getY();
@@ -115,6 +116,8 @@ EnvelopeGraphicsSubItem::EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGra
     GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(), rect, QRectF(0, 1, parent_->getClient()->getEnvelope()->getDuration(), -2), parent_, false, true, nodePen, nodeBrush),
     parent(parent_)
 {
+    setVisible(GraphicsInterpolatorEditItem::FIRST, false);
+    setVisible(GraphicsInterpolatorEditItem::LAST, false);
 }
 
 void EnvelopeGraphicsSubItem::increaseControlPoints()

@@ -1,4 +1,5 @@
 #include "envelope.h"
+#include <QtGlobal>
 
 Envelope::Envelope(double sampleRate) :
         MidiProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
@@ -60,7 +61,7 @@ void Envelope::processNoteOn(unsigned char, unsigned char, unsigned char velocit
     double newVelocity = velocity / 127.0;
     currentPhaseTime = 0.0;
     currentPhase = ATTACK;
-    minimumLevel = previousLevel * this->velocity / newVelocity;
+    minimumLevel = qAbs(previousLevel) * this->velocity / newVelocity;
     this->velocity = newVelocity;
     release = false;
 }
@@ -79,8 +80,8 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
             currentPhase = SUSTAIN;
         } else {
             level = interpolator.evaluate(currentPhaseTime);
-            if (level < minimumLevel) {
-                level = minimumLevel;
+            if (qAbs(level) < minimumLevel) {
+                level = (level < 0.0 ? -minimumLevel : minimumLevel);
             } else {
                 minimumLevel = 0;
             }

@@ -28,6 +28,7 @@ private slots:
     void on_actionStore_connections_triggered();
     void on_actionRestore_connections_triggered();
     void onRecordFinished();
+    void on_actionAll_modules_triggered();
 
 private:
     Ui::MainWindow *ui;

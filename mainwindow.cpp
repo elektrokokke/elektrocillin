@@ -28,17 +28,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->graphicsView->setScene(new QGraphicsScene());
 
-    Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient = new Record2MemoryClient("Record"))->getInnerItem();
-
     addClient("system_in");
     addClient("system_out");
 
-    for (QList<JackClientFactory*>::const_iterator i = JackClientFactory::getFactories().begin(); i != JackClientFactory::getFactories().end(); i++) {
-        JackClientFactoryAction *action = new JackClientFactoryAction(*i, ui->menuCreate_client);
-        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
-        ui->menuCreate_client->addAction(action);
-    }
-
+    Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient = new Record2MemoryClient("Record"))->getInnerItem();
     // special treatment for the record client (its widget need resize when the scene scale changes):
     QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), record2MemoryGraphicsItem, SLOT(resizeForView(QGraphicsView *)));
     // be notified when something has been recorded (to update audio view):
@@ -46,65 +39,12 @@ MainWindow::MainWindow(QWidget *parent) :
     recordClientGraphView = record2MemoryGraphicsItem->getGraphView();
     record2MemoryGraphicsItem->resizeForView(ui->graphicsView);
 
+    for (QList<JackClientFactory*>::const_iterator i = JackClientFactory::getFactories().begin(); i != JackClientFactory::getFactories().end(); i++) {
+        JackClientFactoryAction *action = new JackClientFactoryAction(*i, ui->menuCreate_client);
+        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
+        ui->menuCreate_client->addAction(action);
+    }
 //    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
-
-//    // ADSR envelope GUI test:
-//    int nrOfNodes = 5;
-//    QList<GraphicsNodeItem*> nodes;
-//    for (int i = 0; i < nrOfNodes; i++) {
-//        GraphicsNodeItem * nodeItem = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0);
-//        nodeItem->setPos(i * (bounds.width() / (nrOfNodes + 2)), 200.0);
-//        nodeItem->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
-//        nodeItem->setBrush(QBrush(qRgb(52, 101, 164)));
-//        nodeItem->setZValue(1);
-//        scene->addItem(nodeItem);
-//        nodes.append(nodeItem);
-
-//        nodeItem->setBounds(bounds);
-//    }
-//    for (int i = 1; i < nrOfNodes; i++) {
-//        GraphicsLogLineItem * line = new GraphicsLogLineItem(0.0, 0.0, 0.0, 0.0, (i+1) % 2);
-//        if ((i+1) % 2) {
-//            // toggle the logarithmic mode:
-//            QObject::connect(ui->checkBoxLogarithmic, SIGNAL(toggled(bool)), line, SLOT(setLogarithmic(bool)));
-//        }
-//        line->setPen(QPen(QBrush(qRgb(52, 101, 164)), 3));
-//        scene->addItem(line);
-//        nodes[i-1]->connectLine(line, GraphicsLineItem::P1);
-//        nodes[i]->connectLine(line, GraphicsLineItem::P2);
-//    }
-
-//    // restrict the five nodes:
-//    nodes[0]->setVisible(false);
-//    nodes[3]->setVisible(false);
-//    nodes[1]->setBounds(QRectF(nodes[0]->x(), bounds.top(), nodes[2]->x() - nodes[0]->x(), 0.0));
-//    nodes[2]->setBounds(QRectF(nodes[1]->x(), bounds.top(), nodes[3]->x() - nodes[1]->x(), bounds.height()));
-//    nodes[3]->setBounds(QRectF(nodes[3]->x(), bounds.top(), 0.0, bounds.height()));
-//    nodes[4]->setBounds(QRectF(nodes[3]->x(), bounds.bottom(), bounds.width() - nodes[3]->x(), 0.0));
-//    // third and fourth node keep the same vertical position:
-//    QObject::connect(nodes[3], SIGNAL(yChanged(qreal)), nodes[2], SLOT(setY(qreal)));
-//    QObject::connect(nodes[2], SIGNAL(yChanged(qreal)), nodes[3], SLOT(setY(qreal)));
-//    nodes[2]->setY(bounds.height() * 0.5);
-//    nodes[4]->setX(bounds.right());
-//    // connect the bounds of two neighboured nodes:
-//    QObject::connect(nodes[1], SIGNAL(xChanged(qreal)), nodes[2], SLOT(setBoundsLeft(qreal)));
-//    QObject::connect(nodes[2], SIGNAL(xChanged(qreal)), nodes[1], SLOT(setBoundsRight(qreal)));
-
-//    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
-//    ui->graphicsView->setScene(scene);
-
-//    Butterworth2PoleFilter filter(0.05);
-//    PulseOscillator osc;
-//    osc.setSampleRate(44100);
-//    osc.setFrequency(441);
-//    FloatTableModel *model = new FloatTableModel(this);
-//    model->insertColumn(0);
-//    model->insertRows(0, 2000);
-//    for (int i = 0; i < model->rowCount(); i++) {
-//        float value = osc.nextSample();
-//        model->setData(model->index(i, 0), filter.filter(value), Qt::DisplayRole);
-//    }
-//    ui->audioView->setModel(model);
 }
 
 MainWindow::~MainWindow()
@@ -196,4 +136,12 @@ GraphicsClientItem * MainWindow::addClient(const QString &clientName)
     QAction *action = ui->menuView->addAction(clientName, this, SLOT(onActionAnimateToRect()));
     action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
     return graphicsClientItem;
+}
+
+void MainWindow::on_actionAll_modules_triggered()
+{
+    int x = gridWidth - 1;
+    int y = (clients.size() - 1) / gridWidth;
+    QRectF allClientsRect(clientsRect.topLeft(), clientsRect.translated(clientsRect.width() * x, clientsRect.height() * y).bottomRight());
+    ui->graphicsView->animateToVisibleSceneRect(allClientsRect);
 }
