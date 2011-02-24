@@ -55,16 +55,23 @@
     <property name="title">
      <string>JACK</string>
     </property>
-    <widget class="QMenu" name="menuClients">
-     <property name="title">
-      <string>Show client</string>
-     </property>
-    </widget>
     <addaction name="actionStore_connections"/>
     <addaction name="actionRestore_connections"/>
-    <addaction name="menuClients"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuCreate_client">
+    <property name="title">
+     <string>Add module</string>
+    </property>
+    <addaction name="actionADSR_envelope"/>
    </widget>
    <addaction name="menuJACK"/>
+   <addaction name="menuCreate_client"/>
+   <addaction name="menuView"/>
   </widget>
   <action name="actionStore_connections">
    <property name="text">
@@ -74,6 +81,11 @@
   <action name="actionRestore_connections">
    <property name="text">
     <string>Restore connections</string>
+   </property>
+  </action>
+  <action name="actionADSR_envelope">
+   <property name="text">
+    <string>ADSR envelope</string>
    </property>
   </action>
  </widget>

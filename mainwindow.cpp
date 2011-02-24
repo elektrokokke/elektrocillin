@@ -8,65 +8,33 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    settings("settings.ini", QSettings::IniFormat)
+    settings("settings.ini", QSettings::IniFormat),
+    gridWidth(3)
 {   
     ui->setupUi(this);
-    QGraphicsScene * scene = new QGraphicsScene();
+    ui->graphicsView->setScene(new QGraphicsScene());
 
-    QRectF rect(0, 0, 600, 420);
+    actionAllClients = ui->menuView->addAction("All clients", this, SLOT(onActionAnimateToRect()));
+    ui->menuView->addSeparator();
 
-    QVector<JackClient*> clients;
-    clients.append(new IirMoogFilterClient("Moog filter"));
-    clients.append(new MidiSignalClient("Virtual keyboard"));
-    clients.append(new LinearWaveShapingClient("Linear waveshaping"));
-    clients.append(new CubicSplineWaveShapingClient("Cubic spline waveshaping"));
-    clients.append(new LinearMorphOscillatorClient("Oscillator", 2.0));
-    clients.append(new WhiteNoiseGeneratorClient("White noise"));
-    clients.append(new AdsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3));
-    clients.append(new MultiplyClient("Multiplier"));
-    clients.append(new Record2MemoryClient("Record"));
+    addClient(new IirMoogFilterClient("Moog filter"));
+    addClient(new MidiSignalClient("Virtual keyboard"));
+    addClient(new LinearWaveShapingClient("Linear waveshaping"));
+    addClient(new CubicSplineWaveShapingClient("Cubic spline waveshaping"));
+    addClient(new LinearMorphOscillatorClient("Oscillator", 2.0));
+    addClient(new WhiteNoiseGeneratorClient("White noise"));
+    addClient(new AdsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3));
+    addClient(new MultiplyClient("Multiplier"));
+    Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient = new Record2MemoryClient("Record"))->getInnerItem();
 
-    int gridWidth = 3;
-    QAction *actionAllClients = ui->menuClients->addAction("All clients", this, SLOT(onActionAnimateToRect()));
-    ui->menuClients->addSeparator();
-    for (int i = 0; i < clients.size(); i++) {
-        // activate the Jack client:
-        clients[i]->activate();
-        // create a visual representation and position it in the scene:
-        int x = i % gridWidth;
-        int y = i / gridWidth;
-        QGraphicsItem *graphicsItem = clients[i]->createGraphicsItem(rect);
-        if (graphicsItem == 0) {
-            // create "dummy" representation:
-            graphicsItem = new QGraphicsSimpleTextItem(clients[i]->getClientName());
-        } else if (Record2MemoryGraphicsItem *record2MemoryGraphicsItem = dynamic_cast<Record2MemoryGraphicsItem*>(graphicsItem)) {
-            record2MemoryClient = (Record2MemoryClient*)clients[i];
-            // special treatment for the record client (its widget need resize when the scene scale changes):
-            QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), record2MemoryGraphicsItem, SLOT(resizeForView(QGraphicsView *)));
-            // be notified when something has been recorded (to update audio view):
-            QObject::connect(record2MemoryClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
-            recordClientGraphView = record2MemoryGraphicsItem->getGraphView();
-        }
-        GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i], rect.translated(rect.width() * x, rect.height() * y));
-        graphicsClientItem->setInnerItem(graphicsItem);
-        scene->addItem(graphicsClientItem);
-        // create an action to zoom to that client:
-        QAction *action = ui->menuClients->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
-        action->setData(qVariantFromValue(graphicsItem->sceneBoundingRect()));
-        if (i == 0) {
-            allClientsRect = graphicsItem->sceneBoundingRect();
-        } else {
-            allClientsRect |= graphicsItem->sceneBoundingRect();
-        }
-    }
-    actionAllClients->setData(qVariantFromValue(allClientsRect));
+    // special treatment for the record client (its widget need resize when the scene scale changes):
+    QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), record2MemoryGraphicsItem, SLOT(resizeForView(QGraphicsView *)));
+    // be notified when something has been recorded (to update audio view):
+    QObject::connect(record2MemoryClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
+    recordClientGraphView = record2MemoryGraphicsItem->getGraphView();
 
 //    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
-    ui->graphicsView->setScene(scene);
-    ui->graphicsView->setSceneRect(scene->sceneRect().adjusted(-1000, -1000, 1000, 1000));
     ui->graphicsView->centerOn(allClientsRect.center());
-
-    ui->graphicsView->animateToVisibleSceneRect(allClientsRect);
 
 //    // ADSR envelope GUI test:
 //    int nrOfNodes = 5;
@@ -170,4 +138,40 @@ void MainWindow::onRecordFinished()
 //        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
 //        recordClientGraphView->model()->setData(recordClientGraphView->model()->index(i, 0), (value - min) / (max - min) * 2.0 - 1.0, Qt::DisplayRole);
 //    }
+}
+
+void MainWindow::on_actionADSR_envelope_triggered()
+{
+    addClient(new AdsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3));
+}
+
+GraphicsClientItem * MainWindow::addClient(JackClient *client)
+{
+    QRectF rect(0, 0, 600, 420);
+    int i = clients.size();
+    clients.append(client);
+    // activate the Jack client:
+    clients[i]->activate();
+    QRectF allClientsRect = actionAllClients->data().toRectF();
+    // create a visual representation and position it in the scene:
+    int x = i % gridWidth;
+    int y = i / gridWidth;
+    QGraphicsItem *graphicsItem = clients[i]->createGraphicsItem(rect);
+    if (graphicsItem == 0) {
+        // create "dummy" representation:
+        graphicsItem = new QGraphicsSimpleTextItem(clients[i]->getClientName());
+    }
+    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i], rect.translated(rect.width() * x, rect.height() * y));
+    graphicsClientItem->setInnerItem(graphicsItem);
+    ui->graphicsView->scene()->addItem(graphicsClientItem);
+    // create an action to zoom to that client:
+    QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
+    action->setData(qVariantFromValue(graphicsItem->sceneBoundingRect()));
+    if (i == 0) {
+        allClientsRect = graphicsItem->sceneBoundingRect();
+    } else {
+        allClientsRect |= graphicsItem->sceneBoundingRect();
+    }
+    actionAllClients->setData(qVariantFromValue(allClientsRect));
+    return graphicsClientItem;
 }

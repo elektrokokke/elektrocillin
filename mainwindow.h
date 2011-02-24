@@ -43,13 +43,20 @@ private slots:
 
     void onRecordFinished();
 
+    void on_actionADSR_envelope_triggered();
+
 private:
     Ui::MainWindow *ui;
     QSettings settings;
+    int gridWidth;
+    QVector<JackClient*> clients;
     Record2MemoryClient *record2MemoryClient;
     GraphView *recordClientGraphView;
+    QAction *actionAllClients;
     JackNullClient nullClient;
     QRectF allClientsRect;
+
+    GraphicsClientItem * addClient(JackClient *client);
 };
 
 #endif // MAINWINDOW_H
