@@ -41,9 +41,7 @@ private:
     QVector<JackClient*> clients;
     Record2MemoryClient *record2MemoryClient;
     GraphView *recordClientGraphView;
-    QAction *actionAllClients;
     JackNullClient nullClient;
-    QRectF allClientsRect;
 
     GraphicsClientItem * addClient(JackClient *client);
 };

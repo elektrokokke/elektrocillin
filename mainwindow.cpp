@@ -27,16 +27,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->graphicsView->setScene(new QGraphicsScene());
 
-    actionAllClients = ui->menuView->addAction("All clients", this, SLOT(onActionAnimateToRect()));
-    ui->menuView->addSeparator();
-
     addClient(new IirMoogFilterClient("Moog filter"));
     addClient(new MidiSignalClient("Virtual keyboard"));
     addClient(new LinearWaveShapingClient("Linear waveshaping"));
     addClient(new CubicSplineWaveShapingClient("Cubic spline waveshaping"));
     addClient(new LinearMorphOscillatorClient("Oscillator", 2.0));
     addClient(new WhiteNoiseGeneratorClient("White noise"));
-    addClient(new AdsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3));
     addClient(new MultiplyClient("Multiplier"));
     addClient(new EnvelopeClient("Envelope"));
     Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient = new Record2MemoryClient("Record"))->getInnerItem();
@@ -48,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
     recordClientGraphView = record2MemoryGraphicsItem->getGraphView();
 
 //    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
-    ui->graphicsView->centerOn(allClientsRect.center());
 
 //    // ADSR envelope GUI test:
 //    int nrOfNodes = 5;
@@ -116,10 +111,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::onActionAnimateToRect()
 {
-    if (sender()->inherits("QAction")) {
-        QAction *action = (QAction*)sender();
-        QRectF rect = action->data().toRectF();
-        ui->graphicsView->animateToVisibleSceneRect(rect);
+    if (QAction *action = qobject_cast<QAction*>(sender())) {
+        QGraphicsItem *graphicsItem = action->data().value<QGraphicsItem*>();
+        ui->graphicsView->animateToVisibleSceneRect(graphicsItem->sceneBoundingRect());
     }
 }
 
@@ -156,7 +150,7 @@ void MainWindow::onRecordFinished()
 
 void MainWindow::on_actionADSR_envelope_triggered()
 {
-    addClient(new AdsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3));
+    addClient(new EnvelopeClient("Envelope"));
 }
 
 GraphicsClientItem * MainWindow::addClient(JackClient *client)
@@ -166,7 +160,6 @@ GraphicsClientItem * MainWindow::addClient(JackClient *client)
     clients.append(client);
     // activate the Jack client:
     clients[i]->activate();
-    QRectF allClientsRect = actionAllClients->data().toRectF();
     // create a visual representation and position it in the scene:
     int x = i % gridWidth;
     int y = i / gridWidth;
@@ -180,13 +173,7 @@ GraphicsClientItem * MainWindow::addClient(JackClient *client)
     ui->graphicsView->scene()->addItem(graphicsClientItem);
     // create an action to zoom to that client:
     QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
-    action->setData(qVariantFromValue(graphicsItem->sceneBoundingRect()));
-    if (i == 0) {
-        allClientsRect = graphicsItem->sceneBoundingRect();
-    } else {
-        allClientsRect |= graphicsItem->sceneBoundingRect();
-    }
-    actionAllClients->setData(qVariantFromValue(allClientsRect));
+    action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
     return graphicsClientItem;
 }
 
