@@ -8,17 +8,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    settings("settings.ini", QSettings::IniFormat),
-    midiSignalClient("Virtual keyboard"),
-    moogFilter(44100, 1),
-    moogFilterClient("Moog filter", &moogFilter),
-    noiseClient("White noise", &noiseGenerator),
-    adsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3),
-    multiplierClient("Multiplier", &multiplier),
-    linearWaveShapingClient("Linear waveshaping"),
-    linearMorphOscillatorClient("Oscillator", 2.0),
-    cubicSplineWaveShapingClient("Cubic spline waveshaping"),
-    recordClient("Record")
+    settings("settings.ini", QSettings::IniFormat)
 {   
     ui->setupUi(this);
     QGraphicsScene * scene = new QGraphicsScene();
@@ -26,18 +16,19 @@ MainWindow::MainWindow(QWidget *parent) :
     QRectF rect(0, 0, 600, 420);
 
     QVector<JackClient*> clients;
-    clients.append(&moogFilterClient);
-    clients.append(&midiSignalClient);
-    clients.append(&linearWaveShapingClient);
-    clients.append(&cubicSplineWaveShapingClient);
-    clients.append(&linearMorphOscillatorClient);
-    clients.append(&noiseClient);
-    clients.append(&adsrClient);
-    clients.append(&multiplierClient);
-    clients.append(&recordClient);
+    clients.append(new IirMoogFilterClient("Moog filter"));
+    clients.append(new MidiSignalClient("Virtual keyboard"));
+    clients.append(new LinearWaveShapingClient("Linear waveshaping"));
+    clients.append(new CubicSplineWaveShapingClient("Cubic spline waveshaping"));
+    clients.append(new LinearMorphOscillatorClient("Oscillator", 2.0));
+    clients.append(new WhiteNoiseGeneratorClient("White noise"));
+    clients.append(new AdsrClient("ADSR envelope", 0.001, 0.2, 0.2, 0.3));
+    clients.append(new MultiplyClient("Multiplier"));
+    clients.append(new Record2MemoryClient("Record"));
 
     int gridWidth = 3;
     QAction *actionAllClients = ui->menuClients->addAction("All clients", this, SLOT(onActionAnimateToRect()));
+    ui->menuClients->addSeparator();
     for (int i = 0; i < clients.size(); i++) {
         // activate the Jack client:
         clients[i]->activate();
@@ -48,12 +39,13 @@ MainWindow::MainWindow(QWidget *parent) :
         if (graphicsItem == 0) {
             // create "dummy" representation:
             graphicsItem = new QGraphicsSimpleTextItem(clients[i]->getClientName());
-        } else if (clients[i] == &recordClient) {
+        } else if (Record2MemoryGraphicsItem *record2MemoryGraphicsItem = dynamic_cast<Record2MemoryGraphicsItem*>(graphicsItem)) {
+            record2MemoryClient = (Record2MemoryClient*)clients[i];
             // special treatment for the record client (its widget need resize when the scene scale changes):
-            QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), (Record2MemoryGraphicsItem*)graphicsItem, SLOT(resizeForView(QGraphicsView *)));
+            QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), record2MemoryGraphicsItem, SLOT(resizeForView(QGraphicsView *)));
             // be notified when something has been recorded (to update audio view):
-            QObject::connect(&recordClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
-            recordClientGraphView = ((Record2MemoryGraphicsItem*)graphicsItem)->getGraphView();
+            QObject::connect(record2MemoryClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
+            recordClientGraphView = record2MemoryGraphicsItem->getGraphView();
         }
         GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i], rect.translated(rect.width() * x, rect.height() * y));
         graphicsClientItem->setInnerItem(graphicsItem);
@@ -163,7 +155,7 @@ void MainWindow::on_actionRestore_connections_triggered()
 
 void MainWindow::onRecordFinished()
 {
-    recordClientGraphView->setModel(recordClient.popAudioModel());
+    recordClientGraphView->setModel(record2MemoryClient->popAudioModel());
     recordClientGraphView->model()->setParent(recordClientGraphView);
 //    double min = -1, max = 1;
 //    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {

@@ -20,8 +20,8 @@ void IirMoogFilterThread::processDeferred()
     }
 }
 
-IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter, size_t ringBufferSize) :
-    JackThreadEventProcessorClient<IirMoogFilter::Parameters>(new IirMoogFilterThread(this), clientName, filter, ringBufferSize),
+IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, size_t ringBufferSize) :
+    JackThreadEventProcessorClient<IirMoogFilter::Parameters>(new IirMoogFilterThread(this), clientName, new IirMoogFilter(44100, 1), ringBufferSize),
     ringBufferToThread(ringBufferSize)
 {
     getMoogFilterThread()->setRingBufferFromClient(&ringBufferToThread);
@@ -31,6 +31,7 @@ IirMoogFilterClient::~IirMoogFilterClient()
 {
     close();
     delete getMoogFilterThread();
+    delete getMoogFilter();
 }
 
 IirMoogFilter * IirMoogFilterClient::getMoogFilter()

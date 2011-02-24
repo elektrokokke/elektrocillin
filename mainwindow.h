@@ -46,18 +46,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QSettings settings;
-    MidiSignalClient midiSignalClient;
-    IirMoogFilter moogFilter;
-    IirMoogFilterClient moogFilterClient;
-    WhiteNoiseGenerator noiseGenerator;
-    AudioProcessorClient noiseClient;
-    AdsrClient adsrClient;
-    MultiplyProcessor multiplier;
-    AudioProcessorClient multiplierClient;
-    LinearWaveShapingClient linearWaveShapingClient;
-    LinearMorphOscillatorClient linearMorphOscillatorClient;
-    CubicSplineWaveShapingClient cubicSplineWaveShapingClient;
-    Record2MemoryClient recordClient;
+    Record2MemoryClient *record2MemoryClient;
     GraphView *recordClientGraphView;
     JackNullClient nullClient;
     QRectF allClientsRect;

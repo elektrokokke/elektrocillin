@@ -40,6 +40,7 @@ public:
         by another client. Use getClientName() to get the actual name.
       */
     JackClient(const QString &clientName);
+    virtual ~JackClient();
 
     /**
       @return If the client is active, this returns the actual client name as

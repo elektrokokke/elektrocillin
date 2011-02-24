@@ -29,7 +29,7 @@ private:
 class IirMoogFilterClient : public JackThreadEventProcessorClient<IirMoogFilter::Parameters>
 {
 public:
-    IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter, size_t ringBufferSize = 1024);
+    IirMoogFilterClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~IirMoogFilterClient();
 
     IirMoogFilter * getMoogFilter();

@@ -11,3 +11,13 @@ void WhiteNoiseGenerator::processAudio(const double *, double *outputs, jack_nfr
     int randomNumber = rand();
     outputs[0] = (double)randomNumber / (double)RAND_MAX * 2.0 - 1.0;
 }
+
+WhiteNoiseGeneratorClient::WhiteNoiseGeneratorClient(const QString &clientName) :
+    AudioProcessorClient(clientName, new WhiteNoiseGenerator(44100))
+{
+}
+
+WhiteNoiseGeneratorClient::~WhiteNoiseGeneratorClient()
+{
+    delete getAudioProcessor();
+}

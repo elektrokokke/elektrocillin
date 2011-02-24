@@ -8,6 +8,10 @@ JackClient::JackClient(const QString &clientName) :
 {
 }
 
+JackClient::~JackClient()
+{
+}
+
 const QString & JackClient::getClientName() const
 {
     return actualName;

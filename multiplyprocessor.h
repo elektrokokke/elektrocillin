@@ -1,7 +1,7 @@
 #ifndef MULTIPLYPROCESSOR_H
 #define MULTIPLYPROCESSOR_H
 
-#include "audioprocessor.h"
+#include "audioprocessorclient.h"
 
 class MultiplyProcessor : public AudioProcessor
 {
@@ -16,6 +16,13 @@ public:
 
 private:
     double gain;
+};
+
+class MultiplyClient : public AudioProcessorClient
+{
+public:
+    MultiplyClient(const QString &clientName);
+    ~MultiplyClient();
 };
 
 #endif // MULTIPLYPROCESSOR_H

@@ -31,3 +31,13 @@ void MultiplyProcessor::processAudio(const double *inputs, double *outputs, jack
     }
     outputs[0] = product;
 }
+
+MultiplyClient::MultiplyClient(const QString &clientName) :
+    AudioProcessorClient(clientName, new MultiplyProcessor())
+{
+}
+
+MultiplyClient::~MultiplyClient()
+{
+    delete getAudioProcessor();
+}
