@@ -21,6 +21,18 @@ OscillatorClient::~OscillatorClient()
     }
 }
 
+void OscillatorClient::saveState(QDataStream &stream)
+{
+    stream << getOscillator()->getGain();
+}
+
+void OscillatorClient::loadState(QDataStream &stream)
+{
+    double gain;
+    stream >> gain;
+    getOscillator()->setGain(gain);
+}
+
 Oscillator * OscillatorClient::getOscillator()
 {
     return (Oscillator*)getAudioProcessor();

@@ -33,6 +33,8 @@ public:
     virtual ~IirMoogFilterClient();
 
     virtual JackClientFactory * getFactory();
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
 
     IirMoogFilter * getMoogFilter();
     IirMoogFilterThread * getMoogFilterThread();

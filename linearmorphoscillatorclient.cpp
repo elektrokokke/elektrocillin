@@ -22,6 +22,22 @@ LinearMorphOscillatorClient::~LinearMorphOscillatorClient()
     close();
 }
 
+void LinearMorphOscillatorClient::saveState(QDataStream &stream)
+{
+    OscillatorClient::saveState(stream);
+    state[0].save(stream);
+    state[1].save(stream);
+}
+
+void LinearMorphOscillatorClient::loadState(QDataStream &stream)
+{
+    OscillatorClient::loadState(stream);
+    state[0].load(stream);
+    state[1].load(stream);
+    getLinearMorphOscillator()->setState(0, state[0]);
+    getLinearMorphOscillator()->setState(1, state[1]);
+}
+
 LinearMorphOscillator * LinearMorphOscillatorClient::getLinearMorphOscillator()
 {
     return (LinearMorphOscillator*)getAudioProcessor();

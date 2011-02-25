@@ -27,6 +27,7 @@ public:
     Envelope(double sampleRate = 44100);
 
     LinearInterpolator * getInterpolator();
+    void setInterpolator(const LinearInterpolator &interpolator);
 
     void setSustainPosition(double sustainPosition);
     double getSustainPosition() const;

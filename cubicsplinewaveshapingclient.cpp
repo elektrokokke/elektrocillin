@@ -30,6 +30,17 @@ CubicSplineWaveShapingClient::~CubicSplineWaveShapingClient()
     close();
 }
 
+void CubicSplineWaveShapingClient::saveState(QDataStream &stream)
+{
+    interpolator.save(stream);
+}
+
+void CubicSplineWaveShapingClient::loadState(QDataStream &stream)
+{
+    interpolator.load(stream);
+    interpolatorProcess = interpolator;
+}
+
 CubicSplineInterpolator * CubicSplineWaveShapingClient::getInterpolator()
 {
     return &interpolator;

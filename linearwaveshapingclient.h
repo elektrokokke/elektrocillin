@@ -12,6 +12,8 @@ public:
     virtual ~LinearWaveShapingClient();
 
     virtual JackClientFactory * getFactory();
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
 
     LinearInterpolator * getLinearInterpolator();
 

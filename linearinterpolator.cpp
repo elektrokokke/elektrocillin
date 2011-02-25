@@ -12,6 +12,16 @@ LinearInterpolator::LinearInterpolator(const QVector<double> &xx, const QVector<
 {
 }
 
+void LinearInterpolator::save(QDataStream &stream)
+{
+    stream << xx << yy;
+}
+
+void LinearInterpolator::load(QDataStream &stream)
+{
+    stream >> xx >> yy;
+}
+
 const QVector<double> & LinearInterpolator::getX() const
 {
     return Interpolator::getX();

@@ -167,10 +167,10 @@ bool MainWindow::loadSession(QDataStream &stream)
     // first delete all current clients:
     for (int i = 0; i < clients.size(); ) {
         if (clients[i] && clients[i]->getFactory()) {
-            delete clients[i];
             delete clientGraphicsItems[i];
-            clients.remove(i);
+            delete clients[i];
             clientGraphicsItems.remove(i);
+            clients.remove(i);
         } else {
             i++;
         }

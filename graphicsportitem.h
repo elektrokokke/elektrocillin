@@ -17,6 +17,7 @@ class GraphicsPortItem : public QObject, public QGraphicsRectItem, public PortCo
     Q_OBJECT
 public:
     GraphicsPortItem(JackClient *client, const QString &fullPortName, QGraphicsItem *parent = 0);
+    virtual ~GraphicsPortItem();
 
     void connectedTo(const QString &fullPortName);
     void disconnectedFrom(const QString &fullPortName);

@@ -3,12 +3,16 @@
 
 #include "interpolator.h"
 #include <QVector>
+#include <QDataStream>
 
 class LinearInterpolator : public Interpolator
 {
 public:
     LinearInterpolator();
     LinearInterpolator(const QVector<double> &xx, const QVector<double> &yy);
+
+    void save(QDataStream &stream);
+    void load(QDataStream &stream);
 
     const QVector<double> & getX() const;
     const QVector<double> & getY() const;

@@ -34,6 +34,29 @@ IirMoogFilterClient::~IirMoogFilterClient()
     delete getMoogFilter();
 }
 
+void IirMoogFilterClient::saveState(QDataStream &stream)
+{
+    IirMoogFilter::Parameters parameters = getMoogFilter()->getParameters();
+    stream << parameters.frequency;
+    stream << parameters.frequencyOffsetFactor;
+    stream << parameters.frequencyPitchBendFactor;
+    stream << parameters.frequencyModulationFactor;
+    stream << parameters.frequencyModulationIntensity;
+    stream << parameters.resonance;
+}
+
+void IirMoogFilterClient::loadState(QDataStream &stream)
+{
+    IirMoogFilter::Parameters parameters;
+    stream >> parameters.frequency;
+    stream >> parameters.frequencyOffsetFactor;
+    stream >> parameters.frequencyPitchBendFactor;
+    stream >> parameters.frequencyModulationFactor;
+    stream >> parameters.frequencyModulationIntensity;
+    stream >> parameters.resonance;
+    getMoogFilter()->setParameters(parameters);
+}
+
 IirMoogFilter * IirMoogFilterClient::getMoogFilter()
 {
     return (IirMoogFilter*)getMidiProcessor();

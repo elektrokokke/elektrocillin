@@ -23,6 +23,16 @@ CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, cons
 {
 }
 
+void CubicSplineInterpolator::save(QDataStream &stream)
+{
+    stream << xx << yy << y2;
+}
+
+void CubicSplineInterpolator::load(QDataStream &stream)
+{
+    stream >> xx >> yy >> y2;
+}
+
 const QVector<double> & CubicSplineInterpolator::getY() const
 {
     return yy;

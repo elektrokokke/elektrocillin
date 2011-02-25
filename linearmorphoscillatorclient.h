@@ -12,6 +12,8 @@ public:
     virtual ~LinearMorphOscillatorClient();
 
     virtual JackClientFactory * getFactory();
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
 
     LinearMorphOscillator * getLinearMorphOscillator();
     LinearInterpolator * getState(int state);

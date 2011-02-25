@@ -15,6 +15,8 @@ public:
     virtual ~EnvelopeClient();
 
     virtual JackClientFactory * getFactory();
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
 
     Envelope * getEnvelope();
 

@@ -13,6 +13,8 @@ public:
     virtual ~LinearOscillatorClient();
 
     virtual JackClientFactory * getFactory();
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
 
     LinearOscillator * getLinearOscillator();
     LinearInterpolator * getLinearInterpolator();

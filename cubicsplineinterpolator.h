@@ -19,6 +19,9 @@ public:
       */
     CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy, const QVector<double> &y2);
 
+    void save(QDataStream &stream);
+    void load(QDataStream &stream);
+
     const QVector<double> & getY() const;
     const QVector<double> & getY2() const;
 

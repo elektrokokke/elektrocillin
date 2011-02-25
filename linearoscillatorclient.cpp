@@ -13,6 +13,19 @@ LinearOscillatorClient::~LinearOscillatorClient()
     close();
 }
 
+void LinearOscillatorClient::saveState(QDataStream &stream)
+{
+    OscillatorClient::saveState(stream);
+    interpolator.save(stream);
+}
+
+void LinearOscillatorClient::loadState(QDataStream &stream)
+{
+    OscillatorClient::loadState(stream);
+    interpolator.load(stream);
+    getLinearOscillator()->setLinearInterpolator(interpolator);
+}
+
 LinearOscillator * LinearOscillatorClient::getLinearOscillator()
 {
     return (LinearOscillator*)getAudioProcessor();

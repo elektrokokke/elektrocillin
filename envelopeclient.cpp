@@ -14,6 +14,24 @@ EnvelopeClient::~EnvelopeClient()
     delete envelopeProcess;
 }
 
+void EnvelopeClient::saveState(QDataStream &stream)
+{
+    envelope->getInterpolator()->save(stream);
+    stream << envelope->getSustainPosition();
+}
+
+void EnvelopeClient::loadState(QDataStream &stream)
+{
+    LinearInterpolator interpolator;
+    interpolator.load(stream);
+    envelope->setInterpolator(interpolator);
+    envelopeProcess->setInterpolator(interpolator);
+    double sustainPosition;
+    stream >> sustainPosition;
+    envelope->setSustainPosition(sustainPosition);
+    envelopeProcess->setSustainPosition(sustainPosition);
+}
+
 Envelope * EnvelopeClient::getEnvelope()
 {
     return envelope;

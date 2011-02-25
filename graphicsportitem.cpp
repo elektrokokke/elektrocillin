@@ -16,6 +16,11 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     init();
 }
 
+GraphicsPortItem::~GraphicsPortItem()
+{
+    client->registerPortConnectInterface(fullPortName, 0);
+}
+
 void GraphicsPortItem::init()
 {
     setBrush(QBrush(Qt::white));

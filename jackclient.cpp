@@ -108,7 +108,11 @@ bool JackClient::disconnectPorts(const QString &sourcePortName, const QString &d
 
 void JackClient::registerPortConnectInterface(const QString &fullPortName, PortConnectInterface *portConnectInterface)
 {
-    portConnectInterfaces.insert(fullPortName, portConnectInterface);
+    if (portConnectInterface) {
+        portConnectInterfaces.insert(fullPortName, portConnectInterface);
+    } else {
+        portConnectInterfaces.remove(fullPortName);
+    }
 }
 
 QString JackClient::getPortType(const QString &fullPortName)

@@ -24,7 +24,11 @@ public:
     MultiplyClient(const QString &clientName);
     ~MultiplyClient();
 
+    MultiplyProcessor * getMultiplyProcessor();
+
     virtual JackClientFactory * getFactory();
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
 };
 
 #endif // MULTIPLYPROCESSOR_H

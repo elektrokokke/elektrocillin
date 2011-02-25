@@ -12,6 +12,8 @@ public:
     virtual ~CubicSplineWaveShapingClient();
 
     virtual JackClientFactory * getFactory();
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
 
     CubicSplineInterpolator * getInterpolator();
 

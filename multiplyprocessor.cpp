@@ -42,6 +42,23 @@ MultiplyClient::~MultiplyClient()
     delete getAudioProcessor();
 }
 
+MultiplyProcessor * MultiplyClient::getMultiplyProcessor()
+{
+    return (MultiplyProcessor*)getAudioProcessor();
+}
+
+void MultiplyClient::saveState(QDataStream &stream)
+{
+    stream << getMultiplyProcessor()->getGainFactor();
+}
+
+void MultiplyClient::loadState(QDataStream &stream)
+{
+    double gain;
+    stream >> gain;
+    getMultiplyProcessor()->setGainFactor(gain);
+}
+
 class MultiplyClientFactory : public JackClientFactory
 {
 public:

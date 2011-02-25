@@ -19,6 +19,17 @@ LinearWaveShapingClient::~LinearWaveShapingClient()
     close();
 }
 
+void LinearWaveShapingClient::saveState(QDataStream &stream)
+{
+    interpolator.save(stream);
+}
+
+void LinearWaveShapingClient::loadState(QDataStream &stream)
+{
+    interpolator.load(stream);
+    interpolatorProcess = interpolator;
+}
+
 LinearInterpolator * LinearWaveShapingClient::getLinearInterpolator()
 {
     return &interpolator;

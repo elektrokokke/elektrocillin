@@ -25,6 +25,11 @@ LinearInterpolator * Envelope::getInterpolator()
     return &interpolator;
 }
 
+void Envelope::setInterpolator(const LinearInterpolator &interpolator)
+{
+    this->interpolator = interpolator;
+}
+
 void Envelope::setSustainPosition(double sustainPosition)
 {
     this->sustainPosition = sustainPosition;
