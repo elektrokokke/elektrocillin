@@ -113,6 +113,11 @@ MetaJackClientProcess * MetaJackClient::getProcessClient()
     return twin;
 }
 
+std::set<MetaJackPortBase*> & MetaJackClient::getPorts()
+{
+    return ports;
+}
+
 MetaJackInterfaceClient::MetaJackInterfaceClient(MetaJackContext *context_, int flags) :
     MetaJackClient((flags & JackPortIsOutput) ? "system_in" : "system_out"),
     context(context_),

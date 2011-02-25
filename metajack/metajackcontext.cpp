@@ -130,7 +130,25 @@ MetaJackClient * MetaJackContext::openClient(const std::string &name, jack_optio
 bool MetaJackContext::closeClient(MetaJackClient *client)
 {
     assert(client && client->getProcessClient());
+    // first deactivate the client:
     deactivateClient(client);
+    // remove the client from all callback handlers:
+    threadInitCallbackHandler.setCallback(client, 0, 0);
+    shutdownCallbackHandler.setCallback(client, 0, 0);
+    infoShutdownCallbackHandler.setCallback(client, 0, 0);
+    freewheelCallbackHandler.setCallback(client, 0, 0);
+    bufferSizeCallbackHandler.setCallback(client, 0, 0);
+    sampleRateCallbackHandler.setCallback(client, 0, 0);
+    clientRegistrationCallbackHandler.setCallback(client, 0, 0);
+    portRegistrationCallbackHandler.setCallback(client, 0, 0);
+    portConnectCallbackHandler.setCallback(client, 0, 0);
+    portRenameCallbackHandler.setCallback(client, 0, 0);
+    graphOrderCallbackHandler.setCallback(client, 0, 0);
+    xRunCallbackHandler.setCallback(client, 0, 0);
+    // unregister the client's ports:
+    for (; client->getPorts().size(); ) {
+        unregisterPort((MetaJackPort*)*client->getPorts().begin());
+    }
     if (isActive()) {
         MetaJackGraphEvent event;
         event.type = MetaJackGraphEvent::CLOSE_CLIENT;

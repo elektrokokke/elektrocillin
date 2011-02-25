@@ -40,6 +40,7 @@ public:
     void setActive(bool active);
     bool isActive() const;
     MetaJackClientProcess * getProcessClient();
+    std::set<MetaJackPortBase*> & getPorts();
 private:
     bool active;
     MetaJackClientProcess *twin;
