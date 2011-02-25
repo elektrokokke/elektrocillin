@@ -25,10 +25,10 @@ public:
 private slots:
     void onActionAnimateToRect();
     void onActionCreateClient();
-    void on_actionStore_connections_triggered();
-    void on_actionRestore_connections_triggered();
     void onRecordFinished();
     void on_actionAll_modules_triggered();
+    void on_actionSave_session_triggered();
+    void on_actionLoad_session_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -36,12 +36,16 @@ private:
     int gridWidth;
     QRectF clientsRect;
     QVector<JackClient*> clients;
+    QVector<GraphicsClientItem*> clientGraphicsItems;
     Record2MemoryClient *record2MemoryClient;
     GraphView *recordClientGraphView;
     JackNullClient nullClient;
 
     GraphicsClientItem * addClient(JackClient *client);
     GraphicsClientItem * addClient(const QString &clientName);
+
+    void saveSession(QDataStream &stream);
+    bool loadSession(QDataStream &stream);
 };
 
 #endif // MAINWINDOW_H

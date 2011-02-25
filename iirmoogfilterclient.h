@@ -32,6 +32,8 @@ public:
     IirMoogFilterClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~IirMoogFilterClient();
 
+    virtual JackClientFactory * getFactory();
+
     IirMoogFilter * getMoogFilter();
     IirMoogFilterThread * getMoogFilterThread();
 

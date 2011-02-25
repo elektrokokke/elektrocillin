@@ -137,6 +137,10 @@ void LinearWaveShapingGraphicsItem::changeControlPoint(int index, int nrOfContro
 class LinearWaveShapingClientFactory : public JackClientFactory
 {
 public:
+    LinearWaveShapingClientFactory()
+    {
+        JackClientFactory::registerFactory(this);
+    }
     QString getName()
     {
         return "Piecewise linear wave shaper";
@@ -145,8 +149,12 @@ public:
     {
         return new LinearWaveShapingClient(clientName);
     }
-private:
     static LinearWaveShapingClientFactory factory;
 };
 
 LinearWaveShapingClientFactory LinearWaveShapingClientFactory::factory;
+
+JackClientFactory * LinearWaveShapingClient::getFactory()
+{
+    return &LinearWaveShapingClientFactory::factory;
+}

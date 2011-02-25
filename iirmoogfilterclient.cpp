@@ -113,6 +113,10 @@ void IirMoogFilterGraphicsItem::onClientChangedFilterParameters(double frequency
 class IirMoogFilterClientFactory : public JackClientFactory
 {
 public:
+    IirMoogFilterClientFactory()
+    {
+        JackClientFactory::registerFactory(this);
+    }
     QString getName()
     {
         return "Lowpass filter";
@@ -121,8 +125,12 @@ public:
     {
         return new IirMoogFilterClient(clientName);
     }
-private:
     static IirMoogFilterClientFactory factory;
 };
 
 IirMoogFilterClientFactory IirMoogFilterClientFactory::factory;
+
+JackClientFactory * IirMoogFilterClient::getFactory()
+{
+    return &IirMoogFilterClientFactory::factory;
+}

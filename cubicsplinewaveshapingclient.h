@@ -11,6 +11,8 @@ public:
     CubicSplineWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~CubicSplineWaveShapingClient();
 
+    virtual JackClientFactory * getFactory();
+
     CubicSplineInterpolator * getInterpolator();
 
     void postIncreaseControlPoints();

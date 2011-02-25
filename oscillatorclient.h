@@ -20,6 +20,8 @@ public:
     OscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~OscillatorClient();
 
+    virtual JackClientFactory * getFactory();
+
     Oscillator * getOscillator();
 
     void postChangeGain(double gain);

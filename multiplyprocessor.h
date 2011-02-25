@@ -23,6 +23,8 @@ class MultiplyClient : public AudioProcessorClient
 public:
     MultiplyClient(const QString &clientName);
     ~MultiplyClient();
+
+    virtual JackClientFactory * getFactory();
 };
 
 #endif // MULTIPLYPROCESSOR_H

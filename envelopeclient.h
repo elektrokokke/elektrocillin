@@ -14,6 +14,8 @@ public:
     EnvelopeClient(const QString &clientName, size_t ringBufferSize = (2 << 16));
     virtual ~EnvelopeClient();
 
+    virtual JackClientFactory * getFactory();
+
     Envelope * getEnvelope();
 
     void postIncreaseControlPoints();

@@ -45,6 +45,10 @@ MultiplyClient::~MultiplyClient()
 class MultiplyClientFactory : public JackClientFactory
 {
 public:
+    MultiplyClientFactory()
+    {
+        JackClientFactory::registerFactory(this);
+    }
     QString getName()
     {
         return "Multiplier";
@@ -53,8 +57,12 @@ public:
     {
         return new MultiplyClient(clientName);
     }
-private:
     static MultiplyClientFactory factory;
 };
 
 MultiplyClientFactory MultiplyClientFactory::factory;
+
+JackClientFactory * MultiplyClient::getFactory()
+{
+    return &MultiplyClientFactory::factory;
+}

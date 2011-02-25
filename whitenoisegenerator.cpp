@@ -25,6 +25,10 @@ WhiteNoiseGeneratorClient::~WhiteNoiseGeneratorClient()
 class WhiteNoiseGeneratorClientFactory : public JackClientFactory
 {
 public:
+    WhiteNoiseGeneratorClientFactory()
+    {
+        JackClientFactory::registerFactory(this);
+    }
     QString getName()
     {
         return "White noise generator";
@@ -33,8 +37,12 @@ public:
     {
         return new WhiteNoiseGeneratorClient(clientName);
     }
-private:
     static WhiteNoiseGeneratorClientFactory factory;
 };
 
 WhiteNoiseGeneratorClientFactory WhiteNoiseGeneratorClientFactory::factory;
+
+JackClientFactory * WhiteNoiseGeneratorClient::getFactory()
+{
+    return &WhiteNoiseGeneratorClientFactory::factory;
+}

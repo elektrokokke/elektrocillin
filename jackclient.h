@@ -32,6 +32,8 @@ public:
   custom event type.
   */
 
+class JackClientFactory;
+
 class JackClient
 {
 public:
@@ -42,6 +44,10 @@ public:
       */
     JackClient(const QString &clientName);
     virtual ~JackClient();
+
+    virtual JackClientFactory * getFactory();
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
 
     /**
       @return If the client is active, this returns the actual client name as
@@ -269,14 +275,15 @@ private:
 class JackClientFactory
 {
 public:
-    JackClientFactory();
     virtual QString getName() = 0;
     virtual JackClient * createClient(const QString &clientName) = 0;
 
-    static const QList<JackClientFactory*> & getFactories();
+    static void registerFactory(JackClientFactory *factory);
+    static JackClientFactory * getFactoryByName(const QString &name);
+    static QList<JackClientFactory*> getFactories();
 private:
-    static QList<JackClientFactory*> *getOrCreateFactories();
-    static QList<JackClientFactory*> *factories;
+    static QMap<QString, JackClientFactory*> *getOrCreateFactories();
+    static QMap<QString, JackClientFactory*> *factories;
 };
 
 class JackClientFactoryAction : public QAction

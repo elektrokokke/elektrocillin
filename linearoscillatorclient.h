@@ -12,6 +12,8 @@ public:
     LinearOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~LinearOscillatorClient();
 
+    virtual JackClientFactory * getFactory();
+
     LinearOscillator * getLinearOscillator();
     LinearInterpolator * getLinearInterpolator();
 

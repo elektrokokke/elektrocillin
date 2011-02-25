@@ -43,6 +43,8 @@ public:
     MidiSignalClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~MidiSignalClient();
 
+    virtual JackClientFactory * getFactory();
+
     MidiSignalThread * getMidiSignalThread();
 
     QGraphicsItem * createGraphicsItem(const QRectF &rect);

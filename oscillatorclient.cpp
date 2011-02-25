@@ -69,6 +69,10 @@ void OscillatorClientGraphicsItem::onNodeYChanged(qreal y)
 class OscillatorClientFactory : public JackClientFactory
 {
 public:
+    OscillatorClientFactory()
+    {
+        JackClientFactory::registerFactory(this);
+    }
     QString getName()
     {
         return "Sine oscillator";
@@ -77,8 +81,12 @@ public:
     {
         return new OscillatorClient(clientName);
     }
-private:
     static OscillatorClientFactory factory;
 };
 
 OscillatorClientFactory OscillatorClientFactory::factory;
+
+JackClientFactory * OscillatorClient::getFactory()
+{
+    return &OscillatorClientFactory::factory;
+}

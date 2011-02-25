@@ -12,6 +12,19 @@ JackClient::~JackClient()
 {
 }
 
+JackClientFactory * JackClient::getFactory()
+{
+    return 0;
+}
+
+void JackClient::saveState(QDataStream &stream)
+{
+}
+
+void JackClient::loadState(QDataStream &stream)
+{
+}
+
 const QString & JackClient::getClientName() const
 {
     return actualName;
@@ -265,25 +278,30 @@ void JackClient::portRegisterCallback(jack_port_id_t id, int registered, void *a
     }
 }
 
-JackClientFactory::JackClientFactory()
+void JackClientFactory::registerFactory(JackClientFactory *factory)
 {
-    getOrCreateFactories()->append(this);
+    getOrCreateFactories()->insert(factory->getName(), factory);
 }
 
-const QList<JackClientFactory*> & JackClientFactory::getFactories()
+JackClientFactory * JackClientFactory::getFactoryByName(const QString &name)
 {
-    return *getOrCreateFactories();
+    return getOrCreateFactories()->value(name, 0);
 }
 
-QList<JackClientFactory*> * JackClientFactory::getOrCreateFactories()
+QList<JackClientFactory*> JackClientFactory::getFactories()
+{
+    return getOrCreateFactories()->values();
+}
+
+QMap<QString, JackClientFactory*> * JackClientFactory::getOrCreateFactories()
 {
     if (!factories) {
-        factories = new QList<JackClientFactory*>();
+        factories = new QMap<QString, JackClientFactory*>();
     }
     return factories;
 }
 
-QList<JackClientFactory*> * JackClientFactory::factories = 0;
+QMap<QString, JackClientFactory*> * JackClientFactory::factories = 0;
 
 JackClientFactoryAction::JackClientFactoryAction(JackClientFactory *factory_, QObject *parent) :
     QAction(factory_->getName(), parent),

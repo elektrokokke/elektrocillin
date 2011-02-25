@@ -17,6 +17,7 @@
 #include <QDialog>
 #include <QBoxLayout>
 #include <QGraphicsScene>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,7 +32,9 @@ MainWindow::MainWindow(QWidget *parent) :
     addClient("system_in");
     addClient("system_out");
 
-    Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient = new Record2MemoryClient("Record"))->getInnerItem();
+    record2MemoryClient = new Record2MemoryClient("Record");
+    record2MemoryClient->activate();
+    Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient)->getInnerItem();
     // special treatment for the record client (its widget need resize when the scene scale changes):
     QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), record2MemoryGraphicsItem, SLOT(resizeForView(QGraphicsView *)));
     // be notified when something has been recorded (to update audio view):
@@ -39,7 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
     recordClientGraphView = record2MemoryGraphicsItem->getGraphView();
     record2MemoryGraphicsItem->resizeForView(ui->graphicsView);
 
-    for (QList<JackClientFactory*>::const_iterator i = JackClientFactory::getFactories().begin(); i != JackClientFactory::getFactories().end(); i++) {
+    QList<JackClientFactory*> factories = JackClientFactory::getFactories();
+    for (QList<JackClientFactory*>::const_iterator i = factories.begin(); i != factories.end(); i++) {
         JackClientFactoryAction *action = new JackClientFactoryAction(*i, ui->menuCreate_client);
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
         ui->menuCreate_client->addAction(action);
@@ -65,18 +69,6 @@ void MainWindow::onActionCreateClient()
     if (JackClientFactoryAction *action = qobject_cast<JackClientFactoryAction*>(sender())) {
         addClient(action->getFactory()->createClient(action->getFactory()->getName()));
     }
-}
-
-void MainWindow::on_actionStore_connections_triggered()
-{
-    qDebug() << nullClient.getConnections();
-    settings.setValue("connections", nullClient.getConnections());
-}
-
-void MainWindow::on_actionRestore_connections_triggered()
-{
-    qDebug() << settings.value("connections").toStringList();
-    nullClient.restoreConnections(settings.value("connections").toStringList());
 }
 
 void MainWindow::onRecordFinished()
@@ -112,7 +104,9 @@ GraphicsClientItem * MainWindow::addClient(JackClient *client)
         // create "dummy" representation:
         graphicsItem = new QGraphicsSimpleTextItem(clients[i]->getClientName());
     }
-    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i], clientsRect.translated(clientsRect.width() * x, clientsRect.height() * y));
+    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i], clientsRect);
+    clientGraphicsItems.append(graphicsClientItem);
+    graphicsClientItem->setPos(clientsRect.width() * x, clientsRect.height() * y);
     graphicsClientItem->setInnerItem(graphicsItem);
     ui->graphicsView->scene()->addItem(graphicsClientItem);
     // create an action to zoom to that client:
@@ -129,7 +123,9 @@ GraphicsClientItem * MainWindow::addClient(const QString &clientName)
     int x = i % gridWidth;
     int y = i / gridWidth;
     QGraphicsItem *graphicsItem = new QGraphicsSimpleTextItem(clientName);
-    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, clientsRect.translated(clientsRect.width() * x, clientsRect.height() * y));
+    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, clientsRect);
+    clientGraphicsItems.append(graphicsClientItem);
+    graphicsClientItem->setPos(clientsRect.width() * x, clientsRect.height() * y);
     graphicsClientItem->setInnerItem(graphicsItem);
     ui->graphicsView->scene()->addItem(graphicsClientItem);
     // create an action to zoom to that client:
@@ -144,4 +140,92 @@ void MainWindow::on_actionAll_modules_triggered()
     int y = (clients.size() - 1) / gridWidth;
     QRectF allClientsRect(clientsRect.topLeft(), clientsRect.translated(clientsRect.width() * x, clientsRect.height() * y).bottomRight());
     ui->graphicsView->animateToVisibleSceneRect(allClientsRect);
+}
+
+void MainWindow::saveSession(QDataStream &stream)
+{
+    for (int i = 0; i < clients.size(); i++) {
+        if (clients[i] && clients[i]->getFactory()) {
+            // save the client's factory name:
+            stream << clients[i]->getFactory()->getName();
+            // save the client's name:
+            stream << clients[i]->getClientName();
+            // save the client's position:
+            stream << clientGraphicsItems[i]->pos();
+            // save the client's state:
+            clients[i]->saveState(stream);
+        }
+    }
+    // save an empty string as end token:
+    stream << QString();
+    // save the connections:
+    stream << nullClient.getConnections();
+}
+
+bool MainWindow::loadSession(QDataStream &stream)
+{
+    // first delete all current clients:
+    for (int i = 0; i < clients.size(); ) {
+        if (clients[i] && clients[i]->getFactory()) {
+            delete clients[i];
+            delete clientGraphicsItems[i];
+            clients.remove(i);
+            clientGraphicsItems.remove(i);
+        } else {
+            i++;
+        }
+    }
+    // load the client names and create them:
+    QString factoryName;
+    stream >> factoryName;
+    for (; !factoryName.isNull(); ) {
+        // get the factory associated with that name:
+        JackClientFactory *factory = JackClientFactory::getFactoryByName(factoryName);
+        if (factory) {
+            // load the client's name:
+            QString clientName;
+            stream >> clientName;
+            // create a client:
+            JackClient *client = factory->createClient(clientName);
+            // load the client's position:
+            QPointF position;
+            stream >> position;
+            // load the client's state:
+            client->loadState(stream);
+            // show the client:
+            addClient(client)->setPos(position);
+        } else {
+            return false;
+        }
+        stream >> factoryName;
+    }
+    // load the connections and restore them:
+    QStringList connections;
+    stream >> connections;
+    nullClient.restoreConnections(connections);
+    return true;
+}
+
+void MainWindow::on_actionSave_session_triggered()
+{
+    // ask for the session file name:
+    QString fileName = QFileDialog::getSaveFileName(this, "Save session", QString(), "Elektrocillin session files (*.elektrocillin)");
+    if (!fileName.isNull()) {
+        QFile file(fileName);
+        file.open(QIODevice::WriteOnly);
+        QDataStream stream(&file);
+        saveSession(stream);
+    }
+}
+
+void MainWindow::on_actionLoad_session_triggered()
+{
+    // ask for the session file name:
+    QString fileName = QFileDialog::getOpenFileName(this, "Load session", QString(), "Elektrocillin session files (*.elektrocillin)");
+    if (!fileName.isNull()) {
+        QFile file(fileName);
+        file.open(QIODevice::ReadOnly);
+        QDataStream stream(&file);
+        loadSession(stream);
+    }
 }

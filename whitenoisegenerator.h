@@ -16,6 +16,8 @@ class WhiteNoiseGeneratorClient : public AudioProcessorClient
 public:
     WhiteNoiseGeneratorClient(const QString &clientName);
     ~WhiteNoiseGeneratorClient();
+
+    virtual JackClientFactory * getFactory();
 };
 
 #endif // WHITENOISEGENERATOR_H

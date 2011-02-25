@@ -11,6 +11,8 @@ public:
     LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~LinearWaveShapingClient();
 
+    virtual JackClientFactory * getFactory();
+
     LinearInterpolator * getLinearInterpolator();
 
     void postIncreaseControlPoints();

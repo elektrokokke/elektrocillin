@@ -168,6 +168,10 @@ LinearMorphOscillatorGraphicsItem::LinearMorphOscillatorGraphicsItem(const QRect
 class LinearMorphOscillatorClientFactory : public JackClientFactory
 {
 public:
+    LinearMorphOscillatorClientFactory()
+    {
+        JackClientFactory::registerFactory(this);
+    }
     QString getName()
     {
         return "Morph oscillator";
@@ -176,8 +180,12 @@ public:
     {
         return new LinearMorphOscillatorClient(clientName);
     }
-private:
     static LinearMorphOscillatorClientFactory factory;
 };
 
 LinearMorphOscillatorClientFactory LinearMorphOscillatorClientFactory::factory;
+
+JackClientFactory * LinearMorphOscillatorClient::getFactory()
+{
+    return &LinearMorphOscillatorClientFactory::factory;
+}

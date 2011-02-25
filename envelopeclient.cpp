@@ -210,6 +210,10 @@ void EnvelopeGraphicsItem::onSustainNodePositionChanged(qreal x)
 class EnvelopeClientFactory : public JackClientFactory
 {
 public:
+    EnvelopeClientFactory()
+    {
+        JackClientFactory::registerFactory(this);
+    }
     QString getName()
     {
         return "Envelope";
@@ -218,8 +222,12 @@ public:
     {
         return new EnvelopeClient(clientName);
     }
-private:
     static EnvelopeClientFactory factory;
 };
 
 EnvelopeClientFactory EnvelopeClientFactory::factory;
+
+JackClientFactory * EnvelopeClient::getFactory()
+{
+    return &EnvelopeClientFactory::factory;
+}

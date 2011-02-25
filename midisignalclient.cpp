@@ -210,6 +210,10 @@ MidiSignalGraphicsItem::MidiSignalGraphicsItem(const QRectF &, MidiSignalClient 
 class MidiSignalClientFactory : public JackClientFactory
 {
 public:
+    MidiSignalClientFactory()
+    {
+        JackClientFactory::registerFactory(this);
+    }
     QString getName()
     {
         return "Keyboard";
@@ -218,8 +222,12 @@ public:
     {
         return new MidiSignalClient(clientName);
     }
-private:
     static MidiSignalClientFactory factory;
 };
 
 MidiSignalClientFactory MidiSignalClientFactory::factory;
+
+JackClientFactory * MidiSignalClient::getFactory()
+{
+    return &MidiSignalClientFactory::factory;
+}

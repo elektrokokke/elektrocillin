@@ -11,6 +11,8 @@ public:
     LinearMorphOscillatorClient(const QString &clientName, double frequencyModulationIntensity = 2.0/12.0, size_t ringBufferSize = 1024);
     virtual ~LinearMorphOscillatorClient();
 
+    virtual JackClientFactory * getFactory();
+
     LinearMorphOscillator * getLinearMorphOscillator();
     LinearInterpolator * getState(int state);
 
