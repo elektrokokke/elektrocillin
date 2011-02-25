@@ -100,18 +100,16 @@ GraphicsClientItem * MainWindow::addClient(JackClient *client)
     int x = i % gridWidth;
     int y = i / gridWidth;
     QGraphicsItem *graphicsItem = clients[i]->createGraphicsItem(clientsRect);
-    if (graphicsItem == 0) {
-        // create "dummy" representation:
-        graphicsItem = new QGraphicsSimpleTextItem(clients[i]->getClientName());
-    }
-    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i], clientsRect);
+    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i]);
     clientGraphicsItems.append(graphicsClientItem);
     graphicsClientItem->setPos(clientsRect.width() * x, clientsRect.height() * y);
-    graphicsClientItem->setInnerItem(graphicsItem);
+    if (graphicsItem) {
+        graphicsClientItem->setInnerItem(graphicsItem);
+        // create an action to zoom to that client:
+        QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
+        action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
+    }
     ui->graphicsView->scene()->addItem(graphicsClientItem);
-    // create an action to zoom to that client:
-    QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
-    action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
     return graphicsClientItem;
 }
 
@@ -122,15 +120,10 @@ GraphicsClientItem * MainWindow::addClient(const QString &clientName)
     // create a visual representation and position it in the scene:
     int x = i % gridWidth;
     int y = i / gridWidth;
-    QGraphicsItem *graphicsItem = new QGraphicsSimpleTextItem(clientName);
-    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, clientsRect);
+    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName);
     clientGraphicsItems.append(graphicsClientItem);
     graphicsClientItem->setPos(clientsRect.width() * x, clientsRect.height() * y);
-    graphicsClientItem->setInnerItem(graphicsItem);
     ui->graphicsView->scene()->addItem(graphicsClientItem);
-    // create an action to zoom to that client:
-    QAction *action = ui->menuView->addAction(clientName, this, SLOT(onActionAnimateToRect()));
-    action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
     return graphicsClientItem;
 }
 

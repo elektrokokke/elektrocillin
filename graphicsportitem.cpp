@@ -1,35 +1,60 @@
 #include "graphicsportitem.h"
 #include <QGraphicsSceneMouseEvent>
-#include <QBrush>
-#include <QFont>
 #include <QSet>
 #include <QGraphicsScene>
 
 GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, QGraphicsItem *parent) :
-    QGraphicsRectItem(parent),
+    QGraphicsPathItem(parent),
     client(client_),
     clientName(client->getClientName()),
     fullPortName(fullPortName_),
     shortPortName(fullPortName.split(":")[1]),
-    portNameItem(new QGraphicsSimpleTextItem(shortPortName, this))
-{
-    init();
-}
+    connections(0),
+    gapSize(8),
+    fill(QColor("wheat")),
+    outline(QBrush(Qt::black), 1),
+    font("Helvetica", 12)
 
-GraphicsPortItem::~GraphicsPortItem()
 {
-    client->registerPortConnectInterface(fullPortName, 0);
-}
+    setBrush(fill);
+    setPen(QPen(Qt::NoPen));
 
-void GraphicsPortItem::init()
-{
-    setBrush(QBrush(Qt::white));
-    portNameItem->setFont(QFont("Helvetica", 8));
-    setRect(portNameItem->boundingRect().adjusted(0, 0, 4, 2));
-    portNameItem->setPos(2, 1);
     // get port info:
     type = client->getPortType(fullPortName);
     isInput = (client->getPortFlags(fullPortName) & JackPortIsInput);
+
+    portNameItem = new QGraphicsSimpleTextItem(shortPortName, this);
+    portNameItem->setFont(font);
+    QRectF rect(portNameItem->boundingRect().adjusted(0, 0, 4, 4 + gapSize));
+    QPainterPath path;
+    if (isInput) {
+        path.moveTo(rect.topLeft());
+        path.lineTo(QPointF(rect.center().x() - gapSize, rect.top()));
+        QRectF portConnectionPositionRect(path.currentPosition().x(), path.currentPosition().y() - gapSize, gapSize * 2, gapSize * 2);
+        path.arcTo(portConnectionPositionRect, 180, 180);
+        path.lineTo(rect.topRight());
+        path.lineTo(rect.bottomRight());
+        path.lineTo(rect.bottomLeft());
+        path.lineTo(rect.topLeft());
+        portConnectionPositionItem = new QGraphicsEllipseItem(portConnectionPositionRect, this);
+        portConnectionPositionItem->setVisible(false);
+    } else {
+        path.moveTo(rect.bottomLeft());
+        path.lineTo(QPointF(rect.center().x() - gapSize, rect.bottom()));
+        QRectF portConnectionPositionRect(path.currentPosition().x(), path.currentPosition().y() - gapSize, gapSize * 2, gapSize * 2);
+        path.arcTo(portConnectionPositionRect, 180, -180);
+        path.lineTo(rect.bottomRight());
+        path.lineTo(rect.topRight());
+        path.lineTo(rect.topLeft());
+        path.lineTo(rect.bottomLeft());
+        portConnectionPositionItem = new QGraphicsEllipseItem(portConnectionPositionRect, this);
+        portConnectionPositionItem->setVisible(false);
+    }
+    setPath(path);
+    portConnectionPositionItem->setBrush(Qt::black);
+    portConnectionPositionItem->setPen(QPen(Qt::NoPen));
+
+    portNameItem->setPos(2, isInput ? 2 + gapSize : 2);
     // create the context menu:
     connectMenu = contextMenu.addMenu("Connect");
     disconnectMenu = contextMenu.addMenu("Disconnect");
@@ -57,8 +82,12 @@ void GraphicsPortItem::init()
     connectMenu->setEnabled(connectMenu->actions().size());
     // register the port connection callback at the jack server:
     client->registerPortConnectInterface(fullPortName, this);
-
     setFlags(QGraphicsItem::ItemSendsScenePositionChanges);
+}
+
+GraphicsPortItem::~GraphicsPortItem()
+{
+    client->registerPortConnectInterface(fullPortName, 0);
 }
 
 void GraphicsPortItem::connectedTo(const QString &otherPort)
@@ -71,7 +100,8 @@ void GraphicsPortItem::connectedTo(const QString &otherPort)
     disconnectMenu->setEnabled(disconnectMenu->actions().size());
     connectMenu->setEnabled(connectMenu->actions().size());
     GraphicsPortConnectionItem *connectionItem = GraphicsPortConnectionItem::getPortConnectionItem(fullPortName, otherPort, scene());
-    connectionItem->setPos(fullPortName, sceneBoundingRect().center());
+    connectionItem->setPos(fullPortName, portConnectionPositionItem->sceneBoundingRect().center());
+    connections++;
 }
 
 void GraphicsPortItem::disconnectedFrom(const QString &otherPort)
@@ -84,6 +114,7 @@ void GraphicsPortItem::disconnectedFrom(const QString &otherPort)
     disconnectMenu->setEnabled(disconnectMenu->actions().size());
     connectMenu->setEnabled(connectMenu->actions().size());
     GraphicsPortConnectionItem::deletePortConnectionItem(fullPortName, otherPort);
+    connections--;
 }
 
 void GraphicsPortItem::registeredPort(const QString &fullPortname, const QString &type, int flags)
@@ -114,7 +145,7 @@ void GraphicsPortItem::unregisteredPort(const QString &fullPortname, const QStri
 
 void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
-    QGraphicsRectItem::mousePressEvent(event);
+    QGraphicsPathItem::mousePressEvent(event);
     if (!event->isAccepted() && (event->button() == Qt::RightButton)) {
         event->accept();
         // show a menu that allows removing and adding control points:
@@ -125,7 +156,7 @@ void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 QVariant GraphicsPortItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemScenePositionHasChanged) {
-        GraphicsPortConnectionItem::setPositions(fullPortName, sceneBoundingRect().center());
+        GraphicsPortConnectionItem::setPositions(fullPortName, portConnectionPositionItem->sceneBoundingRect().center());
     }
     return QGraphicsItem::itemChange(change, value);
 }
@@ -173,7 +204,8 @@ void GraphicsPortConnectionItem::setPos(const QString &port, const QPointF &poin
         point2 = point;
     }
     QPainterPath path(point1);
-    path.lineTo(point2);
+    path.cubicTo(QPointF(point1.x(), 0.5 * (point1.y() + point2.y())), QPointF(point2.x(), 0.5 * (point1.y() + point2.y())), point2);
+    //path.lineTo(point2);
     setPath(path);
 }
 
@@ -190,6 +222,7 @@ GraphicsPortConnectionItem::GraphicsPortConnectionItem(const QString &port1_, co
     port1(port1_),
     port2(port2_)
 {
+    setPen(QPen(QBrush(Qt::black), 3));
 }
 
 QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > GraphicsPortConnectionItem::items;

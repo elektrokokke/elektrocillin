@@ -78,7 +78,8 @@ SOURCES += main.cpp\
     oscillatorclient.cpp \
     eventprocessorclient.cpp \
     envelope.cpp \
-    envelopeclient.cpp
+    envelopeclient.cpp \
+    graphicsclientnameitem.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -151,7 +152,8 @@ HEADERS  += mainwindow.h \
     linearmorphoscillatorclient.h \
     oscillatorclient.h \
     envelope.h \
-    envelopeclient.h
+    envelopeclient.h \
+    graphicsclientnameitem.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

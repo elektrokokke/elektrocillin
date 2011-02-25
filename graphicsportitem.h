@@ -6,13 +6,17 @@
 #include <QGraphicsRectItem>
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsPathItem>
+#include <QGraphicsEllipseItem>
 #include <QMenu>
 #include <QMap>
 #include <QObject>
+#include <QBrush>
+#include <QPen>
+#include <QFont>
 
 class GraphicsPortConnectionItem;
 
-class GraphicsPortItem : public QObject, public QGraphicsRectItem, public PortConnectInterface
+class GraphicsPortItem : public QObject, public QGraphicsPathItem, public PortConnectInterface
 {
     Q_OBJECT
 public:
@@ -35,10 +39,14 @@ private:
     QString fullPortName, shortPortName, type;
     bool isInput;
     QGraphicsSimpleTextItem *portNameItem;
+    QGraphicsEllipseItem *portConnectionPositionItem;
+    int connections;
     QMenu contextMenu, *connectMenu, *disconnectMenu;
     QMap<QString, QAction*> mapPortNamesToActions;
-
-    void init();
+    int gapSize;
+    QBrush fill;
+    QPen outline;
+    QFont font;
 };
 
 class GraphicsPortConnectionItem : public QGraphicsPathItem

@@ -2,14 +2,16 @@
 #define GRAPHICSCLIENTITEM_H
 
 #include "jackclient.h"
-#include <QGraphicsEllipseItem>
+#include <QGraphicsRectItem>
 #include <QTransform>
+#include <QBrush>
+#include <QPen>
 
-class GraphicsClientItem : public QGraphicsEllipseItem
+class GraphicsClientItem : public QGraphicsRectItem
 {
 public:
-    GraphicsClientItem(JackClient *client, const QRectF &rect, QGraphicsItem *parent = 0);
-    GraphicsClientItem(JackClient *client, const QString &clientName, const QRectF &rect, QGraphicsItem *parent = 0);
+    GraphicsClientItem(JackClient *client, QGraphicsItem *parent = 0);
+    GraphicsClientItem(JackClient *client, const QString &clientName, QGraphicsItem *parent = 0);
 
     JackClient * getClient();
 
@@ -25,6 +27,9 @@ private:
     QString clientName;
     QRectF innerRect;
     QGraphicsItem *innerItem;
+    int padding;
+    QBrush fill;
+    QPen outline;
 
     void init();
 };
