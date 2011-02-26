@@ -31,7 +31,7 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
         path.moveTo(rect.topLeft());
         path.lineTo(QPointF(rect.center().x() - gapSize, rect.top()));
         QRectF portConnectionPositionRect(path.currentPosition().x(), path.currentPosition().y() - gapSize, gapSize * 2, gapSize * 2);
-        path.arcTo(portConnectionPositionRect, 180, 180);
+//        path.arcTo(portConnectionPositionRect, 180, 180);
         path.lineTo(rect.topRight());
         path.lineTo(rect.bottomRight());
         path.lineTo(rect.bottomLeft());
@@ -42,7 +42,7 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
         path.moveTo(rect.bottomLeft());
         path.lineTo(QPointF(rect.center().x() - gapSize, rect.bottom()));
         QRectF portConnectionPositionRect(path.currentPosition().x(), path.currentPosition().y() - gapSize, gapSize * 2, gapSize * 2);
-        path.arcTo(portConnectionPositionRect, 180, -180);
+//        path.arcTo(portConnectionPositionRect, 180, -180);
         path.lineTo(rect.bottomRight());
         path.lineTo(rect.topRight());
         path.lineTo(rect.topLeft());

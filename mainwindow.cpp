@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
         ui->menuCreate_client->addAction(action);
     }
-//    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+    //ui->graphicsView->setRenderHints(QPainter::Antialiasing);
 }
 
 MainWindow::~MainWindow()
@@ -132,7 +132,7 @@ void MainWindow::on_actionAll_modules_triggered()
     int x = gridWidth - 1;
     int y = (clients.size() - 1) / gridWidth;
     QRectF allClientsRect(clientsRect.topLeft(), clientsRect.translated(clientsRect.width() * x, clientsRect.height() * y).bottomRight());
-    ui->graphicsView->animateToVisibleSceneRect(allClientsRect);
+    ui->graphicsView->setVisibleSceneRect(allClientsRect);
 }
 
 void MainWindow::saveSession(QDataStream &stream)
@@ -141,22 +141,27 @@ void MainWindow::saveSession(QDataStream &stream)
         if (clients[i] && clients[i]->getFactory()) {
             // save the client's factory name:
             stream << clients[i]->getFactory()->getName();
-            // save the client's name:
-            stream << clients[i]->getClientName();
-            // save the client's position:
-            stream << clientGraphicsItems[i]->pos();
+        } else {
+            stream << QString();
+        }
+        // save the client's name:
+        stream << clientGraphicsItems[i]->getClientName();
+        // save the client's position:
+        stream << clientGraphicsItems[i]->pos();
+        if (clients[i] && clients[i]->getFactory()) {
             // save the client's state:
             clients[i]->saveState(stream);
         }
     }
-    // save an empty string as end token:
-    stream << QString();
+    // save two empty string as end token:
+    stream << QString() << QString();
     // save the connections:
     stream << nullClient.getConnections();
 }
 
 bool MainWindow::loadSession(QDataStream &stream)
 {
+    QMap<QString, int> mapClientNameToIndex;
     // first delete all current clients:
     for (int i = 0; i < clients.size(); ) {
         if (clients[i] && clients[i]->getFactory()) {
@@ -165,32 +170,32 @@ bool MainWindow::loadSession(QDataStream &stream)
             clientGraphicsItems.remove(i);
             clients.remove(i);
         } else {
+            mapClientNameToIndex[clientGraphicsItems[i]->getClientName()] = i;
             i++;
         }
     }
     // load the client names and create them:
-    QString factoryName;
-    stream >> factoryName;
-    for (; !factoryName.isNull(); ) {
-        // get the factory associated with that name:
-        JackClientFactory *factory = JackClientFactory::getFactoryByName(factoryName);
-        if (factory) {
-            // load the client's name:
-            QString clientName;
-            stream >> clientName;
-            // create a client:
+    QString factoryName, clientName;
+    stream >> factoryName >> clientName;
+    for (; !factoryName.isNull() || !clientName.isNull(); ) {
+        // load the client's position:
+        QPointF position;
+        stream >> position;
+        if (factoryName.isNull()) {
+            clientGraphicsItems[mapClientNameToIndex[clientName]]->setPos(position);
+        } else {
+            // get the factory associated with that name:
+            JackClientFactory *factory = JackClientFactory::getFactoryByName(factoryName);
+            if (!factory) {
+                return false;
+            }
             JackClient *client = factory->createClient(clientName);
-            // load the client's position:
-            QPointF position;
-            stream >> position;
             // load the client's state:
             client->loadState(stream);
             // show the client:
             addClient(client)->setPos(position);
-        } else {
-            return false;
         }
-        stream >> factoryName;
+        stream >> factoryName >> clientName;
     }
     // load the connections and restore them:
     QStringList connections;
@@ -221,4 +226,9 @@ void MainWindow::on_actionLoad_session_triggered()
         QDataStream stream(&file);
         loadSession(stream);
     }
+}
+
+void MainWindow::on_actionReset_triggered()
+{
+    ui->graphicsView->resetTransform();
 }

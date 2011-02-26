@@ -11,7 +11,6 @@ class VisibleRectangleGraphicsView : public QGraphicsView
     Q_PROPERTY(QRectF visibleSceneRect READ visibleSceneRect WRITE setVisibleSceneRect);
 public:
     explicit VisibleRectangleGraphicsView(QWidget *parent = 0);
-    explicit VisibleRectangleGraphicsView(QGraphicsScene *scene, QWidget *parent = 0);
 
     QRectF visibleSceneRect() const;
     void setVisibleSceneRect(const QRectF &rect);
@@ -23,11 +22,6 @@ signals:
     void animationFinished(QGraphicsView *view);
 
 public slots:
-
-protected:
-    virtual void mousePressEvent ( QMouseEvent * event );
-    virtual void mouseMoveEvent ( QMouseEvent * event );
-    virtual void mouseReleaseEvent ( QMouseEvent * event );
 
 private:
     QPropertyAnimation animation;

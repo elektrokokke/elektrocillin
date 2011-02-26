@@ -7,14 +7,7 @@ VisibleRectangleGraphicsView::VisibleRectangleGraphicsView(QWidget *parent) :
     moving(false)
 {
     QObject::connect(&animation, SIGNAL(finished()), this, SLOT(animationFinished()));
-}
-
-VisibleRectangleGraphicsView::VisibleRectangleGraphicsView(QGraphicsScene *scene, QWidget *parent) :
-    QGraphicsView(scene, parent),
-    animation(this, "visibleSceneRect"),
-    moving(false)
-{
-    QObject::connect(&animation, SIGNAL(finished()), this, SLOT(animationFinished()));
+    setDragMode(QGraphicsView::ScrollHandDrag);
 }
 
 QRectF VisibleRectangleGraphicsView::visibleSceneRect() const
@@ -58,43 +51,6 @@ void VisibleRectangleGraphicsView::animateToVisibleSceneRect(const QRectF &rect,
 void VisibleRectangleGraphicsView::animateToClientItem(GraphicsClientItem *item, int msecs)
 {
     animateToVisibleSceneRect(item->getInnerItem()->sceneBoundingRect(), msecs);
-}
-
-void VisibleRectangleGraphicsView::mousePressEvent ( QMouseEvent * event )
-{
-    QGraphicsView::mousePressEvent(event);
-    if (!event->isAccepted()) {
-        event->accept();
-        moving = true;
-        mousePosWhenPressed = mapToScene(event->pos());
-        previousCenter = mapToScene(viewport()->rect()).boundingRect().center();
-        previousMouseCursor = cursor();
-        setCursor(Qt::ClosedHandCursor);
-    }
-}
-
-void VisibleRectangleGraphicsView::mouseMoveEvent ( QMouseEvent * event )
-{
-    if (moving) {
-        event->accept();
-        QPointF mousePosNow = mapToScene(event->pos());
-        QPointF centerNow = previousCenter + mousePosWhenPressed - mousePosNow;
-        previousCenter = centerNow;
-        centerOn(centerNow);
-    } else {
-        QGraphicsView::mouseMoveEvent(event);
-    }
-}
-
-void VisibleRectangleGraphicsView::mouseReleaseEvent ( QMouseEvent * event )
-{
-    if (moving) {
-        event->accept();
-        moving = false;
-        setCursor(previousMouseCursor);
-    } else {
-        QGraphicsView::mouseReleaseEvent(event);
-    }
 }
 
 void VisibleRectangleGraphicsView::animationFinished()

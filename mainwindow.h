@@ -30,6 +30,8 @@ private slots:
     void on_actionSave_session_triggered();
     void on_actionLoad_session_triggered();
 
+    void on_actionReset_triggered();
+
 private:
     Ui::MainWindow *ui;
     QSettings settings;

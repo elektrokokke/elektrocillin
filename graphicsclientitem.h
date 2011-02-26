@@ -14,6 +14,7 @@ public:
     GraphicsClientItem(JackClient *client, const QString &clientName, QGraphicsItem *parent = 0);
 
     JackClient * getClient();
+    const QString & getClientName() const;
 
     const QRectF & getInnerRect() const;
 

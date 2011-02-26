@@ -3,9 +3,7 @@
 #include "graphicsportitem.h"
 #include <QGraphicsPathItem>
 #include <QGraphicsSimpleTextItem>
-#include <QLabel>
-#include <QVBoxLayout>
-#include <QGraphicsProxyWidget>
+#include <QGraphicsDropShadowEffect>
 #include <QPen>
 #include <cmath>
 
@@ -87,12 +85,22 @@ void GraphicsClientItem::init()
     clientNameItem->setMinimumWidth(minimumWidth - padding);
     boundingRectangle |= clientNameItem->boundingRect().translated(clientNameItem->pos());
     setRect(boundingRectangle.adjusted(-padding, -padding, padding, padding));
+
+//    QGraphicsDropShadowEffect *graphicsDropShadowEffect = new QGraphicsDropShadowEffect();
+//    graphicsDropShadowEffect->setBlurRadius(8);
+//    setGraphicsEffect(graphicsDropShadowEffect);
+
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges);
 }
 
 JackClient * GraphicsClientItem::getClient()
 {
     return client;
+}
+
+const QString & GraphicsClientItem::getClientName() const
+{
+    return clientName;
 }
 
 const QRectF & GraphicsClientItem::getInnerRect() const
@@ -108,7 +116,7 @@ QGraphicsItem * GraphicsClientItem::getInnerItem()
 void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
 {
     QRectF boundingRectangle = rect().adjusted(padding, padding, -padding, -padding);
-    innerRect = QRectF(boundingRectangle.right(), 0, 100, boundingRectangle.height());
+    innerRect = QRectF(boundingRectangle.right() + padding, 0, 100, boundingRectangle.height());
     boundingRectangle |= innerRect;
     setRect(boundingRectangle.adjusted(-padding, -padding, padding, padding));
 
