@@ -18,6 +18,7 @@
 #include <QBoxLayout>
 #include <QGraphicsScene>
 #include <QFileDialog>
+#include <QGLWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -28,19 +29,21 @@ MainWindow::MainWindow(QWidget *parent) :
 {   
     ui->setupUi(this);
     ui->graphicsView->setScene(new QGraphicsScene());
+    ui->graphicsView->setViewport(new QGLWidget());
+    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
 
     addClient("system_in");
     addClient("system_out");
 
-    record2MemoryClient = new Record2MemoryClient("Record");
-    record2MemoryClient->activate();
-    Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient)->getInnerItem();
-    // special treatment for the record client (its widget need resize when the scene scale changes):
-    QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), record2MemoryGraphicsItem, SLOT(resizeForView(QGraphicsView *)));
-    // be notified when something has been recorded (to update audio view):
-    QObject::connect(record2MemoryClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
-    recordClientGraphView = record2MemoryGraphicsItem->getGraphView();
-    record2MemoryGraphicsItem->resizeForView(ui->graphicsView);
+//    record2MemoryClient = new Record2MemoryClient("Record");
+//    record2MemoryClient->activate();
+//    Record2MemoryGraphicsItem *record2MemoryGraphicsItem = (Record2MemoryGraphicsItem*)addClient(record2MemoryClient)->getInnerItem();
+//    // special treatment for the record client (its widget need resize when the scene scale changes):
+//    QObject::connect(ui->graphicsView, SIGNAL(animationFinished(QGraphicsView *)), record2MemoryGraphicsItem, SLOT(resizeForView(QGraphicsView *)));
+//    // be notified when something has been recorded (to update audio view):
+//    QObject::connect(record2MemoryClient, SIGNAL(recordingFinished()), this, SLOT(onRecordFinished()));
+//    recordClientGraphView = record2MemoryGraphicsItem->getGraphView();
+//    record2MemoryGraphicsItem->resizeForView(ui->graphicsView);
 
     QList<JackClientFactory*> factories = JackClientFactory::getFactories();
     for (QList<JackClientFactory*>::const_iterator i = factories.begin(); i != factories.end(); i++) {
@@ -48,7 +51,6 @@ MainWindow::MainWindow(QWidget *parent) :
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
         ui->menuCreate_client->addAction(action);
     }
-    //ui->graphicsView->setRenderHints(QPainter::Antialiasing);
 }
 
 MainWindow::~MainWindow()

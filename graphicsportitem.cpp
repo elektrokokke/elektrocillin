@@ -2,6 +2,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QSet>
 #include <QGraphicsScene>
+#include <QGraphicsDropShadowEffect>
 
 GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
@@ -12,12 +13,12 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     connections(0),
     gapSize(8),
     fill(QColor("wheat")),
-    outline(QBrush(Qt::black), 1),
+    outline(Qt::black),
     font("Helvetica", 12)
 
 {
     setBrush(fill);
-    setPen(QPen(Qt::NoPen));
+    setPen(outline);
 
     // get port info:
     type = client->getPortType(fullPortName);
@@ -31,7 +32,7 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
         path.moveTo(rect.topLeft());
         path.lineTo(QPointF(rect.center().x() - gapSize, rect.top()));
         QRectF portConnectionPositionRect(path.currentPosition().x(), path.currentPosition().y() - gapSize, gapSize * 2, gapSize * 2);
-//        path.arcTo(portConnectionPositionRect, 180, 180);
+        path.arcTo(portConnectionPositionRect, 180, 180);
         path.lineTo(rect.topRight());
         path.lineTo(rect.bottomRight());
         path.lineTo(rect.bottomLeft());
@@ -42,7 +43,7 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
         path.moveTo(rect.bottomLeft());
         path.lineTo(QPointF(rect.center().x() - gapSize, rect.bottom()));
         QRectF portConnectionPositionRect(path.currentPosition().x(), path.currentPosition().y() - gapSize, gapSize * 2, gapSize * 2);
-//        path.arcTo(portConnectionPositionRect, 180, -180);
+        path.arcTo(portConnectionPositionRect, 180, -180);
         path.lineTo(rect.bottomRight());
         path.lineTo(rect.topRight());
         path.lineTo(rect.topLeft());
@@ -83,6 +84,9 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     // register the port connection callback at the jack server:
     client->registerPortConnectInterface(fullPortName, this);
     setFlags(QGraphicsItem::ItemSendsScenePositionChanges);
+
+    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
+    setGraphicsEffect(effect);
 }
 
 GraphicsPortItem::~GraphicsPortItem()
@@ -222,7 +226,11 @@ GraphicsPortConnectionItem::GraphicsPortConnectionItem(const QString &port1_, co
     port1(port1_),
     port2(port2_)
 {
-    setPen(QPen(QBrush(Qt::black), 3));
+    setPen(QPen(QBrush(Qt::black), 5, Qt::SolidLine, Qt::RoundCap));
+    setOpacity(0.5);
+
+    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
+    setGraphicsEffect(effect);
 }
 
 QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > GraphicsPortConnectionItem::items;

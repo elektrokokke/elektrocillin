@@ -27,9 +27,9 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clien
 
 void GraphicsClientItem::init()
 {
-    padding = 1;
-    fill = QBrush(Qt::white);
-    outline = QPen(QBrush(Qt::black), 1, Qt::DotLine);
+    padding = 4;
+    fill = QBrush(Qt::NoBrush);//QBrush(Qt::white);
+    outline = QPen(Qt::NoPen);//QPen(QBrush(Qt::black), 1, Qt::DotLine);
     setBrush(fill);
     setPen(outline);
 
@@ -84,11 +84,9 @@ void GraphicsClientItem::init()
     }
     clientNameItem->setMinimumWidth(minimumWidth - padding);
     boundingRectangle |= clientNameItem->boundingRect().translated(clientNameItem->pos());
-    setRect(boundingRectangle.adjusted(-padding, -padding, padding, padding));
+    setRect(boundingRectangle);
 
-//    QGraphicsDropShadowEffect *graphicsDropShadowEffect = new QGraphicsDropShadowEffect();
-//    graphicsDropShadowEffect->setBlurRadius(8);
-//    setGraphicsEffect(graphicsDropShadowEffect);
+    setZValue(1);
 
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges);
 }
@@ -115,15 +113,22 @@ QGraphicsItem * GraphicsClientItem::getInnerItem()
 
 void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
 {
-    QRectF boundingRectangle = rect().adjusted(padding, padding, -padding, -padding);
-    innerRect = QRectF(boundingRectangle.right() + padding, 0, 100, boundingRectangle.height());
-    boundingRectangle |= innerRect;
-    setRect(boundingRectangle.adjusted(-padding, -padding, padding, padding));
+    QRectF boundingRectangle = rect();
+//    innerRect = QRectF(boundingRectangle.right() + padding, 0, 200, boundingRectangle.height());
+//    boundingRectangle |= innerRect;
+//    setRect(boundingRectangle);
 
     innerItem = item;
     // add the item to our children:
     item->setParentItem(this);
-    fitItemIntoRectangle(item, innerRect);
+    //fitItemIntoRectangle(item, innerRect);
+    item->setPos(boundingRectangle.right() + padding, 0);
+    boundingRectangle |= item->boundingRect().translated(item->pos());
+    setRect(boundingRectangle);
+
+    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
+    effect->setBlurRadius(0);
+    item->setGraphicsEffect(effect);
 }
 
 void GraphicsClientItem::fitItemIntoRectangle(QGraphicsItem *item, const QRectF &rect)

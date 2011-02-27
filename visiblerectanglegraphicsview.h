@@ -23,6 +23,9 @@ signals:
 
 public slots:
 
+protected:
+    virtual void wheelEvent(QWheelEvent *event);
+
 private:
     QPropertyAnimation animation;
     bool moving;

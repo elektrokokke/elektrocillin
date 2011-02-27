@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT      += core gui
+QT      += opengl
 
 TARGET = elektrocillin
 TEMPLATE = app
