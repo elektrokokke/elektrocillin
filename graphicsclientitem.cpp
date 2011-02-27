@@ -3,7 +3,7 @@
 #include "graphicsportitem.h"
 #include <QGraphicsPathItem>
 #include <QGraphicsSimpleTextItem>
-#include <QGraphicsDropShadowEffect>
+//#include <QGraphicsDropShadowEffect>
 #include <QPen>
 #include <cmath>
 
@@ -27,7 +27,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clien
 
 void GraphicsClientItem::init()
 {
-    padding = 4;
+    padding = 2;
     fill = QBrush(Qt::NoBrush);//QBrush(Qt::white);
     outline = QPen(Qt::NoPen);//QPen(QBrush(Qt::black), 1, Qt::DotLine);
     setBrush(fill);
@@ -86,8 +86,6 @@ void GraphicsClientItem::init()
     boundingRectangle |= clientNameItem->boundingRect().translated(clientNameItem->pos());
     setRect(boundingRectangle);
 
-    setZValue(1);
-
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges);
 }
 
@@ -126,9 +124,9 @@ void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
     boundingRectangle |= item->boundingRect().translated(item->pos());
     setRect(boundingRectangle);
 
-    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
-    effect->setBlurRadius(0);
-    item->setGraphicsEffect(effect);
+//    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
+//    effect->setBlurRadius(0);
+//    item->setGraphicsEffect(effect);
 }
 
 void GraphicsClientItem::fitItemIntoRectangle(QGraphicsItem *item, const QRectF &rect)

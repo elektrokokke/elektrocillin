@@ -2,7 +2,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QSet>
 #include <QGraphicsScene>
-#include <QGraphicsDropShadowEffect>
+//#include <QGraphicsDropShadowEffect>
 
 GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
@@ -13,10 +13,11 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     connections(0),
     gapSize(8),
     fill(QColor("wheat")),
-    outline(Qt::black),
-    font("Helvetica", 12)
+    outline(QBrush(fill.color().darker()), 2),
+    font("Mighty Zeo 2.0", 12)
 
 {
+    font.setStyleStrategy(QFont::PreferAntialias);
     setBrush(fill);
     setPen(outline);
 
@@ -85,8 +86,9 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     client->registerPortConnectInterface(fullPortName, this);
     setFlags(QGraphicsItem::ItemSendsScenePositionChanges);
 
-    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
-    setGraphicsEffect(effect);
+//    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
+//    effect->setBlurRadius(0);
+//    setGraphicsEffect(effect);
 }
 
 GraphicsPortItem::~GraphicsPortItem()
@@ -179,6 +181,26 @@ void GraphicsPortItem::onDisconnectAction()
     client->disconnectPorts(fullPortName, otherPort);
 }
 
+GraphicsPortConnectionItem::GraphicsPortConnectionItem(const QString &port1_, const QString &port2_, QGraphicsScene *scene) :
+    QGraphicsPathItem(0, scene),
+    port1(port1_),
+    port2(port2_)
+{
+    //setPen(QPen(QBrush(Qt::black), 2, Qt::SolidLine, Qt::RoundCap));
+    setPen(QPen(QBrush(Qt::black), 1));
+    QColor fillColor(Qt::white);
+    fillColor.setAlphaF(0.5);
+    setBrush(QBrush(fillColor));
+    pathStroker.setWidth(5);
+    pathStroker.setCapStyle(Qt::RoundCap);
+    //setOpacity(0.25);
+    setZValue(1);
+
+//    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
+//    effect->setBlurRadius(0);
+//    setGraphicsEffect(effect);
+}
+
 GraphicsPortConnectionItem * GraphicsPortConnectionItem::getPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene)
 {
     GraphicsPortConnectionItem *item = items.value(port1).value(port2, 0);
@@ -209,8 +231,7 @@ void GraphicsPortConnectionItem::setPos(const QString &port, const QPointF &poin
     }
     QPainterPath path(point1);
     path.cubicTo(QPointF(point1.x(), 0.5 * (point1.y() + point2.y())), QPointF(point2.x(), 0.5 * (point1.y() + point2.y())), point2);
-    //path.lineTo(point2);
-    setPath(path);
+    setPath(pathStroker.createStroke(path));
 }
 
 void GraphicsPortConnectionItem::setPositions(const QString &port, const QPointF &point)
@@ -219,18 +240,6 @@ void GraphicsPortConnectionItem::setPositions(const QString &port, const QPointF
     for (QMap<QString, GraphicsPortConnectionItem*>::const_iterator i = portItems.begin(); i != portItems.end(); i++) {
         i.value()->setPos(port, point);
     }
-}
-
-GraphicsPortConnectionItem::GraphicsPortConnectionItem(const QString &port1_, const QString &port2_, QGraphicsScene *scene) :
-    QGraphicsPathItem(0, scene),
-    port1(port1_),
-    port2(port2_)
-{
-    setPen(QPen(QBrush(Qt::black), 5, Qt::SolidLine, Qt::RoundCap));
-    setOpacity(0.5);
-
-    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
-    setGraphicsEffect(effect);
 }
 
 QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > GraphicsPortConnectionItem::items;

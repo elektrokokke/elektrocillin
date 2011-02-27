@@ -28,9 +28,9 @@ MainWindow::MainWindow(QWidget *parent) :
     clientsRect(0, 0, 600, 420)
 {   
     ui->setupUi(this);
-    ui->graphicsView->setScene(new QGraphicsScene());
-    ui->graphicsView->setViewport(new QGLWidget());
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+    ui->graphicsView->setScene(new QGraphicsScene());
+//    ui->graphicsView->setViewport(new QGLWidget());
 
     addClient("system_in");
     addClient("system_out");

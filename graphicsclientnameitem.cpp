@@ -1,12 +1,13 @@
 #include "graphicsclientnameitem.h"
-#include <QGraphicsDropShadowEffect>
+//#include <QGraphicsDropShadowEffect>
 
 GraphicsClientNameItem::GraphicsClientNameItem(const QString &clientName, QGraphicsItem *parent) :
     QGraphicsRectItem(parent),
     fill(QColor("royalblue").lighter()),
-    outline(Qt::black),
-    font("Helvetica", 16)
+    outline(QBrush(QColor("royalblue")), 2),
+    font("Mighty Zeo 2.0", 16)
 {
+    font.setStyleStrategy(QFont::PreferAntialias);
     setBrush(fill);
     setPen(outline);
 
@@ -15,8 +16,9 @@ GraphicsClientNameItem::GraphicsClientNameItem(const QString &clientName, QGraph
     setRect(nameItem->boundingRect().adjusted(0, 0, 8, 8));
     nameItem->setPos(4, 4);
 
-    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
-    setGraphicsEffect(effect);
+//    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
+//    effect->setBlurRadius(0);
+//    setGraphicsEffect(effect);
 }
 
 void GraphicsClientNameItem::setMinimumWidth(qreal width)
