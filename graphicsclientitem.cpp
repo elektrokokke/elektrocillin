@@ -32,7 +32,7 @@ void GraphicsClientItem::init()
     outline = QPen(Qt::NoPen);//QPen(QBrush(Qt::black), 1, Qt::DotLine);
     setBrush(fill);
     setPen(outline);
-
+    setCursor(Qt::ArrowCursor);
 
     QRectF boundingRectangle;
     qreal x;

@@ -1,17 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "iirmoogfilterclient.h"
-#include "midisignalclient.h"
-#include "linearwaveshapingclient.h"
-#include "linearoscillatorclient.h"
-#include "linearmorphoscillatorclient.h"
-#include "cubicsplinewaveshapingclient.h"
-#include "record2memoryclient.h"
-#include "adsrclient.h"
-#include "multiplyprocessor.h"
-#include "whitenoisegenerator.h"
-#include "envelopeclient.h"
+#include "graphicsclientitem2.h"
 
 #include <QDebug>
 #include <QDialog>
@@ -51,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
         ui->menuCreate_client->addAction(action);
     }
+
+    ui->graphicsView->scene()->addItem(new GraphicsClientItem2("Lowpass resonance filter"));
 }
 
 MainWindow::~MainWindow()
@@ -73,24 +65,11 @@ void MainWindow::onActionCreateClient()
     }
 }
 
-void MainWindow::onRecordFinished()
-{
-    recordClientGraphView->setModel(record2MemoryClient->popAudioModel());
-    recordClientGraphView->model()->setParent(recordClientGraphView);
-//    double min = -1, max = 1;
-//    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {
-//        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
-//        if (value < min) {
-//            min = value;
-//        } else if (value > max) {
-//            max = value;
-//        }
-//    }
-//    for (int i = 0; i < recordClientGraphView->model()->rowCount(); i++) {
-//        double value = recordClientGraphView->model()->data(recordClientGraphView->model()->index(i, 0)).toDouble();
-//        recordClientGraphView->model()->setData(recordClientGraphView->model()->index(i, 0), (value - min) / (max - min) * 2.0 - 1.0, Qt::DisplayRole);
-//    }
-}
+//void MainWindow::onRecordFinished()
+//{
+//    recordClientGraphView->setModel(record2MemoryClient->popAudioModel());
+//    recordClientGraphView->model()->setParent(recordClientGraphView);
+//}
 
 GraphicsClientItem * MainWindow::addClient(JackClient *client)
 {

@@ -25,11 +25,10 @@ public:
 private slots:
     void onActionAnimateToRect();
     void onActionCreateClient();
-    void onRecordFinished();
+//    void onRecordFinished();
     void on_actionAll_modules_triggered();
     void on_actionSave_session_triggered();
     void on_actionLoad_session_triggered();
-
     void on_actionReset_triggered();
 
 private:
