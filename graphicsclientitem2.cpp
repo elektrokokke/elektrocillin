@@ -4,22 +4,27 @@
 #include <QPen>
 #include <QBrush>
 #include <QLinearGradient>
+#include <QGraphicsScene>
 
-GraphicsClientItem2::GraphicsClientItem2(JackClient *client_, int type_, int portType_, QGraphicsItem *parent) :
+GraphicsClientItem2::GraphicsClientItem2(JackClient *client_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     client(client_),
     clientName(client->getClientName()),
     type(type_),
-    portType(portType_)
+    portType(portType_),
+    font(font_),
+    innerItem(0)
 {
     init();
 }
-GraphicsClientItem2::GraphicsClientItem2(JackClient *client_, const QString &clientName_, int type_, int portType_, QGraphicsItem *parent) :
+GraphicsClientItem2::GraphicsClientItem2(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     client(client_),
     clientName(clientName_),
     type(type_),
-    portType(portType_)
+    portType(portType_),
+    font(font_),
+    innerItem(0)
 {
     init();
 }
@@ -34,14 +39,63 @@ const QRectF & GraphicsClientItem2::getRect() const
     return rect;
 }
 
+void GraphicsClientItem2::setInnerItem(QGraphicsItem *item)
+{
+    if (innerItem) {
+        delete innerItem;
+    }
+    innerItem = item;
+    showInnerItemCommand->setText("[+]");
+    showInnerItemCommand->setVisible(innerItem);
+    if (innerItem) {
+        innerItem->setVisible(false);
+        innerItem->setParentItem(this);
+        innerItem->setPos(getRect().bottomLeft());
+    }
+}
+
+QGraphicsItem * GraphicsClientItem2::getInnerItem() const
+{
+    return innerItem;
+}
+
+void GraphicsClientItem2::showInnerItem(bool ensureVisible_)
+{
+    if (innerItem) {
+        setFocus();
+        if (!innerItem->isVisible()) {
+            pathWithoutInnerItem = path();
+        }
+        // show the inner item if requested:
+        innerItem->setVisible(ensureVisible_ || !innerItem->isVisible());
+        if (innerItem->isVisible()) {
+            setPath(pathWithoutInnerItem.united(RectanglePath(innerItem->boundingRect().adjusted(-4, -4, 4, 4).translated(innerItem->pos()))));
+            showInnerItemCommand->setText("[-]");
+            innerItem->ensureVisible();
+        } else {
+            setPath(pathWithoutInnerItem);
+            showInnerItemCommand->setText("[+]");
+        }
+    }
+}
+
+void GraphicsClientItem2::focusInEvent(QFocusEvent *)
+{
+    setZValue(1);
+}
+
+void GraphicsClientItem2::focusOutEvent(QFocusEvent *)
+{
+    setZValue(0);
+}
+
 void GraphicsClientItem2::init()
 {
-    bool gradient = true;
+    bool gradient = false;
     setCursor(Qt::ArrowCursor);
     setPen(QPen(QBrush(Qt::black), 3));
     setBrush(QBrush(Qt::white));
-    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges);
-    QFont font("Mighty Zeo 2.0", 12);
+    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
     font.setStyleStrategy(QFont::PreferAntialias);
     QFont commandsFont = font;
     commandsFont.setBold(true);
@@ -53,14 +107,17 @@ void GraphicsClientItem2::init()
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
     textItem->setFont(font);
     textItem->setPos(padding, padding);
-    (new CommandTextItem("[+]", this))->setPos(padding, padding + fontMetrics.lineSpacing());
+    showInnerItemCommand = new CommandTextItem("[+]", font, this);
+    showInnerItemCommand->setPos(padding, padding + fontMetrics.lineSpacing());
+    showInnerItemCommand->setVisible(innerItem);
+    QObject::connect(showInnerItemCommand, SIGNAL(triggered()), this, SLOT(showInnerItem()));
 
     rect = textItem->boundingRect().adjusted(0, 0, padding * 2, padding * 2 + fontMetrics.height());
 
     if (gradient) {
         QLinearGradient gradient(rect.topLeft(), rect.bottomRight());
         gradient.setColorAt(0, Qt::white);
-        gradient.setColorAt(1, QColor("royalblue").lighter());
+        gradient.setColorAt(1, QColor(0xfc, 0xf9, 0xc2));//QColor("royalblue").lighter());
         setBrush(QBrush(gradient));
     }
 
@@ -79,7 +136,7 @@ void GraphicsClientItem2::init()
     QList<GraphicsPortItem2*> inputPortItems;
     int inpurtPortsWidth = -portPadding;
     for (int i = 0; i < inputPorts.size(); i++) {
-        inputPortItems.append(new GraphicsPortItem2(client, inputPorts[i], 3, this));
+        inputPortItems.append(new GraphicsPortItem2(client, inputPorts[i], 3, font, this));
         inpurtPortsWidth += inputPortItems[i]->getRect().width() + portPadding;
     }
     for (int i = 0, x = (inpurtPortsWidth > rect.width() ? (rect.width() - inpurtPortsWidth) / 2 : 0); i < inputPorts.size(); i++) {
@@ -108,7 +165,7 @@ void GraphicsClientItem2::init()
     QList<GraphicsPortItem2*> outputPortItems;
     int outputPortsWidth = -portPadding;
     for (int i = 0; i < outputPorts.size(); i++) {
-        outputPortItems.append(new GraphicsPortItem2(client, outputPorts[i], 3, this));
+        outputPortItems.append(new GraphicsPortItem2(client, outputPorts[i], 3, font, this));
         outputPortsWidth += outputPortItems[i]->getRect().width() + portPadding;
     }
     for (int i = 0, x = (outputPortsWidth > rect.width() ? (rect.width() - outputPortsWidth) / 2 : 0); i < outputPorts.size(); i++) {

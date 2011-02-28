@@ -17,12 +17,15 @@ MainWindow::MainWindow(QWidget *parent) :
     settings("settings.ini", QSettings::IniFormat),
     gridWidth(3),
     clientStyle(3),
-    portStyle(3),
+    portStyle(1),
+    clientFont("Mighty Zeo 2.0", 12),
+//    clientFont("Helvetica", 12),
     clientsRect(0, 0, 600, 420)
 {   
     ui->setupUi(this);
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
     ui->graphicsView->setScene(new QGraphicsScene());
+    ui->graphicsView->scene()->setBackgroundBrush(QBrush(QColor("lightsteelblue")));
 //    ui->graphicsView->setViewport(new QGLWidget());
 
     addClient("system_in");
@@ -91,11 +94,11 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onActionAnimateToRect()
+void MainWindow::onActionShowClient()
 {
     if (QAction *action = qobject_cast<QAction*>(sender())) {
-        QGraphicsItem *graphicsItem = action->data().value<QGraphicsItem*>();
-        ui->graphicsView->animateToVisibleSceneRect(graphicsItem->sceneBoundingRect());
+        GraphicsClientItem2 *graphicsClientItem = (GraphicsClientItem2*)action->data().value<QGraphicsItem*>();
+        graphicsClientItem->showInnerItem(true);
     }
 }
 
@@ -121,16 +124,16 @@ GraphicsClientItem2 * MainWindow::addClient(JackClient *client)
     // create a visual representation and position it in the scene:
     int x = i % gridWidth;
     int y = i / gridWidth;
-    GraphicsClientItem2 *graphicsClientItem = new GraphicsClientItem2(clients[i], clientStyle, portStyle);
+    GraphicsClientItem2 *graphicsClientItem = new GraphicsClientItem2(clients[i], clientStyle, portStyle, clientFont);
     clientGraphicsItems.append(graphicsClientItem);
     graphicsClientItem->setPos(clientsRect.width() * x, clientsRect.height() * y);
-//    QGraphicsItem *graphicsItem = clients[i]->createGraphicsItem(clientsRect);
-//    if (graphicsItem) {
-//        graphicsClientItem->setInnerItem(graphicsItem);
-//        // create an action to zoom to that client:
-//        QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
-//        action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
-//    }
+    QGraphicsItem *graphicsItem = clients[i]->createGraphicsItem(clientsRect);
+    if (graphicsItem) {
+        graphicsClientItem->setInnerItem(graphicsItem);
+        // create an action to zoom to that client:
+        QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionShowClient()));
+        action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsClientItem));
+    }
     ui->graphicsView->scene()->addItem(graphicsClientItem);
     return graphicsClientItem;
 }
@@ -142,7 +145,7 @@ GraphicsClientItem2 * MainWindow::addClient(const QString &clientName)
     // create a visual representation and position it in the scene:
     int x = i % gridWidth;
     int y = i / gridWidth;
-    GraphicsClientItem2 *graphicsClientItem = new GraphicsClientItem2(&nullClient, clientName, clientStyle, portStyle);
+    GraphicsClientItem2 *graphicsClientItem = new GraphicsClientItem2(&nullClient, clientName, clientStyle, portStyle, clientFont);
     clientGraphicsItems.append(graphicsClientItem);
     graphicsClientItem->setPos(clientsRect.width() * x, clientsRect.height() * y);
     ui->graphicsView->scene()->addItem(graphicsClientItem);

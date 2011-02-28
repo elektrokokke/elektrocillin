@@ -3,25 +3,37 @@
 
 #include "jackclient.h"
 #include <QGraphicsPathItem>
+#include <QMenu>
 
-class GraphicsPortItem2 : public QGraphicsPathItem, public PortConnectInterface
+class GraphicsPortItem2 : public QObject, public QGraphicsPathItem, public PortConnectInterface
 {
+    Q_OBJECT
 public:
-    GraphicsPortItem2(JackClient *client, const QString &fullPortName, int style, QGraphicsItem *parent = 0);
+    GraphicsPortItem2(JackClient *client, const QString &fullPortName, int style, QFont font, QGraphicsItem *parent = 0);
     const QRectF & getRect() const;
 
     void connectedTo(const QString &fullPortName);
     void disconnectedFrom(const QString &fullPortName);
     void registeredPort(const QString &fullPortname, const QString &type, int flags);
     void unregisteredPort(const QString &fullPortname, const QString &type, int flags);
+
+    QPointF getConnectionScenePos() const;
 protected:
-    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+private slots:
+    void onConnectAction();
+    void onDisconnectAction();
 private:
     JackClient *client;
     QString fullPortName, shortPortName, dataType;
     bool isInput;
     int style;
+    QFont font;
     QRectF portRect;
+    QMenu contextMenu, *connectMenu, *disconnectMenu;
+    QMap<QString, QAction*> mapPortNamesToActions;
+    int connections;
 };
 
 #endif // GRAPHICSPORTITEM2_H

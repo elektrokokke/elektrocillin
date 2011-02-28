@@ -7,34 +7,59 @@
 #include <QGraphicsSimpleTextItem>
 #include <QCursor>
 #include <QFont>
+#include <QGraphicsSceneMouseEvent>
 
-class GraphicsClientItem2 : public QGraphicsPathItem
+class CommandTextItem;
+
+class GraphicsClientItem2 :public QObject, public QGraphicsPathItem
 {
+    Q_OBJECT
 public:
-    GraphicsClientItem2(JackClient *client, int type, int portType, QGraphicsItem *parent = 0);
-    GraphicsClientItem2(JackClient *client, const QString &clientName, int type, int portType, QGraphicsItem *parent = 0);
+    GraphicsClientItem2(JackClient *client, int type, int portType, QFont font, QGraphicsItem *parent = 0);
+    GraphicsClientItem2(JackClient *client, const QString &clientName, int type, int portType, QFont font, QGraphicsItem *parent = 0);
     const QString & getClientName() const;
     const QRectF & getRect() const;
+    void setInnerItem(QGraphicsItem *item);
+    QGraphicsItem * getInnerItem() const;
+public slots:
+    void showInnerItem(bool ensureVisible = false);
+protected:
+    void focusInEvent(QFocusEvent * event);
+    void focusOutEvent(QFocusEvent * event);
 private:
     JackClient *client;
     QString clientName;
     int type, portType;
+    QFont font;
     QRectF rect;
+    QGraphicsItem *innerItem;
+    CommandTextItem *showInnerItemCommand;
+    QPainterPath pathWithoutInnerItem;
 
     void init();
 };
 
-class CommandTextItem : public QGraphicsSimpleTextItem
+class CommandTextItem : public QObject, public QGraphicsSimpleTextItem
 {
+    Q_OBJECT
 public:
-    CommandTextItem(const QString &commandText, QGraphicsItem *parent = 0) :
+    CommandTextItem(const QString &commandText, QFont font, QGraphicsItem *parent = 0) :
         QGraphicsSimpleTextItem(commandText, parent)
     {
-        QFont font("Mighty Zeo 2.0", 12);
         font.setStyleStrategy(QFont::PreferAntialias);
-//        font.setBold(true);
         setFont(font);
         setCursor(Qt::PointingHandCursor);
+    }
+signals:
+    void triggered();
+protected:
+    void mousePressEvent ( QGraphicsSceneMouseEvent * event )
+    {
+        QGraphicsSimpleTextItem::mousePressEvent(event);
+        if (!event->isAccepted() && (event->button() == Qt::LeftButton)) {
+            event->accept();
+            triggered();
+        }
     }
 };
 

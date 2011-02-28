@@ -23,7 +23,7 @@ public:
 
 
 private slots:
-    void onActionAnimateToRect();
+    void onActionShowClient();
     void onActionCreateClient();
 //    void onRecordFinished();
     void on_actionAll_modules_triggered();
@@ -35,6 +35,7 @@ private:
     Ui::MainWindow *ui;
     QSettings settings;
     int gridWidth, clientStyle, portStyle;
+    QFont clientFont;
     QRectF clientsRect;
     QVector<JackClient*> clients;
     QVector<GraphicsClientItem2*> clientGraphicsItems;
