@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "graphicsclientitem2.h"
+#include "iirmoogfilterclient.h"
 
 #include <QDebug>
 #include <QDialog>
@@ -15,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     settings("settings.ini", QSettings::IniFormat),
     gridWidth(3),
+    clientStyle(3),
+    portStyle(3),
     clientsRect(0, 0, 600, 420)
 {   
     ui->setupUi(this);
@@ -42,7 +45,45 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->menuCreate_client->addAction(action);
     }
 
-    ui->graphicsView->scene()->addItem(new GraphicsClientItem2("Lowpass resonance filter"));
+//    JackClient *client = new IirMoogFilterClient("Lowpass resonance filter");
+//    client->activate();
+//    int x = 0;
+//    for (int type = 0; type < 4; type++) {
+//        QGraphicsSimpleTextItem *caption;
+//        if (type == 0) {
+//            caption = new QGraphicsSimpleTextItem("Ellipse");
+//        } else if (type == 1) {
+//            caption = new QGraphicsSimpleTextItem("Speech bubble");
+//        } else if (type == 2) {
+//            caption = new QGraphicsSimpleTextItem("Rounded rectangle");
+//        } else if (type == 3) {
+//            caption = new QGraphicsSimpleTextItem("Rectangle");
+//        }
+//        caption->setPos(x, -50);
+//        ui->graphicsView->scene()->addItem(caption);
+//        GraphicsClientItem2 *clientItem;
+//        int y = 0;
+//        for (int portType = 0; portType < 4; portType++) {
+//            clientItem = new GraphicsClientItem2(client, type, portType);
+//            clientItem->setPos(clientItem->getRect().width() * 1.25 * type, clientItem->getRect().height() * 1.25 * portType);
+//            ui->graphicsView->scene()->addItem(clientItem);
+//            if (type == 0) {
+//                if (portType == 0) {
+//                    caption = new QGraphicsSimpleTextItem("Ellipse");
+//                } else if (portType == 1) {
+//                    caption = new QGraphicsSimpleTextItem("Speech bubble");
+//                } else if (portType == 2) {
+//                    caption = new QGraphicsSimpleTextItem("Rounded rectangle");
+//                } else if (portType == 3) {
+//                    caption = new QGraphicsSimpleTextItem("Rectangle");
+//                }
+//                caption->setPos(-200, y);
+//                ui->graphicsView->scene()->addItem(caption);
+//            }
+//            y += clientItem->getRect().height() * 1.25;
+//        }
+//        x += clientItem->getRect().width() * 1.25;
+//    }
 }
 
 MainWindow::~MainWindow()
@@ -71,7 +112,7 @@ void MainWindow::onActionCreateClient()
 //    recordClientGraphView->model()->setParent(recordClientGraphView);
 //}
 
-GraphicsClientItem * MainWindow::addClient(JackClient *client)
+GraphicsClientItem2 * MainWindow::addClient(JackClient *client)
 {
     int i = clients.size();
     clients.append(client);
@@ -80,28 +121,28 @@ GraphicsClientItem * MainWindow::addClient(JackClient *client)
     // create a visual representation and position it in the scene:
     int x = i % gridWidth;
     int y = i / gridWidth;
-    QGraphicsItem *graphicsItem = clients[i]->createGraphicsItem(clientsRect);
-    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(clients[i]);
+    GraphicsClientItem2 *graphicsClientItem = new GraphicsClientItem2(clients[i], clientStyle, portStyle);
     clientGraphicsItems.append(graphicsClientItem);
     graphicsClientItem->setPos(clientsRect.width() * x, clientsRect.height() * y);
-    if (graphicsItem) {
-        graphicsClientItem->setInnerItem(graphicsItem);
-        // create an action to zoom to that client:
-        QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
-        action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
-    }
+//    QGraphicsItem *graphicsItem = clients[i]->createGraphicsItem(clientsRect);
+//    if (graphicsItem) {
+//        graphicsClientItem->setInnerItem(graphicsItem);
+//        // create an action to zoom to that client:
+//        QAction *action = ui->menuView->addAction(clients[i]->getClientName(), this, SLOT(onActionAnimateToRect()));
+//        action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsItem));
+//    }
     ui->graphicsView->scene()->addItem(graphicsClientItem);
     return graphicsClientItem;
 }
 
-GraphicsClientItem * MainWindow::addClient(const QString &clientName)
+GraphicsClientItem2 * MainWindow::addClient(const QString &clientName)
 {
     int i = clients.size();
     clients.append(0);
     // create a visual representation and position it in the scene:
     int x = i % gridWidth;
     int y = i / gridWidth;
-    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName);
+    GraphicsClientItem2 *graphicsClientItem = new GraphicsClientItem2(&nullClient, clientName, clientStyle, portStyle);
     clientGraphicsItems.append(graphicsClientItem);
     graphicsClientItem->setPos(clientsRect.width() * x, clientsRect.height() * y);
     ui->graphicsView->scene()->addItem(graphicsClientItem);

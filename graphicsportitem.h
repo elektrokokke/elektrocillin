@@ -7,7 +7,6 @@
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsPathItem>
 #include <QGraphicsEllipseItem>
-#include <QPainterPathStroker>
 #include <QMenu>
 #include <QMap>
 #include <QObject>
@@ -48,22 +47,6 @@ private:
     QBrush fill;
     QPen outline;
     QFont font;
-};
-
-class GraphicsPortConnectionItem : public QGraphicsPathItem
-{
-private:
-    GraphicsPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene);
-public:
-    static GraphicsPortConnectionItem * getPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene);
-    static void deletePortConnectionItem(const QString &port1, const QString &port2);
-    void setPos(const QString &port, const QPointF &point);
-    static void setPositions(const QString &port,const  QPointF &point);
-private:
-    QString port1, port2;
-    QPointF point1, point2;
-    QPainterPathStroker pathStroker;
-    static QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > items;
 };
 
 #endif // GRAPHICSPORTITEM_H

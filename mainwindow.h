@@ -9,7 +9,7 @@ namespace Ui {
     class MainWindow;
 }
 
-class GraphicsClientItem;
+class GraphicsClientItem2;
 class Record2MemoryClient;
 class GraphView;
 
@@ -34,16 +34,16 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QSettings settings;
-    int gridWidth;
+    int gridWidth, clientStyle, portStyle;
     QRectF clientsRect;
     QVector<JackClient*> clients;
-    QVector<GraphicsClientItem*> clientGraphicsItems;
+    QVector<GraphicsClientItem2*> clientGraphicsItems;
     Record2MemoryClient *record2MemoryClient;
     GraphView *recordClientGraphView;
     JackNullClient nullClient;
 
-    GraphicsClientItem * addClient(JackClient *client);
-    GraphicsClientItem * addClient(const QString &clientName);
+    GraphicsClientItem2 * addClient(JackClient *client);
+    GraphicsClientItem2 * addClient(const QString &clientName);
 
     void saveSession(QDataStream &stream);
     bool loadSession(QDataStream &stream);

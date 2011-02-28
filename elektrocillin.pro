@@ -81,7 +81,9 @@ SOURCES += main.cpp\
     envelope.cpp \
     envelopeclient.cpp \
     graphicsclientnameitem.cpp \
-    graphicsclientitem2.cpp
+    graphicsclientitem2.cpp \
+    graphicsportitem2.cpp \
+    graphicsportconnectionitem.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -156,7 +158,9 @@ HEADERS  += mainwindow.h \
     envelope.h \
     envelopeclient.h \
     graphicsclientnameitem.h \
-    graphicsclientitem2.h
+    graphicsclientitem2.h \
+    graphicsportitem2.h \
+    graphicsportconnectionitem.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

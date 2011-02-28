@@ -448,7 +448,7 @@ const char ** MetaJackContext::getPortsByPattern(const std::string &port_name_pa
     QRegExp regexPortNames(port_name_pattern.c_str());
     QRegExp regexTypeNames(type_name_pattern.c_str());
     std::list<MetaJackPort*> matchingPorts;
-    for (std::map<std::string, MetaJackPort*>::iterator i = portsByName.begin(); i != portsByName.end(); i++) {
+    for (std::map<jack_port_id_t, MetaJackPort*>::iterator i = portsById.begin(); i != portsById.end(); i++) {
         MetaJackPort *port = i->second;
 //        if (((port->getFlags() & flags) == flags) && ((port_name_pattern.length() == 0) || boost::xpressive::regex_match(port->getFullName(), regexPortNames)) && ((type_name_pattern.length() == 0) || boost::xpressive::regex_match(port->getType(), regexTypeNames))) {
         if (((port->getFlags() & flags) == flags) && ((port_name_pattern.length() == 0) || regexPortNames.exactMatch(port->getFullName().c_str())) && ((type_name_pattern.length() == 0) || regexTypeNames.exactMatch(port->getType().c_str()))) {

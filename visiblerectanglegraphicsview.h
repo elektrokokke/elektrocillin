@@ -1,7 +1,7 @@
 #ifndef VISIBLERECTANGLEGRAPHICSVIEW_H
 #define VISIBLERECTANGLEGRAPHICSVIEW_H
 
-#include "graphicsclientitem.h"
+#include "graphicsclientitem2.h"
 #include <QGraphicsView>
 #include <QPropertyAnimation>
 
@@ -16,7 +16,7 @@ public:
     void setVisibleSceneRect(const QRectF &rect);
 
     void animateToVisibleSceneRect(const QRectF &rect, int msecs = 750);
-    void animateToClientItem(GraphicsClientItem *item, int msecs = 750);
+    void animateToClientItem(GraphicsClientItem2 *item, int msecs = 750);
 
 signals:
     void animationFinished(QGraphicsView *view);

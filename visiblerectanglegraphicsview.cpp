@@ -48,9 +48,9 @@ void VisibleRectangleGraphicsView::animateToVisibleSceneRect(const QRectF &rect,
     animation.start();
 }
 
-void VisibleRectangleGraphicsView::animateToClientItem(GraphicsClientItem *item, int msecs)
+void VisibleRectangleGraphicsView::animateToClientItem(GraphicsClientItem2 *item, int msecs)
 {
-    animateToVisibleSceneRect(item->getInnerItem()->sceneBoundingRect(), msecs);
+    animateToVisibleSceneRect(item->sceneBoundingRect(), msecs);
 }
 
 void VisibleRectangleGraphicsView::animationFinished()
