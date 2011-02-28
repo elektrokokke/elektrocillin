@@ -112,7 +112,36 @@ void GraphicsClientItem2::init()
     showInnerItemCommand->setVisible(innerItem);
     QObject::connect(showInnerItemCommand, SIGNAL(triggered()), this, SLOT(showInnerItem()));
 
+    QStringList inputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
+    QList<GraphicsPortItem2*> inputPortItems;
+    int inputPortsWidth = -portPadding;
+    int minimumInputPortWidth = 0;
+    for (int i = 0; i < inputPorts.size(); i++) {
+        inputPortItems.append(new GraphicsPortItem2(client, inputPorts[i], 3, font, this));
+        inputPortsWidth += inputPortItems[i]->getRect().width() + portPadding;
+        if ((i == 0) || (inputPortItems[i]->getRect().width() < minimumInputPortWidth)) {
+            minimumInputPortWidth = inputPortItems[i]->getRect().width();
+        }
+    }
+    QStringList outputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsOutput);
+    QList<GraphicsPortItem2*> outputPortItems;
+    int outputPortsWidth = -portPadding;
+    int minimumOutputPortWidth = 0;
+    for (int i = 0; i < outputPorts.size(); i++) {
+        outputPortItems.append(new GraphicsPortItem2(client, outputPorts[i], 3, font, this));
+        outputPortsWidth += outputPortItems[i]->getRect().width() + portPadding;
+        if ((i == 0) || (outputPortItems[i]->getRect().width() < minimumOutputPortWidth)) {
+            minimumOutputPortWidth = outputPortItems[i]->getRect().width();
+        }
+    }
+
     rect = textItem->boundingRect().adjusted(0, 0, padding * 2, padding * 2 + fontMetrics.height());
+    if (rect.width() < inputPortsWidth + (portPadding - minimumInputPortWidth) * 2) {
+        rect.setWidth(inputPortsWidth + (portPadding - minimumInputPortWidth) * 2);
+    }
+    if (rect.width() < outputPortsWidth + (portPadding - minimumOutputPortWidth) * 2) {
+        rect.setWidth(outputPortsWidth + (portPadding - minimumOutputPortWidth) * 2);
+    }
 
     if (gradient) {
         QLinearGradient gradient(rect.topLeft(), rect.bottomRight());
@@ -132,14 +161,7 @@ void GraphicsClientItem2::init()
         path = RectanglePath(rect);
     }
 
-    QStringList inputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
-    QList<GraphicsPortItem2*> inputPortItems;
-    int inpurtPortsWidth = -portPadding;
-    for (int i = 0; i < inputPorts.size(); i++) {
-        inputPortItems.append(new GraphicsPortItem2(client, inputPorts[i], 3, font, this));
-        inpurtPortsWidth += inputPortItems[i]->getRect().width() + portPadding;
-    }
-    for (int i = 0, x = (inpurtPortsWidth > rect.width() ? (rect.width() - inpurtPortsWidth) / 2 : 0); i < inputPorts.size(); i++) {
+    for (int i = 0, x = (inputPortsWidth > rect.width() ? (rect.width() - inputPortsWidth) / 2 : 0); i < inputPorts.size(); i++) {
         GraphicsPortItem2 *portItem = inputPortItems[i];
         portItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
         portItem->setPos(x, 0);
@@ -159,14 +181,6 @@ void GraphicsClientItem2::init()
         path = path.subtracted(portPath);
 
         x += portRect.width() + portPadding;
-    }
-
-    QStringList outputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsOutput);
-    QList<GraphicsPortItem2*> outputPortItems;
-    int outputPortsWidth = -portPadding;
-    for (int i = 0; i < outputPorts.size(); i++) {
-        outputPortItems.append(new GraphicsPortItem2(client, outputPorts[i], 3, font, this));
-        outputPortsWidth += outputPortItems[i]->getRect().width() + portPadding;
     }
     for (int i = 0, x = (outputPortsWidth > rect.width() ? (rect.width() - outputPortsWidth) / 2 : 0); i < outputPorts.size(); i++) {
         GraphicsPortItem2 *portItem = outputPortItems[i];
