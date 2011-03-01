@@ -3,7 +3,6 @@
 
 #include "midiprocessorclient.h"
 #include "jackthreadeventprocessorclient.h"
-#include "jackclientwithdeferredprocessing.h"
 #include "graphicskeyboarditem.h"
 
 class MidiSignalClient;

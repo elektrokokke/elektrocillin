@@ -18,8 +18,6 @@ SOURCES += main.cpp\
     oscillator.cpp \
     monophonicsynthesizer.cpp \
     simplelowpassfilter.cpp \
-    adsrenvelope.cpp \
-    distortionfilter.cpp \
     midicontrollerslider.cpp \
     midicontrollercheckbox.cpp \
     midisplitter.cpp \
@@ -36,7 +34,6 @@ SOURCES += main.cpp\
     midicontroller2audioclient.cpp \
     butterworth2polefilter.cpp \
     jackthread.cpp \
-    jackclientwithdeferredprocessing.cpp \
     frequencyresponsegraphicsitem.cpp \
     iirfilter.cpp \
     iirbutterworthfilter.cpp \
@@ -63,7 +60,6 @@ SOURCES += main.cpp\
     linearoscillatorclient.cpp \
     linearmorphoscillator.cpp \
     pulseoscillator.cpp \
-    adsrclient.cpp \
     multiplyprocessor.cpp \
     metajack/midiport.cpp \
     metajack/metajackclient.cpp \
@@ -91,8 +87,6 @@ HEADERS  += mainwindow.h \
     oscillator.h \
     monophonicsynthesizer.h \
     simplelowpassfilter.h \
-    adsrenvelope.h \
-    distortionfilter.h \
     midicontrollerslider.h \
     midicontrollercheckbox.h \
     midisplitter.h \
@@ -111,7 +105,6 @@ HEADERS  += mainwindow.h \
     butterworth2polefilter.h \
     jackringbuffer.h \
     jackthread.h \
-    jackclientwithdeferredprocessing.h \
     frequencyresponsegraphicsitem.h \
     iirfilter.h \
     iirbutterworthfilter.h \
@@ -141,7 +134,6 @@ HEADERS  += mainwindow.h \
     linearoscillatorclient.h \
     linearmorphoscillator.h \
     pulseoscillator.h \
-    adsrclient.h \
     multiplyprocessor.h \
     metajack/midiport.h \
     metajack/metajackclient.h \

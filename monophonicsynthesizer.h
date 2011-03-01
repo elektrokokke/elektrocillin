@@ -3,7 +3,7 @@
 
 #include "simplelowpassfilter.h"
 #include "pulseoscillator.h"
-#include "adsrenvelope.h"
+#include "envelope.h"
 #include "iirbutterworthfilter.h"
 #include <QStack>
 
@@ -23,7 +23,7 @@ private:
     double controller;
     PulseOscillator osc;
     //Oscillator osc;
-    AdsrEnvelope envelope;
+    Envelope envelope;
     IirButterworthFilter filterAudio, filterController;
     QStack<unsigned char> midiNoteNumbers;
 };

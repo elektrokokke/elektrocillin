@@ -4,7 +4,6 @@
 MonophonicSynthesizer::MonophonicSynthesizer(double sampleRate) :
     MidiProcessor(QStringList("Modulation"), QStringList("Audio out"), sampleRate),
     controller(0.0),
-    envelope(0.001, 0.2, 0.2, 0.3),
     filterAudio(22050),
     filterController(44.1)
 {
