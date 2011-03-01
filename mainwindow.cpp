@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     settings("settings.ini", QSettings::IniFormat),
     gridWidth(3),
-    clientStyle(3),
+    clientStyle(1),
     portStyle(3),
 //    clientFont("Mighty Zeo 2.0", 12),
     clientFont("Helvetica", 12),

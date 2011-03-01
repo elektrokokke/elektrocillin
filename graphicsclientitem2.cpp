@@ -158,7 +158,6 @@ void GraphicsClientItem2::init()
     } else if (type == 3) {
         bodyPath = RectanglePath(rect);
     }
-    QPainterPath combinedPath = bodyPath;
 
     for (int i = 0, x = (inputPortsWidth > rect.width() ? (rect.width() - inputPortsWidth) / 2 : 0); i < inputPorts.size(); i++) {
         GraphicsPortItem2 *portItem = inputPortItems[i];
@@ -178,7 +177,6 @@ void GraphicsClientItem2::init()
             portPath += RectanglePath(portRect);
         }
         bodyPath -= portPath;
-        combinedPath += portPath;
 
         x += portRect.width() + portPadding;
     }
@@ -200,10 +198,10 @@ void GraphicsClientItem2::init()
             portPath += RectanglePath(portRect);
         }
         bodyPath -= portPath;
-        combinedPath += portPath;
 
         x += portRect.width() + portPadding;
     }
+    QPainterPath combinedPath = bodyPath;
 
     QGraphicsPathItem *bodyItem = new QGraphicsPathItem(bodyPath, this);
     bodyItem->setPen(QPen(QBrush(Qt::black), 3));
