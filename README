@@ -20,8 +20,9 @@ figfont: larry3d.flf by Larry Gelberg (larryg@avs.com)
 
 1.) Install Qt 4.7. Or just install the whole Qt SDK (http://qt.nokia.com/downloads) including the QtCreator IDE.
 2.) Install Jack. You can install jack1 (also known as jackd) as well as jack2 (also known as jackdmp), which is currently available in version 1.9.6 (http://jackaudio.org/download)
-3.) Modify the project file electrocillin.pro such as to include your Jack include and library paths, as well as the libraries jack and jackserver (the latter only on Windows).
-Note: on Linux you probably won't have to change anything, as Jack typically resides in /usr/include and /usr/lib, which will already be in search paths when building.
+    You will also need libjack (the development library for Jack).
+3.) Modify the project file electrocillin.pro such as to include your libjack include and library paths, as well as the libraries libjack and libjackserver (the latter only on Windows).
+Note: on Linux you probably won't have to change anything, as libjack typically resides in /usr/include and /usr/lib, which will already be in search paths when building.
 4.) Build the project. You can do this either via QtCreator or manually. For the latter it should be sufficient to run
     $ qmake -o Makefile elektrocillin.pro
     $ make
