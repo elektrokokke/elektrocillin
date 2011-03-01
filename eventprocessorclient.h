@@ -5,6 +5,9 @@
 #include "jackringbuffer.h"
 #include <QVector>
 
+/**
+  @deprecated please use EventProcessorClient2 instead.
+  */
 template<class T> class EventProcessorClient : public MidiProcessorClient
 {
 public:
@@ -114,8 +117,8 @@ class EventProcessorClient2 : public MidiProcessorClient
 public:
     EventProcessorClient2(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = (2 << 16));
 
-    bool postEvent(const RingBufferEvent *event);
-    bool postEvents(const QVector<const RingBufferEvent*> &events);
+    bool postEvent(RingBufferEvent *event);
+    bool postEvents(const QVector<RingBufferEvent*> &events);
 
 protected:
     /**

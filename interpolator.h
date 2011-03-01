@@ -4,11 +4,6 @@
 #include "jackringbuffer.h"
 #include <QVector>
 
-struct InterpolatorParameters {
-    int controlPoints, index;
-    double x, y;
-};
-
 class Interpolator
 {
 public:
@@ -35,8 +30,8 @@ public:
 
     virtual double interpolate(int jlo, double x) = 0;
 
-    virtual void processEvent(const ChangeControlPointEvent *event);
-    virtual void processEvent(const ChangeAllControlPointsEvent *event);
+    virtual void processEvent(const ChangeControlPointEvent *event) = 0;
+    virtual void processEvent(const ChangeAllControlPointsEvent *event) = 0;
 protected:
     Interpolator(const QVector<double> &xx, int m);
 

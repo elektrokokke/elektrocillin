@@ -21,7 +21,7 @@ void IirMoogFilterThread::processDeferred()
 }
 
 IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, size_t ringBufferSize) :
-    JackThreadEventProcessorClient<IirMoogFilter::Parameters>(new IirMoogFilterThread(this), clientName, new IirMoogFilter(44100, 1), ringBufferSize),
+    JackThreadEventProcessorClient(new IirMoogFilterThread(this), clientName, new IirMoogFilter(44100, 1), ringBufferSize),
     ringBufferToThread(ringBufferSize)
 {
     getMoogFilterThread()->setRingBufferFromClient(&ringBufferToThread);
@@ -54,7 +54,7 @@ void IirMoogFilterClient::loadState(QDataStream &stream)
     stream >> parameters.frequencyModulationFactor;
     stream >> parameters.frequencyModulationIntensity;
     stream >> parameters.resonance;
-    getMoogFilter()->setParameters(parameters);
+    getMoogFilter()->processEvent(&parameters);
 }
 
 IirMoogFilter * IirMoogFilterClient::getMoogFilter()
@@ -72,9 +72,11 @@ QGraphicsItem * IirMoogFilterClient::createGraphicsItem(const QRectF &rect)
     return new IirMoogFilterGraphicsItem(this, rect);
 }
 
-void IirMoogFilterClient::processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t)
+void IirMoogFilterClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
-    getMoogFilter()->setParameters(event);
+    if (const IirMoogFilter::Parameters *parameters = dynamic_cast<const IirMoogFilter::Parameters*>(event)) {
+        getMoogFilter()->processEvent(parameters);
+    }
 }
 
 void IirMoogFilterClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
@@ -114,11 +116,12 @@ IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client
 
 void IirMoogFilterGraphicsItem::onGuiChangedFilterParameters(const QPointF &cutoffResonance)
 {
-    IirMoogFilter::Parameters parameters = filterCopy.getParameters();
-    parameters.frequency = cutoffResonance.x();
-    parameters.resonance = cutoffResonance.y();
+    IirMoogFilter::Parameters *parameters = new IirMoogFilter::Parameters();
+    *parameters = filterCopy.getParameters();
+    parameters->frequency = cutoffResonance.x();
+    parameters->resonance = cutoffResonance.y();
+    filterCopy.processEvent(parameters);
     client->postEvent(parameters);
-    filterCopy.setParameters(parameters);
     updateFrequencyResponse(0);
 }
 
@@ -127,7 +130,7 @@ void IirMoogFilterGraphicsItem::onClientChangedFilterParameters(double frequency
     IirMoogFilter::Parameters parameters = filterCopy.getParameters();
     parameters.frequency = frequency;
     parameters.resonance = resonance;
-    filterCopy.setParameters(parameters);
+    filterCopy.processEvent(&parameters);
     cutoffResonanceNode->setXScaled(parameters.frequency);
     cutoffResonanceNode->setYScaled(parameters.resonance);
     updateFrequencyResponse(0);

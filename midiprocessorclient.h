@@ -4,11 +4,13 @@
 #include "audioprocessorclient.h"
 #include "midiprocessor.h"
 #include "metajack/midiport.h"
+#include "jackringbuffer.h"
 
 class MidiProcessorClient : public AudioProcessorClient
 {
 public:
-    struct MidiEvent {
+    class MidiEvent : public RingBufferEvent {
+    public:
         size_t size;
         jack_midi_data_t buffer[3];
     };

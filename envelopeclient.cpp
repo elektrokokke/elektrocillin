@@ -148,7 +148,7 @@ void EnvelopeGraphicsSubItem::decreaseControlPoints()
     parent->getClient()->postDecreaseControlPoints();
 }
 
-void EnvelopeGraphicsSubItem::changeControlPoint(int index, int, double x, double y)
+void EnvelopeGraphicsSubItem::changeControlPoint(int index, double x, double y)
 {
     parent->getClient()->postChangeControlPoint(index, x, y);
 }

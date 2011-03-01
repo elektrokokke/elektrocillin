@@ -123,11 +123,3 @@ int Interpolator::hunt(double x)
     jsav = jl;
     return std::max(0, std::min(xx.size() - mm, jl - ((mm - 2) >> 1)));
 }
-
-void Interpolator::processEvent(const ChangeControlPointEvent *)
-{
-}
-
-void Interpolator::processEvent(const ChangeAllControlPointsEvent *)
-{
-}

@@ -128,7 +128,7 @@ void LinearOscillatorGraphicsItem::decreaseControlPoints()
     client->postDecreaseControlPoints();
 }
 
-void LinearOscillatorGraphicsItem::changeControlPoint(int index, int nrOfControlPoints, double x, double y)
+void LinearOscillatorGraphicsItem::changeControlPoint(int index, double x, double y)
 {
     client->postChangeControlPoint(index, x, y);
 }

@@ -5,7 +5,7 @@
 #include <QPen>
 
 CubicSplineWaveShapingClient::CubicSplineWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient<InterpolatorParameters>(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
+    EventProcessorClient2(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
     interpolator(QVector<double>(), QVector<double>(), QVector<double>()),
     interpolatorProcess(QVector<double>(), QVector<double>(), QVector<double>())
 {
@@ -60,17 +60,11 @@ void CubicSplineWaveShapingClient::postIncreaseControlPoints()
     yy.insert(0, -1);
     xx.append(1);
     yy.append(1);
-    QVector<InterpolatorParameters> parameterVector;
-    for (int i = 0; i < xx.size(); i++) {
-        InterpolatorParameters parameters;
-        parameters.controlPoints = size;
-        parameters.index = i;
-        parameters.x = xx[i];
-        parameters.y = yy[i];
-        parameterVector.append(parameters);
-    }
-    postEvents(parameterVector);
-    interpolator = CubicSplineInterpolator(xx, yy);
+    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
+    event->xx = xx;
+    event->yy = yy;
+    interpolator.processEvent(event);
+    postEvent(event);
 }
 
 void CubicSplineWaveShapingClient::postDecreaseControlPoints()
@@ -85,24 +79,20 @@ void CubicSplineWaveShapingClient::postDecreaseControlPoints()
         yy.resize(size);
         double stretchFactor1 = 1.0 / -xx.first();
         double stretchFactor2 = 1.0 / xx.back();
-        QVector<InterpolatorParameters> parameterVector;
         for (int i = 0; i < xx.size(); i++) {
             double stretchFactor = (i < size / 2 ? stretchFactor1 : stretchFactor2);
             xx[i] = xx[i] * stretchFactor;
             yy[i] = qMin(1.0, qMax(-1.0, yy[i] * stretchFactor));
-            InterpolatorParameters parameters;
-            parameters.controlPoints = size;
-            parameters.index = i;
-            parameters.x = xx[i];
-            parameters.y = yy[i];
-            parameterVector.append(parameters);
         }
-        postEvents(parameterVector);
-        interpolator = CubicSplineInterpolator(xx, yy);
+        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
+        event->xx = xx;
+        event->yy = yy;
+        interpolator.processEvent(event);
+        postEvent(event);
     }
 }
 
-void CubicSplineWaveShapingClient::postChangeControlPoint(int index, int nrOfControlPoints, double x, double y)
+void CubicSplineWaveShapingClient::postChangeControlPoint(int index, double x, double y)
 {
     if (index == 0) {
        x = interpolator.getX()[0];
@@ -116,15 +106,12 @@ void CubicSplineWaveShapingClient::postChangeControlPoint(int index, int nrOfCon
     if ((index < interpolator.getX().size() - 1) && (x >= interpolator.getX()[index + 1])) {
         return;
     }
-    QVector<double> xx = interpolator.getX();
-    QVector<double> yy = interpolator.getY();
-    InterpolatorParameters parameters;
-    parameters.controlPoints = nrOfControlPoints;
-    parameters.index = index;
-    xx[index] = parameters.x = x;
-    yy[index] = parameters.y = y;
-    postEvent(parameters);
-    interpolator = CubicSplineInterpolator(xx, yy);
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
+    event->index = index;
+    event->x = x;
+    event->y = y;
+    interpolator.processEvent(event);
+    postEvent(event);
 }
 
 QGraphicsItem * CubicSplineWaveShapingClient::createGraphicsItem(const QRectF &rect)
@@ -137,16 +124,13 @@ void CubicSplineWaveShapingClient::processAudio(const double *inputs, double *ou
     outputs[0] = std::max(std::min(interpolatorProcess.evaluate(inputs[0]), 1.0), -1.0);
 }
 
-void CubicSplineWaveShapingClient::processEvent(const InterpolatorParameters &event, jack_nframes_t)
+void CubicSplineWaveShapingClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
-    // set the interpolator parameters accordingly:
-    QVector<double> xx = interpolator.getX();
-    QVector<double> yy = interpolator.getY();
-    xx.resize(event.controlPoints);
-    yy.resize(event.controlPoints);
-    xx[event.index] = event.x;
-    yy[event.index] = event.y;
-    interpolatorProcess = CubicSplineInterpolator(xx, yy);
+    if (const Interpolator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
+        interpolatorProcess.processEvent(changeControlPointEvent);
+    } else if (const Interpolator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const Interpolator::ChangeAllControlPointsEvent*>(event)) {
+        interpolatorProcess.processEvent(changeAllControlPointsEvent);
+    }
 }
 
 CubicSplineWaveShapingGraphicsItem::CubicSplineWaveShapingGraphicsItem(CubicSplineWaveShapingClient *client_, const QRectF &rect, QGraphicsItem *parent) :
@@ -163,8 +147,8 @@ void CubicSplineWaveShapingGraphicsItem::decreaseControlPoints() {
     return client->postDecreaseControlPoints();
 }
 
-void CubicSplineWaveShapingGraphicsItem::changeControlPoint(int index, int nrOfControlPoints, double x, double y) {
-    client->postChangeControlPoint(index, nrOfControlPoints, x, y);
+void CubicSplineWaveShapingGraphicsItem::changeControlPoint(int index, double x, double y) {
+    client->postChangeControlPoint(index, x, y);
 }
 
 class CubicSplineWaveShapingClientFactory : public JackClientFactory

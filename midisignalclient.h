@@ -35,10 +35,11 @@ public slots:
 protected:
     void processDeferred();
 private:
+    // This is still the template class because the other class involves new and delete, which should not be in the Jack process thread (which is the sending thread here)
     JackRingBuffer<MidiProcessorClient::MidiEvent> *ringBufferFromClient;
 };
 
-class MidiSignalClient : public JackThreadEventProcessorClient<MidiProcessorClient::MidiEvent> {
+class MidiSignalClient : public JackThreadEventProcessorClient {
 public:
     MidiSignalClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~MidiSignalClient();
@@ -50,12 +51,13 @@ public:
     QGraphicsItem * createGraphicsItem(const QRectF &rect);
 
 protected:
-    // reimplemented from EventProcessor:
-    virtual void processEvent(const MidiProcessorClient::MidiEvent &event, jack_nframes_t time);
+    // reimplemented from EventProcessorClient2:
+    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimplemented from MidiProcessor:
     virtual void processMidi(const MidiProcessorClient::MidiEvent &event, jack_nframes_t time);
 
 private:
+    // This is still the template class because the other class involves new and delete, which should not be in the Jack process thread (which is the sending thread here)
     JackRingBuffer<MidiProcessorClient::MidiEvent> ringBufferToThread;
 };
 

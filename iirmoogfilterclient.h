@@ -26,7 +26,7 @@ private:
     JackRingBuffer<IirMoogFilter::Parameters> *ringBufferFromClient;
 };
 
-class IirMoogFilterClient : public JackThreadEventProcessorClient<IirMoogFilter::Parameters>
+class IirMoogFilterClient : public JackThreadEventProcessorClient
 {
 public:
     IirMoogFilterClient(const QString &clientName, size_t ringBufferSize = 1024);
@@ -41,8 +41,8 @@ public:
 
     QGraphicsItem * createGraphicsItem(const QRectF &rect);
 protected:
-    // reimplemented from EventProcessorClient:
-    virtual void processEvent(const IirMoogFilter::Parameters &event, jack_nframes_t time);
+    // reimplemented from EventProcessorClient2:
+    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimplemented from MidiProcessorClient:
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);

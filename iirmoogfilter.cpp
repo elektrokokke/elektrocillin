@@ -91,9 +91,9 @@ void IirMoogFilter::setSampleRate(double sampleRate)
     computeCoefficients();
 }
 
-void IirMoogFilter::setParameters(const Parameters parameters)
+void IirMoogFilter::processEvent(const Parameters *event)
 {
-    this->parameters = parameters;
+    this->parameters = *event;
     computeCoefficients();
 }
 

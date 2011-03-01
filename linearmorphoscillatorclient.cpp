@@ -52,7 +52,7 @@ LinearInterpolator * LinearMorphOscillatorClient::getState(int stateIndex)
 void LinearMorphOscillatorClient::postIncreaseControlPoints()
 {
     int size = state[0].getX().size() + 1;
-    QVector<const RingBufferEvent*> events;
+    QVector<RingBufferEvent*> events;
     for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
         double stretchFactor = (double)(state[stateIndex].getX().size() - 1) / (double)(size - 1);
         state[stateIndex].getX().append(2 * M_PI);
@@ -74,7 +74,7 @@ void LinearMorphOscillatorClient::postIncreaseControlPoints()
 void LinearMorphOscillatorClient::postDecreaseControlPoints()
 {
     if (state[0].getX().size() > 2) {
-        QVector<const RingBufferEvent*> events;
+        QVector<RingBufferEvent*> events;
         int size = state[0].getX().size() - 1;
         for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
             state[stateIndex].getX().resize(size);
@@ -93,7 +93,7 @@ void LinearMorphOscillatorClient::postDecreaseControlPoints()
     }
 }
 
-void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int index, int nrOfControlPoints, double x, double y)
+void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int index, double x, double y)
 {
     Q_ASSERT((stateIndex >= 0) && (stateIndex < 2));
     if (index == 0) {
@@ -166,9 +166,9 @@ void LinearMorphOscillatorGraphicsSubItem::decreaseControlPoints()
     }
 }
 
-void LinearMorphOscillatorGraphicsSubItem::changeControlPoint(int index, int nrOfControlPoints, double x, double y)
+void LinearMorphOscillatorGraphicsSubItem::changeControlPoint(int index, double x, double y)
 {
-    client->postChangeControlPoint(state, index, nrOfControlPoints, x, y);
+    client->postChangeControlPoint(state, index, x, y);
 }
 
 LinearMorphOscillatorGraphicsItem::LinearMorphOscillatorGraphicsItem(const QRectF &rect, LinearMorphOscillatorClient *client, QGraphicsItem *parent) :

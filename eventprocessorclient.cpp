@@ -5,7 +5,7 @@ EventProcessorClient2::EventProcessorClient2(const QString &clientName, MidiProc
     ringBuffer(ringBufferSize)
 {}
 
-bool EventProcessorClient2::postEvent(const RingBufferEvent *event)
+bool EventProcessorClient2::postEvent(RingBufferEvent *event)
 {
     if (isActive()) {
         jack_nframes_t time = getEstimatedCurrentTime();
@@ -15,7 +15,7 @@ bool EventProcessorClient2::postEvent(const RingBufferEvent *event)
     }
 }
 
-bool EventProcessorClient2::postEvents(const QVector<const RingBufferEvent*> &events)
+bool EventProcessorClient2::postEvents(const QVector<RingBufferEvent*> &events)
 {
     if (isActive()) {
         int writtenEvents = 0;

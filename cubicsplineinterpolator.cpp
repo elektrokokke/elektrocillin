@@ -67,6 +67,21 @@ double CubicSplineInterpolator::interpolate(int jl, double x)
     return y;
 }
 
+void CubicSplineInterpolator::processEvent(const ChangeControlPointEvent *event)
+{
+    Q_ASSERT((event->index >= 0) && (event->index < xx.size()));
+    xx[event->index] = event->x;
+    yy[event->index] = event->y;
+    sety2NaturalSpline(xx, yy);
+}
+
+void CubicSplineInterpolator::processEvent(const ChangeAllControlPointsEvent *event)
+{
+    xx = event->xx;
+    yy = event->yy;
+    sety2NaturalSpline(xx, yy);
+}
+
 /**
   Comments from "Numerical Recipes"
 

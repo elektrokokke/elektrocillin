@@ -4,7 +4,7 @@
 #include <QtGlobal>
 
 LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient<InterpolatorParameters>(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
+    EventProcessorClient2(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
     interpolator(QVector<double>(5), QVector<double>(5)),
     interpolatorProcess(QVector<double>(5), QVector<double>(5))
 {
@@ -47,16 +47,10 @@ void LinearWaveShapingClient::postIncreaseControlPoints()
     interpolator.getY().insert(0, -1);
     interpolator.getX().append(1);
     interpolator.getY().append(1);
-    QVector<InterpolatorParameters> parameterVector;
-    for (int i = 0; i < interpolator.getX().size(); i++) {
-        InterpolatorParameters parameters;
-        parameters.controlPoints = size;
-        parameters.index = i;
-        parameters.x = interpolator.getX()[i];
-        parameters.y = interpolator.getY()[i];
-        parameterVector.append(parameters);
-    }
-    postEvents(parameterVector);
+    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
+    event->xx = interpolator.getX();
+    event->yy = interpolator.getY();
+    postEvent(event);
 }
 
 void LinearWaveShapingClient::postDecreaseControlPoints()
@@ -69,23 +63,19 @@ void LinearWaveShapingClient::postDecreaseControlPoints()
         interpolator.getY().resize(size);
         double stretchFactor1 = 1.0 / -interpolator.getX().first();
         double stretchFactor2 = 1.0 / interpolator.getX().back();
-        QVector<InterpolatorParameters> parameterVector;
         for (int i = 0; i < interpolator.getX().size(); i++) {
             double stretchFactor = (i < size / 2 ? stretchFactor1 : stretchFactor2);
             interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
             interpolator.getY()[i] = qMin(1.0, qMax(-1.0, interpolator.getY()[i] * stretchFactor));
-            InterpolatorParameters parameters;
-            parameters.controlPoints = size;
-            parameters.index = i;
-            parameters.x = interpolator.getX()[i];
-            parameters.y = interpolator.getY()[i];
-            parameterVector.append(parameters);
         }
-        postEvents(parameterVector);
+        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
+        event->xx = interpolator.getX();
+        event->yy = interpolator.getY();
+        postEvent(event);
     }
 }
 
-void LinearWaveShapingClient::postChangeControlPoint(int index, int nrOfControlPoints, double x, double y)
+void LinearWaveShapingClient::postChangeControlPoint(int index, double x, double y)
 {
     if (index == 0) {
        x = interpolator.getX()[0];
@@ -99,12 +89,12 @@ void LinearWaveShapingClient::postChangeControlPoint(int index, int nrOfControlP
     if ((index < interpolator.getX().size() - 1) && (x >= interpolator.getX()[index + 1])) {
         x = interpolator.getX()[index + 1];
     }
-    InterpolatorParameters parameters;
-    parameters.controlPoints = nrOfControlPoints;
-    parameters.index = index;
-    interpolator.getX()[index] = parameters.x = x;
-    interpolator.getY()[index] = parameters.y = y;
-    postEvent(parameters);
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
+    event->index = index;
+    event->x = x;
+    event->y = y;
+    interpolator.processEvent(event);
+    postEvent(event);
 }
 
 QGraphicsItem * LinearWaveShapingClient::createGraphicsItem(const QRectF &rect)
@@ -117,14 +107,13 @@ void LinearWaveShapingClient::processAudio(const double *inputs, double *outputs
     outputs[0] = interpolatorProcess.evaluate(inputs[0]);
 }
 
-void LinearWaveShapingClient::processEvent(const InterpolatorParameters &event, jack_nframes_t)
+void LinearWaveShapingClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
-    // set the interpolator's nr of control points:
-    interpolatorProcess.getX().resize(event.controlPoints);
-    interpolatorProcess.getY().resize(event.controlPoints);
-    // set the interpolator control point at "index" accordingly:
-    interpolatorProcess.getX()[event.index] = event.x;
-    interpolatorProcess.getY()[event.index] = event.y;
+    if (const Interpolator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
+        interpolatorProcess.processEvent(changeControlPointEvent);
+    } else if (const Interpolator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const Interpolator::ChangeAllControlPointsEvent*>(event)) {
+        interpolatorProcess.processEvent(changeAllControlPointsEvent);
+    }
 }
 
 LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client_, QGraphicsItem *parent) :
@@ -141,8 +130,8 @@ void LinearWaveShapingGraphicsItem::decreaseControlPoints() {
     return client->postDecreaseControlPoints();
 }
 
-void LinearWaveShapingGraphicsItem::changeControlPoint(int index, int nrOfControlPoints, double x, double y) {
-    client->postChangeControlPoint(index, nrOfControlPoints, x, y);
+void LinearWaveShapingGraphicsItem::changeControlPoint(int index, double x, double y) {
+    client->postChangeControlPoint(index, x, y);
 }
 
 class LinearWaveShapingClientFactory : public JackClientFactory

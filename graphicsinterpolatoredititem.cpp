@@ -211,7 +211,7 @@ void GraphicsInterpolatorEditSubItem::onNodePositionChangedScaled(QPointF positi
     // get the control point index:
     int index = mapSenderToControlPointIndex[sender()];
     // signal the control point change event and update our interpolator graphic item:
-    parent->changeControlPoint(index, interpolator->getX().size(), position.x(), position.y());
+    parent->changeControlPoint(index, position.x(), position.y());
     interpolationItem->updatePath();
 }
 

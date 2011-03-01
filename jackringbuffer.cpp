@@ -9,10 +9,10 @@ RingBuffer::RingBuffer(size_t ringBufferSize)
 
 RingBuffer::~RingBuffer()
 {
-    // delete all remaining event objects in the "return" ring buffer:
-    for (; jack_ringbuffer_read_space(ringBufferReturn); ) {
-        RingBufferEvent *event;
-        jack_ringbuffer_read(ringBufferReturn, (char*)&event, sizeof(RingBufferEvent*));
+    // delete all remaining undeleted event objects:
+    for (; undeletedEvents.size(); ) {
+        RingBufferEvent *event = *undeletedEvents.begin();
+        undeletedEvents.erase(undeletedEvents.begin());
         delete event;
     }
     jack_ringbuffer_free(ringBuffer);
@@ -31,15 +31,17 @@ jack_nframes_t RingBuffer::peekEventTime()
     return time;
 }
 
-bool RingBuffer::sendEvent(const RingBufferEvent *event, jack_nframes_t time)
+bool RingBuffer::sendEvent(RingBufferEvent *event, jack_nframes_t time)
 {
     // first delete all event objects in the "return" ring buffer:
     for (; jack_ringbuffer_read_space(ringBufferReturn); ) {
         RingBufferEvent *event;
         jack_ringbuffer_read(ringBufferReturn, (char*)&event, sizeof(RingBufferEvent*));
+        undeletedEvents.remove(event);
         delete event;
     }
     if (sizeof(jack_nframes_t) + sizeof(RingBufferEvent*) + sizeof(size_t) <= jack_ringbuffer_write_space(ringBuffer)) {
+        undeletedEvents.insert(event);
         // write the event time:
         jack_ringbuffer_write(ringBuffer, (const char*)&time, sizeof(jack_nframes_t));
         // write a pointer to event object:

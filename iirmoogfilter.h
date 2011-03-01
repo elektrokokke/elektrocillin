@@ -2,11 +2,13 @@
 #define IIRMOOGFILTER_H
 
 #include "iirfilter.h"
+#include "jackringbuffer.h"
 
 class IirMoogFilter : public IirFilter
 {
 public:
-    struct Parameters {
+    class Parameters : public RingBufferEvent {
+    public:
         double frequency;
         double frequencyOffsetFactor;
         double frequencyPitchBendFactor;
@@ -32,7 +34,7 @@ public:
 
     void setSampleRate(double sampleRate);
 
-    void setParameters(const Parameters parameters);
+    void processEvent(const Parameters *event);
     const Parameters & getParameters() const;
 
     void computeCoefficients();

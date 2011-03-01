@@ -20,7 +20,7 @@ public:
 
     void postIncreaseControlPoints();
     void postDecreaseControlPoints();
-    void postChangeControlPoint(int state, int index, int nrOfControlPoints, double x, double y);
+    void postChangeControlPoint(int state, int index, double x, double y);
 
     QGraphicsItem * createGraphicsItem(const QRectF &rect);
 
@@ -41,7 +41,7 @@ public:
 protected:
     virtual void increaseControlPoints();
     virtual void decreaseControlPoints();
-    virtual void changeControlPoint(int index, int nrOfControlPoints, double x, double y);
+    virtual void changeControlPoint(int index, double x, double y);
 
 private:
     LinearMorphOscillatorClient *client;

@@ -27,7 +27,7 @@ public:
 protected:
     virtual void increaseControlPoints() = 0;
     virtual void decreaseControlPoints() = 0;
-    virtual void changeControlPoint(int index, int nrOfControlPoints, double x, double y) = 0;
+    virtual void changeControlPoint(int index, double x, double y) = 0;
     friend class GraphicsInterpolatorEditSubItem;
 private:
     Interpolator *interpolator;
