@@ -33,7 +33,6 @@ private:
 
 class CubicSplineWaveShapingGraphicsItem : public GraphicsInterpolatorEditItem
 {
-    Q_OBJECT
 public:
     CubicSplineWaveShapingGraphicsItem(CubicSplineWaveShapingClient *client, const QRectF &rect, QGraphicsItem *parent = 0);
 

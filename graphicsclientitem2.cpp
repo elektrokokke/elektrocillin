@@ -2,7 +2,6 @@
 #include "graphicsportitem2.h"
 #include <QFontMetrics>
 #include <QPen>
-#include <QBrush>
 #include <QLinearGradient>
 #include <QGraphicsScene>
 
@@ -69,7 +68,7 @@ void GraphicsClientItem2::showInnerItem(bool ensureVisible_)
         // show the inner item if requested:
         innerItem->setVisible(ensureVisible_ || !innerItem->isVisible());
         if (innerItem->isVisible()) {
-            setPath(pathWithoutInnerItem.united(RectanglePath(innerItem->boundingRect().adjusted(-4, -4, 4, 4).translated(innerItem->pos()))));
+            setPath(pathWithoutInnerItem.united(RectanglePath(innerItem->boundingRect().translated(innerItem->pos()))));
             showInnerItemCommand->setText("[-]");
             innerItem->ensureVisible();
         } else {
@@ -82,19 +81,23 @@ void GraphicsClientItem2::showInnerItem(bool ensureVisible_)
 void GraphicsClientItem2::focusInEvent(QFocusEvent *)
 {
     setZValue(1);
+    if (innerItem) {
+        innerItem->setOpacity(1);
+    }
 }
 
 void GraphicsClientItem2::focusOutEvent(QFocusEvent *)
 {
     setZValue(0);
+    if (innerItem) {
+        innerItem->setOpacity(0.25);
+    }
 }
 
 void GraphicsClientItem2::init()
 {
     bool gradient = false;
     setCursor(Qt::ArrowCursor);
-    setPen(QPen(QBrush(Qt::black), 3));
-    setBrush(QBrush(Qt::white));
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
     font.setStyleStrategy(QFont::PreferAntialias);
     QFont commandsFont = font;
@@ -107,9 +110,11 @@ void GraphicsClientItem2::init()
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
     textItem->setFont(font);
     textItem->setPos(padding, padding);
+    textItem->setZValue(1);
     showInnerItemCommand = new CommandTextItem("[+]", font, this);
     showInnerItemCommand->setPos(padding, padding + fontMetrics.lineSpacing());
     showInnerItemCommand->setVisible(innerItem);
+    showInnerItemCommand->setZValue(1);
     QObject::connect(showInnerItemCommand, SIGNAL(triggered()), this, SLOT(showInnerItem()));
 
     QStringList inputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
@@ -150,16 +155,17 @@ void GraphicsClientItem2::init()
         setBrush(QBrush(gradient));
     }
 
-    QPainterPath path;
+    QPainterPath bodyPath;
     if (type == 0) {
-        path = EllipsePath(rect);
+        bodyPath = EllipsePath(rect);
     } else if (type == 1) {
-        path = SpeechBubblePath(rect, rect.height() / 4, rect.height() / 4, Qt::AbsoluteSize);
+        bodyPath = SpeechBubblePath(rect, rect.height() / 4, rect.height() / 4, Qt::AbsoluteSize);
     } else if (type == 2){
-        path = RoundedRectanglePath(rect, padding + fontMetrics.height(), padding + fontMetrics.height());
+        bodyPath = RoundedRectanglePath(rect, padding + fontMetrics.height(), padding + fontMetrics.height());
     } else if (type == 3) {
-        path = RectanglePath(rect);
+        bodyPath = RectanglePath(rect);
     }
+    QPainterPath combinedPath = bodyPath;
 
     for (int i = 0, x = (inputPortsWidth > rect.width() ? (rect.width() - inputPortsWidth) / 2 : 0); i < inputPorts.size(); i++) {
         GraphicsPortItem2 *portItem = inputPortItems[i];
@@ -170,15 +176,16 @@ void GraphicsClientItem2::init()
         QPainterPath portPath;
         portPath.addRect(QRectF(portRect.topLeft(), 0.5 * (portRect.topRight() + portRect.bottomRight())));
         if (portType == 0) {
-            portPath = portPath.united(EllipsePath(portRect));
+            portPath += EllipsePath(portRect);
         } else if (portType == 1) {
-            portPath = portPath.united(SpeechBubblePath(portRect, portRect.height() / 4, portRect.height() / 4, Qt::AbsoluteSize));
+            portPath += SpeechBubblePath(portRect, 0.7, 0.7);
         } else if (portType == 2) {
-            portPath = portPath.united(RoundedRectanglePath(portRect, portPadding + fontMetrics.height() / 2, portPadding + fontMetrics.height() / 2));
+            portPath += RoundedRectanglePath(portRect, portPadding + fontMetrics.height() / 2, portPadding + fontMetrics.height() / 2);
         } else if (portType == 3) {
-            portPath = portPath.united(RectanglePath(portRect));
+            portPath += RectanglePath(portRect);
         }
-        path = path.subtracted(portPath);
+        bodyPath -= portPath;
+        combinedPath += portPath;
 
         x += portRect.width() + portPadding;
     }
@@ -191,18 +198,24 @@ void GraphicsClientItem2::init()
         QPainterPath portPath;
         portPath.addRect(QRectF(0.5 * (portRect.topLeft() + portRect.bottomLeft()), portRect.bottomRight()));
         if (portType == 0) {
-            portPath = portPath.united(EllipsePath(portRect));
+            portPath += EllipsePath(portRect);
         } else if (portType == 1) {
-            portPath = portPath.united(SpeechBubblePath(portRect, 0.7, 0.7));
+            portPath += SpeechBubblePath(portRect, 0.7, 0.7);
         } else if (portType == 2) {
-            portPath = portPath.united(RoundedRectanglePath(portRect, portPadding + fontMetrics.height() / 2, portPadding + fontMetrics.height() / 2));
+            portPath += RoundedRectanglePath(portRect, portPadding + fontMetrics.height() / 2, portPadding + fontMetrics.height() / 2);
         } else if (portType == 3) {
-            portPath = portPath.united(RectanglePath(portRect));
+            portPath += RectanglePath(portRect);
         }
-        path = path.subtracted(portPath);
+        bodyPath -= portPath;
+        combinedPath += portPath;
 
         x += portRect.width() + portPadding;
     }
 
-    setPath(path);
+    QGraphicsPathItem *bodyItem = new QGraphicsPathItem(bodyPath, this);
+    bodyItem->setPen(QPen(QBrush(Qt::black), 3));
+    bodyItem->setBrush(QBrush(Qt::white));
+    setPath(combinedPath);
+    setPen(QPen(Qt::NoPen));
+    setBrush(QBrush(Qt::NoBrush));
 }

@@ -1,36 +1,132 @@
 #include "graphicsinterpolatoredititem.h"
 #include <QGraphicsSceneMouseEvent>
+#include <QtGlobal>
 
-GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, QGraphicsItem *parent, bool verticalGrid, bool horizontalGrid, const QPen &nodePen_, const QBrush &nodeBrush_) :
-    QGraphicsRectItem(rectangle, parent),
+GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalGridCells_, int horizontalGridCells_, const QPen &nodePen_, const QBrush &nodeBrush_) :
+    QGraphicsRectItem(parent),
+    interpolator(interpolator_),
+    child(0),
+    verticalGridCells(qMax(1, verticalGridCells_)),
+    horizontalGridCells(qMax(1, horizontalGridCells_)),
+    nodePen(nodePen_),
+    nodeBrush(nodeBrush_)
+{
+    setPen(QPen(QBrush(Qt::black), 2));
+    setBrush(QBrush(Qt::white));
+
+    setRect(rectangle, rectScaled);
+}
+
+void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF &rectScaled)
+{
+    QGraphicsRectItem::setRect(rectangle);
+
+    QList<QGraphicsItem*> children = childItems();
+    for (int i = 0; i < children.size(); i++) {
+        if (children[i] != child) {
+            delete children[i];
+        }
+    }
+
+    qreal tickSize = 10;
+    // create the first horizontal textual label:
+    QGraphicsSimpleTextItem *horizontalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(rectScaled.bottom(), 0, 'g', 5), this);
+    qreal padding = horizontalLabel->boundingRect().height();
+    // compute the inner rectangle's bottom and top:
+    qreal innerBottom = rect().bottom() - tickSize - padding * 2;
+    qreal innerTop = rect().top() + padding;
+    // now create the vertical labels, put them at zero and multiples of 10:
+    qreal maxLabelWidth = horizontalLabel->boundingRect().width() * 0.5 - tickSize;
+    for (int i = 0; i <= horizontalGridCells; i++) {
+        double value = (double)i * (rectScaled.top() - rectScaled.bottom()) / (double)horizontalGridCells + rectScaled.bottom();
+        // compute the vertical position of the label:
+        double y = (double)i * (innerTop - innerBottom) / (double)horizontalGridCells + innerBottom;
+        // create a vertical label:
+        QGraphicsSimpleTextItem *verticalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(value, 0, 'g', 5), this);
+        if (verticalLabel->boundingRect().width() > maxLabelWidth) {
+            maxLabelWidth = verticalLabel->boundingRect().width();
+        }
+        // move it to the right position:
+        verticalLabel->setPos(rect().left() + padding, y - padding * 0.5);
+    }
+    // compute the inner rectangle's left and right:
+    qreal innerLeft = rect().left() + maxLabelWidth + padding + tickSize;
+    qreal innerRight = rect().right() - padding;
+    QRectF innerRectangle = QRectF(innerLeft, innerTop, innerRight - innerLeft, innerBottom - innerTop);
+    // create the vertical ticks and dotted horizontal lines:
+    for (int i = 0; i <= horizontalGridCells; i++) {
+        double y = (double)i * (innerTop - innerBottom) / (double)horizontalGridCells + innerBottom;
+        new QGraphicsLineItem(innerLeft - tickSize * 0.5, y, innerLeft, y, this);
+        (new QGraphicsLineItem(innerLeft, y, innerRight, y, this))->setPen(QPen(Qt::DotLine));
+    }
+    // move the first horizontal label to the right position:
+    horizontalLabel->setPos(innerLeft - horizontalLabel->boundingRect().width() * 0.5, innerBottom + tickSize);
+    qreal lastRight = innerLeft + horizontalLabel->boundingRect().width() * 0.5;
+    // create horizontal ticks and dotted vertical lines:
+    for (int i = 0; i <= verticalGridCells; i++) {
+        double value = (double)i * (rectScaled.right() - rectScaled.left()) / (double)verticalGridCells + rectScaled.left();
+        double x = (double)i * (innerRight - innerLeft) / (double)verticalGridCells + innerLeft;
+        new QGraphicsLineItem(x, innerBottom, x, innerBottom + tickSize * 0.5, this);
+        (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(Qt::DotLine));
+        // create another horizontal label if it fits:
+        QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem(QString("%1").arg(value, 0, 'g', 5));
+        if ((x - label->boundingRect().width() * 0.5 > lastRight) && (x + label->boundingRect().width() * 0.5 < rect().right())) {
+            label->setParentItem(this);
+            label->setPos(x - label->boundingRect().width() * 0.5, innerBottom + tickSize);
+            lastRight = x + label->boundingRect().width() * 0.5;
+        } else {
+            delete label;
+        }
+    }
+
+    if (child) {
+        child->setRect(innerRectangle, rectScaled);
+    } else {
+        child = new GraphicsInterpolatorEditSubItem(interpolator, innerRectangle, rectScaled, this, verticalGridCells, horizontalGridCells, nodePen, nodeBrush);
+    }
+}
+
+void GraphicsInterpolatorEditItem::setVisible(ControlPoint controlPoint, bool visible)
+{
+    child->setVisible(controlPoint, visible);
+}
+
+void GraphicsInterpolatorEditItem::interpolatorChanged()
+{
+    child->interpolatorChanged();
+}
+
+Interpolator * GraphicsInterpolatorEditItem::getInterpolator()
+{
+    return child->getInterpolator();
+}
+
+GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, int verticalGridCells, int horizontalGridCells, const QPen &nodePen_, const QBrush &nodeBrush_) :
+    QGraphicsRectItem(rectangle, parent_),
     rectScaled(rectScaled_),
+    parent(parent_),
     nodePen(nodePen_),
     nodeBrush(nodeBrush_),
     interpolator(interpolator_)
 {
-    visible[FIRST] = visible[LAST] = true;
-    setPen(QPen(QBrush(Qt::black), 2));
-    setBrush(QBrush(Qt::white));
-    if (verticalGrid) {
-        // create dotted vertical lines:
-        for (int i = 0; i <= 8; i++) {
-            qreal x = (double)i / 8.0 * (rect().right() - rect().left()) + rect().left();
-            (new QGraphicsLineItem(x, rect().top(), x, rect().bottom(), this))->setPen(QPen(Qt::DotLine));
-        }
-    }
-    if (horizontalGrid) {
-        // create dotted horizontal lines:
-        for (int i = 0; i <= 8; i++) {
-            qreal y = (double)i / 8.0 * (rect().top() - rect().bottom()) + rect().bottom();
-            (new QGraphicsLineItem(rect().left(), y, rect().right(), y, this))->setPen(QPen(Qt::DotLine));
-        }
-    }
+    visible[GraphicsInterpolatorEditItem::FIRST] = visible[GraphicsInterpolatorEditItem::LAST] = true;
+    setPen(QPen(Qt::NoPen));
+//    // create dotted vertical lines:
+//    for (int i = 0; i <= verticalGridCells; i++) {
+//        qreal x = (double)i / (double)verticalGridCells * (rect().right() - rect().left()) + rect().left();
+//        (new QGraphicsLineItem(x, rect().top(), x, rect().bottom(), this))->setPen(QPen(Qt::DotLine));
+//    }
+//    // create dotted horizontal lines:
+//    for (int i = 0; i <= horizontalGridCells; i++) {
+//        qreal y = (double)i / (double)horizontalGridCells * (rect().top() - rect().bottom()) + rect().bottom();
+//        (new QGraphicsLineItem(rect().left(), y, rect().right(), y, this))->setPen(QPen(Qt::DotLine));
+//    }
     for (int i = 0; i < interpolator->getX().size(); i++) {
         nodes.append(createNode(interpolator->getX()[i], interpolator->interpolate(i, interpolator->getX()[i]), rectScaled));
         mapSenderToControlPointIndex[nodes.back()] = i;
     }
-    nodes.first()->setVisible(visible[FIRST]);
-    nodes.back()->setVisible(visible[LAST]);
+    nodes.first()->setVisible(visible[GraphicsInterpolatorEditItem::FIRST]);
+    nodes.back()->setVisible(visible[GraphicsInterpolatorEditItem::LAST]);
     interpolationItem = new GraphicsInterpolationItem(interpolator, 0.01, rectScaled.bottom(), rectScaled.top(), rect().width() / rectScaled.width(), rect().height() / rectScaled.height(), this);
     interpolationItem->setPen(QPen(QBrush(Qt::black), 2));
     interpolationItem->setPos(-rectScaled.left() * rect().width() / rectScaled.width() + rect().left(), -rectScaled.top() * rect().height() / rectScaled.height() + rect().top());
@@ -39,7 +135,7 @@ GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpo
     contextMenu.addAction(tr("Decrease nr. of control points"), this, SLOT(onDecreaseControlPoints()));
 }
 
-void GraphicsInterpolatorEditItem::setRect(const QRectF &rect_, const QRectF &scaled_)
+void GraphicsInterpolatorEditSubItem::setRect(const QRectF &rect_, const QRectF &scaled_)
 {
     QGraphicsRectItem::setRect(rect_);
     rectScaled = scaled_;
@@ -56,17 +152,17 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rect_, const QRectF &sc
     }
 }
 
-void GraphicsInterpolatorEditItem::setVisible(ControlPoint controlPoint, bool visible)
+void GraphicsInterpolatorEditSubItem::setVisible(GraphicsInterpolatorEditItem::ControlPoint controlPoint, bool visible)
 {
     this->visible[controlPoint] = visible;
-    if (controlPoint == FIRST) {
+    if (controlPoint == GraphicsInterpolatorEditItem::FIRST) {
         nodes.first()->setVisible(visible);
-    } else if (controlPoint == LAST) {
+    } else if (controlPoint == GraphicsInterpolatorEditItem::LAST) {
         nodes.back()->setVisible(visible);
     }
 }
 
-void GraphicsInterpolatorEditItem::interpolatorChanged()
+void GraphicsInterpolatorEditSubItem::interpolatorChanged()
 {
     interpolationItem->updatePath();
     nodes.first()->setVisible(true);
@@ -86,16 +182,16 @@ void GraphicsInterpolatorEditItem::interpolatorChanged()
         nodes.append(createNode(interpolator->getX()[i], interpolator->interpolate(i, interpolator->getX()[i]), rectScaled));
         mapSenderToControlPointIndex[nodes[i]] = i;
     }
-    nodes.first()->setVisible(visible[FIRST]);
-    nodes.back()->setVisible(visible[LAST]);
+    nodes.first()->setVisible(visible[GraphicsInterpolatorEditItem::FIRST]);
+    nodes.back()->setVisible(visible[GraphicsInterpolatorEditItem::LAST]);
 }
 
-Interpolator * GraphicsInterpolatorEditItem::getInterpolator()
+Interpolator * GraphicsInterpolatorEditSubItem::getInterpolator()
 {
     return interpolator;
 }
 
-void GraphicsInterpolatorEditItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
+void GraphicsInterpolatorEditSubItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     QGraphicsRectItem::mousePressEvent(event);
     if (!event->isAccepted() && (event->button() == Qt::RightButton)) {
@@ -105,30 +201,30 @@ void GraphicsInterpolatorEditItem::mousePressEvent ( QGraphicsSceneMouseEvent * 
     }
 }
 
-void GraphicsInterpolatorEditItem::onIncreaseControlPoints()
+void GraphicsInterpolatorEditSubItem::onIncreaseControlPoints()
 {
     // signal the control point increase event and update our interpolator graphic item:
-    increaseControlPoints();
+    parent->increaseControlPoints();
     interpolatorChanged();
 }
 
-void GraphicsInterpolatorEditItem::onDecreaseControlPoints()
+void GraphicsInterpolatorEditSubItem::onDecreaseControlPoints()
 {
     // signal the control point decrease event and update our interpolator graphic item:
-    decreaseControlPoints();
+    parent->decreaseControlPoints();
     interpolatorChanged();
 }
 
-void GraphicsInterpolatorEditItem::onNodePositionChangedScaled(QPointF position)
+void GraphicsInterpolatorEditSubItem::onNodePositionChangedScaled(QPointF position)
 {
     // get the control point index:
     int index = mapSenderToControlPointIndex[sender()];
     // signal the control point change event and update our interpolator graphic item:
-    changeControlPoint(index, interpolator->getX().size(), position.x(), position.y());
+    parent->changeControlPoint(index, interpolator->getX().size(), position.x(), position.y());
     interpolationItem->updatePath();
 }
 
-GraphicsNodeItem * GraphicsInterpolatorEditItem::createNode(qreal x, qreal y, const QRectF &rectScaled)
+GraphicsNodeItem * GraphicsInterpolatorEditSubItem::createNode(qreal x, qreal y, const QRectF &rectScaled)
 {
     GraphicsNodeItem *nodeItem = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
     nodeItem->setPen(nodePen);

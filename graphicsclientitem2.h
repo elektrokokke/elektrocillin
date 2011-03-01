@@ -6,6 +6,7 @@
 #include <QPainterPath>
 #include <QGraphicsSimpleTextItem>
 #include <QCursor>
+#include <QBrush>
 #include <QFont>
 #include <QGraphicsSceneMouseEvent>
 
@@ -48,6 +49,7 @@ public:
     {
         font.setStyleStrategy(QFont::PreferAntialias);
         setFont(font);
+        setBrush(QBrush(Qt::black));
         setCursor(Qt::PointingHandCursor);
     }
 signals:
@@ -58,8 +60,15 @@ protected:
         QGraphicsSimpleTextItem::mousePressEvent(event);
         if (!event->isAccepted() && (event->button() == Qt::LeftButton)) {
             event->accept();
+            setBrush(QBrush(Qt::lightGray));
+        }
+    }
+    void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
+    {
+        if (contains(event->pos())) {
             triggered();
         }
+        setBrush(QBrush(Qt::black));
     }
 };
 

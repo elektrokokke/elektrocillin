@@ -121,7 +121,7 @@ void FrequencyResponseGraphicsItem::initialize()
             maxLabelWidth = verticalLabel->boundingRect().width();
         }
         // move it to the right position:
-        verticalLabel->setPos(padding, y - padding * 0.5);
+        verticalLabel->setPos(rect().left() + padding, y - padding * 0.5);
     }
     for (double decibel =-10.0; decibel >= lowestDecibel; decibel -= 10.0) {
         // compute the vertical position of the label:
@@ -132,7 +132,7 @@ void FrequencyResponseGraphicsItem::initialize()
             maxLabelWidth = verticalLabel->boundingRect().width();
         }
         // move it to the right position:
-        verticalLabel->setPos(padding, y - padding * 0.5);
+        verticalLabel->setPos(rect().left() + padding, y - padding * 0.5);
     }
     // compute the inner rectangle's left and right:
     qreal innerLeft = rect().left() + maxLabelWidth + padding + tickSize;
@@ -143,7 +143,6 @@ void FrequencyResponseGraphicsItem::initialize()
         qreal y = (decibel - lowestDecibel) / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
         new QGraphicsLineItem(innerLeft - tickSize * 0.5, y, innerLeft, y, this);
         (new QGraphicsLineItem(innerLeft, y, innerRight, y, this))->setPen(QPen(Qt::DotLine));
-
     }
     for (double decibel =-10.0; decibel >= lowestDecibel; decibel -= 10.0) {
         qreal y = (decibel - lowestDecibel) / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
@@ -160,7 +159,7 @@ void FrequencyResponseGraphicsItem::initialize()
         (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(Qt::DotLine));
         // create another horizontal label if it fits:
         QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem(QString("%1Hz").arg(hertz, 0, 'g', 5));
-        if ((x - label->boundingRect().width() * 0.5 > lastRight) && (x + label->boundingRect().width() * 0.5 < boundingRect().right())) {
+        if ((x - label->boundingRect().width() * 0.5 > lastRight) && (x + label->boundingRect().width() * 0.5 < rect().right())) {
             label->setParentItem(this);
             label->setPos(x - label->boundingRect().width() * 0.5, innerBottom + tickSize);
             lastRight = x + label->boundingRect().width() * 0.5;

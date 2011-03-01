@@ -139,7 +139,7 @@ void LinearMorphOscillatorClient::processEvent(const RingBufferEvent *event, jac
 }
 
 LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
-    GraphicsInterpolatorEditItem(client_->getState(state_), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent, true, true, nodePen, nodeBrush),
+    GraphicsInterpolatorEditItem(client_->getState(state_), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent, 8, 8, nodePen, nodeBrush),
     client(client_),
     state(state_),
     twin(0)

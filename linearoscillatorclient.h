@@ -34,7 +34,6 @@ private:
 
 class LinearOscillatorGraphicsItem : public GraphicsInterpolatorEditItem
 {
-    Q_OBJECT
 public:
     LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client, QGraphicsItem *parent = 0);
 

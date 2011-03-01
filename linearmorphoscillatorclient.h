@@ -33,7 +33,6 @@ private:
 
 class LinearMorphOscillatorGraphicsSubItem : public GraphicsInterpolatorEditItem
 {
-    Q_OBJECT
 public:
     LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client, int state, QGraphicsItem *parent = 0, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 

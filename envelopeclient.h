@@ -38,7 +38,6 @@ class EnvelopeGraphicsItem;
 
 class EnvelopeGraphicsSubItem : public GraphicsInterpolatorEditItem
 {
-    Q_OBJECT
 public:
     EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 protected:

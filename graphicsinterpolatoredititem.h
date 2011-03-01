@@ -9,29 +9,47 @@
 #include <QMenu>
 #include <QPen>
 
-class GraphicsInterpolatorEditItem : public QObject, public QGraphicsRectItem
+class GraphicsInterpolatorEditSubItem;
+
+class GraphicsInterpolatorEditItem : public QGraphicsRectItem
 {
-    Q_OBJECT
 public:
     enum ControlPoint {
         FIRST = 0,
         LAST = 1
     };
-
-    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, bool verticalGrid = true, bool horizontalGrid = true, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, int verticalGridCells = 8, int horizontalGridCells = 8, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 
     void setRect(const QRectF &rect, const QRectF &rectScaled);
-
     void setVisible(ControlPoint controlPoint, bool visible);
-
     void interpolatorChanged();
-
     Interpolator * getInterpolator();
-
 protected:
     virtual void increaseControlPoints() = 0;
     virtual void decreaseControlPoints() = 0;
     virtual void changeControlPoint(int index, int nrOfControlPoints, double x, double y) = 0;
+    friend class GraphicsInterpolatorEditSubItem;
+private:
+    Interpolator *interpolator;
+    GraphicsInterpolatorEditSubItem *child;
+    int verticalGridCells, horizontalGridCells;
+    QPen nodePen;
+    QBrush nodeBrush;
+};
+
+class GraphicsInterpolatorEditSubItem : public QObject, public QGraphicsRectItem
+{
+    Q_OBJECT
+public:
+
+    GraphicsInterpolatorEditSubItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, GraphicsInterpolatorEditItem *parent, int verticalGridCells, int horizontalGridCells, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+
+    void setRect(const QRectF &rect, const QRectF &rectScaled);
+    void setVisible(GraphicsInterpolatorEditItem::ControlPoint controlPoint, bool visible);
+    void interpolatorChanged();
+    Interpolator * getInterpolator();
+
+protected:
     virtual void mousePressEvent ( QGraphicsSceneMouseEvent * event );
 
 private slots:
@@ -41,6 +59,7 @@ private slots:
 
 private:
     QRectF rectScaled;
+    GraphicsInterpolatorEditItem *parent;
     QPen nodePen;
     QBrush nodeBrush;
     QMap<QObject*, int> mapSenderToControlPointIndex;

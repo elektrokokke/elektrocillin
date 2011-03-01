@@ -33,7 +33,6 @@ private:
 
 class LinearWaveShapingGraphicsItem : public GraphicsInterpolatorEditItem
 {
-    Q_OBJECT
 public:
     LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client, QGraphicsItem *parent = 0);
 

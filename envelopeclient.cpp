@@ -131,7 +131,7 @@ void EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t t
 }
 
 EnvelopeGraphicsSubItem::EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent_, const QPen &nodePen, const QBrush &nodeBrush) :
-    GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(), rect, QRectF(0, 1, parent_->getClient()->getEnvelope()->getDuration(), -2), parent_, false, true, nodePen, nodeBrush),
+    GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(), rect, QRectF(0, 1, parent_->getClient()->getEnvelope()->getDuration(), -2), parent_, 8, 8, nodePen, nodeBrush),
     parent(parent_)
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
