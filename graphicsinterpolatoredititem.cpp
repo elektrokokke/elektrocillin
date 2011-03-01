@@ -2,12 +2,12 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QtGlobal>
 
-GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalGridCells_, int horizontalGridCells_, const QPen &nodePen_, const QBrush &nodeBrush_) :
+GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalSlices_, int horizontalSlices_, const QPen &nodePen_, const QBrush &nodeBrush_) :
     QGraphicsRectItem(parent),
     interpolator(interpolator_),
     child(0),
-    verticalGridCells(qMax(1, verticalGridCells_)),
-    horizontalGridCells(qMax(1, horizontalGridCells_)),
+    verticalSlices(qMax(1, verticalSlices_)),
+    horizontalSlices(qMax(1, horizontalSlices_)),
     nodePen(nodePen_),
     nodeBrush(nodeBrush_)
 {
@@ -37,10 +37,10 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
     qreal innerTop = rect().top() + padding;
     // now create the vertical labels, put them at zero and multiples of 10:
     qreal maxLabelWidth = horizontalLabel->boundingRect().width() * 0.5 - tickSize;
-    for (int i = 0; i <= horizontalGridCells; i++) {
-        double value = (double)i * (rectScaled.top() - rectScaled.bottom()) / (double)horizontalGridCells + rectScaled.bottom();
+    for (int i = 0; i <= horizontalSlices; i++) {
+        double value = (double)i * (rectScaled.top() - rectScaled.bottom()) / (double)horizontalSlices + rectScaled.bottom();
         // compute the vertical position of the label:
-        double y = (double)i * (innerTop - innerBottom) / (double)horizontalGridCells + innerBottom;
+        double y = (double)i * (innerTop - innerBottom) / (double)horizontalSlices + innerBottom;
         // create a vertical label:
         QGraphicsSimpleTextItem *verticalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(value, 0, 'g', 5), this);
         if (verticalLabel->boundingRect().width() > maxLabelWidth) {
@@ -54,8 +54,8 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
     qreal innerRight = rect().right() - padding;
     QRectF innerRectangle = QRectF(innerLeft, innerTop, innerRight - innerLeft, innerBottom - innerTop);
     // create the vertical ticks and dotted horizontal lines:
-    for (int i = 0; i <= horizontalGridCells; i++) {
-        double y = (double)i * (innerTop - innerBottom) / (double)horizontalGridCells + innerBottom;
+    for (int i = 0; i <= horizontalSlices; i++) {
+        double y = (double)i * (innerTop - innerBottom) / (double)horizontalSlices + innerBottom;
         new QGraphicsLineItem(innerLeft - tickSize * 0.5, y, innerLeft, y, this);
         (new QGraphicsLineItem(innerLeft, y, innerRight, y, this))->setPen(QPen(Qt::DotLine));
     }
@@ -63,9 +63,9 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
     horizontalLabel->setPos(innerLeft - horizontalLabel->boundingRect().width() * 0.5, innerBottom + tickSize);
     qreal lastRight = innerLeft + horizontalLabel->boundingRect().width() * 0.5;
     // create horizontal ticks and dotted vertical lines:
-    for (int i = 0; i <= verticalGridCells; i++) {
-        double value = (double)i * (rectScaled.right() - rectScaled.left()) / (double)verticalGridCells + rectScaled.left();
-        double x = (double)i * (innerRight - innerLeft) / (double)verticalGridCells + innerLeft;
+    for (int i = 0; i <= verticalSlices; i++) {
+        double value = (double)i * (rectScaled.right() - rectScaled.left()) / (double)verticalSlices + rectScaled.left();
+        double x = (double)i * (innerRight - innerLeft) / (double)verticalSlices + innerLeft;
         new QGraphicsLineItem(x, innerBottom, x, innerBottom + tickSize * 0.5, this);
         (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(Qt::DotLine));
         // create another horizontal label if it fits:
@@ -82,7 +82,7 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
     if (child) {
         child->setRect(innerRectangle, rectScaled);
     } else {
-        child = new GraphicsInterpolatorEditSubItem(interpolator, innerRectangle, rectScaled, this, verticalGridCells, horizontalGridCells, nodePen, nodeBrush);
+        child = new GraphicsInterpolatorEditSubItem(interpolator, innerRectangle, rectScaled, this, nodePen, nodeBrush);
     }
 }
 
@@ -101,7 +101,7 @@ Interpolator * GraphicsInterpolatorEditItem::getInterpolator()
     return child->getInterpolator();
 }
 
-GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, int verticalGridCells, int horizontalGridCells, const QPen &nodePen_, const QBrush &nodeBrush_) :
+GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, const QPen &nodePen_, const QBrush &nodeBrush_) :
     QGraphicsRectItem(rectangle, parent_),
     rectScaled(rectScaled_),
     parent(parent_),
@@ -111,16 +111,7 @@ GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *i
 {
     visible[GraphicsInterpolatorEditItem::FIRST] = visible[GraphicsInterpolatorEditItem::LAST] = true;
     setPen(QPen(Qt::NoPen));
-//    // create dotted vertical lines:
-//    for (int i = 0; i <= verticalGridCells; i++) {
-//        qreal x = (double)i / (double)verticalGridCells * (rect().right() - rect().left()) + rect().left();
-//        (new QGraphicsLineItem(x, rect().top(), x, rect().bottom(), this))->setPen(QPen(Qt::DotLine));
-//    }
-//    // create dotted horizontal lines:
-//    for (int i = 0; i <= horizontalGridCells; i++) {
-//        qreal y = (double)i / (double)horizontalGridCells * (rect().top() - rect().bottom()) + rect().bottom();
-//        (new QGraphicsLineItem(rect().left(), y, rect().right(), y, this))->setPen(QPen(Qt::DotLine));
-//    }
+    setBrush(QBrush(Qt::NoBrush));
     for (int i = 0; i < interpolator->getX().size(); i++) {
         nodes.append(createNode(interpolator->getX()[i], interpolator->interpolate(i, interpolator->getX()[i]), rectScaled));
         mapSenderToControlPointIndex[nodes.back()] = i;

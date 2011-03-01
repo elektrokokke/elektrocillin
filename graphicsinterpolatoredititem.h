@@ -18,7 +18,7 @@ public:
         FIRST = 0,
         LAST = 1
     };
-    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, int verticalGridCells = 8, int horizontalGridCells = 8, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, int verticalSlices = 8, int horizontalSlices = 8, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 
     void setRect(const QRectF &rect, const QRectF &rectScaled);
     void setVisible(ControlPoint controlPoint, bool visible);
@@ -32,7 +32,7 @@ protected:
 private:
     Interpolator *interpolator;
     GraphicsInterpolatorEditSubItem *child;
-    int verticalGridCells, horizontalGridCells;
+    int verticalSlices, horizontalSlices;
     QPen nodePen;
     QBrush nodeBrush;
 };
@@ -42,7 +42,7 @@ class GraphicsInterpolatorEditSubItem : public QObject, public QGraphicsRectItem
     Q_OBJECT
 public:
 
-    GraphicsInterpolatorEditSubItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, GraphicsInterpolatorEditItem *parent, int verticalGridCells, int horizontalGridCells, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    GraphicsInterpolatorEditSubItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, GraphicsInterpolatorEditItem *parent, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 
     void setRect(const QRectF &rect, const QRectF &rectScaled);
     void setVisible(GraphicsInterpolatorEditItem::ControlPoint controlPoint, bool visible);

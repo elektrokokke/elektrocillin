@@ -49,7 +49,7 @@ void GraphicsClientItem2::setInnerItem(QGraphicsItem *item)
     if (innerItem) {
         innerItem->setVisible(false);
         innerItem->setParentItem(this);
-        innerItem->setPos(getRect().bottomLeft());
+        innerItem->setPos(getRect().topRight());
     }
 }
 
@@ -68,9 +68,8 @@ void GraphicsClientItem2::showInnerItem(bool ensureVisible_)
         // show the inner item if requested:
         innerItem->setVisible(ensureVisible_ || !innerItem->isVisible());
         if (innerItem->isVisible()) {
-            setPath(pathWithoutInnerItem.united(RectanglePath(innerItem->boundingRect().translated(innerItem->pos()))));
+            setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().translated(innerItem->pos())));
             showInnerItemCommand->setText("[-]");
-            innerItem->ensureVisible();
         } else {
             setPath(pathWithoutInnerItem);
             showInnerItemCommand->setText("[+]");
@@ -81,17 +80,11 @@ void GraphicsClientItem2::showInnerItem(bool ensureVisible_)
 void GraphicsClientItem2::focusInEvent(QFocusEvent *)
 {
     setZValue(1);
-    if (innerItem) {
-        innerItem->setOpacity(1);
-    }
 }
 
 void GraphicsClientItem2::focusOutEvent(QFocusEvent *)
 {
     setZValue(0);
-    if (innerItem) {
-        innerItem->setOpacity(0.25);
-    }
 }
 
 void GraphicsClientItem2::init()
