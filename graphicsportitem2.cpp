@@ -129,7 +129,7 @@ void GraphicsPortItem2::registeredPort(const QString &fullPortname, const QStrin
     }
 }
 
-void GraphicsPortItem2::unregisteredPort(const QString &fullPortname, const QString &type, int flags)
+void GraphicsPortItem2::unregisteredPort(const QString &fullPortname, const QString &, int)
 {
     QAction *action = mapPortNamesToActions.value(fullPortname, 0);
     if (action) {

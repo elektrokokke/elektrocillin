@@ -50,7 +50,7 @@ QGraphicsItem * OscillatorClient::createGraphicsItem(const QRectF &rect)
     return new OscillatorClientGraphicsItem(rect, this);
 }
 
-void OscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+void OscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
     if (const ChangeGainEvent *changeGainEvent = dynamic_cast<const ChangeGainEvent*>(event)) {
         getOscillator()->setGain(changeGainEvent->gain);

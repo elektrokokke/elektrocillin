@@ -17,11 +17,11 @@ JackClientFactory * JackClient::getFactory()
     return 0;
 }
 
-void JackClient::saveState(QDataStream &stream)
+void JackClient::saveState(QDataStream &)
 {
 }
 
-void JackClient::loadState(QDataStream &stream)
+void JackClient::loadState(QDataStream &)
 {
 }
 
@@ -191,7 +191,7 @@ QString JackClient::getPortNameById(jack_port_id_t id)
     return jack_port_name(jack_port_by_id(client, id));
 }
 
-QGraphicsItem * JackClient::createGraphicsItem(const QRectF &rect)
+QGraphicsItem * JackClient::createGraphicsItem(const QRectF &)
 {
     return 0;
 }
