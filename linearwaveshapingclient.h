@@ -5,7 +5,7 @@
 #include "eventprocessorclient.h"
 #include "graphicsinterpolatoredititem.h"
 
-class LinearWaveShapingClient : public EventProcessorClient2
+class LinearWaveShapingClient : public EventProcessorClient
 {
 public:
     LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);

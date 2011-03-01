@@ -5,10 +5,10 @@
 #include "jackringbuffer.h"
 #include <QVector>
 
-class EventProcessorClient2 : public MidiProcessorClient
+class EventProcessorClient : public MidiProcessorClient
 {
 public:
-    EventProcessorClient2(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = (2 << 16));
+    EventProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = (2 << 16));
 
     bool postEvent(RingBufferEvent *event);
     bool postEvents(const QVector<RingBufferEvent*> &events);
@@ -32,7 +32,7 @@ protected:
       - processMidi(const MidiEvent &, jack_nframes_t) OR
       - processMidi(jack_nframes_t, jack_nframes_t)
       */
-    EventProcessorClient2(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16));
+    EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16));
 
     virtual bool process(jack_nframes_t nframes);
     virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time) = 0;

@@ -5,7 +5,7 @@
 #include "cubicsplineinterpolator.h"
 #include "graphicsinterpolatoredititem.h"
 
-class CubicSplineWaveShapingClient : public EventProcessorClient2
+class CubicSplineWaveShapingClient : public EventProcessorClient
 {
 public:
     CubicSplineWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);

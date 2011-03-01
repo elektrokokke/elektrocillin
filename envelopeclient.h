@@ -8,7 +8,7 @@
 #include <QPen>
 #include <QBrush>
 
-class EnvelopeClient : public EventProcessorClient2
+class EnvelopeClient : public EventProcessorClient
 {
 public:
     EnvelopeClient(const QString &clientName, size_t ringBufferSize = (2 << 16));

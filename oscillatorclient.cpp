@@ -2,13 +2,13 @@
 #include "graphicsnodeitem.h"
 
 OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator, size_t ringBufferSize) :
-    EventProcessorClient2(clientName, oscillator, ringBufferSize),
+    EventProcessorClient(clientName, oscillator, ringBufferSize),
     oscillator(0)
 {
 }
 
 OscillatorClient::OscillatorClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient2(clientName, new Oscillator(), ringBufferSize)
+    EventProcessorClient(clientName, new Oscillator(), ringBufferSize)
 {
     oscillator = (Oscillator*)getAudioProcessor();
 }

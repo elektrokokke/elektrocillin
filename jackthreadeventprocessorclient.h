@@ -4,11 +4,11 @@
 #include "eventprocessorclient.h"
 #include "jackthread.h"
 
-class JackThreadEventProcessorClient : public EventProcessorClient2
+class JackThreadEventProcessorClient : public EventProcessorClient
 {
 public:
     JackThreadEventProcessorClient(JackThread *thread, const QString &clientName, MidiProcessor *midiProcessor, size_t ringBufferSize = 1024) :
-        EventProcessorClient2(clientName, midiProcessor, ringBufferSize),
+        EventProcessorClient(clientName, midiProcessor, ringBufferSize),
         jackThread(thread)
     {}
     /**
@@ -26,7 +26,7 @@ public:
       - processMidi(jack_nframes_t, jack_nframes_t)
       */
     JackThreadEventProcessorClient(JackThread *thread, const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = 1024) :
-        EventProcessorClient2(clientName, inputPortNames, outputPortNames, ringBufferSize),
+        EventProcessorClient(clientName, inputPortNames, outputPortNames, ringBufferSize),
         jackThread(thread)
     {}
 
@@ -49,7 +49,7 @@ protected:
     virtual bool init()
     {
         jackThread->start();
-        return EventProcessorClient2::init();
+        return EventProcessorClient::init();
     }
     /**
       This stops the associated JackThread.
@@ -59,7 +59,7 @@ protected:
     virtual void deinit()
     {
         jackThread->stop();
-        EventProcessorClient2::deinit();
+        EventProcessorClient::deinit();
     }
 
 private:

@@ -2,7 +2,7 @@
 #include <math.h>
 
 EnvelopeClient::EnvelopeClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient2(clientName, new Envelope(), ringBufferSize)
+    EventProcessorClient(clientName, new Envelope(), ringBufferSize)
 {
     envelopeProcess = (Envelope*)getAudioProcessor();
     envelope = new Envelope();

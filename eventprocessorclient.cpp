@@ -1,11 +1,11 @@
 #include "eventprocessorclient.h"
 
-EventProcessorClient2::EventProcessorClient2(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize) :
+EventProcessorClient::EventProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize) :
     MidiProcessorClient(clientName, midiProcessor_),
     ringBuffer(ringBufferSize)
 {}
 
-bool EventProcessorClient2::postEvent(RingBufferEvent *event)
+bool EventProcessorClient::postEvent(RingBufferEvent *event)
 {
     if (isActive()) {
         jack_nframes_t time = getEstimatedCurrentTime();
@@ -15,7 +15,7 @@ bool EventProcessorClient2::postEvent(RingBufferEvent *event)
     }
 }
 
-bool EventProcessorClient2::postEvents(const QVector<RingBufferEvent*> &events)
+bool EventProcessorClient::postEvents(const QVector<RingBufferEvent*> &events)
 {
     if (isActive()) {
         int writtenEvents = 0;
@@ -31,12 +31,12 @@ bool EventProcessorClient2::postEvents(const QVector<RingBufferEvent*> &events)
     }
 }
 
-EventProcessorClient2::EventProcessorClient2(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize) :
+EventProcessorClient::EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize) :
     MidiProcessorClient(clientName, inputPortNames, outputPortNames),
     ringBuffer(ringBufferSize)
 {}
 
-bool EventProcessorClient2::process(jack_nframes_t nframes)
+bool EventProcessorClient::process(jack_nframes_t nframes)
 {
     jack_nframes_t lastFrameTime = getLastFrameTime();
     // get audio port buffers:

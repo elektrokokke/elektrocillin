@@ -7,7 +7,7 @@
 #include <QBrush>
 #include <QPen>
 
-class OscillatorClient : public EventProcessorClient2
+class OscillatorClient : public EventProcessorClient
 {
 public:
     class ChangeGainEvent : public RingBufferEvent

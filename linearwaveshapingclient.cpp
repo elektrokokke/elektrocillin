@@ -4,7 +4,7 @@
 #include <QtGlobal>
 
 LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient2(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
+    EventProcessorClient(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
     interpolator(QVector<double>(5), QVector<double>(5)),
     interpolatorProcess(QVector<double>(5), QVector<double>(5))
 {
