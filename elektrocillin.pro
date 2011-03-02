@@ -79,7 +79,8 @@ SOURCES += main.cpp\
     graphicsclientnameitem.cpp \
     graphicsclientitem2.cpp \
     graphicsportitem2.cpp \
-    graphicsportconnectionitem.cpp
+    graphicsportconnectionitem.cpp \
+    metajack/realjackcontext.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -152,7 +153,9 @@ HEADERS  += mainwindow.h \
     graphicsclientnameitem.h \
     graphicsclientitem2.h \
     graphicsportitem2.h \
-    graphicsportconnectionitem.h
+    graphicsportconnectionitem.h \
+    metajack/metajackinterface.h \
+    metajack/realjackcontext.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
