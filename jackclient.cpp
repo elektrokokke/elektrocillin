@@ -67,14 +67,17 @@ bool JackClient::activate()
     }
     // get the actual client name:
     actualName = jack_get_client_name (client);
+    // associate the client handle with a pointer to this object:
+    mapClientHandlesToJackClients[client] = this;
     return true;
 }
 
 void JackClient::close()
 {
-    if (isActive()) {
-        // close the Jack client:
-        jack_client_close(client);
+    // close the Jack client:
+    if (isActive() && (jack_client_close(client) == 0)) {
+        // deassociate the client handle from the pointer to this object:
+        mapClientHandlesToJackClients.remove(client);
         client = 0;
         actualName = requestedName;
         // notify subclasses:
@@ -220,9 +223,16 @@ int JackClient::getMaximumPortNameLength()
     return jack_port_name_size();
 }
 
+JackClient * JackClient::getClient(jack_client_t *client)
+{
+    return mapClientHandlesToJackClients.value(client, 0);
+}
+
 void JackClient::deinit()
 {
 }
+
+QMap<jack_client_t*, JackClient*> JackClient::mapClientHandlesToJackClients;
 
 int JackClient::process(jack_nframes_t nframes, void *arg)
 {

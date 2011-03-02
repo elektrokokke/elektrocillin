@@ -189,6 +189,8 @@ public:
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
     static int getMaximumPortNameLength();
 
+    static JackClient * getClient(jack_client_t *client);
+
 protected:
     /**
       This is called before the jack client is activated.
@@ -268,6 +270,8 @@ private:
     QString requestedName, actualName;
     jack_client_t *client;
     QMap<QString, PortConnectInterface*> portConnectInterfaces;
+
+    static QMap<jack_client_t*, JackClient*> mapClientHandlesToJackClients;
 
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
