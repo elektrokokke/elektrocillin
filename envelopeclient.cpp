@@ -10,6 +10,7 @@ EnvelopeClient::EnvelopeClient(const QString &clientName, size_t ringBufferSize)
 
 EnvelopeClient::~EnvelopeClient()
 {
+    close();
     delete envelope;
     delete envelopeProcess;
 }

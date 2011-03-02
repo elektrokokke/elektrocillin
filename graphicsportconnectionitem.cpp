@@ -34,6 +34,12 @@ void GraphicsPortConnectionItem::deletePortConnectionItem(const QString &port1, 
         items[port1].remove(port2);
         items[port2].remove(port1);
         delete item;
+        if (items[port1].size() == 0) {
+            items.remove(port1);
+        }
+        if (items[port2].size() == 0) {
+            items.remove(port2);
+        }
     }
 }
 
@@ -54,6 +60,15 @@ void GraphicsPortConnectionItem::setPositions(const QString &port, const QPointF
     const QMap<QString, GraphicsPortConnectionItem*> &portItems = items[port];
     for (QMap<QString, GraphicsPortConnectionItem*>::const_iterator i = portItems.begin(); i != portItems.end(); i++) {
         i.value()->setPos(port, point);
+    }
+}
+
+void GraphicsPortConnectionItem::deletePortConnectionItems(const QString &fullPortName)
+{
+    QMap<QString, GraphicsPortConnectionItem*> portItems = items.value(fullPortName);
+    int size = portItems.size();
+    for (int i = 0; i < size; i++) {
+        deletePortConnectionItem(fullPortName, portItems.begin().key());
     }
 }
 

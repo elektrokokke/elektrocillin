@@ -13,7 +13,8 @@ public:
     static GraphicsPortConnectionItem * getPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene);
     static void deletePortConnectionItem(const QString &port1, const QString &port2);
     void setPos(const QString &port, const QPointF &point);
-    static void setPositions(const QString &port,const  QPointF &point);
+    static void setPositions(const QString &port, const  QPointF &point);
+    static void deletePortConnectionItems(const QString &fullPortName);
 private:
     QString port1, port2;
     QPointF point1, point2;

@@ -39,6 +39,7 @@ MultiplyClient::MultiplyClient(const QString &clientName) :
 
 MultiplyClient::~MultiplyClient()
 {
+    close();
     delete getAudioProcessor();
 }
 

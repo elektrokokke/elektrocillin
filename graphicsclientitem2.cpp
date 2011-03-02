@@ -1,5 +1,6 @@
 #include "graphicsclientitem2.h"
 #include "graphicsportitem2.h"
+#include "jackcontextgraphicsscene.h"
 #include <QFontMetrics>
 #include <QPen>
 #include <QLinearGradient>
@@ -77,6 +78,17 @@ void GraphicsClientItem2::showInnerItem(bool ensureVisible_)
     }
 }
 
+void GraphicsClientItem2::mousePressEvent ( QGraphicsSceneMouseEvent * event )
+{
+    if (event->button() == Qt::RightButton) {
+        event->accept();
+        // show the context menu:
+        contextMenu.exec(event->screenPos());
+    } else {
+        QGraphicsPathItem::mousePressEvent(event);
+    }
+}
+
 void GraphicsClientItem2::focusInEvent(QFocusEvent *)
 {
     setZValue(1);
@@ -85,6 +97,14 @@ void GraphicsClientItem2::focusInEvent(QFocusEvent *)
 void GraphicsClientItem2::focusOutEvent(QFocusEvent *)
 {
     setZValue(0);
+}
+
+void GraphicsClientItem2::onActionRemoveClient()
+{
+    // delete the client belonging to this item:
+    if (JackContextGraphicsScene *jackContextGraphicsScene = qobject_cast<JackContextGraphicsScene*>(scene())) {
+        jackContextGraphicsScene->removeClient(client);
+    }
 }
 
 void GraphicsClientItem2::init()
@@ -99,6 +119,8 @@ void GraphicsClientItem2::init()
     QFontMetrics fontMetrics(font);
     int padding = fontMetrics.height() * 2;
     int portPadding = fontMetrics.height() / 2;
+
+    contextMenu.addAction("Delete client", this, SLOT(onActionRemoveClient()));
 
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
     textItem->setFont(font);

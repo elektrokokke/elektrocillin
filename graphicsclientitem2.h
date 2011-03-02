@@ -8,11 +8,12 @@
 #include <QCursor>
 #include <QBrush>
 #include <QFont>
+#include <QMenu>
 #include <QGraphicsSceneMouseEvent>
 
 class CommandTextItem;
 
-class GraphicsClientItem2 :public QObject, public QGraphicsPathItem
+class GraphicsClientItem2 : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
@@ -25,8 +26,11 @@ public:
 public slots:
     void showInnerItem(bool ensureVisible = false);
 protected:
+    void mousePressEvent ( QGraphicsSceneMouseEvent * event );
     void focusInEvent(QFocusEvent * event);
     void focusOutEvent(QFocusEvent * event);
+private slots:
+    void onActionRemoveClient();
 private:
     JackClient *client;
     QString clientName;
@@ -36,6 +40,7 @@ private:
     QGraphicsItem *innerItem;
     CommandTextItem *showInnerItemCommand;
     QPainterPath pathWithoutInnerItem;
+    QMenu contextMenu;
 
     void init();
 };

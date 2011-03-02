@@ -8,26 +8,29 @@
 
 class JackContextGraphicsScene : public QGraphicsScene
 {
+    Q_OBJECT
 public:
     JackContextGraphicsScene(int clientStyle, int portStyle, const QFont &font);
+    virtual ~JackContextGraphicsScene();
 
     void setClientStyle(int clientStyle);
     void setPortStyle(int portStyle);
 
     GraphicsClientItem2 * addClient(JackClient *client);
+    void removeClient(JackClient *client);
     void saveSession(QDataStream &stream);
     bool loadSession(QDataStream &stream);
 
 protected:
     GraphicsClientItem2 * addClient(const QString &clientName);
+    void removeAllClients();
 
 private:
     int clientStyle, portStyle;
     QFont font;
     QRectF clientsRect;
     JackNullClient nullClient;
-    QVector<JackClient*> clients;
-    QVector<GraphicsClientItem2*> clientGraphicsItems;
+    QMap<QString, QPair<JackClient*, GraphicsClientItem2*> > clientsMap;
 };
 
 #endif // JACKCONTEXTGRAPHICSSCENE_H
