@@ -1,7 +1,7 @@
 #include "realjackcontext.h"
 #include <jack/jack.h>
 
-jack_client_t * RealJackContext::get_client_by_name(const char *client_name)
+jack_client_t * RealJackContext::client_by_name(const char *client_name)
 {
     std::map<std::string, jack_client_t*>::iterator find = clients.find(client_name);
     if (find != clients.end()) {

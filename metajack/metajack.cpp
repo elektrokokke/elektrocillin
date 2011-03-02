@@ -8,6 +8,11 @@ extern "C"
 {
 #endif
 
+jack_client_t * jack_client_by_name(const char *client_name)
+{
+    return RecursiveJackContext::getInstance()->client_by_name(client_name);
+}
+
 void meta_jack_get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
 {
     RecursiveJackContext::getInstance()->get_version(major_ptr, minor_ptr, micro_ptr, proto_ptr);

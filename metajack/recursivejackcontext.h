@@ -30,7 +30,7 @@ public:
     JackContext * getInterfaceByClientName(const std::string &clientName);
 
     // methods reimplemented from JackInterface:
-    jack_client_t * get_client_by_name(const char *client_name);
+    jack_client_t * client_by_name(const char *client_name);
     void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);
     const char * get_version_string();
     jack_client_t * client_open (const char *client_name, jack_options_t options, jack_status_t *, ...);

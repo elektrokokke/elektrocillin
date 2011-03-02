@@ -12,7 +12,7 @@ public:
       Returns a client handle iff it has been created by this instance.
       I.e., client handles of clients created by others can not be retrieved this way.
       */
-    jack_client_t * get_client_by_name(const char *client_name);
+    jack_client_t * client_by_name(const char *client_name);
 
     // Jack API methods:
     void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);

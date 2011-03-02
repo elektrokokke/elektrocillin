@@ -17,12 +17,12 @@ public:
     void setPortStyle(int portStyle);
 
     GraphicsClientItem2 * addClient(JackClient *client);
+    GraphicsClientItem2 * addClient(const QString &clientName);
     void removeClient(JackClient *client);
     void saveSession(QDataStream &stream);
     bool loadSession(QDataStream &stream);
 
 protected:
-    GraphicsClientItem2 * addClient(const QString &clientName);
     void removeAllClients();
 
 private:

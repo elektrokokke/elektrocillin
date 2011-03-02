@@ -74,9 +74,9 @@ JackContext * RecursiveJackContext::getInterfaceByClientName(const std::string &
     }
 }
 
-jack_client_t * RecursiveJackContext::get_client_by_name(const char *client_name)
+jack_client_t * RecursiveJackContext::client_by_name(const char *client_name)
 {
-    return interfaceStack.top()->get_client_by_name(client_name);
+    return interfaceStack.top()->client_by_name(client_name);
 }
 
 void RecursiveJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)

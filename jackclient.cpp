@@ -26,6 +26,11 @@ void JackClient::loadState(QDataStream &)
 {
 }
 
+jack_client_t * JackClient::getClient()
+{
+    return client;
+}
+
 const QString & JackClient::getClientName() const
 {
     return actualName;

@@ -641,7 +641,7 @@ int MetaJackContext::bufferSizeCallback(jack_nframes_t bufferSize, void *arg)
  * Methods reimplemented from JackInterface
  *
  ******************************************/
-jack_client_t * MetaJackContext::get_client_by_name(const char *client_name)
+jack_client_t * MetaJackContext::client_by_name(const char *client_name)
 {
     std::map<std::string, MetaJackClient*>::iterator find = clients.find(client_name);
     if (find != clients.end()) {

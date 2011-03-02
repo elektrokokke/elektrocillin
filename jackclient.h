@@ -49,6 +49,8 @@ public:
     virtual void saveState(QDataStream &stream);
     virtual void loadState(QDataStream &stream);
 
+    jack_client_t * getClient();
+
     /**
       @return If the client is active, this returns the actual client name as
         assign by the Jack server. If not, it returns the desired client name
