@@ -34,9 +34,11 @@ jack_client_t * RealJackContext::client_open (const char *client_name, jack_opti
 int RealJackContext::client_close (jack_client_t *client)
 {
     std::string client_name = jack_get_client_name(client);
-    if (jack_client_close(client) == 0) {
+    int returnValue = jack_client_close(client);
+    if (returnValue == 0) {
         clients.erase(client_name);
     }
+    return returnValue;
 }
 
 int RealJackContext::client_name_size ()
