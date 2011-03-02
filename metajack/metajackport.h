@@ -3,7 +3,7 @@
 
 #include <string>
 #include <set>
-#include <jack/jack.h>
+#include <jack/types.h>
 
 class MetaJackClientBase;
 class MetaJackClientProcess;

@@ -118,9 +118,10 @@ std::set<MetaJackPortBase*> & MetaJackClient::getPorts()
     return ports;
 }
 
-MetaJackInterfaceClient::MetaJackInterfaceClient(MetaJackContext *context_, int flags) :
+MetaJackInterfaceClient::MetaJackInterfaceClient(MetaJackContext *context_, JackInterface *wrapperInterface_, int flags) :
     MetaJackClient((flags & JackPortIsOutput) ? "system_in" : "system_out"),
     context(context_),
+    wrapperInterface(wrapperInterface_),
     wrapperAudioSuffix(1),
     wrapperMidiSuffix(1),
     audioSuffix(1),
@@ -144,7 +145,7 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
         if (port && wrapperPort) {
             if (port->getType() == JACK_DEFAULT_AUDIO_TYPE) {
                 // copy audio:
-                jack_default_audio_sample_t *wrapperAudioBuffer = (jack_default_audio_sample_t*)jack_port_get_buffer(wrapperPort, nframes);
+                jack_default_audio_sample_t *wrapperAudioBuffer = (jack_default_audio_sample_t*)me->wrapperInterface->port_get_buffer(wrapperPort, nframes);
                 jack_default_audio_sample_t *audioBuffer = (jack_default_audio_sample_t*)me->context->getPortBuffer(port, nframes);
                 if (port->isInput()) {
                     for (jack_nframes_t i = 0; i < nframes; i++) {
@@ -157,7 +158,7 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
                 }
             } else if (port->getType() == JACK_DEFAULT_MIDI_TYPE) {
                 // copy midi:
-                void *wrapperMidiBuffer = jack_port_get_buffer(wrapperPort, nframes);
+                void *wrapperMidiBuffer = me->wrapperInterface->port_get_buffer(wrapperPort, nframes);
                 void *midiBuffer = me->context->getPortBuffer(port, nframes);
                 if (port->isInput()) {
                     jack_midi_clear_buffer(wrapperMidiBuffer);

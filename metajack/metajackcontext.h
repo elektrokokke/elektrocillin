@@ -1,7 +1,7 @@
 #ifndef METAJACKCONTEXTNEW_H
 #define METAJACKCONTEXTNEW_H
 
-#include "metajackinterface.h"
+#include "jackinterface.h"
 #include "metajackclient.h"
 #include "metajackport.h"
 #include "callbackhandlers.h"
@@ -14,23 +14,17 @@
 class MetaJackContext : public JackInterface
 {
 public:
-    static MetaJackContext * getInstance();
-
     struct MetaJackContextMidiBufferHead {
         size_t bufferSize, midiEventCount, midiDataSize;
         jack_nframes_t lostMidiEvents;
     };
 
-    MetaJackContext(const std::string &name);
-    ~MetaJackContext();
+    MetaJackContext(JackInterface *wrapperInterface, const std::string &name);
+    virtual ~MetaJackContext();
 
     jack_port_t * createWrapperPort(const std::string &shortName, const std::string &type, unsigned long flags);
 
     bool isActive() const;
-
-    static size_t getClientNameSize();
-    static size_t getPortNameSize();
-    static size_t getPortTypeSize();
 
     jack_port_id_t createUniquePortId();
 
@@ -53,17 +47,6 @@ public:
     MetaJackPort * getPortByName(const std::string &name) const;
     MetaJackPort * getPortById(jack_port_id_t id);
     void * getPortBuffer(MetaJackPort *port, jack_nframes_t nframes);
-
-    int get_pid();
-    pthread_t get_thread_id();
-    bool is_realtime();
-
-    // server-related methods:
-    int set_freewheel(int onoff);
-    int set_buffer_size(jack_nframes_t nframes);
-    jack_nframes_t get_sample_rate();
-    jack_nframes_t get_buffer_size();
-    float get_cpu_load();
 
     // time handling methods:
     jack_nframes_t  get_frames_since_cycle_start() const;
@@ -119,6 +102,7 @@ private:
         std::string shortName;
     };
 
+    JackInterface *wrapperInterface;
     jack_client_t *wrapperClient;
     jack_nframes_t bufferSize;
     jack_port_id_t uniquePortId;

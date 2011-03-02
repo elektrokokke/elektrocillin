@@ -1,11 +1,22 @@
-#ifndef REALJACKCONTEXT_H
-#define REALJACKCONTEXT_H
+#ifndef RECURSIVEJACKCONTEXT_H
+#define RECURSIVEJACKCONTEXT_H
 
 #include "jackinterface.h"
+#include <map>
+#include <stack>
 
-class RealJackContext : public JackInterface
+class RecursiveJackContext : public JackInterface
 {
 public:
+    RecursiveJackContext();
+    virtual ~RecursiveJackContext();
+
+    // own methods controlling the Jack interface currently active:
+    void push();
+    void push(jack_client_t *client);
+    void pop();
+
+    // methods reimplemented from JackInterface:
     void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);
     const char * get_version_string();
     jack_client_t * client_open (const char *client_name, jack_options_t options, jack_status_t *, ...);
@@ -77,6 +88,12 @@ public:
     void set_error_function (void (*func)(const char *));
     void set_info_function (void (*func)(const char *));
     void free(void* ptr);
+
+private:
+    std::stack<JackInterface*> interfaces, interfaceStack;
+    std::map<const jack_client_t*, JackInterface*> mapClientToInterface;
+    std::map<const jack_port_t*, JackInterface*> mapPortToInterface;
+    std::map<void*, JackInterface*> mapPointerToInterface;
 };
 
-#endif // REALJACKCONTEXT_H
+#endif // RECURSIVEJACKCONTEXT_H

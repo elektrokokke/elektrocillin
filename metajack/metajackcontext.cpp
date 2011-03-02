@@ -6,46 +6,40 @@
 //#include <boost/xpressive/xpressive_dynamic.hpp>
 #include <QRegExp>
 
-MetaJackContext MetaJackContext::instance("metajack");
-
-MetaJackContext * MetaJackContext::getInstance()
-{
-    return &instance;
-}
-
-MetaJackContext::MetaJackContext(const std::string &name) :
+MetaJackContext::MetaJackContext(JackInterface *jackInterface_, const std::string &name) :
+    wrapperInterface(jackInterface_),
     wrapperClient(0),
     uniquePortId(1),
     graphChangesRingBuffer(1024),
     shutdown(false)
 {
-    // register at the real JACK server:
-    wrapperClient = jack_client_open(name.c_str(), JackNullOption, 0);
+    // register at the given jack interface:
+    wrapperClient = wrapperInterface->client_open(name.c_str(), JackNullOption, 0);
     if (wrapperClient) {
         // get the buffer size:
-        bufferSize = jack_get_buffer_size(wrapperClient);
+        bufferSize = wrapperInterface->get_buffer_size(wrapperClient);
         // register the process callback (this gets special treatment):
-        jack_set_process_callback(wrapperClient, process, this);
+        wrapperInterface->set_process_callback(wrapperClient, process, this);
         // register the thread init callback:
-        jack_set_thread_init_callback(wrapperClient, JackThreadInitCallbackHandler::invokeCallbacksWithoutArgs, &threadInitCallbackHandler);
+        wrapperInterface->set_thread_init_callback(wrapperClient, JackThreadInitCallbackHandler::invokeCallbacksWithoutArgs, &threadInitCallbackHandler);
         // register the shutdown info callback (this gets special treatment):
-        jack_on_info_shutdown(wrapperClient, infoShutdownCallback, this);
+        wrapperInterface->on_info_shutdown(wrapperClient, infoShutdownCallback, this);
         // register the freewheel callback:
-        jack_set_freewheel_callback(wrapperClient, JackFreewheelCallbackHandler::invokeCallbacksWithArgs, &freewheelCallbackHandler);
+        wrapperInterface->set_freewheel_callback(wrapperClient, JackFreewheelCallbackHandler::invokeCallbacksWithArgs, &freewheelCallbackHandler);
         // set the buffer size callback to be informed of any buffer size changed (this gets special treatment):
-        jack_set_buffer_size_callback(wrapperClient, bufferSizeCallback, this);
+        wrapperInterface->set_buffer_size_callback(wrapperClient, bufferSizeCallback, this);
         // register the sample rate callback:
-        jack_set_sample_rate_callback(wrapperClient, JackSampleRateCallbackHandler::invokeCallbacksWithArgs, &sampleRateCallbackHandler);
+        wrapperInterface->set_sample_rate_callback(wrapperClient, JackSampleRateCallbackHandler::invokeCallbacksWithArgs, &sampleRateCallbackHandler);
         // register the xrun callback:
-        jack_set_xrun_callback(wrapperClient, JackXRunCallbackHandler::invokeCallbacksWithoutArgs, &xRunCallbackHandler);
+        wrapperInterface->set_xrun_callback(wrapperClient, JackXRunCallbackHandler::invokeCallbacksWithoutArgs, &xRunCallbackHandler);
         // activate the client:
-        if (jack_activate(wrapperClient)) {
-            jack_client_close(wrapperClient);
+        if (wrapperInterface->activate(wrapperClient)) {
+            wrapperInterface->client_close(wrapperClient);
             wrapperClient = 0;
         } else {
-            MetaJackInterfaceClient *dummyInputClient = new MetaJackInterfaceClient(this, JackPortIsOutput);
+            MetaJackInterfaceClient *dummyInputClient = new MetaJackInterfaceClient(this, wrapperInterface, JackPortIsOutput);
             activateClient(dummyInputClient);
-            MetaJackInterfaceClient *dummyOutputClient = new MetaJackInterfaceClient(this, JackPortIsInput);
+            MetaJackInterfaceClient *dummyOutputClient = new MetaJackInterfaceClient(this, wrapperInterface, JackPortIsInput);
             activateClient(dummyOutputClient);
         }
     }
@@ -58,7 +52,7 @@ MetaJackContext::~MetaJackContext()
     infoShutdownCallbackHandler.invokeCallbacksWithArgs((jack_status_t)0, "Your MetaJack instance is being deleted");
     shutdownCallbackHandler.invokeCallbacks();
     // close the wrapper client:
-    jack_client_close(wrapperClient);
+    wrapperInterface->client_close(wrapperClient);
     wrapperClient = 0;
     // close all clients:
     for (; clients.size(); ) {
@@ -69,27 +63,12 @@ MetaJackContext::~MetaJackContext()
 
 jack_port_t * MetaJackContext::createWrapperPort(const std::string &shortName, const std::string &type, unsigned long flags)
 {
-    return jack_port_register(wrapperClient, shortName.c_str(), type.c_str(), flags, 0);
+    return wrapperInterface->port_register(wrapperClient, shortName.c_str(), type.c_str(), flags, 0);
 }
 
 bool MetaJackContext::isActive() const
 {
     return wrapperClient && !shutdown;
-}
-
-size_t MetaJackContext::getClientNameSize()
-{
-    return jack_client_name_size();
-}
-
-size_t MetaJackContext::getPortNameSize()
-{
-    return jack_port_name_size();
-}
-
-size_t MetaJackContext::getPortTypeSize()
-{
-    return jack_port_type_size();
 }
 
 jack_port_id_t MetaJackContext::createUniquePortId()
@@ -104,7 +83,7 @@ MetaJackClient * MetaJackContext::openClient(const std::string &name, jack_optio
         return 0;
     }
     // test if the name is not too long:
-    if (name.length() > (size_t)getClientNameSize()) {
+    if (name.length() > (size_t)client_name_size()) {
         return 0;
     }
     // test if the requested name is already taken:
@@ -262,7 +241,7 @@ MetaJackPort * MetaJackContext::registerPort(MetaJackClient *client, const std::
 {
     assert(client);
     // check if the given port name is not too long:
-    if (client->getName().length() + shortName.length() + 1 > getClientNameSize()) {
+    if (client->getName().length() + shortName.length() + 1 > (size_t)client_name_size()) {
         return 0;
     }
     // check if the given port name is already taken:
@@ -339,7 +318,7 @@ bool MetaJackContext::renamePort(MetaJackPort *port, const std::string &shortNam
     std::string oldFullName = port->getFullName();
     port->setShortName(shortName);
     // check if the given port name is not too long and if the given port name is already taken:
-    if ((port->getFullName().length() > getClientNameSize()) || (clients.find(port->getFullName()) != clients.end())) {
+    if ((port->getFullName().length() > (size_t)client_name_size()) || (clients.find(port->getFullName()) != clients.end())) {
         port->setShortName(oldShortName);
         return false;
     }
@@ -501,84 +480,6 @@ void * MetaJackContext::getPortBuffer(MetaJackPort *port, jack_nframes_t nframes
     }
 }
 
-int MetaJackContext::get_pid()
-{
-    assert(isActive());
-    return jack_get_client_pid(jack_get_client_name(wrapperClient));
-}
-
-pthread_t MetaJackContext::get_thread_id()
-{
-    assert(isActive());
-    return jack_client_thread_id(wrapperClient);
-}
-
-bool MetaJackContext::is_realtime()
-{
-    assert(isActive());
-    return jack_is_realtime(wrapperClient);
-}
-
-int MetaJackContext::set_freewheel(int onoff)
-{
-    assert(isActive());
-    return jack_set_freewheel(wrapperClient, onoff);
-}
-
-int MetaJackContext::set_buffer_size(jack_nframes_t nframes)
-{
-    assert(isActive());
-    return jack_set_buffer_size(wrapperClient, nframes);
-}
-
-jack_nframes_t MetaJackContext::get_sample_rate()
-{
-    assert(isActive());
-    return jack_get_sample_rate(wrapperClient);
-}
-
-jack_nframes_t MetaJackContext::get_buffer_size()
-{
-    assert(isActive());
-    return jack_get_buffer_size(wrapperClient);
-}
-
-float MetaJackContext::get_cpu_load()
-{
-    assert(isActive());
-    return jack_cpu_load(wrapperClient);
-}
-
-jack_nframes_t MetaJackContext::get_frames_since_cycle_start() const
-{
-    assert(isActive());
-    return jack_frames_since_cycle_start(wrapperClient);
-}
-
-jack_nframes_t MetaJackContext::get_frame_time() const
-{
-    assert(isActive());
-    return jack_frame_time(wrapperClient);
-}
-
-jack_nframes_t MetaJackContext::get_last_frame_time() const
-{
-    assert(isActive());
-    return jack_last_frame_time(wrapperClient);
-}
-
-jack_time_t MetaJackContext::convert_frames_to_time(jack_nframes_t nframes) const
-{
-    assert(isActive());
-    return jack_frames_to_time(wrapperClient, nframes);
-}
-
-jack_nframes_t MetaJackContext::convert_time_to_frames(jack_time_t time) const
-{
-    assert(isActive());
-    return jack_time_to_frames(wrapperClient, time);
-}
-
 jack_nframes_t MetaJackContext::midi_get_event_count(void* port_buffer)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
@@ -725,19 +626,19 @@ int MetaJackContext::bufferSizeCallback(jack_nframes_t bufferSize, void *arg)
     return 0;
 }
 
-void MetaJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
-{
-    jack_get_version(major_ptr, minor_ptr, micro_ptr, proto_ptr);
-}
-
 /******************************************
  *
  * Methods reimplemented from JackInterface
  *
  ******************************************/
+void MetaJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
+{
+    wrapperInterface->get_version(major_ptr, minor_ptr, micro_ptr, proto_ptr);
+}
+
 const char * MetaJackContext::get_version_string()
 {
-    return jack_get_version_string();
+    return wrapperInterface->get_version_string();
 }
 
 jack_client_t * MetaJackContext::client_open (const char *client_name, jack_options_t options, jack_status_t *, ...)
@@ -752,7 +653,7 @@ int MetaJackContext::client_close (jack_client_t *client)
 
 int MetaJackContext::client_name_size ()
 {
-    return getClientNameSize();
+    return wrapperInterface->client_name_size();
 }
 
 char * MetaJackContext::get_client_name (jack_client_t *client)
@@ -772,17 +673,17 @@ int MetaJackContext::deactivate (jack_client_t *client)
 
 int MetaJackContext::get_client_pid (const char *name)
 {
-    return get_pid();
+    return wrapperInterface->get_client_pid(wrapperInterface->get_client_name(wrapperClient));
 }
 
 pthread_t MetaJackContext::client_thread_id (jack_client_t *client)
 {
-    return get_thread_id();
+    return wrapperInterface->client_thread_id(wrapperClient);
 }
 
 int MetaJackContext::is_realtime (jack_client_t *client)
 {
-    return is_realtime();
+    return wrapperInterface->is_realtime(wrapperClient);
 }
 
 int MetaJackContext::set_thread_init_callback (jack_client_t *client, JackThreadInitCallback thread_init_callback, void *arg)
@@ -794,7 +695,7 @@ int MetaJackContext::set_thread_init_callback (jack_client_t *client, JackThread
 void MetaJackContext::on_shutdown (jack_client_t *client, JackShutdownCallback shutdown_callback, void *arg)
 {
     // if the client has an info shutdown, do not register this callback (it wouldn't be called anyway):
-    if (shutdownCallbackHandler.find((MetaJackClient*)client) == MetaJackContext::getInstance()->shutdownCallbackHandler.end()) {
+    if (shutdownCallbackHandler.find((MetaJackClient*)client) == shutdownCallbackHandler.end()) {
         shutdownCallbackHandler.setCallback((MetaJackClient*)client, shutdown_callback, arg);
     }
 }
@@ -867,27 +768,27 @@ int MetaJackContext::set_xrun_callback (jack_client_t *client, JackXRunCallback 
 
 int MetaJackContext::set_freewheel(jack_client_t *client, int onoff)
 {
-    return set_freewheel(onoff);
+    return wrapperInterface->set_freewheel(wrapperClient, onoff);
 }
 
 int MetaJackContext::set_buffer_size (jack_client_t *client, jack_nframes_t nframes)
 {
-    return set_buffer_size(nframes);
+    return wrapperInterface->set_buffer_size(wrapperClient, nframes);
 }
 
 jack_nframes_t MetaJackContext::get_sample_rate (jack_client_t *client)
 {
-    return get_sample_rate();
+    return wrapperInterface->get_sample_rate(wrapperClient);
 }
 
 jack_nframes_t MetaJackContext::get_buffer_size (jack_client_t *client)
 {
-    return get_buffer_size();
+    return wrapperInterface->get_buffer_size(wrapperClient);
 }
 
 float MetaJackContext::cpu_load (jack_client_t *client)
 {
-    return get_cpu_load();
+    return wrapperInterface->cpu_load(wrapperClient);
 }
 
 jack_port_t * MetaJackContext::port_register (jack_client_t *client, const char *port_name, const char *port_type, unsigned long flags, unsigned long buffer_size)
@@ -1036,12 +937,12 @@ int MetaJackContext::port_disconnect (jack_client_t *client, jack_port_t *port)
 
 int MetaJackContext::port_name_size()
 {
-    return getPortNameSize();
+    return wrapperInterface->port_name_size();
 }
 
 int MetaJackContext::port_type_size()
 {
-    return getPortTypeSize();
+    return wrapperInterface->port_type_size();
 }
 
 const char ** MetaJackContext::get_ports (jack_client_t *client, const char *port_name_pattern, const char *type_name_pattern, unsigned long flags)
@@ -1067,40 +968,42 @@ jack_port_t * MetaJackContext::port_by_id (jack_client_t *client, jack_port_id_t
 
 jack_nframes_t MetaJackContext::frames_since_cycle_start (const jack_client_t *client)
 {
-    return get_frames_since_cycle_start();
+    return wrapperInterface->frames_since_cycle_start(wrapperClient);
 }
 
 jack_nframes_t MetaJackContext::frame_time (const jack_client_t *client)
 {
-    return get_frame_time();
+    return wrapperInterface->frame_time(wrapperClient);
 }
 
 jack_nframes_t MetaJackContext::last_frame_time (const jack_client_t *client)
 {
-    return get_last_frame_time();
+    return wrapperInterface->last_frame_time(wrapperClient);
 }
 
 jack_time_t MetaJackContext::frames_to_time(const jack_client_t *client, jack_nframes_t nframes)
 {
-    return convert_frames_to_time(nframes);
+    return wrapperInterface->frames_to_time(wrapperClient, nframes);
 }
 
 jack_nframes_t MetaJackContext::time_to_frames(const jack_client_t *client, jack_time_t time)
 {
-    return convert_time_to_frames(time);
+    return wrapperInterface->time_to_frames(wrapperClient, time);
 }
 
 jack_time_t MetaJackContext::get_time()
 {
-    return jack_get_time();
+    return wrapperInterface->get_time();
 }
 
 void MetaJackContext::set_error_function (void (*func)(const char *))
 {
+    wrapperInterface->set_error_function(func);
 }
 
 void MetaJackContext::set_info_function (void (*func)(const char *))
 {
+    wrapperInterface->set_error_function(func);
 }
 
 void MetaJackContext::free(void* ptr)

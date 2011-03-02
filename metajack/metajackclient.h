@@ -4,7 +4,7 @@
 #include <string>
 #include <set>
 #include <map>
-#include <jack/jack.h>
+#include <jack/types.h>
 
 class MetaJackPortBase;
 class MetaJackPort;
@@ -47,12 +47,14 @@ private:
 };
 
 class MetaJackContext;
+class JackInterface;
 
 class MetaJackInterfaceClient : public MetaJackClient {
 public:
-    MetaJackInterfaceClient(MetaJackContext *context, int flags);
+    MetaJackInterfaceClient(MetaJackContext *context, JackInterface *wrapperInterface, int flags);
 private:
     MetaJackContext *context;
+    JackInterface *wrapperInterface;
     std::map<MetaJackPort*, jack_port_t*> connectedPorts;
     std::set<MetaJackPort*> freePorts;
     int wrapperAudioSuffix, wrapperMidiSuffix, audioSuffix, midiSuffix;
