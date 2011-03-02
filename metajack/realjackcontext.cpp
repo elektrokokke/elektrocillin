@@ -3,7 +3,12 @@
 
 jack_client_t * RealJackContext::get_client_by_name(const char *client_name)
 {
-    return 0;
+    std::map<std::string, jack_client_t*>::iterator find = clients.find(client_name);
+    if (find != clients.end()) {
+        return find->second;
+    } else {
+        return 0;
+    }
 }
 
 void RealJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
@@ -19,12 +24,19 @@ const char * RealJackContext::get_version_string()
 jack_client_t * RealJackContext::client_open (const char *client_name, jack_options_t options, jack_status_t *, ...)
 {
     // TODO: figure out how the ellipsis arguments can be implemented... probably have to consider each possible case
-    return jack_client_open(client_name, options, 0);
+    jack_client_t *client = jack_client_open(client_name, options, 0);
+    if (client) {
+        clients[jack_get_client_name(client)] = client;
+    }
+    return client;
 }
 
 int RealJackContext::client_close (jack_client_t *client)
 {
-    return jack_client_close(client);
+    std::string client_name = jack_get_client_name(client);
+    if (jack_client_close(client) == 0) {
+        clients.erase(client_name);
+    }
 }
 
 int RealJackContext::client_name_size ()

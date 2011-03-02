@@ -2,12 +2,15 @@
 #define REALJACKCONTEXT_H
 
 #include "jackcontext.h"
+#include <string>
+#include <map>
 
 class RealJackContext : public JackContext
 {
 public:
     /**
-      Always returns 0
+      Returns a client handle iff it has been created by this instance.
+      I.e., client handles of clients created by others can not be retrieved this way.
       */
     jack_client_t * get_client_by_name(const char *client_name);
 
@@ -83,6 +86,9 @@ public:
     void set_error_function (void (*func)(const char *));
     void set_info_function (void (*func)(const char *));
     void free(void* ptr);
+
+private:
+    std::map<std::string, jack_client_t*> clients;
 };
 
 #endif // REALJACKCONTEXT_H
