@@ -1,6 +1,11 @@
 #include "realjackcontext.h"
 #include <jack/jack.h>
 
+jack_client_t * RealJackContext::get_client_by_name(const char *client_name)
+{
+    return 0;
+}
+
 void RealJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
 {
     jack_get_version(major_ptr, minor_ptr, micro_ptr, proto_ptr);

@@ -5,6 +5,10 @@
 
 class JackContext {
 public:
+    // auxiliary methods:
+    virtual jack_client_t * get_client_by_name(const char *client_name) = 0;
+
+    // Jack API methods:
     virtual void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr) = 0;
     virtual const char * get_version_string() = 0;
     virtual jack_client_t * client_open (const char *client_name, jack_options_t options, jack_status_t *, ...) = 0;

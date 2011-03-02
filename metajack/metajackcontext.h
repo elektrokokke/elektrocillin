@@ -139,6 +139,8 @@ private:
 
 public:
     // methods implemented from JackInterface:
+    virtual jack_client_t * get_client_by_name(const char *client_name);
+
     virtual void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);
     virtual const char * get_version_string();
     virtual jack_client_t * client_open (const char *client_name, jack_options_t options, jack_status_t *, ...);

@@ -641,6 +641,16 @@ int MetaJackContext::bufferSizeCallback(jack_nframes_t bufferSize, void *arg)
  * Methods reimplemented from JackInterface
  *
  ******************************************/
+jack_client_t * MetaJackContext::get_client_by_name(const char *client_name)
+{
+    std::map<std::string, MetaJackClient*>::iterator find = clients.find(client_name);
+    if (find != clients.end()) {
+        return (jack_client_t*)find->second;
+    } else {
+        return 0;
+    }
+}
+
 void MetaJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
 {
     wrapperInterface->get_version(major_ptr, minor_ptr, micro_ptr, proto_ptr);
