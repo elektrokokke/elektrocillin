@@ -46,7 +46,7 @@ GraphicsClientItem2 * JackContextGraphicsScene::addClient(JackClient *client)
 GraphicsClientItem2 * JackContextGraphicsScene::addClient(const QString &clientName)
 {
     // try to get a jack_client_t pointer for this client:
-    jack_client_t *client = jack_client_by_name(clientName.toAscii().data());
+    jack_client_t *client = meta_jack_client_by_name(clientName.toAscii().data());
     JackClient * jackClient;
     if (client && (jackClient = JackClient::getClient(client))) {
         return addClient(jackClient);

@@ -8,7 +8,7 @@ extern "C"
 {
 #endif
 
-jack_client_t * jack_client_by_name(const char *client_name)
+jack_client_t * meta_jack_client_by_name(const char *client_name)
 {
     return RecursiveJackContext::getInstance()->client_by_name(client_name);
 }

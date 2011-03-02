@@ -16,7 +16,7 @@ extern "C"
 #include <jack/systemdeps.h>
 #include <jack/weakmacros.h>
 
-jack_client_t * jack_client_by_name(const char *client_name);
+jack_client_t * meta_jack_client_by_name(const char *client_name);
 
 #define jack_port_t                             jack_port_t
 #define jack_client_t                           jack_client_t
