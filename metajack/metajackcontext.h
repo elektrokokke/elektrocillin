@@ -1,6 +1,7 @@
 #ifndef METAJACKCONTEXTNEW_H
 #define METAJACKCONTEXTNEW_H
 
+#include "metajackinterface.h"
 #include "metajackclient.h"
 #include "metajackport.h"
 #include "callbackhandlers.h"

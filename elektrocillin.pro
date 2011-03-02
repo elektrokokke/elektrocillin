@@ -141,7 +141,6 @@ HEADERS  += mainwindow.h \
     metajack/metajackport.h \
     metajack/metajackcontext.h \
     metajack/callbackhandlers.h \
-    metajack/jack.h \
     whitenoisegenerator.h \
     graphicsportitem.h \
     graphicsinterpolatoredititem.h \
@@ -155,7 +154,8 @@ HEADERS  += mainwindow.h \
     graphicsportitem2.h \
     graphicsportconnectionitem.h \
     metajack/metajackinterface.h \
-    metajack/realjackcontext.h
+    metajack/realjackcontext.h \
+    metajack/metajack.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

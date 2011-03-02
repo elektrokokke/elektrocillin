@@ -1,7 +1,7 @@
 #ifndef JACKCLIENT_H
 #define JACKCLIENT_H
 
-#include "metajack/jack.h"
+#include "metajack/metajack.h"
 #include <QStringList>
 #include <QMap>
 #include <QRectF>

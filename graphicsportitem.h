@@ -2,7 +2,7 @@
 #define GRAPHICSPORTITEM_H
 
 #include "jackclient.h"
-#include "metajack/jack.h"
+#include "metajack/metajack.h"
 #include <QGraphicsRectItem>
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsPathItem>

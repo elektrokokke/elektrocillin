@@ -3,7 +3,7 @@
 
 #include <QVector>
 #include <QStringList>
-#include "metajack/jack.h"
+#include "metajack/metajack.h"
 #include <jack/ringbuffer.h>
 
 class AudioProcessor
