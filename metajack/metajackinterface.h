@@ -52,18 +52,18 @@ public:
     virtual int recompute_total_latency (jack_client_t *, jack_port_t*) = 0;
     virtual int recompute_total_latencies (jack_client_t *) = 0;
     virtual int port_set_name (jack_port_t *port, const char *port_name) = 0;
-    virtual int port_set_alias (jack_port_t *client, const char *) = 0;
-    virtual int port_unset_alias (jack_port_t *client, const char *) = 0;
-    virtual int port_get_aliases (const jack_port_t *client, char* const []) = 0;
-    virtual int port_request_monitor (jack_port_t *, int) = 0;
-    virtual int port_request_monitor_by_name (jack_client_t *, const char *, int) = 0;
-    virtual int port_ensure_monitor (jack_port_t *, int) = 0;
-    virtual int port_monitoring_input (jack_port_t *) = 0;
+    virtual int port_set_alias (jack_port_t *port, const char *alias) = 0;
+    virtual int port_unset_alias (jack_port_t *port, const char *alias) = 0;
+    virtual int port_get_aliases (const jack_port_t *port, char* const aliases[]) = 0;
+    virtual int port_request_monitor (jack_port_t *port, int onoff) = 0;
+    virtual int port_request_monitor_by_name (jack_client_t *client, const char *port_name, int onoff) = 0;
+    virtual int port_ensure_monitor (jack_port_t *port, int onoff) = 0;
+    virtual int port_monitoring_input (jack_port_t *port) = 0;
     virtual int connect (jack_client_t *client, const char *source_port, const char *destination_port) = 0;
     virtual int disconnect (jack_client_t *client, const char *source_port, const char *destination_port) = 0;
     virtual int port_disconnect (jack_client_t *, jack_port_t *) = 0;
-    virtual int port_name_size(void) = 0;
-    virtual int port_type_size(void) = 0;
+    virtual int port_name_size() = 0;
+    virtual int port_type_size() = 0;
     virtual const char ** get_ports (jack_client_t *client, const char *port_name_pattern, const char *type_name_pattern, unsigned long flags) = 0;
     virtual jack_port_t * port_by_name (jack_client_t *client, const char *port_name) = 0;
     virtual jack_port_t * port_by_id (jack_client_t *client, jack_port_id_t port_id) = 0;
@@ -73,8 +73,8 @@ public:
     virtual jack_time_t frames_to_time(const jack_client_t *client, jack_nframes_t nframes) = 0;
     virtual jack_nframes_t time_to_frames(const jack_client_t *client, jack_time_t time) = 0;
     virtual jack_time_t get_time() = 0;
-    virtual void set_error_function (void (*)(const char *)) = 0;
-    virtual void set_info_function (void (*)(const char *)) = 0;
+    virtual void set_error_function (void (*func)(const char *)) = 0;
+    virtual void set_info_function (void (*func)(const char *)) = 0;
     virtual void free(void* ptr) = 0;
 };
 

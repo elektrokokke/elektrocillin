@@ -579,11 +579,6 @@ jack_nframes_t MetaJackContext::convert_time_to_frames(jack_time_t time) const
     return jack_time_to_frames(wrapperClient, time);
 }
 
-jack_time_t MetaJackContext::get_time()
-{
-    return jack_get_time();
-}
-
 jack_nframes_t MetaJackContext::midi_get_event_count(void* port_buffer)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
@@ -653,17 +648,6 @@ jack_nframes_t MetaJackContext::midi_get_lost_event_count(void *port_buffer)
 
 bool MetaJackContext::compare_midi_events(const jack_midi_event_t &event1, const jack_midi_event_t &event2) {
     return event1.time < event2.time;
-}
-
-void MetaJackContext::free(void* ptr)
-{
-    if (ptr) {
-        char **names = (char**)ptr;
-        for (size_t index = 0; names[index]; index++) {
-            delete [] names[index];
-        }
-        delete [] names;
-    }
 }
 
 void MetaJackContext::sendGraphChangeEvent(const MetaJackGraphEvent &event)
@@ -739,4 +723,393 @@ int MetaJackContext::bufferSizeCallback(jack_nframes_t bufferSize, void *arg)
     // now invoke all callbacks registered by the internal clients:
     context->bufferSizeCallbackHandler.invokeCallbacksWithArgs(bufferSize);
     return 0;
+}
+
+void MetaJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
+{
+    jack_get_version(major_ptr, minor_ptr, micro_ptr, proto_ptr);
+}
+
+/******************************************
+ *
+ * Methods reimplemented from JackInterface
+ *
+ ******************************************/
+const char * MetaJackContext::get_version_string()
+{
+    return jack_get_version_string();
+}
+
+jack_client_t * MetaJackContext::client_open (const char *client_name, jack_options_t options, jack_status_t *, ...)
+{
+    return (jack_client_t*)openClient(client_name, options);
+}
+
+int MetaJackContext::client_close (jack_client_t *client)
+{
+    return (closeClient((MetaJackClient*)client) ? 0 : 1);
+}
+
+int MetaJackContext::client_name_size ()
+{
+    return getClientNameSize();
+}
+
+char * MetaJackContext::get_client_name (jack_client_t *client)
+{
+    return (char*)((MetaJackClient*)client)->getName().c_str();
+}
+
+int MetaJackContext::activate (jack_client_t *client)
+{
+    return (activateClient((MetaJackClient*)client) ? 0 : 1);
+}
+
+int MetaJackContext::deactivate (jack_client_t *client)
+{
+    return (deactivateClient((MetaJackClient*)client) ? 0 : 1);
+}
+
+int MetaJackContext::get_client_pid (const char *name)
+{
+    return get_pid();
+}
+
+pthread_t MetaJackContext::client_thread_id (jack_client_t *client)
+{
+    return get_thread_id();
+}
+
+int MetaJackContext::is_realtime (jack_client_t *client)
+{
+    return is_realtime();
+}
+
+int MetaJackContext::set_thread_init_callback (jack_client_t *client, JackThreadInitCallback thread_init_callback, void *arg)
+{
+    threadInitCallbackHandler.setCallback((MetaJackClient*)client, thread_init_callback, arg);
+    return 0;
+}
+
+void MetaJackContext::on_shutdown (jack_client_t *client, JackShutdownCallback shutdown_callback, void *arg)
+{
+    // if the client has an info shutdown, do not register this callback (it wouldn't be called anyway):
+    if (shutdownCallbackHandler.find((MetaJackClient*)client) == MetaJackContext::getInstance()->shutdownCallbackHandler.end()) {
+        shutdownCallbackHandler.setCallback((MetaJackClient*)client, shutdown_callback, arg);
+    }
+}
+
+void MetaJackContext::on_info_shutdown (jack_client_t *client, JackInfoShutdownCallback shutdown_callback, void *arg)
+{
+    infoShutdownCallbackHandler.setCallback((MetaJackClient*)client, shutdown_callback, arg);
+    // remove any existing "simple" shutdown callback for this client (it shouldn't be called if the client registers an info shutdown callback):
+    shutdownCallbackHandler.erase((MetaJackClient*)client);
+}
+
+int MetaJackContext::set_process_callback (jack_client_t *client, JackProcessCallback process_callback, void *arg)
+{
+    return (setProcessCallback((MetaJackClient*)client, process_callback, arg) ? 0 : 1);
+}
+
+int MetaJackContext::set_freewheel_callback (jack_client_t *client, JackFreewheelCallback freewheel_callback, void *arg)
+{
+    freewheelCallbackHandler.setCallback((MetaJackClient*)client, freewheel_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_buffer_size_callback (jack_client_t *client, JackBufferSizeCallback bufsize_callback, void *arg)
+{
+    bufferSizeCallbackHandler.setCallback((MetaJackClient*)client, bufsize_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_sample_rate_callback (jack_client_t *client, JackSampleRateCallback srate_callback, void *arg)
+{
+    sampleRateCallbackHandler.setCallback((MetaJackClient*)client, srate_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_client_registration_callback (jack_client_t *client, JackClientRegistrationCallback registration_callback, void *arg)
+{
+    clientRegistrationCallbackHandler.setCallback((MetaJackClient*)client, registration_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_port_registration_callback (jack_client_t *client, JackPortRegistrationCallback registration_callback, void *arg)
+{
+    portRegistrationCallbackHandler.setCallback((MetaJackClient*)client, registration_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_port_connect_callback (jack_client_t *client, JackPortConnectCallback connect_callback, void *arg)
+{
+    portConnectCallbackHandler.setCallback((MetaJackClient*)client, connect_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_port_rename_callback (jack_client_t *client, JackPortRenameCallback rename_callback, void *arg)
+{
+    portRenameCallbackHandler.setCallback((MetaJackClient*)client, rename_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_graph_order_callback (jack_client_t *client, JackGraphOrderCallback graph_callback, void *arg)
+{
+    graphOrderCallbackHandler.setCallback((MetaJackClient*)client, graph_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_xrun_callback (jack_client_t *client, JackXRunCallback xrun_callback, void *arg)
+{
+    xRunCallbackHandler.setCallback((MetaJackClient*)client, xrun_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_freewheel(jack_client_t *client, int onoff)
+{
+    return set_freewheel(onoff);
+}
+
+int MetaJackContext::set_buffer_size (jack_client_t *client, jack_nframes_t nframes)
+{
+    return set_buffer_size(nframes);
+}
+
+jack_nframes_t MetaJackContext::get_sample_rate (jack_client_t *client)
+{
+    return get_sample_rate();
+}
+
+jack_nframes_t MetaJackContext::get_buffer_size (jack_client_t *client)
+{
+    return get_buffer_size();
+}
+
+float MetaJackContext::cpu_load (jack_client_t *client)
+{
+    return get_cpu_load();
+}
+
+jack_port_t * MetaJackContext::port_register (jack_client_t *client, const char *port_name, const char *port_type, unsigned long flags, unsigned long buffer_size)
+{
+    return (jack_port_t*)registerPort((MetaJackClient*)client, port_name, port_type, flags, buffer_size);
+}
+
+int MetaJackContext::port_unregister (jack_client_t *client, jack_port_t *port)
+{
+    return (unregisterPort((MetaJackPort*)port) ? 0 : 1);
+}
+
+void * MetaJackContext::port_get_buffer (jack_port_t *port, jack_nframes_t nframes)
+{
+    return getPortBuffer((MetaJackPort*)port, nframes);
+}
+
+const char * MetaJackContext::port_name (const jack_port_t *port)
+{
+    return ((MetaJackPort*)port)->getFullName().c_str();
+}
+
+const char * MetaJackContext::port_short_name (const jack_port_t *port)
+{
+    return ((MetaJackPort*)port)->getShortName().c_str();
+}
+
+int MetaJackContext::port_flags (const jack_port_t *port)
+{
+    return ((MetaJackPort*)port)->getFlags();
+}
+
+const char * MetaJackContext::port_type (const jack_port_t *port)
+{
+    return ((MetaJackPort*)port)->getType().c_str();
+}
+
+int MetaJackContext::port_is_mine (const jack_client_t *client, const jack_port_t *port)
+{
+    return ((MetaJackPort*)port)->belongsTo((MetaJackClient*)client);
+}
+
+int MetaJackContext::port_connected (const jack_port_t *port)
+{
+    return ((MetaJackPort*)port)->getConnectionCount();
+}
+
+int MetaJackContext::port_connected_to (const jack_port_t *port, const char *port_name)
+{
+    MetaJackPort *connectedPort = getPortByName(port_name);
+    if (connectedPort) {
+        return ((MetaJackPort*)port)->isConnectedTo(connectedPort);
+    } else {
+        return 0;
+    }
+}
+
+const char ** MetaJackContext::port_get_connections (const jack_port_t *port)
+{
+    return ((MetaJackPort*)port)->getConnections();
+}
+
+const char ** MetaJackContext::port_get_all_connections (const jack_client_t *client, const jack_port_t *port)
+{
+    return ((MetaJackPort*)port)->getConnections();
+}
+
+jack_nframes_t MetaJackContext::port_get_latency (jack_port_t *)
+{
+   return 0;
+}
+
+jack_nframes_t MetaJackContext::port_get_total_latency (jack_client_t *, jack_port_t *)
+{
+    return 0;
+}
+
+void MetaJackContext::port_set_latency (jack_port_t *, jack_nframes_t)
+{
+}
+
+int MetaJackContext::recompute_total_latency (jack_client_t *, jack_port_t *)
+{
+    return 1;
+}
+
+int MetaJackContext::recompute_total_latencies (jack_client_t *)
+{
+    return 1;
+}
+
+int MetaJackContext::port_set_name (jack_port_t *port, const char *port_name)
+{
+    return (renamePort((MetaJackPort*)port, port_name) ? 0 : 1);
+}
+
+int MetaJackContext::port_set_alias (jack_port_t *client, const char *alias)
+{
+    return 1;
+}
+
+int MetaJackContext::port_unset_alias (jack_port_t *client, const char *alias)
+{
+    return 1;
+}
+
+int MetaJackContext::port_get_aliases (const jack_port_t *client, char* const aliases[])
+{
+    return 0;
+}
+
+int MetaJackContext::port_request_monitor (jack_port_t *port, int onoff)
+{
+    return 1;
+}
+
+int MetaJackContext::port_request_monitor_by_name (jack_client_t *client, const char *port_name, int onoff)
+{
+    return 1;
+}
+
+int MetaJackContext::port_ensure_monitor (jack_port_t *port, int onoff)
+{
+    return 1;
+}
+
+int MetaJackContext::port_monitoring_input (jack_port_t *port)
+{
+    return 0;
+}
+
+int MetaJackContext::connect (jack_client_t *client, const char *source_port, const char *destination_port)
+{
+    return (connectPorts(source_port, destination_port) ? 0 : 1);
+}
+
+int MetaJackContext::disconnect (jack_client_t *client, const char *source_port, const char *destination_port)
+{
+    return (disconnectPorts(source_port, destination_port) ? 0 : 1);
+}
+
+int MetaJackContext::port_disconnect (jack_client_t *client, jack_port_t *port)
+{
+    return 1;
+}
+
+int MetaJackContext::port_name_size()
+{
+    return getPortNameSize();
+}
+
+int MetaJackContext::port_type_size()
+{
+    return getPortTypeSize();
+}
+
+const char ** MetaJackContext::get_ports (jack_client_t *client, const char *port_name_pattern, const char *type_name_pattern, unsigned long flags)
+{
+    if (client) {
+        std::string port_name_pattern_string = (port_name_pattern ? port_name_pattern : "");
+        std::string type_name_pattern_string = (type_name_pattern ? type_name_pattern : "");
+        return getPortsByPattern(port_name_pattern_string, type_name_pattern_string, flags);
+    } else {
+        return 0;
+    }
+}
+
+jack_port_t * MetaJackContext::port_by_name (jack_client_t *client, const char *port_name)
+{
+    return (jack_port_t*)getPortByName(port_name);
+}
+
+jack_port_t * MetaJackContext::port_by_id (jack_client_t *client, jack_port_id_t port_id)
+{
+    return (jack_port_t*)getPortById(port_id);
+}
+
+jack_nframes_t MetaJackContext::frames_since_cycle_start (const jack_client_t *client)
+{
+    return get_frames_since_cycle_start();
+}
+
+jack_nframes_t MetaJackContext::frame_time (const jack_client_t *client)
+{
+    return get_frame_time();
+}
+
+jack_nframes_t MetaJackContext::last_frame_time (const jack_client_t *client)
+{
+    return get_last_frame_time();
+}
+
+jack_time_t MetaJackContext::frames_to_time(const jack_client_t *client, jack_nframes_t nframes)
+{
+    return convert_frames_to_time(nframes);
+}
+
+jack_nframes_t MetaJackContext::time_to_frames(const jack_client_t *client, jack_time_t time)
+{
+    return convert_time_to_frames(time);
+}
+
+jack_time_t MetaJackContext::get_time()
+{
+    return jack_get_time();
+}
+
+void MetaJackContext::set_error_function (void (*func)(const char *))
+{
+}
+
+void MetaJackContext::set_info_function (void (*func)(const char *))
+{
+}
+
+void MetaJackContext::free(void* ptr)
+{
+    if (ptr) {
+        char **names = (char**)ptr;
+        for (size_t index = 0; names[index]; index++) {
+            delete [] names[index];
+        }
+        delete [] names;
+    }
 }
