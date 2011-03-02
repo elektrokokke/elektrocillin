@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QSettings>
 #include "jacknullclient.h"
+#include "jackcontextgraphicsscene.h"
 
 namespace Ui {
     class MainWindow;
@@ -23,10 +24,7 @@ public:
 
 
 private slots:
-    void onActionShowClient();
     void onActionCreateClient();
-//    void onRecordFinished();
-    void on_actionAll_modules_triggered();
     void on_actionSave_session_triggered();
     void on_actionLoad_session_triggered();
     void on_actionReset_triggered();
@@ -34,20 +32,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QSettings settings;
-    int gridWidth, clientStyle, portStyle;
-    QFont clientFont;
-    QRectF clientsRect;
-    QVector<JackClient*> clients;
-    QVector<GraphicsClientItem2*> clientGraphicsItems;
-    Record2MemoryClient *record2MemoryClient;
-    GraphView *recordClientGraphView;
-    JackNullClient nullClient;
-
-    GraphicsClientItem2 * addClient(JackClient *client);
-    GraphicsClientItem2 * addClient(const QString &clientName);
-
-    void saveSession(QDataStream &stream);
-    bool loadSession(QDataStream &stream);
+    JackContextGraphicsScene *scene;
 };
 
 #endif // MAINWINDOW_H

@@ -2,13 +2,20 @@
 #include "realjackcontext.h"
 #include "metajackcontext.h"
 
+RecursiveJackContext RecursiveJackContext::instance;
+
+RecursiveJackContext * RecursiveJackContext::getInstance()
+{
+    return &instance;
+}
+
 RecursiveJackContext::RecursiveJackContext()
 {
     // put the interface to the real server on the stack as the first interface to be used:
     interfaces.push(new RealJackContext());
     interfaceStack.push(interfaces.top());
     // put one meta jack instance on the stack:
-    push();
+    pushNewContext("metajack");
 }
 
 RecursiveJackContext::~RecursiveJackContext()
@@ -20,26 +27,51 @@ RecursiveJackContext::~RecursiveJackContext()
     }
 }
 
-void RecursiveJackContext::push()
+JackContext * RecursiveJackContext::pushNewContext(const std::string &desiredWrapperClientName)
 {
     // create a new meta jack context:
-    interfaces.push(new MetaJackContext(interfaceStack.top(), "metajack"));
+    MetaJackContext *jackInterface = new MetaJackContext(interfaceStack.top(), desiredWrapperClientName);
+    interfaces.push(jackInterface);
+    // get its name in the current jack context and remember it:
+    std::string wrapperClientName = jackInterface->getWrapperInterface()->get_client_name(jackInterface->getWrapperClient());
+    mapClientNameToInterface[jackInterface->getWrapperInterface()][wrapperClientName] = jackInterface;
     // it becomes the current jack interface:
-    interfaceStack.push(interfaces.top());
+    interfaceStack.push(jackInterface);
+    return jackInterface;
 }
 
-void RecursiveJackContext::push(jack_client_t *client)
+JackContext * RecursiveJackContext::pushExistingContext(JackContext *jackInterface)
+{
+    interfaceStack.push(jackInterface);
+    return jackInterface;
+}
+
+JackContext * RecursiveJackContext::pushExistingContextByClient(jack_client_t *client)
 {
     // get the jack interface associated with the given client:
-    JackInterface *jackInterface = mapClientToInterface[client];
-   // it becomes the current jack interfaces:
+    JackContext *jackInterface = mapClientToInterface[client];
+    // it becomes the current jack interfaces:
     interfaceStack.push(jackInterface);
+    return jackInterface;
 }
 
-void RecursiveJackContext::pop()
+JackContext * RecursiveJackContext::popContext()
 {
-    // remove the current jack interface from the stack, the previous interface becomes the current:
-    interfaceStack.pop();
+    if (interfaceStack.size() > 1) {
+        // remove the current jack interface from the stack, the previous interface becomes the current:
+        interfaceStack.pop();
+    }
+    return interfaceStack.top();
+}
+
+JackContext * RecursiveJackContext::getInterfaceByClientName(const std::string &clientName)
+{
+    std::map<std::string, JackContext*>::iterator find = mapClientNameToInterface[interfaceStack.top()].find(clientName);
+    if (find != mapClientNameToInterface[interfaceStack.top()].end()) {
+        return find->second;
+    } else {
+        return 0;
+    }
 }
 
 void RecursiveJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
@@ -63,9 +95,12 @@ jack_client_t * RecursiveJackContext::client_open (const char *client_name, jack
 
 int RecursiveJackContext::client_close (jack_client_t *client)
 {
-    int returnValue = mapClientToInterface[client]->client_close(client);
+    JackContext *jackInterface = mapClientToInterface[client];
+    std::string clientName = jackInterface->get_client_name(client);
+    int returnValue = jackInterface->client_close(client);
     if (returnValue == 0) {
         mapClientToInterface.erase(client);
+        mapClientNameToInterface[jackInterface].erase(clientName);
     }
     return returnValue;
 }

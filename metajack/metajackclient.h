@@ -47,14 +47,14 @@ private:
 };
 
 class MetaJackContext;
-class JackInterface;
+class JackContext;
 
 class MetaJackInterfaceClient : public MetaJackClient {
 public:
-    MetaJackInterfaceClient(MetaJackContext *context, JackInterface *wrapperInterface, int flags);
+    MetaJackInterfaceClient(MetaJackContext *context, JackContext *wrapperInterface, int flags);
 private:
     MetaJackContext *context;
-    JackInterface *wrapperInterface;
+    JackContext *wrapperInterface;
     std::map<MetaJackPort*, jack_port_t*> connectedPorts;
     std::set<MetaJackPort*> freePorts;
     int wrapperAudioSuffix, wrapperMidiSuffix, audioSuffix, midiSuffix;

@@ -1,9 +1,9 @@
 #ifndef REALJACKCONTEXT_H
 #define REALJACKCONTEXT_H
 
-#include "jackinterface.h"
+#include "jackcontext.h"
 
-class RealJackContext : public JackInterface
+class RealJackContext : public JackContext
 {
 public:
     void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);

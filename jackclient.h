@@ -174,6 +174,8 @@ public:
     QStringList getConnections();
     void restoreConnections(const QStringList &connections);
 
+    QStringList getClients();
+
     QString getPortNameById(jack_port_id_t id);
 
     /**

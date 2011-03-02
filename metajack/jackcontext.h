@@ -3,7 +3,7 @@
 
 #include <jack/types.h>
 
-class JackInterface{
+class JackContext {
 public:
     virtual void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr) = 0;
     virtual const char * get_version_string() = 0;

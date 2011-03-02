@@ -6,7 +6,7 @@
 //#include <boost/xpressive/xpressive_dynamic.hpp>
 #include <QRegExp>
 
-MetaJackContext::MetaJackContext(JackInterface *jackInterface_, const std::string &name) :
+MetaJackContext::MetaJackContext(JackContext *jackInterface_, const std::string &name) :
     wrapperInterface(jackInterface_),
     wrapperClient(0),
     uniquePortId(1),
@@ -64,6 +64,16 @@ MetaJackContext::~MetaJackContext()
 jack_port_t * MetaJackContext::createWrapperPort(const std::string &shortName, const std::string &type, unsigned long flags)
 {
     return wrapperInterface->port_register(wrapperClient, shortName.c_str(), type.c_str(), flags, 0);
+}
+
+jack_client_t * MetaJackContext::getWrapperClient()
+{
+    return wrapperClient;
+}
+
+JackContext * MetaJackContext::getWrapperInterface()
+{
+    return wrapperInterface;
 }
 
 bool MetaJackContext::isActive() const

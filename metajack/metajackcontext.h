@@ -1,7 +1,7 @@
 #ifndef METAJACKCONTEXTNEW_H
 #define METAJACKCONTEXTNEW_H
 
-#include "jackinterface.h"
+#include "jackcontext.h"
 #include "metajackclient.h"
 #include "metajackport.h"
 #include "callbackhandlers.h"
@@ -11,7 +11,7 @@
 #include <QWaitCondition>
 #include <QMutex>
 
-class MetaJackContext : public JackInterface
+class MetaJackContext : public JackContext
 {
 public:
     struct MetaJackContextMidiBufferHead {
@@ -19,10 +19,13 @@ public:
         jack_nframes_t lostMidiEvents;
     };
 
-    MetaJackContext(JackInterface *wrapperInterface, const std::string &name);
+    MetaJackContext(JackContext *wrapperInterface, const std::string &name);
     virtual ~MetaJackContext();
 
     jack_port_t * createWrapperPort(const std::string &shortName, const std::string &type, unsigned long flags);
+
+    jack_client_t * getWrapperClient();
+    JackContext * getWrapperInterface();
 
     bool isActive() const;
 
@@ -102,7 +105,7 @@ private:
         std::string shortName;
     };
 
-    JackInterface *wrapperInterface;
+    JackContext *wrapperInterface;
     jack_client_t *wrapperClient;
     jack_nframes_t bufferSize;
     jack_port_id_t uniquePortId;

@@ -118,7 +118,7 @@ std::set<MetaJackPortBase*> & MetaJackClient::getPorts()
     return ports;
 }
 
-MetaJackInterfaceClient::MetaJackInterfaceClient(MetaJackContext *context_, JackInterface *wrapperInterface_, int flags) :
+MetaJackInterfaceClient::MetaJackInterfaceClient(MetaJackContext *context_, JackContext *wrapperInterface_, int flags) :
     MetaJackClient((flags & JackPortIsOutput) ? "system_in" : "system_out"),
     context(context_),
     wrapperInterface(wrapperInterface_),

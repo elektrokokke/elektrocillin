@@ -1,5 +1,6 @@
 #include "jackclient.h"
 #include <QDebug>
+#include <QSet>
 
 JackClient::JackClient(const QString &clientName) :
     requestedName(clientName),
@@ -184,6 +185,19 @@ void JackClient::restoreConnections(const QStringList &connections)
         Q_ASSERT(connection.size() == 2);
         connectPorts(connection[0], connection[1]);
     }
+}
+
+QStringList JackClient::getClients()
+{
+    QSet<QString> clientNamesSet;
+    // get all ports:
+    QStringList portNames = getPorts();
+    for (int i = 0; i < portNames.size(); i++) {
+        QString clientName = portNames[i].split(":")[0];
+        clientNamesSet.insert(clientName);
+    }
+    QStringList clientNames = clientNamesSet.toList();
+    return clientNames;
 }
 
 QString JackClient::getPortNameById(jack_port_id_t id)

@@ -54,7 +54,6 @@ SOURCES += main.cpp\
     graphicsinterpolationitem.cpp \
     linearwaveshapingclient.cpp \
     cubicsplinewaveshapingclient.cpp \
-    visiblerectanglegraphicsview.cpp \
     linearintegralinterpolator.cpp \
     linearoscillator.cpp \
     linearoscillatorclient.cpp \
@@ -81,7 +80,9 @@ SOURCES += main.cpp\
     graphicsportitem2.cpp \
     graphicsportconnectionitem.cpp \
     metajack/realjackcontext.cpp \
-    metajack/recursivejackcontext.cpp
+    metajack/recursivejackcontext.cpp \
+    jackcontextgraphicsscene.cpp \
+    wheelzoominggraphicsview.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -130,7 +131,6 @@ HEADERS  += mainwindow.h \
     graphicsinterpolationitem.h \
     linearwaveshapingclient.h \
     cubicsplinewaveshapingclient.h \
-    visiblerectanglegraphicsview.h \
     linearintegralinterpolator.h \
     linearoscillator.h \
     linearoscillatorclient.h \
@@ -157,7 +157,9 @@ HEADERS  += mainwindow.h \
     metajack/realjackcontext.h \
     metajack/metajack.h \
     metajack/recursivejackcontext.h \
-    metajack/jackinterface.h
+    metajack/jackcontext.h \
+    jackcontextgraphicsscene.h \
+    wheelzoominggraphicsview.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

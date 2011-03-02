@@ -1,20 +1,33 @@
 #ifndef RECURSIVEJACKCONTEXT_H
 #define RECURSIVEJACKCONTEXT_H
 
-#include "jackinterface.h"
+#include "jackcontext.h"
 #include <map>
 #include <stack>
+#include <string>
 
-class RecursiveJackContext : public JackInterface
+class RecursiveJackContext : public JackContext
 {
 public:
-    RecursiveJackContext();
+    static RecursiveJackContext * getInstance();
     virtual ~RecursiveJackContext();
 
     // own methods controlling the Jack interface currently active:
-    void push();
-    void push(jack_client_t *client);
-    void pop();
+    JackContext * pushNewContext(const std::string &desiredWrapperClientName);
+    JackContext * pushExistingContext(JackContext *jackInterface);
+    JackContext * pushExistingContextByClient(jack_client_t *client);
+    JackContext * popContext();
+    /**
+      Use this function if you want to know if the client with the given
+      name is a wrapper client within the current context.
+
+      @param clientName the name of a client within the current context
+      @return pointer to a JackInterface object, iff the given client name
+        is the name of a wrapper client within the current context. Returns
+        zero if a client with the given name does not exists within the
+        current context or if it is not a wrapper client
+      */
+    JackContext * getInterfaceByClientName(const std::string &clientName);
 
     // methods reimplemented from JackInterface:
     void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);
@@ -90,10 +103,14 @@ public:
     void free(void* ptr);
 
 private:
-    std::stack<JackInterface*> interfaces, interfaceStack;
-    std::map<const jack_client_t*, JackInterface*> mapClientToInterface;
-    std::map<const jack_port_t*, JackInterface*> mapPortToInterface;
-    std::map<void*, JackInterface*> mapPointerToInterface;
+    std::stack<JackContext*> interfaces, interfaceStack;
+    std::map<const jack_client_t*, JackContext*> mapClientToInterface;
+    std::map<const jack_port_t*, JackContext*> mapPortToInterface;
+    std::map<void*, JackContext*> mapPointerToInterface;
+    std::map<JackContext*, std::map<std::string, JackContext*> > mapClientNameToInterface;
+
+    RecursiveJackContext();
+    static RecursiveJackContext instance;
 };
 
 #endif // RECURSIVEJACKCONTEXT_H
