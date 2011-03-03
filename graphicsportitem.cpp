@@ -85,6 +85,12 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     connectMenu->setEnabled(connectMenu->actions().size());
 }
 
+GraphicsPortItem::~GraphicsPortItem()
+{
+    // unregister the port connect callback:
+    client->registerPortConnectInterface(fullPortName, 0);
+}
+
 const QRectF & GraphicsPortItem::getRect() const
 {
     return portRect;

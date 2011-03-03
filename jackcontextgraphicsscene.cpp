@@ -16,6 +16,9 @@ JackContextGraphicsScene::JackContextGraphicsScene(int clientStyle_, int portSty
 
 JackContextGraphicsScene::~JackContextGraphicsScene()
 {
+    // make sure all items are deleted before nullClient is deleted:
+    // (some GraphicsPortItem instances unregister their port callbacks at nullClient when they are deleted)
+    clear();
 }
 
 void JackContextGraphicsScene::setClientStyle(int clientStyle)
@@ -54,7 +57,7 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(const QString &clientNa
         // create a visual representation in the scene:
         GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, clientStyle, portStyle, font);
         addItem(graphicsClientItem);
-        clientsMap.insert(clientName, QPair<JackClient*, GraphicsClientItem*>(jackClient, graphicsClientItem));
+        clientsMap.insert(clientName, QPair<JackClient*, GraphicsClientItem*>(0, graphicsClientItem));
         return graphicsClientItem;
     }
 }
@@ -172,10 +175,9 @@ void JackContextGraphicsScene::setPositions(const QString &port, const  QPointF 
 
 void JackContextGraphicsScene::deletePortConnectionItems(const QString &fullPortName)
 {
-    QMap<QString, GraphicsPortConnectionItem*> portItems = portConnectionItems.value(fullPortName);
-    int size = portItems.size();
-    for (int i = 0; i < size; i++) {
-        deletePortConnectionItem(fullPortName, portItems.begin().key());
+    QStringList otherPorts = portConnectionItems.value(fullPortName).keys();
+    for (int i = 0; i < otherPorts.size(); i++) {
+        deletePortConnectionItem(fullPortName, otherPorts[i]);
     }
 }
 

@@ -29,6 +29,11 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clien
     init();
 }
 
+GraphicsClientItem::~GraphicsClientItem()
+{
+    contextMenu->deleteLater();
+}
+
 const QString & GraphicsClientItem::getClientName() const
 {
     return clientName;
@@ -83,7 +88,7 @@ void GraphicsClientItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
     if (event->button() == Qt::RightButton) {
         event->accept();
         // show the context menu:
-        contextMenu.exec(event->screenPos());
+        contextMenu->exec(event->screenPos());
     } else {
         QGraphicsPathItem::mousePressEvent(event);
     }
@@ -120,7 +125,8 @@ void GraphicsClientItem::init()
     int padding = fontMetrics.height() * 2;
     int portPadding = fontMetrics.height() / 2;
 
-    contextMenu.addAction("Delete client", this, SLOT(onActionRemoveClient()));
+    contextMenu = new QMenu();
+    contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
 
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
     textItem->setFont(font);

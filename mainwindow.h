@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QSettings>
-#include "jackcontextgraphicsscene.h"
 
 namespace Ui {
     class MainWindow;
@@ -28,10 +27,13 @@ private slots:
     void on_actionLoad_session_triggered();
     void on_actionReset_triggered();
 
+    void on_actionParent_level_triggered();
+
+    void on_actionCreate_macro_triggered();
+
 private:
     Ui::MainWindow *ui;
     QSettings settings;
-    JackContextGraphicsScene *scene;
 };
 
 #endif // MAINWINDOW_H

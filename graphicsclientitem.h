@@ -19,6 +19,7 @@ class GraphicsClientItem : public QObject, public QGraphicsPathItem
 public:
     GraphicsClientItem(JackClient *client, int type, int portType, QFont font, QGraphicsItem *parent = 0);
     GraphicsClientItem(JackClient *client, const QString &clientName, int type, int portType, QFont font, QGraphicsItem *parent = 0);
+    ~GraphicsClientItem();
     const QString & getClientName() const;
     const QRectF & getRect() const;
     void setInnerItem(QGraphicsItem *item);
@@ -40,7 +41,7 @@ private:
     QGraphicsItem *innerItem;
     CommandTextItem *showInnerItemCommand;
     QPainterPath pathWithoutInnerItem;
-    QMenu contextMenu;
+    QMenu *contextMenu;
 
     void init();
 };

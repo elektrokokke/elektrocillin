@@ -10,6 +10,7 @@ class GraphicsPortItem : public QObject, public QGraphicsPathItem, public PortCo
     Q_OBJECT
 public:
     GraphicsPortItem(JackClient *client, const QString &fullPortName, int style, QFont font, QGraphicsItem *parent = 0);
+    ~GraphicsPortItem();
     const QRectF & getRect() const;
 
     void connectedTo(const QString &fullPortName);
