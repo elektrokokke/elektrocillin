@@ -10,21 +10,27 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     settings("settings.ini", QSettings::IniFormat)
 {
-    scene = new JackContextGraphicsScene(1, 3, QFont("Helvetica", 12));
-//    scene = new JackContextGraphicsScene(1, 3, QFont("Mighty Zeo 2.0", 12));
-
     ui->setupUi(this);
-    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
-//    ui->graphicsView->setViewport(new QGLWidget());
-    scene->setBackgroundBrush(QBrush(QColor("lightsteelblue")));
-    ui->graphicsView->setScene(scene);
 
     QList<JackClientFactory*> factories = JackClientFactory::getFactories();
     for (QList<JackClientFactory*>::const_iterator i = factories.begin(); i != factories.end(); i++) {
-        JackClientFactoryAction *action = new JackClientFactoryAction(*i, ui->menuCreate_client);
+        JackClientFactory *factory = *i;
+        JackClientFactoryAction *action = new JackClientFactoryAction(factory, ui->menuCreate_client);
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
         ui->menuCreate_client->addAction(action);
+
+        // create an example instance:
+        factory->createClient(factory->getName())->activate();
     }
+
+    scene = new JackContextGraphicsScene(1, 3, QFont("Helvetica", 12));
+//    scene = new JackContextGraphicsScene(1, 3, QFont("Mighty Zeo 2.0", 12));
+    scene->setBackgroundBrush(QBrush(QColor("lightsteelblue")));
+
+    ui->graphicsView->setRenderHints(QPainter::Antialiasing);
+//    ui->graphicsView->setViewport(new QGLWidget());
+    ui->graphicsView->setScene(scene);
+
 }
 
 MainWindow::~MainWindow()
