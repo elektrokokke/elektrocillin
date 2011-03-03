@@ -18,6 +18,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portT
     innerItem(0)
 {
     init();
+    setPos(client->getPosition());
 }
 GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
     QGraphicsPathItem(parent, scene),
@@ -33,6 +34,9 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clien
 
 GraphicsClientItem::~GraphicsClientItem()
 {
+    if (client->getClientName() == clientName) {
+        client->setPosition(pos());
+    }
     contextMenu->deleteLater();
 }
 
