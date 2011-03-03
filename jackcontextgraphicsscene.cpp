@@ -28,22 +28,22 @@ void JackContextGraphicsScene::setPortStyle(int portStyle)
     this->portStyle = portStyle;
 }
 
-GraphicsClientItem2 * JackContextGraphicsScene::addClient(JackClient *client)
+GraphicsClientItem * JackContextGraphicsScene::addClient(JackClient *client)
 {
     // activate the Jack client:
     client->activate();
     // create a visual representation in the scene:
-    GraphicsClientItem2 *graphicsClientItem = new GraphicsClientItem2(client, clientStyle, portStyle, font);
+    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(client, clientStyle, portStyle, font);
     QGraphicsItem *graphicsItem = client->createGraphicsItem(clientsRect);
     if (graphicsItem) {
         graphicsClientItem->setInnerItem(graphicsItem);
     }
     addItem(graphicsClientItem);
-    clientsMap.insert(client->getClientName(), QPair<JackClient*, GraphicsClientItem2*>(client, graphicsClientItem));
+    clientsMap.insert(client->getClientName(), QPair<JackClient*, GraphicsClientItem*>(client, graphicsClientItem));
     return graphicsClientItem;
 }
 
-GraphicsClientItem2 * JackContextGraphicsScene::addClient(const QString &clientName)
+GraphicsClientItem * JackContextGraphicsScene::addClient(const QString &clientName)
 {
     // try to get a jack_client_t pointer for this client:
     jack_client_t *client = meta_jack_client_by_name(clientName.toAscii().data());
@@ -52,19 +52,19 @@ GraphicsClientItem2 * JackContextGraphicsScene::addClient(const QString &clientN
         return addClient(jackClient);
     } else {
         // create a visual representation in the scene:
-        GraphicsClientItem2 *graphicsClientItem = new GraphicsClientItem2(&nullClient, clientName, clientStyle, portStyle, font);
+        GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, clientStyle, portStyle, font);
         addItem(graphicsClientItem);
-        clientsMap.insert(clientName, QPair<JackClient*, GraphicsClientItem2*>(jackClient, graphicsClientItem));
+        clientsMap.insert(clientName, QPair<JackClient*, GraphicsClientItem*>(jackClient, graphicsClientItem));
         return graphicsClientItem;
     }
 }
 
-void JackContextGraphicsScene::removeClient(JackClient *client)
+void JackContextGraphicsScene::deleteClient(JackClient *client)
 {
-    QMap<QString, QPair<JackClient*, GraphicsClientItem2*> >::iterator find = clientsMap.find(client->getClientName());
+    QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator find = clientsMap.find(client->getClientName());
     if (find != clientsMap.end()) {
         JackClient *client = find.value().first;
-        GraphicsClientItem2 *graphicsClientItem = find.value().second;
+        GraphicsClientItem *graphicsClientItem = find.value().second;
         QStringList fullPortNames = client->getMyPorts();
         for (int i = 0; i < fullPortNames.size(); i++) {
             GraphicsPortConnectionItem::deletePortConnectionItems(fullPortNames[i]);
@@ -77,9 +77,9 @@ void JackContextGraphicsScene::removeClient(JackClient *client)
 
 void JackContextGraphicsScene::saveSession(QDataStream &stream)
 {
-    for (QMap<QString, QPair<JackClient*, GraphicsClientItem2*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {
+    for (QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {
         JackClient *client = i.value().first;
-        GraphicsClientItem2 *graphicsClientItem = i.value().second;
+        GraphicsClientItem *graphicsClientItem = i.value().second;
         if (client && client->getFactory()) {
             // save the client's factory name:
             stream << client->getFactory()->getName();
@@ -104,7 +104,7 @@ void JackContextGraphicsScene::saveSession(QDataStream &stream)
 bool JackContextGraphicsScene::loadSession(QDataStream &stream)
 {
     // first delete all current clients:
-    removeAllClients();
+    deleteAllClients();
     // load the client names and create them:
     QString factoryName, clientName;
     stream >> factoryName >> clientName;
@@ -135,16 +135,16 @@ bool JackContextGraphicsScene::loadSession(QDataStream &stream)
     return true;
 }
 
-void JackContextGraphicsScene::removeAllClients()
+void JackContextGraphicsScene::deleteAllClients()
 {
     QList<JackClient*> clients;
-    for (QMap<QString, QPair<JackClient*, GraphicsClientItem2*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {
+    for (QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {
         JackClient *client = i.value().first;
         if (client) {
             clients.append(client);
         }
     }
     for (int i = 0; i < clients.size(); i++) {
-        removeClient(clients[i]);
+        deleteClient(clients[i]);
     }
 }

@@ -1,13 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "graphicsclientitem2.h"
-#include "iirmoogfilterclient.h"
-
 #include <QDebug>
-#include <QDialog>
-#include <QBoxLayout>
-#include <QGraphicsScene>
 #include <QFileDialog>
 #include <QGLWidget>
 
@@ -41,7 +35,7 @@ MainWindow::~MainWindow()
 void MainWindow::onActionCreateClient()
 {
     if (JackClientFactoryAction *action = qobject_cast<JackClientFactoryAction*>(sender())) {
-        GraphicsClientItem2 *graphicsClientItem = scene->addClient(action->getFactory()->createClient(action->getFactory()->getName()));
+        GraphicsClientItem *graphicsClientItem = scene->addClient(action->getFactory()->createClient(action->getFactory()->getName()));
         // create an action to zoom to that client:
         QAction *action = ui->menuView->addAction(graphicsClientItem->getClientName(), this, SLOT(onActionShowClient()));
         action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsClientItem));

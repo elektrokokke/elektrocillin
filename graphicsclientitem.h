@@ -13,12 +13,12 @@
 
 class CommandTextItem;
 
-class GraphicsClientItem2 : public QObject, public QGraphicsPathItem
+class GraphicsClientItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsClientItem2(JackClient *client, int type, int portType, QFont font, QGraphicsItem *parent = 0);
-    GraphicsClientItem2(JackClient *client, const QString &clientName, int type, int portType, QFont font, QGraphicsItem *parent = 0);
+    GraphicsClientItem(JackClient *client, int type, int portType, QFont font, QGraphicsItem *parent = 0);
+    GraphicsClientItem(JackClient *client, const QString &clientName, int type, int portType, QFont font, QGraphicsItem *parent = 0);
     const QString & getClientName() const;
     const QRectF & getRect() const;
     void setInnerItem(QGraphicsItem *item);

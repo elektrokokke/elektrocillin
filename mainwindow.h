@@ -3,14 +3,13 @@
 
 #include <QMainWindow>
 #include <QSettings>
-#include "jacknullclient.h"
 #include "jackcontextgraphicsscene.h"
 
 namespace Ui {
     class MainWindow;
 }
 
-class GraphicsClientItem2;
+class GraphicsClientItem;
 class Record2MemoryClient;
 class GraphView;
 

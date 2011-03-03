@@ -1,7 +1,7 @@
 #ifndef JACKCONTEXTGRAPHICSSCENE_H
 #define JACKCONTEXTGRAPHICSSCENE_H
 
-#include "graphicsclientitem2.h"
+#include "graphicsclientitem.h"
 #include "jacknullclient.h"
 #include <QGraphicsScene>
 #include <QFont>
@@ -16,21 +16,21 @@ public:
     void setClientStyle(int clientStyle);
     void setPortStyle(int portStyle);
 
-    GraphicsClientItem2 * addClient(JackClient *client);
-    GraphicsClientItem2 * addClient(const QString &clientName);
-    void removeClient(JackClient *client);
+    GraphicsClientItem * addClient(JackClient *client);
+    GraphicsClientItem * addClient(const QString &clientName);
+    void deleteClient(JackClient *client);
     void saveSession(QDataStream &stream);
     bool loadSession(QDataStream &stream);
 
 protected:
-    void removeAllClients();
+    void deleteAllClients();
 
 private:
     int clientStyle, portStyle;
     QFont font;
     QRectF clientsRect;
     JackNullClient nullClient;
-    QMap<QString, QPair<JackClient*, GraphicsClientItem2*> > clientsMap;
+    QMap<QString, QPair<JackClient*, GraphicsClientItem*> > clientsMap;
 };
 
 #endif // JACKCONTEXTGRAPHICSSCENE_H

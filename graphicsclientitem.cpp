@@ -1,12 +1,12 @@
-#include "graphicsclientitem2.h"
-#include "graphicsportitem2.h"
+#include "graphicsclientitem.h"
+#include "graphicsportitem.h"
 #include "jackcontextgraphicsscene.h"
 #include <QFontMetrics>
 #include <QPen>
 #include <QLinearGradient>
 #include <QGraphicsScene>
 
-GraphicsClientItem2::GraphicsClientItem2(JackClient *client_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
+GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     client(client_),
     clientName(client->getClientName()),
@@ -17,7 +17,7 @@ GraphicsClientItem2::GraphicsClientItem2(JackClient *client_, int type_, int por
 {
     init();
 }
-GraphicsClientItem2::GraphicsClientItem2(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
+GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     client(client_),
     clientName(clientName_),
@@ -29,17 +29,17 @@ GraphicsClientItem2::GraphicsClientItem2(JackClient *client_, const QString &cli
     init();
 }
 
-const QString & GraphicsClientItem2::getClientName() const
+const QString & GraphicsClientItem::getClientName() const
 {
     return clientName;
 }
 
-const QRectF & GraphicsClientItem2::getRect() const
+const QRectF & GraphicsClientItem::getRect() const
 {
     return rect;
 }
 
-void GraphicsClientItem2::setInnerItem(QGraphicsItem *item)
+void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
 {
     if (innerItem) {
         delete innerItem;
@@ -54,12 +54,12 @@ void GraphicsClientItem2::setInnerItem(QGraphicsItem *item)
     }
 }
 
-QGraphicsItem * GraphicsClientItem2::getInnerItem() const
+QGraphicsItem * GraphicsClientItem::getInnerItem() const
 {
     return innerItem;
 }
 
-void GraphicsClientItem2::showInnerItem(bool ensureVisible_)
+void GraphicsClientItem::showInnerItem(bool ensureVisible_)
 {
     if (innerItem) {
         setFocus();
@@ -78,7 +78,7 @@ void GraphicsClientItem2::showInnerItem(bool ensureVisible_)
     }
 }
 
-void GraphicsClientItem2::mousePressEvent ( QGraphicsSceneMouseEvent * event )
+void GraphicsClientItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     if (event->button() == Qt::RightButton) {
         event->accept();
@@ -89,25 +89,25 @@ void GraphicsClientItem2::mousePressEvent ( QGraphicsSceneMouseEvent * event )
     }
 }
 
-void GraphicsClientItem2::focusInEvent(QFocusEvent *)
+void GraphicsClientItem::focusInEvent(QFocusEvent *)
 {
     setZValue(1);
 }
 
-void GraphicsClientItem2::focusOutEvent(QFocusEvent *)
+void GraphicsClientItem::focusOutEvent(QFocusEvent *)
 {
     setZValue(0);
 }
 
-void GraphicsClientItem2::onActionRemoveClient()
+void GraphicsClientItem::onActionRemoveClient()
 {
     // delete the client belonging to this item:
     if (JackContextGraphicsScene *jackContextGraphicsScene = qobject_cast<JackContextGraphicsScene*>(scene())) {
-        jackContextGraphicsScene->removeClient(client);
+        jackContextGraphicsScene->deleteClient(client);
     }
 }
 
-void GraphicsClientItem2::init()
+void GraphicsClientItem::init()
 {
     bool gradient = false;
     setCursor(Qt::ArrowCursor);
@@ -133,22 +133,22 @@ void GraphicsClientItem2::init()
     QObject::connect(showInnerItemCommand, SIGNAL(triggered()), this, SLOT(showInnerItem()));
 
     QStringList inputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
-    QList<GraphicsPortItem2*> inputPortItems;
+    QList<GraphicsPortItem*> inputPortItems;
     int inputPortsWidth = -portPadding;
     int minimumInputPortWidth = 0;
     for (int i = 0; i < inputPorts.size(); i++) {
-        inputPortItems.append(new GraphicsPortItem2(client, inputPorts[i], 3, font, this));
+        inputPortItems.append(new GraphicsPortItem(client, inputPorts[i], 3, font, this));
         inputPortsWidth += inputPortItems[i]->getRect().width() + portPadding;
         if ((i == 0) || (inputPortItems[i]->getRect().width() < minimumInputPortWidth)) {
             minimumInputPortWidth = inputPortItems[i]->getRect().width();
         }
     }
     QStringList outputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsOutput);
-    QList<GraphicsPortItem2*> outputPortItems;
+    QList<GraphicsPortItem*> outputPortItems;
     int outputPortsWidth = -portPadding;
     int minimumOutputPortWidth = 0;
     for (int i = 0; i < outputPorts.size(); i++) {
-        outputPortItems.append(new GraphicsPortItem2(client, outputPorts[i], 3, font, this));
+        outputPortItems.append(new GraphicsPortItem(client, outputPorts[i], 3, font, this));
         outputPortsWidth += outputPortItems[i]->getRect().width() + portPadding;
         if ((i == 0) || (outputPortItems[i]->getRect().width() < minimumOutputPortWidth)) {
             minimumOutputPortWidth = outputPortItems[i]->getRect().width();
@@ -182,7 +182,7 @@ void GraphicsClientItem2::init()
     }
 
     for (int i = 0, x = (inputPortsWidth > rect.width() ? (rect.width() - inputPortsWidth) / 2 : 0); i < inputPorts.size(); i++) {
-        GraphicsPortItem2 *portItem = inputPortItems[i];
+        GraphicsPortItem *portItem = inputPortItems[i];
         portItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
         portItem->setPos(x, 0);
         QRectF portRect(portItem->getRect().translated(portItem->pos()));
@@ -203,7 +203,7 @@ void GraphicsClientItem2::init()
         x += portRect.width() + portPadding;
     }
     for (int i = 0, x = (outputPortsWidth > rect.width() ? (rect.width() - outputPortsWidth) / 2 : 0); i < outputPorts.size(); i++) {
-        GraphicsPortItem2 *portItem = outputPortItems[i];
+        GraphicsPortItem *portItem = outputPortItems[i];
         portItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
         portItem->setPos(x, rect.height() - fontMetrics.height());
         QRectF portRect(portItem->getRect().translated(portItem->pos()));

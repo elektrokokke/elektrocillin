@@ -1,5 +1,5 @@
-#include "graphicsportitem2.h"
-#include "graphicsclientitem2.h"
+#include "graphicsportitem.h"
+#include "graphicsclientitem.h"
 #include "graphicsportconnectionitem.h"
 #include <QBrush>
 #include <QPen>
@@ -9,7 +9,7 @@
 #include <QSet>
 #include <QGraphicsSceneMouseEvent>
 
-GraphicsPortItem2::GraphicsPortItem2(JackClient *client_, const QString &fullPortName_, int style_, QFont font_, QGraphicsItem *parent) :
+GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, int style_, QFont font_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     client(client_),
     fullPortName(fullPortName_),
@@ -84,12 +84,12 @@ GraphicsPortItem2::GraphicsPortItem2(JackClient *client_, const QString &fullPor
     connectMenu->setEnabled(connectMenu->actions().size());
 }
 
-const QRectF & GraphicsPortItem2::getRect() const
+const QRectF & GraphicsPortItem::getRect() const
 {
     return portRect;
 }
 
-void GraphicsPortItem2::connectedTo(const QString &otherPort)
+void GraphicsPortItem::connectedTo(const QString &otherPort)
 {
     connectMenu->removeAction(mapPortNamesToActions[otherPort]);
     QAction *action = disconnectMenu->addAction(otherPort);
@@ -103,7 +103,7 @@ void GraphicsPortItem2::connectedTo(const QString &otherPort)
     connections++;
 }
 
-void GraphicsPortItem2::disconnectedFrom(const QString &otherPort)
+void GraphicsPortItem::disconnectedFrom(const QString &otherPort)
 {
     disconnectMenu->removeAction(mapPortNamesToActions[otherPort]);
     QAction *action = connectMenu->addAction(otherPort);
@@ -116,7 +116,7 @@ void GraphicsPortItem2::disconnectedFrom(const QString &otherPort)
     connections--;
 }
 
-void GraphicsPortItem2::registeredPort(const QString &fullPortname, const QString &type, int flags)
+void GraphicsPortItem::registeredPort(const QString &fullPortname, const QString &type, int flags)
 {
     bool portIsInput = (flags & JackPortIsInput);
     if ((this->dataType == type) && (portIsInput != isInput)) {
@@ -129,7 +129,7 @@ void GraphicsPortItem2::registeredPort(const QString &fullPortname, const QStrin
     }
 }
 
-void GraphicsPortItem2::unregisteredPort(const QString &fullPortname, const QString &, int)
+void GraphicsPortItem::unregisteredPort(const QString &fullPortname, const QString &, int)
 {
     QAction *action = mapPortNamesToActions.value(fullPortname, 0);
     if (action) {
@@ -142,13 +142,13 @@ void GraphicsPortItem2::unregisteredPort(const QString &fullPortname, const QStr
     }
 }
 
-QPointF GraphicsPortItem2::getConnectionScenePos() const
+QPointF GraphicsPortItem::getConnectionScenePos() const
 {
     QRectF sceneRect = sceneBoundingRect();
     return (isInput ? QPointF(sceneRect.center().x(), sceneRect.top()) : QPointF(sceneRect.center().x(), sceneRect.bottom()));
 }
 
-void GraphicsPortItem2::mousePressEvent ( QGraphicsSceneMouseEvent * event )
+void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     QGraphicsPathItem::mousePressEvent(event);
     if (!event->isAccepted() && (event->button() == Qt::RightButton)) {
@@ -158,7 +158,7 @@ void GraphicsPortItem2::mousePressEvent ( QGraphicsSceneMouseEvent * event )
     }
 }
 
-QVariant GraphicsPortItem2::itemChange(GraphicsItemChange change, const QVariant &value)
+QVariant GraphicsPortItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemScenePositionHasChanged) {
         GraphicsPortConnectionItem::setPositions(fullPortName, getConnectionScenePos());
@@ -166,14 +166,14 @@ QVariant GraphicsPortItem2::itemChange(GraphicsItemChange change, const QVariant
     return QGraphicsItem::itemChange(change, value);
 }
 
-void GraphicsPortItem2::onConnectAction()
+void GraphicsPortItem::onConnectAction()
 {
     // determine which port is being connected:
     QString otherPort = ((QAction*)sender())->data().toString();
     client->connectPorts(fullPortName, otherPort);
 }
 
-void GraphicsPortItem2::onDisconnectAction()
+void GraphicsPortItem::onDisconnectAction()
 {
     // determine which port is being disconnected:
     QString otherPort = ((QAction*)sender())->data().toString();

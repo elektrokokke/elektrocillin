@@ -74,13 +74,13 @@ SOURCES += main.cpp\
     envelope.cpp \
     envelopeclient.cpp \
     graphicsclientnameitem.cpp \
-    graphicsclientitem2.cpp \
-    graphicsportitem2.cpp \
     graphicsportconnectionitem.cpp \
     metajack/realjackcontext.cpp \
     metajack/recursivejackcontext.cpp \
     jackcontextgraphicsscene.cpp \
-    wheelzoominggraphicsview.cpp
+    wheelzoominggraphicsview.cpp \
+    graphicsclientitem.cpp \
+    graphicsportitem.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -147,15 +147,15 @@ HEADERS  += mainwindow.h \
     envelope.h \
     envelopeclient.h \
     graphicsclientnameitem.h \
-    graphicsclientitem2.h \
-    graphicsportitem2.h \
     graphicsportconnectionitem.h \
     metajack/realjackcontext.h \
     metajack/metajack.h \
     metajack/recursivejackcontext.h \
     metajack/jackcontext.h \
     jackcontextgraphicsscene.h \
-    wheelzoominggraphicsview.h
+    wheelzoominggraphicsview.h \
+    graphicsportitem.h \
+    graphicsclientitem.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

@@ -5,11 +5,11 @@
 #include <QGraphicsPathItem>
 #include <QMenu>
 
-class GraphicsPortItem2 : public QObject, public QGraphicsPathItem, public PortConnectInterface
+class GraphicsPortItem : public QObject, public QGraphicsPathItem, public PortConnectInterface
 {
     Q_OBJECT
 public:
-    GraphicsPortItem2(JackClient *client, const QString &fullPortName, int style, QFont font, QGraphicsItem *parent = 0);
+    GraphicsPortItem(JackClient *client, const QString &fullPortName, int style, QFont font, QGraphicsItem *parent = 0);
     const QRectF & getRect() const;
 
     void connectedTo(const QString &fullPortName);
