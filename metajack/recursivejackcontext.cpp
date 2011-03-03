@@ -36,14 +36,15 @@ JackContext * RecursiveJackContext::getCurrentContext()
 JackContext * RecursiveJackContext::pushNewContext(const std::string &desiredWrapperClientName)
 {
     // create a new meta jack context:
-    MetaJackContext *jackInterface = new MetaJackContext(interfaceStack.top(), desiredWrapperClientName);
-    interfaces.push(jackInterface);
+    MetaJackContext *context = new MetaJackContext(interfaceStack.top(), desiredWrapperClientName);
+    interfaces.push(context);
     // get its name in the current jack context and remember it:
-    std::string wrapperClientName = jackInterface->getWrapperInterface()->get_client_name(jackInterface->getWrapperClient());
-    mapClientNameToInterface[jackInterface->getWrapperInterface()][wrapperClientName] = jackInterface;
+    std::string wrapperClientName = context->getWrapperInterface()->get_client_name(context->getWrapperClient());
+    mapClientToInterface[context->getWrapperClient()] = context;
+    mapClientNameToInterface[context->getWrapperInterface()][wrapperClientName] = context;
     // it becomes the current jack interface:
-    interfaceStack.push(jackInterface);
-    return jackInterface;
+    interfaceStack.push(context);
+    return context;
 }
 
 JackContext * RecursiveJackContext::pushExistingContext(JackContext *jackInterface)
@@ -77,8 +78,8 @@ void RecursiveJackContext::deleteContext(JackContext *context)
     for (; interfaceStack.size(); ) {
         if (interfaceStack.top() != context) {
             temp.push(interfaceStack.top());
-            interfaceStack.pop();
         }
+        interfaceStack.pop();
     }
     for (; temp.size(); ) {
         interfaceStack.push(temp.top());
@@ -87,8 +88,8 @@ void RecursiveJackContext::deleteContext(JackContext *context)
     for (; interfaces.size(); ) {
         if (interfaces.top() != context) {
             temp.push(interfaces.top());
-            interfaces.pop();
         }
+        interfaces.pop();
     }
     for (; temp.size(); ) {
         interfaces.push(temp.top());
