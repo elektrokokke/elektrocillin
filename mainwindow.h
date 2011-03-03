@@ -26,9 +26,7 @@ private slots:
     void on_actionSave_session_triggered();
     void on_actionLoad_session_triggered();
     void on_actionReset_triggered();
-
     void on_actionParent_level_triggered();
-
     void on_actionCreate_macro_triggered();
 
 private:

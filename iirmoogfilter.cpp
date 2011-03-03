@@ -4,7 +4,8 @@
 IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     IirFilter(1 + zeros, 4, QStringList("Cutoff modulation"), sampleRate),
     frequencyController(1),
-    resonanceController(2)
+    resonanceController(2),
+    lastCutoffModulationInput(0)
 {
     parameters.frequency = sampleRate * 0.25;
     parameters.frequencyOffsetFactor = 8; // three octaves difference from MIDI input note
@@ -19,7 +20,8 @@ IirMoogFilter::IirMoogFilter(const IirMoogFilter &tocopy) :
     IirFilter(tocopy),
     frequencyController(tocopy.frequencyController),
     resonanceController(tocopy.resonanceController),
-    parameters(tocopy.parameters)
+    parameters(tocopy.parameters),
+    lastCutoffModulationInput(0)
 {
 }
 
@@ -46,8 +48,11 @@ unsigned char IirMoogFilter::getResonanceController() const
 void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
 {
     // modify cutoff frequency from second input:
-    parameters.frequencyModulationFactor = pow(1 + parameters.frequencyModulationIntensity, inputs[1]);
-    computeCoefficients();
+    if (inputs[1] != lastCutoffModulationInput) {
+        parameters.frequencyModulationFactor = pow(1 + parameters.frequencyModulationIntensity, inputs[1]);
+        computeCoefficients();
+        lastCutoffModulationInput = inputs[1];
+    }
     IirFilter::processAudio(inputs, outputs, time);
 }
 

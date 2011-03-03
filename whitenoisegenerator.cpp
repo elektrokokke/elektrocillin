@@ -19,6 +19,7 @@ WhiteNoiseGeneratorClient::WhiteNoiseGeneratorClient(const QString &clientName) 
 
 WhiteNoiseGeneratorClient::~WhiteNoiseGeneratorClient()
 {
+    close();
     delete getAudioProcessor();
 }
 
