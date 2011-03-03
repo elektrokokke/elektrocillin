@@ -5,11 +5,13 @@
 #include <QGraphicsPathItem>
 #include <QMenu>
 
+class JackContextGraphicsScene;
+
 class GraphicsPortItem : public QObject, public QGraphicsPathItem, public PortConnectInterface
 {
     Q_OBJECT
 public:
-    GraphicsPortItem(JackClient *client, const QString &fullPortName, int style, QFont font, QGraphicsItem *parent = 0);
+    GraphicsPortItem(JackClient *client, const QString &fullPortName, int style, QFont font, QGraphicsItem *parent, JackContextGraphicsScene *scene);
     ~GraphicsPortItem();
     const QRectF & getRect() const;
 

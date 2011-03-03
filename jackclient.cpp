@@ -26,6 +26,16 @@ void JackClient::loadState(QDataStream &)
 {
 }
 
+void JackClient::setPosition(const QPointF &pos)
+{
+    position = pos;
+}
+
+const QPointF & JackClient::getPosition() const
+{
+    return position;
+}
+
 jack_client_t * JackClient::getClient()
 {
     return client;

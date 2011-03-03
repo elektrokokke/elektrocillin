@@ -1,13 +1,15 @@
 #include "graphicsclientitem.h"
 #include "graphicsportitem.h"
 #include "jackcontextgraphicsscene.h"
+#include "metajack/recursivejackcontext.h"
 #include <QFontMetrics>
 #include <QPen>
 #include <QLinearGradient>
 #include <QGraphicsScene>
+#include <QGraphicsView>
 
-GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
-    QGraphicsPathItem(parent),
+GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portType_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
+    QGraphicsPathItem(parent, scene),
     client(client_),
     clientName(client->getClientName()),
     type(type_),
@@ -17,8 +19,8 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portT
 {
     init();
 }
-GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
-    QGraphicsPathItem(parent),
+GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
+    QGraphicsPathItem(parent, scene),
     client(client_),
     clientName(clientName_),
     type(type_),
@@ -112,6 +114,27 @@ void GraphicsClientItem::onActionRemoveClient()
     }
 }
 
+void GraphicsClientItem::onActionEditMacro()
+{
+    // get the macro's wrapper client:
+    JackContext *jackContext = RecursiveJackContext::getInstance()->getInterfaceByClientName(clientName.toAscii().data());
+    if (jackContext) {
+        // get the current scene:
+        JackContextGraphicsScene *oldScene = (JackContextGraphicsScene*)scene();
+        // get the view of the scene:
+        QList<QGraphicsView*> views = oldScene->views();
+        // make the macro's wrapper client the new context:
+        RecursiveJackContext::getInstance()->pushExistingContext(jackContext);
+        // create a new scene in the new context and make it the current scene of all views:
+        JackContextGraphicsScene *scene = new JackContextGraphicsScene();
+        for (int i = 0; i < views.size(); i++) {
+            views[i]->setScene(scene);
+        }
+        // delete the old scene:
+        oldScene->deleteLater();
+    }
+}
+
 void GraphicsClientItem::init()
 {
     bool gradient = false;
@@ -124,8 +147,13 @@ void GraphicsClientItem::init()
     QFontMetrics fontMetrics(font);
     int padding = fontMetrics.height() * 2;
     int portPadding = fontMetrics.height() / 2;
+    bool isMacro = RecursiveJackContext::getInstance()->getInterfaceByClientName(clientName.toAscii().data());
 
     contextMenu = new QMenu();
+    if (isMacro) {
+        contextMenu->addAction("Edit macro", this, SLOT(onActionEditMacro()));
+        contextMenu->addSeparator();
+    }
     contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
 
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
@@ -143,7 +171,12 @@ void GraphicsClientItem::init()
     int inputPortsWidth = -portPadding;
     int minimumInputPortWidth = 0;
     for (int i = 0; i < inputPorts.size(); i++) {
-        inputPortItems.append(new GraphicsPortItem(client, inputPorts[i], 3, font, this));
+        inputPortItems.append(new GraphicsPortItem(client, inputPorts[i], 3, font, this, (JackContextGraphicsScene*)scene()));
+        if (isMacro) {
+            QPen pen = inputPortItems.back()->pen();
+            pen.setColor(QColor("steelblue"));
+            inputPortItems.back()->setPen(pen);
+        }
         inputPortsWidth += inputPortItems[i]->getRect().width() + portPadding;
         if ((i == 0) || (inputPortItems[i]->getRect().width() < minimumInputPortWidth)) {
             minimumInputPortWidth = inputPortItems[i]->getRect().width();
@@ -154,7 +187,12 @@ void GraphicsClientItem::init()
     int outputPortsWidth = -portPadding;
     int minimumOutputPortWidth = 0;
     for (int i = 0; i < outputPorts.size(); i++) {
-        outputPortItems.append(new GraphicsPortItem(client, outputPorts[i], 3, font, this));
+        outputPortItems.append(new GraphicsPortItem(client, outputPorts[i], 3, font, this, (JackContextGraphicsScene*)scene()));
+        if (isMacro) {
+            QPen pen = outputPortItems.back()->pen();
+            pen.setColor(QColor("steelblue"));
+            outputPortItems.back()->setPen(pen);
+        }
         outputPortsWidth += outputPortItems[i]->getRect().width() + portPadding;
         if ((i == 0) || (outputPortItems[i]->getRect().width() < minimumOutputPortWidth)) {
             minimumOutputPortWidth = outputPortItems[i]->getRect().width();
@@ -232,7 +270,11 @@ void GraphicsClientItem::init()
     QPainterPath combinedPath = bodyPath;
 
     QGraphicsPathItem *bodyItem = new QGraphicsPathItem(bodyPath, this);
-    bodyItem->setPen(QPen(QBrush(Qt::black), 3));
+    if (isMacro) {
+        bodyItem->setPen(QPen(QBrush(QColor("steelblue")), 3));
+    } else {
+        bodyItem->setPen(QPen(QBrush(Qt::black), 3));
+    }
     bodyItem->setBrush(QBrush(Qt::white));
     setPath(combinedPath);
     setPen(QPen(Qt::NoPen));

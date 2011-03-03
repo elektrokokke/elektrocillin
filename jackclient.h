@@ -49,6 +49,9 @@ public:
     virtual void saveState(QDataStream &stream);
     virtual void loadState(QDataStream &stream);
 
+    void setPosition(const QPointF &pos);
+    const QPointF & getPosition() const;
+
     jack_client_t * getClient();
 
     /**
@@ -272,6 +275,7 @@ private:
     QString requestedName, actualName;
     jack_client_t *client;
     QMap<QString, PortConnectInterface*> portConnectInterfaces;
+    QPointF position;
 
     static QMap<jack_client_t*, JackClient*> mapClientHandlesToJackClients;
 

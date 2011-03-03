@@ -1,12 +1,13 @@
 #include "jackcontextgraphicsscene.h"
 #include "graphicsportconnectionitem.h"
 
-JackContextGraphicsScene::JackContextGraphicsScene(int clientStyle_, int portStyle_, const QFont &font_) :
-    clientStyle(clientStyle_),
-    portStyle(portStyle_),
-    font(font_),
+JackContextGraphicsScene::JackContextGraphicsScene() :
+    clientStyle(1),
+    portStyle(3),
+    font("Helvetica", 12),
     clientsRect(0, 0, 600, 420)
 {
+    setBackgroundBrush(QBrush(QColor("lightsteelblue")));
     // get all clients and create visual representations for them:
     QStringList clientNames = nullClient.getClients();
     for (int i = 0; i < clientNames.size(); i++) {
@@ -36,7 +37,7 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(JackClient *client)
     // activate the Jack client:
     client->activate();
     // create a visual representation in the scene:
-    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(client, clientStyle, portStyle, font);
+    GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(client, clientStyle, portStyle, font, 0, this);
     QGraphicsItem *graphicsItem = client->createGraphicsItem(clientsRect);
     if (graphicsItem) {
         graphicsClientItem->setInnerItem(graphicsItem);
@@ -55,7 +56,7 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(const QString &clientNa
         return addClient(jackClient);
     } else {
         // create a visual representation in the scene:
-        GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, clientStyle, portStyle, font);
+        GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, clientStyle, portStyle, font, 0, this);
         addItem(graphicsClientItem);
         clientsMap.insert(clientName, QPair<JackClient*, GraphicsClientItem*>(0, graphicsClientItem));
         return graphicsClientItem;

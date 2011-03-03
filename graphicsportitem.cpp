@@ -10,8 +10,8 @@
 #include <QSet>
 #include <QGraphicsSceneMouseEvent>
 
-GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, int style_, QFont font_, QGraphicsItem *parent) :
-    QGraphicsPathItem(parent),
+GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, int style_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
+    QGraphicsPathItem(parent, scene),
     client(client_),
     fullPortName(fullPortName_),
     shortPortName(fullPortName.split(":")[1]),
@@ -61,20 +61,27 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     // create the context menu:
     connectMenu = contextMenu.addMenu("Connect");
     disconnectMenu = contextMenu.addMenu("Disconnect");
+    // create the entries in connect- and disconnect-menus, as well as graphical representations of existing connections:
     QStringList connectedPorts = client->getConnectedPorts(fullPortName);
     QSet<QString> connectedPortsSet;
     for (int i = 0; i < connectedPorts.size(); i++) {
+        // create an entry in the disconnect-menu:
         QAction *action = disconnectMenu->addAction(connectedPorts[i]);
         action->setData(connectedPorts[i]);
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(onDisconnectAction()));
         mapPortNamesToActions[connectedPorts[i]] = action;
         connectedPortsSet.insert(connectedPorts[i]);
+        // create a graphical representation of the connection:
+        GraphicsPortConnectionItem *connectionItem = scene->getPortConnectionItem(fullPortName, connectedPorts[i], scene);
+        connectionItem->setPos(fullPortName, getConnectionScenePos());
+        connections++;
     }
     // get all available ports that can be connected to this:
     QStringList connectablePorts = client->getPorts(0, dataType.toAscii().data(), isInput ? JackPortIsOutput : JackPortIsInput);
     for (int i = 0; i < connectablePorts.size(); i++) {
         // skip ports that are already connected:
         if (!connectedPorts.contains(connectablePorts[i])) {
+            // create an entry in the connect-menu:
             QAction *action = connectMenu->addAction(connectablePorts[i]);
             action->setData(connectablePorts[i]);
             QObject::connect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
@@ -98,13 +105,16 @@ const QRectF & GraphicsPortItem::getRect() const
 
 void GraphicsPortItem::connectedTo(const QString &otherPort)
 {
+    // remove the corresponding entry from the connect-menu:
     connectMenu->removeAction(mapPortNamesToActions[otherPort]);
+    // create an entry in the disconnect-menu:
     QAction *action = disconnectMenu->addAction(otherPort);
     action->setData(otherPort);
     QObject::connect(action, SIGNAL(triggered()), this, SLOT(onDisconnectAction()));
     mapPortNamesToActions[otherPort] = action;
     disconnectMenu->setEnabled(disconnectMenu->actions().size());
     connectMenu->setEnabled(connectMenu->actions().size());
+    // create a graphical representation of the connection:
     GraphicsPortConnectionItem *connectionItem = ((JackContextGraphicsScene*)scene())->getPortConnectionItem(fullPortName, otherPort, scene());
     connectionItem->setPos(fullPortName, getConnectionScenePos());
     connections++;
@@ -112,13 +122,16 @@ void GraphicsPortItem::connectedTo(const QString &otherPort)
 
 void GraphicsPortItem::disconnectedFrom(const QString &otherPort)
 {
+    // remove the corresponding entry from the disconnect-menu:
     disconnectMenu->removeAction(mapPortNamesToActions[otherPort]);
+    // create an entry in the connect-menu:
     QAction *action = connectMenu->addAction(otherPort);
     action->setData(otherPort);
     QObject::connect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
     mapPortNamesToActions[otherPort] = action;
     disconnectMenu->setEnabled(disconnectMenu->actions().size());
     connectMenu->setEnabled(connectMenu->actions().size());
+    // delete the graphical representation of the connection:
     ((JackContextGraphicsScene*)scene())->deletePortConnectionItem(fullPortName, otherPort);
     connections--;
 }

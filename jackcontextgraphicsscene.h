@@ -11,7 +11,7 @@ class JackContextGraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    JackContextGraphicsScene(int clientStyle, int portStyle, const QFont &font);
+    JackContextGraphicsScene();
     virtual ~JackContextGraphicsScene();
 
     void setClientStyle(int clientStyle);

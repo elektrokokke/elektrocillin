@@ -12,13 +12,14 @@
 #include <QGraphicsSceneMouseEvent>
 
 class CommandTextItem;
+class JackContextGraphicsScene;
 
 class GraphicsClientItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsClientItem(JackClient *client, int type, int portType, QFont font, QGraphicsItem *parent = 0);
-    GraphicsClientItem(JackClient *client, const QString &clientName, int type, int portType, QFont font, QGraphicsItem *parent = 0);
+    GraphicsClientItem(JackClient *client, int type, int portType, QFont font, QGraphicsItem *parent, JackContextGraphicsScene *scene);
+    GraphicsClientItem(JackClient *client, const QString &clientName, int type, int portType, QFont font, QGraphicsItem *parent, JackContextGraphicsScene *scene);
     ~GraphicsClientItem();
     const QString & getClientName() const;
     const QRectF & getRect() const;
@@ -32,6 +33,7 @@ protected:
     void focusOutEvent(QFocusEvent * event);
 private slots:
     void onActionRemoveClient();
+    void onActionEditMacro();
 private:
     JackClient *client;
     QString clientName;

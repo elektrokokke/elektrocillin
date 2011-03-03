@@ -22,8 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->menuCreate_client->addAction(action);
     }
 
-    JackContextGraphicsScene *scene = new JackContextGraphicsScene(1, 3, QFont("Helvetica", 12));
-    scene->setBackgroundBrush(QBrush(QColor("lightsteelblue")));
+    JackContextGraphicsScene *scene = new JackContextGraphicsScene();
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
 //    ui->graphicsView->setViewport(new QGLWidget());
@@ -36,14 +35,11 @@ MainWindow::~MainWindow()
     delete ui->graphicsView->scene();
     delete ui;
 }
+
 void MainWindow::onActionCreateClient()
 {
     if (JackClientFactoryAction *action = qobject_cast<JackClientFactoryAction*>(sender())) {
-        GraphicsClientItem *graphicsClientItem = ((JackContextGraphicsScene*)ui->graphicsView->scene())->addClient(action->getFactory()->createClient(action->getFactory()->getName()));
-        // create an action to zoom to that client:
-        QAction *action = ui->menuView->addAction(graphicsClientItem->getClientName(), this, SLOT(onActionShowClient()));
-        action->setData(QVariant::fromValue<QGraphicsItem*>(graphicsClientItem));
-
+        ((JackContextGraphicsScene*)ui->graphicsView->scene())->addClient(action->getFactory()->createClient(action->getFactory()->getName()));
     }
 }
 
@@ -83,8 +79,7 @@ void MainWindow::on_actionParent_level_triggered()
     // pop the current jack context:
     RecursiveJackContext::getInstance()->popContext();
     // create a new scene in the new context and make it the current scene:
-    JackContextGraphicsScene *scene = new JackContextGraphicsScene(1, 3, QFont("Helvetica", 12));
-    scene->setBackgroundBrush(QBrush(QColor("lightsteelblue")));
+    JackContextGraphicsScene *scene = new JackContextGraphicsScene();
     ui->graphicsView->setScene(scene);
     // delete the old scene:
     delete oldScene;
@@ -97,8 +92,7 @@ void MainWindow::on_actionCreate_macro_triggered()
     // create a new wrapper client:
     RecursiveJackContext::getInstance()->pushNewContext("New macro");
     // create a new scene in the new context and make it the current scene:
-    JackContextGraphicsScene *scene = new JackContextGraphicsScene(1, 3, QFont("Helvetica", 12));
-    scene->setBackgroundBrush(QBrush(QColor("lightsteelblue")));
+    JackContextGraphicsScene *scene = new JackContextGraphicsScene();
     ui->graphicsView->setScene(scene);
     // delete the old scene:
     delete oldScene;
