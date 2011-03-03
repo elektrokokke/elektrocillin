@@ -47,7 +47,6 @@ SOURCES += main.cpp\
     midiprocessor.cpp \
     midiprocessorclient.cpp \
     jacknullclient.cpp \
-    graphicsclientitem.cpp \
     interpolator.cpp \
     linearinterpolator.cpp \
     cubicsplineinterpolator.cpp \
@@ -66,7 +65,6 @@ SOURCES += main.cpp\
     metajack/metajackcontext.cpp \
     metajack/metajack.cpp \
     whitenoisegenerator.cpp \
-    graphicsportitem.cpp \
     graphicsinterpolatoredititem.cpp \
     cisi.cpp \
     linearmorphoscillatorclient.cpp \
@@ -124,7 +122,6 @@ HEADERS  += mainwindow.h \
     eventprocessorclient.h \
     jackthreadeventprocessorclient.h \
     jacknullclient.h \
-    graphicsclientitem.h \
     interpolator.h \
     linearinterpolator.h \
     cubicsplineinterpolator.h \
@@ -143,7 +140,6 @@ HEADERS  += mainwindow.h \
     metajack/metajackcontext.h \
     metajack/callbackhandlers.h \
     whitenoisegenerator.h \
-    graphicsportitem.h \
     graphicsinterpolatoredititem.h \
     cisi.h \
     linearmorphoscillatorclient.h \
