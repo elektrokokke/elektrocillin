@@ -67,7 +67,7 @@ void JackContextGraphicsScene::deleteClient(JackClient *client)
         GraphicsClientItem *graphicsClientItem = find.value().second;
         QStringList fullPortNames = client->getMyPorts();
         for (int i = 0; i < fullPortNames.size(); i++) {
-            GraphicsPortConnectionItem::deletePortConnectionItems(fullPortNames[i]);
+            deletePortConnectionItems(fullPortNames[i]);
         }
         delete graphicsClientItem;
         delete client;
@@ -133,6 +133,50 @@ bool JackContextGraphicsScene::loadSession(QDataStream &stream)
     stream >> connections;
     nullClient.restoreConnections(connections);
     return true;
+}
+
+GraphicsPortConnectionItem * JackContextGraphicsScene::getPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene)
+{
+    GraphicsPortConnectionItem *item = portConnectionItems.value(port1).value(port2, 0);
+    if (!item) {
+        item = new GraphicsPortConnectionItem(port1, port2, scene);
+        portConnectionItems[port1][port2] = item;
+        portConnectionItems[port2][port1] = item;
+    }
+    return item;
+}
+
+void JackContextGraphicsScene::deletePortConnectionItem(const QString &port1, const QString &port2)
+{
+    GraphicsPortConnectionItem *item = portConnectionItems.value(port1).value(port2, 0);
+    if (item) {
+        portConnectionItems[port1].remove(port2);
+        portConnectionItems[port2].remove(port1);
+        delete item;
+        if (portConnectionItems[port1].size() == 0) {
+            portConnectionItems.remove(port1);
+        }
+        if (portConnectionItems[port2].size() == 0) {
+            portConnectionItems.remove(port2);
+        }
+    }
+}
+
+void JackContextGraphicsScene::setPositions(const QString &port, const  QPointF &point)
+{
+    const QMap<QString, GraphicsPortConnectionItem*> &portItems = portConnectionItems[port];
+    for (QMap<QString, GraphicsPortConnectionItem*>::const_iterator i = portItems.begin(); i != portItems.end(); i++) {
+        i.value()->setPos(port, point);
+    }
+}
+
+void JackContextGraphicsScene::deletePortConnectionItems(const QString &fullPortName)
+{
+    QMap<QString, GraphicsPortConnectionItem*> portItems = portConnectionItems.value(fullPortName);
+    int size = portItems.size();
+    for (int i = 0; i < size; i++) {
+        deletePortConnectionItem(fullPortName, portItems.begin().key());
+    }
 }
 
 void JackContextGraphicsScene::deleteAllClients()

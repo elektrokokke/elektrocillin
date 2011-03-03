@@ -18,9 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
         JackClientFactoryAction *action = new JackClientFactoryAction(factory, ui->menuCreate_client);
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
         ui->menuCreate_client->addAction(action);
-
-        // create an example instance:
-        factory->createClient(factory->getName())->activate();
     }
 
     scene = new JackContextGraphicsScene(1, 3, QFont("Helvetica", 12));

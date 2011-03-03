@@ -16,33 +16,6 @@ GraphicsPortConnectionItem::GraphicsPortConnectionItem(const QString &port1_, co
 
 }
 
-GraphicsPortConnectionItem * GraphicsPortConnectionItem::getPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene)
-{
-    GraphicsPortConnectionItem *item = items.value(port1).value(port2, 0);
-    if (!item) {
-        item = new GraphicsPortConnectionItem(port1, port2, scene);
-        items[port1][port2] = item;
-        items[port2][port1] = item;
-    }
-    return item;
-}
-
-void GraphicsPortConnectionItem::deletePortConnectionItem(const QString &port1, const QString &port2)
-{
-    GraphicsPortConnectionItem *item = items.value(port1).value(port2, 0);
-    if (item) {
-        items[port1].remove(port2);
-        items[port2].remove(port1);
-        delete item;
-        if (items[port1].size() == 0) {
-            items.remove(port1);
-        }
-        if (items[port2].size() == 0) {
-            items.remove(port2);
-        }
-    }
-}
-
 void GraphicsPortConnectionItem::setPos(const QString &port, const QPointF &point)
 {
     if (port == port1) {
@@ -54,22 +27,3 @@ void GraphicsPortConnectionItem::setPos(const QString &port, const QPointF &poin
     path.cubicTo(QPointF(point1.x(), 0.5 * (point1.y() + point2.y())), QPointF(point2.x(), 0.5 * (point1.y() + point2.y())), point2);
     setPath(pathStroker.createStroke(path));
 }
-
-void GraphicsPortConnectionItem::setPositions(const QString &port, const QPointF &point)
-{
-    const QMap<QString, GraphicsPortConnectionItem*> &portItems = items[port];
-    for (QMap<QString, GraphicsPortConnectionItem*>::const_iterator i = portItems.begin(); i != portItems.end(); i++) {
-        i.value()->setPos(port, point);
-    }
-}
-
-void GraphicsPortConnectionItem::deletePortConnectionItems(const QString &fullPortName)
-{
-    QMap<QString, GraphicsPortConnectionItem*> portItems = items.value(fullPortName);
-    int size = portItems.size();
-    for (int i = 0; i < size; i++) {
-        deletePortConnectionItem(fullPortName, portItems.begin().key());
-    }
-}
-
-QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > GraphicsPortConnectionItem::items;

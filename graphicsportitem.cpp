@@ -1,6 +1,7 @@
 #include "graphicsportitem.h"
 #include "graphicsclientitem.h"
 #include "graphicsportconnectionitem.h"
+#include "jackcontextgraphicsscene.h"
 #include <QBrush>
 #include <QPen>
 #include <QFont>
@@ -98,7 +99,7 @@ void GraphicsPortItem::connectedTo(const QString &otherPort)
     mapPortNamesToActions[otherPort] = action;
     disconnectMenu->setEnabled(disconnectMenu->actions().size());
     connectMenu->setEnabled(connectMenu->actions().size());
-    GraphicsPortConnectionItem *connectionItem = GraphicsPortConnectionItem::getPortConnectionItem(fullPortName, otherPort, scene());
+    GraphicsPortConnectionItem *connectionItem = ((JackContextGraphicsScene*)scene())->getPortConnectionItem(fullPortName, otherPort, scene());
     connectionItem->setPos(fullPortName, getConnectionScenePos());
     connections++;
 }
@@ -112,7 +113,7 @@ void GraphicsPortItem::disconnectedFrom(const QString &otherPort)
     mapPortNamesToActions[otherPort] = action;
     disconnectMenu->setEnabled(disconnectMenu->actions().size());
     connectMenu->setEnabled(connectMenu->actions().size());
-    GraphicsPortConnectionItem::deletePortConnectionItem(fullPortName, otherPort);
+    ((JackContextGraphicsScene*)scene())->deletePortConnectionItem(fullPortName, otherPort);
     connections--;
 }
 
@@ -161,7 +162,7 @@ void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 QVariant GraphicsPortItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemScenePositionHasChanged) {
-        GraphicsPortConnectionItem::setPositions(fullPortName, getConnectionScenePos());
+        ((JackContextGraphicsScene*)scene())->setPositions(fullPortName, getConnectionScenePos());
     }
     return QGraphicsItem::itemChange(change, value);
 }

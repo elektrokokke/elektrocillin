@@ -2,6 +2,7 @@
 #define JACKCONTEXTGRAPHICSSCENE_H
 
 #include "graphicsclientitem.h"
+#include "graphicsportconnectionitem.h"
 #include "jacknullclient.h"
 #include <QGraphicsScene>
 #include <QFont>
@@ -22,6 +23,11 @@ public:
     void saveSession(QDataStream &stream);
     bool loadSession(QDataStream &stream);
 
+    GraphicsPortConnectionItem * getPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene);
+    void deletePortConnectionItem(const QString &port1, const QString &port2);
+    void setPositions(const QString &port, const  QPointF &point);
+    void deletePortConnectionItems(const QString &fullPortName);
+
 protected:
     void deleteAllClients();
 
@@ -31,6 +37,7 @@ private:
     QRectF clientsRect;
     JackNullClient nullClient;
     QMap<QString, QPair<JackClient*, GraphicsClientItem*> > clientsMap;
+    QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > portConnectionItems;
 };
 
 #endif // JACKCONTEXTGRAPHICSSCENE_H
