@@ -5,6 +5,7 @@
 
 class JackContext {
 public:
+    virtual ~JackContext() {};
     // auxiliary methods:
     virtual jack_client_t * client_by_name(const char *client_name) = 0;
 
