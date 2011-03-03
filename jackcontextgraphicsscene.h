@@ -7,6 +7,8 @@
 #include <QGraphicsScene>
 #include <QFont>
 
+class JackContext;
+
 class JackContextGraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
@@ -21,12 +23,15 @@ public:
     GraphicsClientItem * addClient(const QString &clientName);
     void deleteClient(JackClient *client);
     void saveSession(QDataStream &stream);
-    bool loadSession(QDataStream &stream);
+    void loadSession(QDataStream &stream);
 
     GraphicsPortConnectionItem * getPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene);
     void deletePortConnectionItem(const QString &port1, const QString &port2);
     void setPositions(const QString &port, const  QPointF &point);
     void deletePortConnectionItems(const QString &fullPortName);
+
+public slots:
+    void clear();
 
 protected:
     void deleteAllClients();

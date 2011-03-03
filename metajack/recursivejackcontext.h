@@ -5,32 +5,59 @@
 #include <map>
 #include <stack>
 #include <string>
+#include <QDataStream>
+#include <QVariant>
 
 class RecursiveJackContext : public JackContext
 {
 public:
+    class JackClientSerializer
+    {
+    public:
+        virtual void save(jack_client_t *client, QDataStream &stream) = 0;
+        virtual jack_client_t * load(const QString &clientName, QDataStream &stream) = 0;
+    };
+
     static RecursiveJackContext * getInstance();
     virtual ~RecursiveJackContext();
 
     // own methods controlling the Jack interface currently active:
+    JackContext * getCurrentContext();
     JackContext * pushNewContext(const std::string &desiredWrapperClientName);
     JackContext * pushExistingContext(JackContext *jackInterface);
     JackContext * pushExistingContextByClient(jack_client_t *client);
     JackContext * popContext();
+    void deleteContext(JackContext *context);
+
+    void saveCurrentContext(QDataStream &stream, JackClientSerializer *clientSaver);
+    void loadCurrentContext(QDataStream &stream, JackClientSerializer *clientLoader);
+
+    void setClientProperty(const QString &clientName, QVariant property);
+    QVariant getClientProperty(const QString &clientName);
+    void setClientProperty(JackContext *context, const QString &clientName, QVariant property);
+    QVariant getClientProperty(JackContext *context, const QString &clientName);
+
     /**
       Use this function if you want to know if the client with the given
       name is a wrapper client within the current context.
 
       @param clientName the name of a client within the current context
-      @return pointer to a JackInterface object, iff the given client name
+      @return pointer to a JackContext object, iff the given client name
         is the name of a wrapper client within the current context. Returns
         zero if a client with the given name does not exists within the
         current context or if it is not a wrapper client
       */
-    JackContext * getInterfaceByClientName(const std::string &clientName);
+    JackContext * getContextByClientName(const std::string &clientName);
+    /**
+      The same above, except it looks for wrapper clients with the given name
+      within the given context.
+      */
+    JackContext * getContextByClientName(JackContext *context, const std::string &clientName);
 
     // methods reimplemented from JackInterface:
     jack_client_t * client_by_name(const char *client_name);
+    std::list<jack_client_t*> get_clients();
+
     void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);
     const char * get_version_string();
     jack_client_t * client_open (const char *client_name, jack_options_t options, jack_status_t *, ...);
@@ -109,6 +136,7 @@ private:
     std::map<const jack_port_t*, JackContext*> mapPortToInterface;
     std::map<void*, JackContext*> mapPointerToInterface;
     std::map<JackContext*, std::map<std::string, JackContext*> > mapClientNameToInterface;
+    std::map<jack_client_t*, QVariant> clientProperties;
 
     RecursiveJackContext();
     static RecursiveJackContext instance;

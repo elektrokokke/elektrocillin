@@ -15,10 +15,10 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portT
     type(type_),
     portType(portType_),
     font(font_),
-    innerItem(0)
+    innerItem(0),
+    context(RecursiveJackContext::getInstance()->getCurrentContext())
 {
     init();
-    setPos(client->getPosition());
 }
 GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
     QGraphicsPathItem(parent, scene),
@@ -27,16 +27,15 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clien
     type(type_),
     portType(portType_),
     font(font_),
-    innerItem(0)
+    innerItem(0),
+    context(RecursiveJackContext::getInstance()->getCurrentContext())
 {
     init();
 }
 
 GraphicsClientItem::~GraphicsClientItem()
 {
-    if (client->getClientName() == clientName) {
-        client->setPosition(pos());
-    }
+    RecursiveJackContext::getInstance()->setClientProperty(context, clientName, QVariant::fromValue<QPointF>(pos()));
     contextMenu->deleteLater();
 }
 
@@ -110,6 +109,14 @@ void GraphicsClientItem::focusOutEvent(QFocusEvent *)
     setZValue(0);
 }
 
+QVariant GraphicsClientItem::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+    if (change == ItemPositionHasChanged) {
+        RecursiveJackContext::getInstance()->setClientProperty(context, clientName, QVariant::fromValue<QPointF>(pos()));
+    }
+    return QGraphicsItem::itemChange(change, value);
+}
+
 void GraphicsClientItem::onActionRemoveClient()
 {
     // delete the client belonging to this item:
@@ -121,7 +128,7 @@ void GraphicsClientItem::onActionRemoveClient()
 void GraphicsClientItem::onActionEditMacro()
 {
     // get the macro's wrapper client:
-    JackContext *jackContext = RecursiveJackContext::getInstance()->getInterfaceByClientName(clientName.toAscii().data());
+    JackContext *jackContext = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data());
     if (jackContext) {
         // get the current scene:
         JackContextGraphicsScene *oldScene = (JackContextGraphicsScene*)scene();
@@ -151,7 +158,7 @@ void GraphicsClientItem::init()
     QFontMetrics fontMetrics(font);
     int padding = fontMetrics.height() * 2;
     int portPadding = fontMetrics.height() / 2;
-    bool isMacro = RecursiveJackContext::getInstance()->getInterfaceByClientName(clientName.toAscii().data());
+    bool isMacro = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data());
 
     contextMenu = new QMenu();
     if (isMacro) {
@@ -283,4 +290,10 @@ void GraphicsClientItem::init()
     setPath(combinedPath);
     setPen(QPen(Qt::NoPen));
     setBrush(QBrush(Qt::NoBrush));
+
+    // try to get the position:
+    QVariant clientProperty = RecursiveJackContext::getInstance()->getClientProperty(clientName);
+    if (clientProperty.isValid()) {
+        setPos(clientProperty.toPointF());
+    }
 }

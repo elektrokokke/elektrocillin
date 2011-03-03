@@ -139,7 +139,7 @@ class LinearWaveShapingClientFactory : public JackClientFactory
 public:
     LinearWaveShapingClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

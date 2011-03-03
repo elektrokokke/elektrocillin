@@ -231,7 +231,7 @@ class EnvelopeClientFactory : public JackClientFactory
 public:
     EnvelopeClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

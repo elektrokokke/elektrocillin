@@ -138,7 +138,7 @@ class LinearOscillatorClientFactory : public JackClientFactory
 public:
     LinearOscillatorClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

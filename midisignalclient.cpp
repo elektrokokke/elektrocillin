@@ -214,7 +214,7 @@ class MidiSignalClientFactory : public JackClientFactory
 public:
     MidiSignalClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

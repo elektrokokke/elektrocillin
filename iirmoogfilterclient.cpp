@@ -141,7 +141,7 @@ class IirMoogFilterClientFactory : public JackClientFactory
 public:
     IirMoogFilterClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

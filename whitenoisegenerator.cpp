@@ -27,7 +27,7 @@ class WhiteNoiseGeneratorClientFactory : public JackClientFactory
 public:
     WhiteNoiseGeneratorClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

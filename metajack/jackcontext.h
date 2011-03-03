@@ -2,12 +2,14 @@
 #define METAJACKINTERFACE_H
 
 #include <jack/types.h>
+#include <list>
 
 class JackContext {
 public:
     virtual ~JackContext() {};
     // auxiliary methods:
     virtual jack_client_t * client_by_name(const char *client_name) = 0;
+    virtual std::list<jack_client_t*> get_clients() = 0;
 
     // Jack API methods:
     virtual void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr) = 0;

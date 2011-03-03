@@ -13,6 +13,7 @@ public:
       I.e., client handles of clients created by others can not be retrieved this way.
       */
     jack_client_t * client_by_name(const char *client_name);
+    std::list<jack_client_t*> get_clients();
 
     // Jack API methods:
     void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);

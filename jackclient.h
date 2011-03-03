@@ -2,6 +2,7 @@
 #define JACKCLIENT_H
 
 #include "metajack/metajack.h"
+#include "metajack/recursivejackcontext.h"
 #include <QStringList>
 #include <QMap>
 #include <QRectF>
@@ -48,9 +49,6 @@ public:
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
     virtual void loadState(QDataStream &stream);
-
-    void setPosition(const QPointF &pos);
-    const QPointF & getPosition() const;
 
     jack_client_t * getClient();
 
@@ -194,8 +192,6 @@ public:
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
     static int getMaximumPortNameLength();
 
-    static JackClient * getClient(jack_client_t *client);
-
 protected:
     /**
       This is called before the jack client is activated.
@@ -275,13 +271,35 @@ private:
     QString requestedName, actualName;
     jack_client_t *client;
     QMap<QString, PortConnectInterface*> portConnectInterfaces;
-    QPointF position;
-
-    static QMap<jack_client_t*, JackClient*> mapClientHandlesToJackClients;
 
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
     static void portRegisterCallback(jack_port_id_t id, int registered, void *arg);
+};
+
+class JackClientSerializer : public RecursiveJackContext::JackClientSerializer
+{
+public:
+    static JackClientSerializer * getInstance();
+
+    void registerClient(jack_client_t *client, JackClient *jackClient);
+    void unregisterClient(jack_client_t *client);
+    JackClient * getClient(jack_client_t *client);
+
+    JackClient * createClient(const QString &factoryName, const QString &clientName);
+    void save(jack_client_t *client, QDataStream &stream);
+    jack_client_t * load(const QString &clientName, QDataStream &stream);
+
+    void registerFactory(JackClientFactory *factory);
+    JackClientFactory * getFactoryByName(const QString &name);
+    QList<JackClientFactory*> getFactories();
+private:
+    QMap<QString, JackClientFactory*> factories;
+    QMap<jack_client_t*, JackClient*> mapClientHandlesToJackClients;
+
+    static JackClientSerializer *serializer;
+
+    JackClientSerializer();
 };
 
 class JackClientFactory
@@ -289,13 +307,6 @@ class JackClientFactory
 public:
     virtual QString getName() = 0;
     virtual JackClient * createClient(const QString &clientName) = 0;
-
-    static void registerFactory(JackClientFactory *factory);
-    static JackClientFactory * getFactoryByName(const QString &name);
-    static QList<JackClientFactory*> getFactories();
-private:
-    static QMap<QString, JackClientFactory*> *getOrCreateFactories();
-    static QMap<QString, JackClientFactory*> *factories;
 };
 
 class JackClientFactoryAction : public QAction

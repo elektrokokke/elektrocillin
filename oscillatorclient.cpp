@@ -83,7 +83,7 @@ class OscillatorClientFactory : public JackClientFactory
 public:
     OscillatorClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

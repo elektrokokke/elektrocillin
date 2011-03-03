@@ -186,7 +186,7 @@ class LinearMorphOscillatorClientFactory : public JackClientFactory
 public:
     LinearMorphOscillatorClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

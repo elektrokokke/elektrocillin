@@ -38,8 +38,10 @@ MetaJackContext::MetaJackContext(JackContext *jackInterface_, const std::string 
             wrapperClient = 0;
         } else {
             MetaJackInterfaceClient *dummyInputClient = new MetaJackInterfaceClient(this, wrapperInterface, JackPortIsOutput);
+            clients[dummyInputClient->getName()] = dummyInputClient;
             activateClient(dummyInputClient);
             MetaJackInterfaceClient *dummyOutputClient = new MetaJackInterfaceClient(this, wrapperInterface, JackPortIsInput);
+            clients[dummyOutputClient->getName()] = dummyOutputClient;
             activateClient(dummyOutputClient);
         }
     }
@@ -649,6 +651,15 @@ jack_client_t * MetaJackContext::client_by_name(const char *client_name)
     } else {
         return 0;
     }
+}
+
+std::list<jack_client_t*> MetaJackContext::get_clients()
+{
+    std::list<jack_client_t*> clientList;
+    for (std::map<std::string, MetaJackClient*>::iterator i = clients.begin(); i != clients.end(); i++) {
+        clientList.push_back((jack_client_t*)i->second);
+    }
+    return clientList;
 }
 
 void MetaJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)

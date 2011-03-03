@@ -11,6 +11,15 @@ jack_client_t * RealJackContext::client_by_name(const char *client_name)
     }
 }
 
+std::list<jack_client_t*> RealJackContext::get_clients()
+{
+    std::list<jack_client_t*> clientList;
+    for (std::map<std::string, jack_client_t*>::iterator i = clients.begin(); i != clients.end(); i++) {
+        clientList.push_back(i->second);
+    }
+    return clientList;
+}
+
 void RealJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
 {
     jack_get_version(major_ptr, minor_ptr, micro_ptr, proto_ptr);

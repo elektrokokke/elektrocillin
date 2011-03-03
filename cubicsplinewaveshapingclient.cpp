@@ -156,7 +156,7 @@ class CubicSplineWaveShapingClientFactory : public JackClientFactory
 public:
     CubicSplineWaveShapingClientFactory()
     {
-        JackClientFactory::registerFactory(this);
+        JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {

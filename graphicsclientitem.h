@@ -13,6 +13,7 @@
 
 class CommandTextItem;
 class JackContextGraphicsScene;
+class JackContext;
 
 class GraphicsClientItem : public QObject, public QGraphicsPathItem
 {
@@ -31,6 +32,7 @@ protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );
     void focusInEvent(QFocusEvent * event);
     void focusOutEvent(QFocusEvent * event);
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 private slots:
     void onActionRemoveClient();
     void onActionEditMacro();
@@ -44,6 +46,7 @@ private:
     CommandTextItem *showInnerItemCommand;
     QPainterPath pathWithoutInnerItem;
     QMenu *contextMenu;
+    JackContext *context;
 
     void init();
 };

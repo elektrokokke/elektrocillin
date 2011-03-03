@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QList<JackClientFactory*> factories = JackClientFactory::getFactories();
+    QList<JackClientFactory*> factories = JackClientSerializer::getInstance()->getFactories();
     for (QList<JackClientFactory*>::const_iterator i = factories.begin(); i != factories.end(); i++) {
         JackClientFactory *factory = *i;
         JackClientFactoryAction *action = new JackClientFactoryAction(factory, ui->menuCreate_client);
@@ -74,26 +74,20 @@ void MainWindow::on_actionReset_triggered()
 
 void MainWindow::on_actionParent_level_triggered()
 {
-    // get the current scene:
-    JackContextGraphicsScene *oldScene = (JackContextGraphicsScene*)ui->graphicsView->scene();
+    // delete the current scene:
+    delete ui->graphicsView->scene();
     // pop the current jack context:
     RecursiveJackContext::getInstance()->popContext();
     // create a new scene in the new context and make it the current scene:
-    JackContextGraphicsScene *scene = new JackContextGraphicsScene();
-    ui->graphicsView->setScene(scene);
-    // delete the old scene:
-    delete oldScene;
+    ui->graphicsView->setScene(new JackContextGraphicsScene());
 }
 
 void MainWindow::on_actionCreate_macro_triggered()
 {
-    // get the current scene:
-    JackContextGraphicsScene *oldScene = (JackContextGraphicsScene*)ui->graphicsView->scene();
+    // delete the current scene:
+    delete ui->graphicsView->scene();
     // create a new wrapper client:
     RecursiveJackContext::getInstance()->pushNewContext("New macro");
     // create a new scene in the new context and make it the current scene:
-    JackContextGraphicsScene *scene = new JackContextGraphicsScene();
-    ui->graphicsView->setScene(scene);
-    // delete the old scene:
-    delete oldScene;
+    ui->graphicsView->setScene(new JackContextGraphicsScene());
 }

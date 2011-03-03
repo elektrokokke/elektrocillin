@@ -1,5 +1,6 @@
 #include "jackcontextgraphicsscene.h"
 #include "graphicsportconnectionitem.h"
+#include "metajack/recursivejackcontext.h"
 
 JackContextGraphicsScene::JackContextGraphicsScene() :
     clientStyle(1),
@@ -36,6 +37,7 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(JackClient *client)
 {
     // activate the Jack client:
     client->activate();
+    QString clientName = client->getClientName();
     // create a visual representation in the scene:
     GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(client, clientStyle, portStyle, font, 0, this);
     QGraphicsItem *graphicsItem = client->createGraphicsItem(clientsRect);
@@ -52,7 +54,7 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(const QString &clientNa
     // try to get a jack_client_t pointer for this client:
     jack_client_t *client = meta_jack_client_by_name(clientName.toAscii().data());
     JackClient * jackClient;
-    if (client && (jackClient = JackClient::getClient(client))) {
+    if (client && (jackClient = JackClientSerializer::getInstance()->getClient(client))) {
         return addClient(jackClient);
     } else {
         // create a visual representation in the scene:
@@ -81,62 +83,20 @@ void JackContextGraphicsScene::deleteClient(JackClient *client)
 
 void JackContextGraphicsScene::saveSession(QDataStream &stream)
 {
-    for (QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {
-        JackClient *client = i.value().first;
-        GraphicsClientItem *graphicsClientItem = i.value().second;
-        if (client && client->getFactory()) {
-            // save the client's factory name:
-            stream << client->getFactory()->getName();
-        } else {
-            stream << QString();
-        }
-        // save the client's name:
-        stream << graphicsClientItem->getClientName();
-        // save the client's position:
-        stream << graphicsClientItem->pos();
-        if (client && client->getFactory()) {
-            // save the client's state:
-            client->saveState(stream);
-        }
-    }
-    // save two empty string as end token:
-    stream << QString() << QString();
-    // save the connections:
-    stream << nullClient.getConnections();
+    RecursiveJackContext::getInstance()->saveCurrentContext(stream, JackClientSerializer::getInstance());
 }
 
-bool JackContextGraphicsScene::loadSession(QDataStream &stream)
+void JackContextGraphicsScene::loadSession(QDataStream &stream)
 {
     // first delete all current clients:
     deleteAllClients();
-    // load the client names and create them:
-    QString factoryName, clientName;
-    stream >> factoryName >> clientName;
-    for (; !factoryName.isNull() || !clientName.isNull(); ) {
-        // load the client's position:
-        QPointF position;
-        stream >> position;
-        if (factoryName.isNull()) {
-            clientsMap[clientName].second->setPos(position);
-        } else {
-            // get the factory associated with that name:
-            JackClientFactory *factory = JackClientFactory::getFactoryByName(factoryName);
-            if (!factory) {
-                return false;
-            }
-            JackClient *client = factory->createClient(clientName);
-            // load the client's state:
-            client->loadState(stream);
-            // show the client:
-            addClient(client)->setPos(position);
-        }
-        stream >> factoryName >> clientName;
+    clear();
+    RecursiveJackContext::getInstance()->loadCurrentContext(stream, JackClientSerializer::getInstance());
+    // get all clients and create visual representations for them:
+    QStringList clientNames = nullClient.getClients();
+    for (int i = 0; i < clientNames.size(); i++) {
+        addClient(clientNames[i]);
     }
-    // load the connections and restore them:
-    QStringList connections;
-    stream >> connections;
-    nullClient.restoreConnections(connections);
-    return true;
 }
 
 GraphicsPortConnectionItem * JackContextGraphicsScene::getPortConnectionItem(const QString &port1, const QString &port2, QGraphicsScene *scene)
@@ -182,13 +142,28 @@ void JackContextGraphicsScene::deletePortConnectionItems(const QString &fullPort
     }
 }
 
+void JackContextGraphicsScene::clear()
+{
+    QGraphicsScene::clear();
+    clientsMap.clear();
+    portConnectionItems.clear();
+}
+
 void JackContextGraphicsScene::deleteAllClients()
 {
     QList<JackClient*> clients;
     for (QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {
         JackClient *client = i.value().first;
         if (client) {
+            // this is a JackClient:
             clients.append(client);
+        } else {
+            QString clientName = i.key();
+            // determine if this is a wrapper client:
+            JackContext *wrapperContext = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data());
+            if (wrapperContext) {
+                RecursiveJackContext::getInstance()->deleteContext(wrapperContext);
+            }
         }
     }
     for (int i = 0; i < clients.size(); i++) {

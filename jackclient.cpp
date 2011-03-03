@@ -26,16 +26,6 @@ void JackClient::loadState(QDataStream &)
 {
 }
 
-void JackClient::setPosition(const QPointF &pos)
-{
-    position = pos;
-}
-
-const QPointF & JackClient::getPosition() const
-{
-    return position;
-}
-
 jack_client_t * JackClient::getClient()
 {
     return client;
@@ -83,7 +73,7 @@ bool JackClient::activate()
     // get the actual client name:
     actualName = jack_get_client_name (client);
     // associate the client handle with a pointer to this object:
-    mapClientHandlesToJackClients[client] = this;
+    JackClientSerializer::getInstance()->registerClient(client, this);
     return true;
 }
 
@@ -92,7 +82,7 @@ void JackClient::close()
     // close the Jack client:
     if (isActive() && (jack_client_close(client) == 0)) {
         // deassociate the client handle from the pointer to this object:
-        mapClientHandlesToJackClients.remove(client);
+        JackClientSerializer::getInstance()->unregisterClient(client);
         client = 0;
         actualName = requestedName;
         // notify subclasses:
@@ -238,16 +228,9 @@ int JackClient::getMaximumPortNameLength()
     return jack_port_name_size();
 }
 
-JackClient * JackClient::getClient(jack_client_t *client)
-{
-    return mapClientHandlesToJackClients.value(client, 0);
-}
-
 void JackClient::deinit()
 {
 }
-
-QMap<jack_client_t*, JackClient*> JackClient::mapClientHandlesToJackClients;
 
 int JackClient::process(jack_nframes_t nframes, void *arg)
 {
@@ -321,30 +304,99 @@ void JackClient::portRegisterCallback(jack_port_id_t id, int registered, void *a
     }
 }
 
-void JackClientFactory::registerFactory(JackClientFactory *factory)
+JackClientSerializer::JackClientSerializer()
 {
-    getOrCreateFactories()->insert(factory->getName(), factory);
 }
 
-JackClientFactory * JackClientFactory::getFactoryByName(const QString &name)
-{
-    return getOrCreateFactories()->value(name, 0);
-}
+JackClientSerializer * JackClientSerializer::serializer = 0;
 
-QList<JackClientFactory*> JackClientFactory::getFactories()
+JackClientSerializer * JackClientSerializer::getInstance()
 {
-    return getOrCreateFactories()->values();
-}
-
-QMap<QString, JackClientFactory*> * JackClientFactory::getOrCreateFactories()
-{
-    if (!factories) {
-        factories = new QMap<QString, JackClientFactory*>();
+    if (serializer == 0) {
+        serializer = new JackClientSerializer();
     }
-    return factories;
+    return serializer;
 }
 
-QMap<QString, JackClientFactory*> * JackClientFactory::factories = 0;
+void JackClientSerializer::registerClient(jack_client_t *client, JackClient *jackClient)
+{
+    mapClientHandlesToJackClients[client] = jackClient;
+}
+
+void JackClientSerializer::unregisterClient(jack_client_t *client)
+{
+    mapClientHandlesToJackClients.remove(client);
+}
+
+JackClient * JackClientSerializer::getClient(jack_client_t *client)
+{
+    return mapClientHandlesToJackClients.value(client, 0);
+}
+
+JackClient * JackClientSerializer::createClient(const QString &factoryName, const QString &clientName)
+{
+    // get the right factory:
+    JackClientFactory *factory = getFactoryByName(factoryName);
+    if (factory) {
+        // create the client:
+        return factory->createClient(clientName);
+    } else {
+        return 0;
+    }
+}
+
+void JackClientSerializer::save(jack_client_t *client, QDataStream &stream)
+{
+    // get the associated JackClient:
+    JackClient *jackClient = getClient(client);
+    if (jackClient && jackClient->getFactory()) {
+        stream << true;
+        // save the factory name:
+        stream << jackClient->getFactory()->getName();
+        // save the client's state:
+        jackClient->saveState(stream);
+    } else {
+        stream << false;
+    }
+}
+
+jack_client_t * JackClientSerializer::load(const QString &clientName, QDataStream &stream)
+{
+    // determine wether the client can be created by us:
+    bool hasFactory;
+    stream >> hasFactory;
+    if (hasFactory) {
+        // load the factory name:
+        QString factoryName;
+        stream >> factoryName;
+        // get the factory:
+        JackClientFactory *factory = getFactoryByName(factoryName);
+        // create a client:
+        JackClient *jackClient = factory->createClient(clientName);
+        // load it's state:
+        jackClient->loadState(stream);
+        // activate it:
+        jackClient->activate();
+        return jackClient->getClient();
+    } else {
+        return 0;
+    }
+}
+
+void JackClientSerializer::registerFactory(JackClientFactory *factory)
+{
+    factories.insert(factory->getName(), factory);
+}
+
+JackClientFactory * JackClientSerializer::getFactoryByName(const QString &name)
+{
+    return factories.value(name, 0);
+}
+
+QList<JackClientFactory*> JackClientSerializer::getFactories()
+{
+    return factories.values();
+}
 
 JackClientFactoryAction::JackClientFactoryAction(JackClientFactory *factory_, QObject *parent) :
     QAction(factory_->getName(), parent),
