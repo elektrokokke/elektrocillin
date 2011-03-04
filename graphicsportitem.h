@@ -18,11 +18,12 @@ public:
 public slots:
     void onPortConnected(QString sourcePortName, QString destPortName);
     void onPortDisconnected(QString sourcePortName, QString destPortName);
-    void onPortRegistered(QString fullPortname, QString type, int flags);
-    void onPortUnregistered(QString fullPortname, QString type, int flags);
+    void onPortRegistered(QString fullPortName, QString type, int flags);
+    void onPortUnregistered(QString fullPortName, QString type, int flags);
 
 protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );
+    void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 private slots:
     void onConnectAction();

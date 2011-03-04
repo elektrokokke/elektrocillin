@@ -37,6 +37,8 @@ public:
     QVariant getClientProperty(const QString &clientName);
     void setClientProperty(JackContext *context, const QString &clientName, QVariant property);
     QVariant getClientProperty(JackContext *context, const QString &clientName);
+    void setClientProperty(jack_client_t *client, QVariant property);
+    QVariant getClientProperty(jack_client_t *client);
 
     /**
       Use this function if you want to know if the client with the given

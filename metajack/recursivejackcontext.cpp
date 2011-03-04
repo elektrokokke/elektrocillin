@@ -15,8 +15,8 @@ RecursiveJackContext::RecursiveJackContext()
     // put the interface to the real server on the stack as the first interface to be used:
     interfaces.push(new RealJackContext());
     interfaceStack.push(interfaces.top());
-//    // put one meta jack instance on the stack:
-//    pushNewContext("metajack");
+    // put one meta jack instance on the stack:
+    pushNewContext("metajack");
 }
 
 RecursiveJackContext::~RecursiveJackContext()
@@ -221,7 +221,7 @@ void RecursiveJackContext::setClientProperty(JackContext *context, const QString
     // get the client by the client's name in the given context:
     jack_client_t *client = context->client_by_name(clientName.toAscii().data());
     if (client) {
-        clientProperties[client] = property;
+        setClientProperty(client, property);
     }
 }
 
@@ -230,10 +230,20 @@ QVariant RecursiveJackContext::getClientProperty(JackContext *context, const QSt
     // get the client by the client's name in the given context:
     jack_client_t *client = context->client_by_name(clientName.toAscii().data());
     if (client) {
-        return clientProperties[client];
+        return getClientProperty(client);
     } else {
         return QVariant();
     }
+}
+
+void RecursiveJackContext::setClientProperty(jack_client_t *client, QVariant property)
+{
+    clientProperties[client] = property;
+}
+
+QVariant RecursiveJackContext::getClientProperty(jack_client_t *client)
+{
+    return clientProperties[client];
 }
 
 JackContext * RecursiveJackContext::getContextByClientName(const std::string &clientName)

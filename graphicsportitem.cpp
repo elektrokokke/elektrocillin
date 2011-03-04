@@ -155,22 +155,22 @@ void GraphicsPortItem::onPortDisconnected(QString sourcePortName, QString destPo
     }
 }
 
-void GraphicsPortItem::onPortRegistered(QString fullPortname, QString type, int flags)
+void GraphicsPortItem::onPortRegistered(QString fullPortName, QString type, int flags)
 {
     bool portIsInput = (flags & JackPortIsInput);
     if ((this->dataType == type) && (portIsInput != isInput)) {
         // put the port into our connection menu:
-        QAction *action = connectMenu->addAction(fullPortname);
-        action->setData(fullPortname);
+        QAction *action = connectMenu->addAction(fullPortName);
+        action->setData(fullPortName);
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
-        mapPortNamesToActions[fullPortname] = action;
+        mapPortNamesToActions[fullPortName] = action;
         connectMenu->setEnabled(connectMenu->actions().size());
     }
 }
 
-void GraphicsPortItem::onPortUnregistered(QString fullPortname, QString type, int flags)
+void GraphicsPortItem::onPortUnregistered(QString fullPortName, QString type, int flags)
 {
-    QAction *action = mapPortNamesToActions.value(fullPortname, 0);
+    QAction *action = mapPortNamesToActions.value(fullPortName, 0);
     if (action) {
         // remove the port from our menus:
         connectMenu->removeAction(action);
@@ -186,8 +186,16 @@ void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
     QGraphicsPathItem::mousePressEvent(event);
     if (!event->isAccepted() && (event->button() == Qt::RightButton)) {
         event->accept();
+    }
+}
+
+void GraphicsPortItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
+{
+    if (event->button() == Qt::RightButton) {
         // show a menu that allows removing and adding control points:
         contextMenu.exec(event->screenPos());
+    } else {
+        QGraphicsPathItem::mouseReleaseEvent(event);
     }
 }
 

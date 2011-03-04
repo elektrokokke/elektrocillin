@@ -260,7 +260,7 @@ void JackClient::portConnectCallback(jack_port_id_t a, jack_port_id_t b, int con
     if (connect) {
         jackClient->portConnected(aName, bName);
     } else {
-        jackClient->portConnected(bName, aName);
+        jackClient->portDisconnected(bName, aName);
     }
 }
 

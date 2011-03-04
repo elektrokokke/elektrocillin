@@ -50,9 +50,9 @@ unsigned int MidiProcessorClient::getChannelMask() const
 
 bool MidiProcessorClient::init()
 {
-    return AudioProcessorClient::init()
-            && (!midiInput || (midiInputPort = registerMidiPort(QString("Midi in"), JackPortIsInput)))
-            && (!midiOutput || (midiOutputPort = registerMidiPort(QString("Midi out"), JackPortIsOutput)));
+    return (!midiInput || (midiInputPort = registerMidiPort(QString("Midi in"), JackPortIsInput)))
+            && (!midiOutput || (midiOutputPort = registerMidiPort(QString("Midi out"), JackPortIsOutput)))
+            && AudioProcessorClient::init();
 }
 
 bool MidiProcessorClient::process(jack_nframes_t nframes)

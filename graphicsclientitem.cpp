@@ -16,9 +16,10 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portT
     portType(portType_),
     font(font_),
     innerItem(0),
-    context(RecursiveJackContext::getInstance()->getCurrentContext())
+    isMacro(RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data()))
 {
-    init();
+    initItem();
+    initRest();
 }
 GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
     QGraphicsPathItem(parent, scene),
@@ -28,14 +29,14 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clien
     portType(portType_),
     font(font_),
     innerItem(0),
-    context(RecursiveJackContext::getInstance()->getCurrentContext())
+    isMacro(RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data()))
 {
-    init();
+    initItem();
+    initRest();
 }
 
 GraphicsClientItem::~GraphicsClientItem()
 {
-    RecursiveJackContext::getInstance()->setClientProperty(context, clientName, QVariant::fromValue<QPointF>(pos()));
     contextMenu->deleteLater();
 }
 
@@ -53,6 +54,13 @@ void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
 {
     if (innerItem) {
         delete innerItem;
+    } else {
+        contextMenu->clear();
+        showInnerItemAction = contextMenu->addAction("Show controls", this, SLOT(showInnerItem()));
+        if (clientName == client->getClientName()) {
+            contextMenu->addSeparator();
+            contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
+        }
     }
     innerItem = item;
     showInnerItemCommand->setText("[+]");
@@ -62,6 +70,7 @@ void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
         innerItem->setParentItem(this);
         innerItem->setPos(getRect().topRight());
     }
+    showInnerItemAction->setEnabled(innerItem);
 }
 
 QGraphicsItem * GraphicsClientItem::getInnerItem() const
@@ -81,21 +90,37 @@ void GraphicsClientItem::showInnerItem(bool ensureVisible_)
         if (innerItem->isVisible()) {
             setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().translated(innerItem->pos())));
             showInnerItemCommand->setText("[-]");
+            showInnerItemAction->setText("Hide controls");
         } else {
             setPath(pathWithoutInnerItem);
             showInnerItemCommand->setText("[+]");
+            showInnerItemAction->setText("Show controls");
         }
+    }
+}
+
+void GraphicsClientItem::onPortRegistered(QString fullPortName, QString type, int flags)
+{
+    if (fullPortName.split(":")[0] == clientName) {
+        initItem();
     }
 }
 
 void GraphicsClientItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
-    if (event->button() == Qt::RightButton) {
+    QGraphicsPathItem::mousePressEvent(event);
+    if (!event->isAccepted() && (event->button() == Qt::RightButton) && (contextMenu->actions().size())) {
         event->accept();
+    }
+}
+
+void GraphicsClientItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
+{
+    if ((event->button() == Qt::RightButton)  && (contextMenu->actions().size())) {
         // show the context menu:
         contextMenu->exec(event->screenPos());
     } else {
-        QGraphicsPathItem::mousePressEvent(event);
+        QGraphicsPathItem::mouseReleaseEvent(event);
     }
 }
 
@@ -112,7 +137,7 @@ void GraphicsClientItem::focusOutEvent(QFocusEvent *)
 QVariant GraphicsClientItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemPositionHasChanged) {
-        RecursiveJackContext::getInstance()->setClientProperty(context, clientName, QVariant::fromValue<QPointF>(pos()));
+        RecursiveJackContext::getInstance()->setClientProperty(clientName, QVariant::fromValue<QPointF>(pos()));
     }
     return QGraphicsItem::itemChange(change, value);
 }
@@ -146,8 +171,14 @@ void GraphicsClientItem::onActionEditMacro()
     }
 }
 
-void GraphicsClientItem::init()
+void GraphicsClientItem::initItem()
 {
+    // delete all children:
+    QList<QGraphicsItem*> children = childItems();
+    for (int i = 0; i < children.size(); i++) {
+        delete children[i];
+    }
+
     bool gradient = false;
     setCursor(Qt::ArrowCursor);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
@@ -158,14 +189,6 @@ void GraphicsClientItem::init()
     QFontMetrics fontMetrics(font);
     int padding = fontMetrics.height() * 2;
     int portPadding = fontMetrics.height() / 2;
-    bool isMacro = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data());
-
-    contextMenu = new QMenu();
-    if (isMacro) {
-        contextMenu->addAction("Edit macro", this, SLOT(onActionEditMacro()));
-        contextMenu->addSeparator();
-    }
-    contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
 
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
     textItem->setFont(font);
@@ -295,5 +318,19 @@ void GraphicsClientItem::init()
     QVariant clientProperty = RecursiveJackContext::getInstance()->getClientProperty(clientName);
     if (clientProperty.isValid()) {
         setPos(clientProperty.toPointF());
+    }
+}
+
+void GraphicsClientItem::initRest()
+{
+    QObject::connect(client, SIGNAL(portRegistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
+    QObject::connect(client, SIGNAL(portUnregistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
+    contextMenu = new QMenu();
+    if (isMacro) {
+        contextMenu->addAction("Edit macro", this, SLOT(onActionEditMacro()));
+    }
+    if (clientName == client->getClientName()) {
+        contextMenu->addSeparator();
+        contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
     }
 }
