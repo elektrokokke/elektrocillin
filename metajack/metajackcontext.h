@@ -107,6 +107,7 @@ private:
 
     JackContext *wrapperInterface;
     jack_client_t *wrapperClient;
+    std::string wrapperClientName;
     jack_nframes_t bufferSize;
     jack_port_id_t uniquePortId;
     std::map<std::string, MetaJackClient*> clients;
@@ -141,6 +142,7 @@ public:
     // methods implemented from JackInterface:
     virtual jack_client_t * client_by_name(const char *client_name);
     virtual std::list<jack_client_t*> get_clients();
+    virtual const char * get_name() const;
 
     virtual void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);
     virtual const char * get_version_string();

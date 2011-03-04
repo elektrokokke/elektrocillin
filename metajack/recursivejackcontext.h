@@ -28,6 +28,7 @@ public:
     JackContext * pushExistingContextByClient(jack_client_t *client);
     JackContext * popContext();
     void deleteContext(JackContext *context);
+    size_t getContextStackSize() const;
 
     void saveCurrentContext(QDataStream &stream, JackClientSerializer *clientSaver);
     void loadCurrentContext(QDataStream &stream, JackClientSerializer *clientLoader);
@@ -57,6 +58,7 @@ public:
     // methods reimplemented from JackInterface:
     jack_client_t * client_by_name(const char *client_name);
     std::list<jack_client_t*> get_clients();
+    const char * get_name() const;
 
     void get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr);
     const char * get_version_string();

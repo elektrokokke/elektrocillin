@@ -1,6 +1,11 @@
 #include "realjackcontext.h"
 #include <jack/jack.h>
 
+RealJackContext::RealJackContext() :
+    name("Jack server")
+{
+}
+
 jack_client_t * RealJackContext::client_by_name(const char *client_name)
 {
     std::map<std::string, jack_client_t*>::iterator find = clients.find(client_name);
@@ -18,6 +23,11 @@ std::list<jack_client_t*> RealJackContext::get_clients()
         clientList.push_back(i->second);
     }
     return clientList;
+}
+
+const char * RealJackContext::get_name() const
+{
+    return name.c_str();
 }
 
 void RealJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)

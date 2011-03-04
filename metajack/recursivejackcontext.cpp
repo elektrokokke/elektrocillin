@@ -98,6 +98,11 @@ void RecursiveJackContext::deleteContext(JackContext *context)
     delete context;
 }
 
+size_t RecursiveJackContext::getContextStackSize() const
+{
+    return interfaceStack.size();
+}
+
 void RecursiveJackContext::saveCurrentContext(QDataStream &stream, JackClientSerializer *clientSaver)
 {
     JackContext *context = getCurrentContext();
@@ -254,6 +259,11 @@ jack_client_t * RecursiveJackContext::client_by_name(const char *client_name)
 std::list<jack_client_t*> RecursiveJackContext::get_clients()
 {
     return interfaceStack.top()->get_clients();
+}
+
+const char * RecursiveJackContext::get_name() const
+{
+    return interfaceStack.top()->get_name();
 }
 
 void RecursiveJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)
