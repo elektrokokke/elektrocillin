@@ -115,15 +115,6 @@ bool JackClient::disconnectPorts(const QString &sourcePortName, const QString &d
     return (jack_disconnect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data()) == 0);
 }
 
-void JackClient::registerPortConnectInterface(const QString &fullPortName, PortConnectInterface *portConnectInterface)
-{
-    if (portConnectInterface) {
-        portConnectInterfaces.insert(fullPortName, portConnectInterface);
-    } else {
-        portConnectInterfaces.remove(fullPortName);
-    }
-}
-
 QString JackClient::getPortType(const QString &fullPortName)
 {
     return QString(jack_port_type(jack_port_by_name(client, fullPortName.toAscii().data())));
@@ -266,22 +257,10 @@ void JackClient::portConnectCallback(jack_port_id_t a, jack_port_id_t b, int con
     // get the port names:
     QString aName = jackClient->getPortNameById(a);
     QString bName = jackClient->getPortNameById(b);
-    // notify the corresponding port connect interfaces, if there are any:
-    PortConnectInterface *aInterface = jackClient->portConnectInterfaces.value(aName, 0);
-    if (aInterface) {
-        if (connect) {
-            aInterface->connectedTo(bName);
-        } else {
-            aInterface->disconnectedFrom(bName);
-        }
-    }
-    PortConnectInterface *bInterface = jackClient->portConnectInterfaces.value(bName, 0);
-    if (bInterface) {
-        if (connect) {
-            bInterface->connectedTo(aName);
-        } else {
-            bInterface->disconnectedFrom(aName);
-        }
+    if (connect) {
+        jackClient->portConnected(aName, bName);
+    } else {
+        jackClient->portConnected(bName, aName);
     }
 }
 
@@ -294,13 +273,11 @@ void JackClient::portRegisterCallback(jack_port_id_t id, int registered, void *a
     QString fullPortName(jack_port_name(port));
     QString type(jack_port_type(port));
     int flags = jack_port_flags(port);
-    // notify all registered PortConnectInterfaces from the new or removed port:
-    for (QMap<QString, PortConnectInterface*>::iterator i = jackClient->portConnectInterfaces.begin(); i != jackClient->portConnectInterfaces.end(); i++) {
-        if (registered) {
-            i.value()->registeredPort(fullPortName, type, flags);
-        } else {
-            i.value()->unregisteredPort(fullPortName, type, flags);
-        }
+    // signal the new or removed port:
+    if (registered) {
+        jackClient->portRegistered(fullPortName, type, flags);
+    } else {
+        jackClient->portUnregistered(fullPortName, type, flags);
     }
 }
 

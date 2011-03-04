@@ -10,14 +10,6 @@
 
 class QGraphicsItem;
 
-class PortConnectInterface {
-public:
-    virtual void connectedTo(const QString &fullPortName) = 0;
-    virtual void disconnectedFrom(const QString &fullPortName) = 0;
-    virtual void registeredPort(const QString &fullPortname, const QString &type, int flags) = 0;
-    virtual void unregisteredPort(const QString &fullPortname, const QString &type, int flags) = 0;
-};
-
 /**
   This is an abstract class which should simplify the creation of arbitrary Jack clients.
   The necessary methods to reimplement are:
@@ -35,8 +27,9 @@ public:
 
 class JackClientFactory;
 
-class JackClient
+class JackClient : public QObject
 {
+    Q_OBJECT
 public:
     /**
       @param clientName the name of the Jack client. The actual name may vary,
@@ -123,19 +116,6 @@ public:
     bool disconnectPorts(const QString &sourcePortName, const QString &destPortName);
 
     /**
-      Enables notification when a given port is registered, unregistered, connected or disconnected.
-      Note: the port registering/unregistering notifications should probably be moved to another
-      function and notification interface (e.g., "PortRegisterInterface").
-
-      @param fullPortName the full port name of the port that should be monitored. That port will be
-        notified when another port gets connected to it, or a port gets disconnected from it, or when
-        any port gets registered or unregistered
-      @param portConnectInterface a pointer to the object which gets notified by calling the corresponding
-        methods on its PortConnectInterface
-      */
-    void registerPortConnectInterface(const QString &fullPortName, PortConnectInterface *portConnectInterface);
-
-    /**
       @param fullPortName the full port name of the port whose type should be returned.
         This can be any port of any client
       @return the port type of the given port, e.g. "JACK_DEFAULT_AUDIO_TYPE"
@@ -191,6 +171,12 @@ public:
 
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
     static int getMaximumPortNameLength();
+
+signals:
+    void portConnected(QString sourcePortName, QString destPortName);
+    void portDisconnected(QString sourcePortName, QString destPortName);
+    void portRegistered(QString fullPortname, QString type, int flags);
+    void portUnregistered(QString fullPortname, QString type, int flags);
 
 protected:
     /**
@@ -270,7 +256,6 @@ protected:
 private:
     QString requestedName, actualName;
     jack_client_t *client;
-    QMap<QString, PortConnectInterface*> portConnectInterfaces;
 
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);

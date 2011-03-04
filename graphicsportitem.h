@@ -7,20 +7,20 @@
 
 class JackContextGraphicsScene;
 
-class GraphicsPortItem : public QObject, public QGraphicsPathItem, public PortConnectInterface
+class GraphicsPortItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
     GraphicsPortItem(JackClient *client, const QString &fullPortName, int style, QFont font, QGraphicsItem *parent, JackContextGraphicsScene *scene);
-    ~GraphicsPortItem();
     const QRectF & getRect() const;
-
-    void connectedTo(const QString &fullPortName);
-    void disconnectedFrom(const QString &fullPortName);
-    void registeredPort(const QString &fullPortname, const QString &type, int flags);
-    void unregisteredPort(const QString &fullPortname, const QString &type, int flags);
-
     QPointF getConnectionScenePos() const;
+
+public slots:
+    void onPortConnected(QString sourcePortName, QString destPortName);
+    void onPortDisconnected(QString sourcePortName, QString destPortName);
+    void onPortRegistered(QString fullPortname, QString type, int flags);
+    void onPortUnregistered(QString fullPortname, QString type, int flags);
+
 protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);

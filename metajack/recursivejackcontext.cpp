@@ -15,8 +15,8 @@ RecursiveJackContext::RecursiveJackContext()
     // put the interface to the real server on the stack as the first interface to be used:
     interfaces.push(new RealJackContext());
     interfaceStack.push(interfaces.top());
-    // put one meta jack instance on the stack:
-    pushNewContext("metajack");
+//    // put one meta jack instance on the stack:
+//    pushNewContext("metajack");
 }
 
 RecursiveJackContext::~RecursiveJackContext()
