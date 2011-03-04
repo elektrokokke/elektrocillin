@@ -25,10 +25,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     JackContextGraphicsScene *scene = new JackContextGraphicsScene();
 
+    QObject::connect(ui->graphicsView, SIGNAL(sceneChanged()), this, SLOT(onSceneChanged()));
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
 //    ui->graphicsView->setViewport(new QGLWidget());
     ui->graphicsView->setScene(scene);
-
 }
 
 MainWindow::~MainWindow()
@@ -95,4 +95,9 @@ void MainWindow::on_actionCreate_macro_triggered()
         // create a new scene in the new context and make it the current scene:
         ui->graphicsView->setScene(new JackContextGraphicsScene());
     }
+}
+
+void MainWindow::onSceneChanged()
+{
+    ui->actionParent_level->setEnabled(RecursiveJackContext::getInstance()->getContextStackSize() > 2);
 }

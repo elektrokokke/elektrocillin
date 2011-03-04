@@ -7,6 +7,12 @@ WheelZoomingGraphicsView::WheelZoomingGraphicsView(QWidget *parent) :
     setDragMode(QGraphicsView::ScrollHandDrag);
 }
 
+void WheelZoomingGraphicsView::setScene(QGraphicsScene *scene)
+{
+    QGraphicsView::setScene(scene);
+    sceneChanged();
+}
+
 void WheelZoomingGraphicsView::wheelEvent(QWheelEvent *event)
 {
     // get the scene position of the mouse position:

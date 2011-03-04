@@ -9,6 +9,11 @@ class WheelZoomingGraphicsView : public QGraphicsView
 public:
     explicit WheelZoomingGraphicsView(QWidget *parent = 0);
 
+    void setScene(QGraphicsScene *scene);
+
+signals:
+    void sceneChanged();
+
 protected:
     virtual void wheelEvent(QWheelEvent *event);
 };

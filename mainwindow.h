@@ -28,6 +28,7 @@ private slots:
     void on_actionReset_triggered();
     void on_actionParent_level_triggered();
     void on_actionCreate_macro_triggered();
+    void onSceneChanged();
 
 private:
     Ui::MainWindow *ui;
