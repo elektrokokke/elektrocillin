@@ -21,7 +21,7 @@ public:
 
     GraphicsClientItem * addClient(JackClient *client);
     GraphicsClientItem * addClient(const QString &clientName);
-    void deleteClient(JackClient *client);
+    void deleteClient(const QString &clientName);
     void saveSession(QDataStream &stream);
     void loadSession(QDataStream &stream);
 

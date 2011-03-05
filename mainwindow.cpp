@@ -89,7 +89,7 @@ void MainWindow::on_actionCreate_macro_triggered()
     QString macroName = QInputDialog::getText(this, "New macro", "Please enter the macro name:");
     if (!macroName.isNull()) {
         // get the oversampling factor:
-        int oversampling = QInputDialog::getInt(this, "Oversampling", "Please enter the oversampling factor", 1, 1, 8);
+        int oversampling = QInputDialog::getInt(this, "Oversampling", "Please enter the oversampling factor", 1, 1, 16);
         // delete the current scene:
         delete ui->graphicsView->scene();
         // create a new wrapper client:

@@ -58,7 +58,7 @@ void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
     } else {
         contextMenu->clear();
         showInnerItemAction = contextMenu->addAction("Show controls", this, SLOT(showInnerItem()));
-        if (clientName == client->getClientName()) {
+        if (isMacro || (clientName == client->getClientName())) {
             contextMenu->addSeparator();
             contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
         }
@@ -147,7 +147,7 @@ void GraphicsClientItem::onActionRemoveClient()
 {
     // delete the client belonging to this item:
     if (JackContextGraphicsScene *jackContextGraphicsScene = qobject_cast<JackContextGraphicsScene*>(scene())) {
-        jackContextGraphicsScene->deleteClient(client);
+        jackContextGraphicsScene->deleteClient(clientName);
     }
 }
 
@@ -334,7 +334,7 @@ void GraphicsClientItem::initRest()
     if (isMacro) {
         contextMenu->addAction("Edit macro", this, SLOT(onActionEditMacro()));
     }
-    if (clientName == client->getClientName()) {
+    if (isMacro || (clientName == client->getClientName())) {
         contextMenu->addSeparator();
         contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
     }

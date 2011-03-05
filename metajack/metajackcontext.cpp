@@ -317,6 +317,7 @@ bool MetaJackContext::unregisterPort(MetaJackPort *port)
     } else {
         unregisterPort(port->getProcessPort(), port);
     }
+    port->disconnect();
     portRegistrationCallbackHandler.invokeCallbacksWithArgs(port->getId(), 0);
     portsById.erase(port->getId());
     portsByName.erase(port->getFullName());
@@ -328,6 +329,7 @@ void MetaJackContext::unregisterPort(MetaJackPortProcess *port, MetaJackPort *no
 {
     assert(port);
     processPorts.erase(nonProcessPort);
+    port->disconnect();
     delete port;
 }
 

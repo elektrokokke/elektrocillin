@@ -65,18 +65,27 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(const QString &clientNa
     }
 }
 
-void JackContextGraphicsScene::deleteClient(JackClient *client)
+void JackContextGraphicsScene::deleteClient(const QString &clientName)
 {
-    QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator find = clientsMap.find(client->getClientName());
+    // determine if it is a JackClient:
+    QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator find = clientsMap.find(clientName);
     if (find != clientsMap.end()) {
-        JackClient *client = find.value().first;
-        GraphicsClientItem *graphicsClientItem = find.value().second;
-        QStringList fullPortNames = client->getMyPorts();
+        // remove all connections:
+        QStringList fullPortNames = nullClient.getPorts(QString("%1:.*").arg(clientName).toAscii().data());
         for (int i = 0; i < fullPortNames.size(); i++) {
             deletePortConnectionItems(fullPortNames[i]);
         }
+        if (find.value().first) {
+            JackClient *client = find.value().first;
+            delete client;
+            // determine if the given client is a macro:
+        } else if (JackContext *context = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data())) {
+            RecursiveJackContext::getInstance()->deleteContext(context);
+        } else {
+            return;
+        }
+        GraphicsClientItem *graphicsClientItem = find.value().second;
         delete graphicsClientItem;
-        delete client;
         clientsMap.erase(find);
     }
 }
@@ -151,22 +160,8 @@ void JackContextGraphicsScene::clear()
 
 void JackContextGraphicsScene::deleteAllClients()
 {
-    QList<JackClient*> clients;
     for (QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {
-        JackClient *client = i.value().first;
-        if (client) {
-            // this is a JackClient:
-            clients.append(client);
-        } else {
-            QString clientName = i.key();
-            // determine if this is a wrapper client:
-            JackContext *wrapperContext = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data());
-            if (wrapperContext) {
-                RecursiveJackContext::getInstance()->deleteContext(wrapperContext);
-            }
-        }
+        deleteClient(i.key());
     }
-    for (int i = 0; i < clients.size(); i++) {
-        deleteClient(clients[i]);
-    }
+    clientsMap.clear();
 }
