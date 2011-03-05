@@ -1,6 +1,7 @@
 #include "graphicsclientitem.h"
 #include "graphicsportitem.h"
 #include "jackcontextgraphicsscene.h"
+#include "wheelzoominggraphicsview.h"
 #include "metajack/recursivejackcontext.h"
 #include <QFontMetrics>
 #include <QPen>
@@ -164,7 +165,11 @@ void GraphicsClientItem::onActionEditMacro()
         // create a new scene in the new context and make it the current scene of all views:
         JackContextGraphicsScene *scene = new JackContextGraphicsScene();
         for (int i = 0; i < views.size(); i++) {
-            views[i]->setScene(scene);
+            if (WheelZoomingGraphicsView *graphicsView = qobject_cast<WheelZoomingGraphicsView*>(views[i])) {
+                graphicsView->setScene(scene);
+            } else {
+                views[i]->setScene(scene);
+            }
         }
         // delete the old scene:
         oldScene->deleteLater();

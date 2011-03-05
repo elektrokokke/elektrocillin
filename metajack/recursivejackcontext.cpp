@@ -33,10 +33,10 @@ JackContext * RecursiveJackContext::getCurrentContext()
     return interfaceStack.top();
 }
 
-JackContext * RecursiveJackContext::pushNewContext(const std::string &desiredWrapperClientName)
+JackContext * RecursiveJackContext::pushNewContext(const std::string &desiredWrapperClientName, unsigned int oversampling)
 {
     // create a new meta jack context:
-    MetaJackContext *context = new MetaJackContext(interfaceStack.top(), desiredWrapperClientName);
+    MetaJackContext *context = new MetaJackContext(interfaceStack.top(), desiredWrapperClientName, oversampling);
     interfaces.push(context);
     // get its name in the current jack context and remember it:
     std::string wrapperClientName = context->getWrapperInterface()->get_client_name(context->getWrapperClient());

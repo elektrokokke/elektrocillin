@@ -5,6 +5,7 @@
 #include <set>
 #include <map>
 #include <jack/types.h>
+#include "iirbutterworthfilter.h"
 
 class MetaJackPortBase;
 class MetaJackPort;

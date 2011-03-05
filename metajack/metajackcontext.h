@@ -19,13 +19,14 @@ public:
         jack_nframes_t lostMidiEvents;
     };
 
-    MetaJackContext(JackContext *wrapperInterface, const std::string &name);
+    MetaJackContext(JackContext *wrapperInterface, const std::string &name, unsigned int oversampling = 1);
     virtual ~MetaJackContext();
 
     jack_port_t * createWrapperPort(const std::string &shortName, const std::string &type, unsigned long flags);
 
     jack_client_t * getWrapperClient();
     JackContext * getWrapperInterface();
+    unsigned int getOversampling() const;
 
     bool isActive() const;
 
@@ -119,6 +120,7 @@ private:
     QWaitCondition waitCondition;
     QMutex waitMutex;
     bool shutdown;
+    unsigned int oversampling;
 
     void closeClient(MetaJackClientProcess *client);
     void setProcessCallback(MetaJackClientProcess *client, JackProcessCallback processCallback, void *processCallbackArgument);

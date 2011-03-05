@@ -23,7 +23,7 @@ public:
 
     // own methods controlling the Jack interface currently active:
     JackContext * getCurrentContext();
-    JackContext * pushNewContext(const std::string &desiredWrapperClientName);
+    JackContext * pushNewContext(const std::string &desiredWrapperClientName, unsigned int oversampling = 1);
     JackContext * pushExistingContext(JackContext *jackInterface);
     JackContext * pushExistingContextByClient(jack_client_t *client);
     JackContext * popContext();

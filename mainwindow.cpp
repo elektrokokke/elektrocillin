@@ -88,10 +88,12 @@ void MainWindow::on_actionCreate_macro_triggered()
     // ask the user for the macro name:
     QString macroName = QInputDialog::getText(this, "New macro", "Please enter the macro name:");
     if (!macroName.isNull()) {
+        // get the oversampling factor:
+        int oversampling = QInputDialog::getInt(this, "Oversampling", "Please enter the oversampling factor", 1, 1, 8);
         // delete the current scene:
         delete ui->graphicsView->scene();
         // create a new wrapper client:
-        RecursiveJackContext::getInstance()->pushNewContext(macroName.toAscii().data());
+        RecursiveJackContext::getInstance()->pushNewContext(macroName.toAscii().data(), oversampling);
         // create a new scene in the new context and make it the current scene:
         ui->graphicsView->setScene(new JackContextGraphicsScene());
     }

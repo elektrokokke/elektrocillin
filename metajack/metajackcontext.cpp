@@ -6,19 +6,20 @@
 //#include <boost/xpressive/xpressive_dynamic.hpp>
 #include <QRegExp>
 
-MetaJackContext::MetaJackContext(JackContext *jackInterface_, const std::string &name) :
+MetaJackContext::MetaJackContext(JackContext *jackInterface_, const std::string &name, unsigned int oversampling_) :
     wrapperInterface(jackInterface_),
     wrapperClient(0),
     wrapperClientName(name),
     uniquePortId(1),
     graphChangesRingBuffer(1024),
-    shutdown(false)
+    shutdown(false),
+    oversampling(oversampling_)
 {
     // register at the given jack interface:
     wrapperClient = wrapperInterface->client_open(name.c_str(), JackNullOption, 0);
     if (wrapperClient) {
         // get the buffer size:
-        bufferSize = wrapperInterface->get_buffer_size(wrapperClient);
+        bufferSize = wrapperInterface->get_buffer_size(wrapperClient) * oversampling;
         // register the process callback (this gets special treatment):
         wrapperInterface->set_process_callback(wrapperClient, process, this);
         // register the thread init callback:
@@ -78,6 +79,11 @@ jack_client_t * MetaJackContext::getWrapperClient()
 JackContext * MetaJackContext::getWrapperInterface()
 {
     return wrapperInterface;
+}
+
+unsigned int MetaJackContext::getOversampling() const
+{
+    return oversampling;
 }
 
 bool MetaJackContext::isActive() const
@@ -611,7 +617,7 @@ int MetaJackContext::process(jack_nframes_t nframes)
 int MetaJackContext::process(jack_nframes_t nframes, void *arg)
 {
     MetaJackContext *context = (MetaJackContext*)arg;
-    return context->process(nframes);
+    return context->process(nframes * context->oversampling);
 }
 
 void MetaJackContext::infoShutdownCallback(jack_status_t statusCode, const char* reason, void *arg)
@@ -629,14 +635,14 @@ void MetaJackContext::infoShutdownCallback(jack_status_t statusCode, const char*
 int MetaJackContext::bufferSizeCallback(jack_nframes_t bufferSize, void *arg)
 {
     MetaJackContext *context = (MetaJackContext*)arg;
-    context->bufferSize = bufferSize;
+    context->bufferSize = bufferSize * context->oversampling;
     // change all ports' buffer sizes:
     for (std::map<jack_port_id_t, MetaJackPort*>::iterator i = context->portsById.begin(); i != context->portsById.end(); i++) {
         MetaJackPort *port = i->second;
-        port->getProcessPort()->changeBufferSize(bufferSize);
+        port->getProcessPort()->changeBufferSize(context->bufferSize);
     }
     // now invoke all callbacks registered by the internal clients:
-    context->bufferSizeCallbackHandler.invokeCallbacksWithArgs(bufferSize);
+    context->bufferSizeCallbackHandler.invokeCallbacksWithArgs(context->bufferSize);
     return 0;
 }
 
@@ -811,17 +817,17 @@ int MetaJackContext::set_freewheel(jack_client_t *client, int onoff)
 
 int MetaJackContext::set_buffer_size (jack_client_t *client, jack_nframes_t nframes)
 {
-    return wrapperInterface->set_buffer_size(wrapperClient, nframes);
+    return wrapperInterface->set_buffer_size(wrapperClient, nframes / oversampling);
 }
 
 jack_nframes_t MetaJackContext::get_sample_rate (jack_client_t *client)
 {
-    return wrapperInterface->get_sample_rate(wrapperClient);
+    return wrapperInterface->get_sample_rate(wrapperClient) * oversampling;
 }
 
 jack_nframes_t MetaJackContext::get_buffer_size (jack_client_t *client)
 {
-    return wrapperInterface->get_buffer_size(wrapperClient);
+    return wrapperInterface->get_buffer_size(wrapperClient) * oversampling;
 }
 
 float MetaJackContext::cpu_load (jack_client_t *client)
@@ -1006,27 +1012,27 @@ jack_port_t * MetaJackContext::port_by_id (jack_client_t *client, jack_port_id_t
 
 jack_nframes_t MetaJackContext::frames_since_cycle_start (const jack_client_t *client)
 {
-    return wrapperInterface->frames_since_cycle_start(wrapperClient);
+    return wrapperInterface->frames_since_cycle_start(wrapperClient) * oversampling;
 }
 
 jack_nframes_t MetaJackContext::frame_time (const jack_client_t *client)
 {
-    return wrapperInterface->frame_time(wrapperClient);
+    return wrapperInterface->frame_time(wrapperClient) * oversampling;
 }
 
 jack_nframes_t MetaJackContext::last_frame_time (const jack_client_t *client)
 {
-    return wrapperInterface->last_frame_time(wrapperClient);
+    return wrapperInterface->last_frame_time(wrapperClient) * oversampling;
 }
 
 jack_time_t MetaJackContext::frames_to_time(const jack_client_t *client, jack_nframes_t nframes)
 {
-    return wrapperInterface->frames_to_time(wrapperClient, nframes);
+    return wrapperInterface->frames_to_time(wrapperClient, nframes / oversampling);
 }
 
 jack_nframes_t MetaJackContext::time_to_frames(const jack_client_t *client, jack_time_t time)
 {
-    return wrapperInterface->time_to_frames(wrapperClient, time);
+    return wrapperInterface->time_to_frames(wrapperClient, time) * oversampling;
 }
 
 jack_time_t MetaJackContext::get_time()

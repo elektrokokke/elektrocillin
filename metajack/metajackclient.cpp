@@ -138,6 +138,7 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
 {
     // the purpose of the dummy input client is to make the wrapper client inputs available to clients inside the wrapper
     MetaJackInterfaceClient *me = (MetaJackInterfaceClient*)arg;
+    unsigned int oversampling = me->context->getOversampling();
     for (std::map<MetaJackPort*, jack_port_t*>::iterator i = me->connectedPorts.begin(); i != me->connectedPorts.end(); i++) {
         // for each connected port, copy from the wrapper client's port to the corresponding internal port:
         MetaJackPort *port = i->first;
@@ -145,20 +146,30 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
         if (port && wrapperPort) {
             if (port->getType() == JACK_DEFAULT_AUDIO_TYPE) {
                 // copy audio:
-                jack_default_audio_sample_t *wrapperAudioBuffer = (jack_default_audio_sample_t*)me->wrapperInterface->port_get_buffer(wrapperPort, nframes);
+                jack_default_audio_sample_t *wrapperAudioBuffer = (jack_default_audio_sample_t*)me->wrapperInterface->port_get_buffer(wrapperPort, nframes / oversampling);
                 jack_default_audio_sample_t *audioBuffer = (jack_default_audio_sample_t*)me->context->getPortBuffer(port, nframes);
                 if (port->isInput()) {
-                    for (jack_nframes_t i = 0; i < nframes; i++) {
-                        wrapperAudioBuffer[i] = audioBuffer[i];
+                    // downsampling:
+                    for (jack_nframes_t i = 0, wrapperi = 0; i < nframes; i += oversampling, wrapperi++) {
+                        // currently just averaging:
+                        double sum = 0;
+                        for (jack_nframes_t j = 0; j < oversampling; j++) {
+                            sum += audioBuffer[i + j];
+                        }
+                        wrapperAudioBuffer[wrapperi] = sum / (double)oversampling;
                     }
                 } else {
-                    for (jack_nframes_t i = 0; i < nframes; i++) {
-                        audioBuffer[i] = wrapperAudioBuffer[i];
+                    // upsampling:
+                    for (jack_nframes_t i = 0, wrapperi = 0; i < nframes; i += oversampling, wrapperi++) {
+                        // currently just copying of samples:
+                        for (jack_nframes_t j = 0; j < oversampling; j++) {
+                            audioBuffer[i + j] = wrapperAudioBuffer[wrapperi];
+                        }
                     }
                 }
             } else if (port->getType() == JACK_DEFAULT_MIDI_TYPE) {
                 // copy midi:
-                void *wrapperMidiBuffer = me->wrapperInterface->port_get_buffer(wrapperPort, nframes);
+                void *wrapperMidiBuffer = me->wrapperInterface->port_get_buffer(wrapperPort, nframes / oversampling);
                 void *midiBuffer = me->context->getPortBuffer(port, nframes);
                 // important: check wether the midi port is from the real jack server or from a MetaJackContext:
                 bool metaJackMidi = dynamic_cast<MetaJackContext*>(me->wrapperInterface);
@@ -172,6 +183,8 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
                     for (jack_nframes_t i = 0; i < midiEventCount; i++) {
                         jack_midi_event_t event;
                         MetaJackContext::midi_event_get(&event, midiBuffer, i);
+                        // downsampling:
+                        event.time /= oversampling;
                         if (metaJackMidi) {
                             MetaJackContext::midi_event_write(wrapperMidiBuffer, event.time, event.buffer, event.size);
                         } else {
@@ -188,6 +201,8 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
                         } else {
                             jack_midi_event_get(&event, wrapperMidiBuffer, i);
                         }
+                        // upsampling:
+                        event.time *= oversampling;
                         MetaJackContext::midi_event_write(midiBuffer, event.time, event.buffer, event.size);
                     }
                 }
