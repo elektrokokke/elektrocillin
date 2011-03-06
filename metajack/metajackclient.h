@@ -5,7 +5,7 @@
 #include <set>
 #include <map>
 #include <jack/types.h>
-#include "iirbutterworthfilter.h"
+#include "sincfilter.h"
 
 class MetaJackPortBase;
 class MetaJackPort;
@@ -57,6 +57,7 @@ private:
     MetaJackContext *context;
     JackContext *wrapperInterface;
     std::map<MetaJackPort*, jack_port_t*> connectedPorts;
+    std::map<MetaJackPort*, SincFilter> downsamplers;
     std::set<MetaJackPort*> freePorts;
     int wrapperAudioSuffix, wrapperMidiSuffix, audioSuffix, midiSuffix;
     static int process(jack_nframes_t nframes, void *arg);

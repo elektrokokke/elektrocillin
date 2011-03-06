@@ -80,7 +80,8 @@ SOURCES += main.cpp\
     jackcontextgraphicsscene.cpp \
     wheelzoominggraphicsview.cpp \
     graphicsclientitem.cpp \
-    graphicsportitem.cpp
+    graphicsportitem.cpp \
+    metajack/sincfilter.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -155,7 +156,8 @@ HEADERS  += mainwindow.h \
     jackcontextgraphicsscene.h \
     wheelzoominggraphicsview.h \
     graphicsportitem.h \
-    graphicsclientitem.h
+    graphicsclientitem.h \
+    metajack/sincfilter.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

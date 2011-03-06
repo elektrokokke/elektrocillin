@@ -150,13 +150,19 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
                 jack_default_audio_sample_t *audioBuffer = (jack_default_audio_sample_t*)me->context->getPortBuffer(port, nframes);
                 if (port->isInput()) {
                     // downsampling:
-                    for (jack_nframes_t i = 0, wrapperi = 0; i < nframes; i += oversampling, wrapperi++) {
-                        // currently just averaging:
-                        double sum = 0;
-                        for (jack_nframes_t j = 0; j < oversampling; j++) {
-                            sum += audioBuffer[i + j];
+                    SincFilter &downsampler = me->downsamplers.at(port);
+                    if (oversampling > 1) {
+                        for (jack_nframes_t i = 0, wrapperi = 0; i < nframes; i += oversampling, wrapperi++) {
+                            // apply a sinc filter for bandlimiting:
+                            for (jack_nframes_t j = 0; j < oversampling; j++) {
+                                downsampler.feed(audioBuffer[i + j]);
+                            }
+                            wrapperAudioBuffer[wrapperi] = downsampler.process();
                         }
-                        wrapperAudioBuffer[wrapperi] = sum / (double)oversampling;
+                    } else {
+                        for (jack_nframes_t i = 0; i < nframes; i++) {
+                            wrapperAudioBuffer[i] = audioBuffer[i];
+                        }
                     }
                 } else {
                     // upsampling:
@@ -233,6 +239,10 @@ void MetaJackInterfaceClient::portConnectCallback(jack_port_id_t a, jack_port_id
             std::string wrapperPortName = me->createPortName(otherPort->getShortName(), freePort->getType() == JACK_DEFAULT_AUDIO_TYPE ? me->wrapperAudioSuffix++ : me->wrapperMidiSuffix++);
             jack_port_t *wrapperPort = me->context->createWrapperPort(wrapperPortName, freePort->getType(), freePort->isInput() ? JackPortIsOutput : JackPortIsInput);
             me->connectedPorts[freePort] = wrapperPort;
+            if (freePort->getType() == JACK_DEFAULT_AUDIO_TYPE) {
+                unsigned int oversampling = me->context->getOversampling();
+                me->downsamplers.insert(std::make_pair(freePort, SincFilter(oversampling * 3, 0.5, oversampling)));
+            }
             me->freePorts.erase(freePort);
             // create a new free port:
             std::string newPortName = freePort->getType() == JACK_DEFAULT_AUDIO_TYPE ? me->createPortName("audio", me->audioSuffix++) : me->createPortName("midi", me->midiSuffix++);
