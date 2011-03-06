@@ -77,7 +77,13 @@ void PolynomialInterpolator::smoothen()
 
 double PolynomialInterpolator::interpolate(int jlo, double x)
 {
-    return polynomials[jlo].evaluate(x);
+    if (jlo < 0) {
+        return polynomials.first().evaluate(x);
+    } else if (jlo >= polynomials.size()) {
+        return polynomials.back().evaluate(x);
+    } else {
+        return polynomials[jlo].evaluate(x);
+    }
 }
 
 void PolynomialInterpolator::processEvent(const ChangeControlPointEvent *event)

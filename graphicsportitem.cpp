@@ -83,7 +83,7 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     QStringList connectablePorts = client->getPorts(0, dataType.toAscii().data(), isInput ? JackPortIsOutput : JackPortIsInput);
     for (int i = 0; i < connectablePorts.size(); i++) {
         // skip ports that are already connected:
-        if (!connectedPorts.contains(connectablePorts[i])) {
+        if (!connectedPortsSet.contains(connectablePorts[i])) {
             // create an entry in the connect-menu:
             QAction *action = connectMenu->addAction(connectablePorts[i]);
             action->setData(connectablePorts[i]);
