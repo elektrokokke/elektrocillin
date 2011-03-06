@@ -23,10 +23,9 @@ public:
     void postIncreaseControlPoints();
     void postDecreaseControlPoints();
     void postChangeControlPoint(int index, double x, double y);
-    void postChangeDuration(double duration);
     void postChangeSustainPosition(double sustainPosition);
 
-    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+    QGraphicsItem * createGraphicsItem();
 
 protected:
     virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
@@ -58,12 +57,11 @@ public:
 
     void changeSustainLevel(double sustainLevel);
 private slots:
-    void onDurationNodePositionChanged(qreal x);
     void onSustainNodePositionChanged(qreal x);
 private:
     EnvelopeClient *client;
     EnvelopeGraphicsSubItem *interpolatorEditItem;
-    GraphicsNodeItem *nodeItemDuration, *nodeItemSustainPosition;
+    GraphicsNodeItem *nodeItemSustainPosition;
     QGraphicsLineItem *sustainPositionLine;
     QGraphicsSimpleTextItem *sustainPositionText, *durationText;
 };

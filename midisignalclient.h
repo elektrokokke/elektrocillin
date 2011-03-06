@@ -47,7 +47,7 @@ public:
 
     MidiSignalThread * getMidiSignalThread();
 
-    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+    QGraphicsItem * createGraphicsItem();
 
 protected:
     // reimplemented from EventProcessorClient2:
@@ -64,7 +64,7 @@ class MidiSignalGraphicsItem : public GraphicsKeyboardItem
 {
     Q_OBJECT
 public:
-    MidiSignalGraphicsItem(const QRectF &rect, MidiSignalClient *client, QGraphicsItem *parent = 0);
+    MidiSignalGraphicsItem(MidiSignalClient *client, QGraphicsItem *parent = 0);
 };
 
 struct MidiEventWithTimeStamp {

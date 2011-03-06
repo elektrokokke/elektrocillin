@@ -97,14 +97,6 @@ void EnvelopeClient::postChangeControlPoint(int index, double x, double y)
     postEvent(event);
 }
 
-void EnvelopeClient::postChangeDuration(double duration)
-{
-    Envelope::ChangeDurationEvent *event = new Envelope::ChangeDurationEvent();
-    event->duration = duration;
-    envelope->processEvent(event, 0);
-    postEvent(event);
-}
-
 void EnvelopeClient::postChangeSustainPosition(double sustainPosition)
 {
     Envelope::ChangeSustainPositionEvent *event = new Envelope::ChangeSustainPositionEvent();
@@ -113,9 +105,9 @@ void EnvelopeClient::postChangeSustainPosition(double sustainPosition)
     postEvent(event);
 }
 
-QGraphicsItem * EnvelopeClient::createGraphicsItem(const QRectF &rect)
+QGraphicsItem * EnvelopeClient::createGraphicsItem()
 {
-    return new EnvelopeGraphicsItem(rect, this);
+    return new EnvelopeGraphicsItem(QRectF(0, 0, 1200, 420), this);
 }
 
 void EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
@@ -124,15 +116,13 @@ void EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t t
         envelopeProcess->processEvent(changeControlPointEvent, time);
     } else if (const Interpolator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const Interpolator::ChangeAllControlPointsEvent*>(event)) {
         envelopeProcess->processEvent(changeAllControlPointsEvent, time);
-    } else if (const Envelope::ChangeDurationEvent *changeDurationEvent = dynamic_cast<const Envelope::ChangeDurationEvent*>(event)) {
-        envelopeProcess->processEvent(changeDurationEvent, time);
     } else if (const Envelope::ChangeSustainPositionEvent *changeSustainPositionEvent = dynamic_cast<const Envelope::ChangeSustainPositionEvent*>(event)) {
         envelopeProcess->processEvent(changeSustainPositionEvent, time);
     }
 }
 
 EnvelopeGraphicsSubItem::EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent_, const QPen &nodePen, const QBrush &nodeBrush) :
-    GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(), rect, QRectF(0, 1, parent_->getClient()->getEnvelope()->getDuration(), -2), parent_, 8, 8, nodePen, nodeBrush),
+    GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(), rect, QRectF(0, 1, parent_->getClient()->getEnvelope()->getInterpolator()->getX().last(), -2), parent_, 4, 8, true, nodePen, nodeBrush),
     parent(parent_)
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
@@ -161,29 +151,19 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     setPen(QPen(Qt::NoPen));
     setBrush(QBrush(Qt::white));
 
-    QGraphicsRectItem *rectDuration = new QGraphicsRectItem(rect.left(), rect.bottom() - 16, rect.width(), 16, this);
-    rectDuration->setPen(QPen(QBrush(Qt::black), 2));
-    QGraphicsRectItem *rectSustain = new QGraphicsRectItem(rect.left(), rect.bottom() - 32, rect.width(), 16, this);
-    rectSustain->setPen(QPen(QBrush(Qt::black), 2));
-
-    interpolatorEditItem = new EnvelopeGraphicsSubItem(QRectF(rect.x(), rect.y(), rect.width(), rect.height() - 32), this, nodePen, nodeBrush);
+    interpolatorEditItem = new EnvelopeGraphicsSubItem(QRectF(rect.x(), rect.y(), rect.width(), rect.height() - 16), this, nodePen, nodeBrush);
     interpolatorEditItem->setBrush(QBrush(Qt::NoBrush));
 
-    nodeItemDuration = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
-    nodeItemDuration->setPen(nodePen);
-    nodeItemDuration->setBrush(nodeBrush);
-    nodeItemDuration->setZValue(1);
-    nodeItemDuration->setBounds(QRectF(rectDuration->rect().x(), rectDuration->rect().center().y(), rectDuration->rect().width(), 0));
-    nodeItemDuration->setBoundsScaled(QRectF(0.05, 0, 20 - 0.05, 0));
-    nodeItemDuration->setXScaled(client->getEnvelope()->getDuration());
-    QObject::connect(nodeItemDuration, SIGNAL(xChangedScaled(qreal)), this, SLOT(onDurationNodePositionChanged(qreal)));
+    QRectF innerRect = interpolatorEditItem->getInnerRectangle();
+    QGraphicsRectItem *rectSustain = new QGraphicsRectItem(innerRect.left(), rect.bottom() - 16, innerRect.width(), 16, this);
+    rectSustain->setPen(QPen(QBrush(Qt::black), 2));
 
     nodeItemSustainPosition = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
     nodeItemSustainPosition->setPen(nodePen);
     nodeItemSustainPosition->setBrush(nodeBrush);
     nodeItemSustainPosition->setZValue(1);
     nodeItemSustainPosition->setBounds(QRectF(rectSustain->rect().x(), rectSustain->rect().center().y(), rectSustain->rect().width(), 0));
-    nodeItemSustainPosition->setBoundsScaled(QRectF(0, 0, client->getEnvelope()->getDuration(), 0));
+    nodeItemSustainPosition->setBoundsScaled(QRectF(0, 0, client->getEnvelope()->getInterpolator()->getX().last(), 0));
     nodeItemSustainPosition->setXScaled(client->getEnvelope()->getSustainPosition());
     QObject::connect(nodeItemSustainPosition, SIGNAL(xChangedScaled(qreal)), this, SLOT(onSustainNodePositionChanged(qreal)));
 
@@ -191,11 +171,8 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     sustainPositionLine->setPen(QPen(Qt::DotLine));
     sustainPositionLine->setPos(nodeItemSustainPosition->x(), interpolatorEditItem->rect().y());
 
-    sustainPositionText = new QGraphicsSimpleTextItem(QString("Sustain: %1s").arg(client->getEnvelope()->getSustainPosition()), this);
+    sustainPositionText = new QGraphicsSimpleTextItem(QString("Sustain: %1s").arg(client->getEnvelope()->getSustainPositionInSeconds()), this);
     sustainPositionText->setPos(nodeItemSustainPosition->x() + 8, nodeItemSustainPosition->y() - 8);
-
-    durationText = new QGraphicsSimpleTextItem(QString("Duration: %1s").arg(client->getEnvelope()->getDuration()), this);
-    durationText->setPos(nodeItemDuration->x() + 8, nodeItemDuration->y() - 8);
 }
 
 EnvelopeClient * EnvelopeGraphicsItem::getClient()
@@ -203,26 +180,12 @@ EnvelopeClient * EnvelopeGraphicsItem::getClient()
     return client;
 }
 
-void EnvelopeGraphicsItem::onDurationNodePositionChanged(qreal x)
-{
-    client->postChangeDuration(x);
-    // update the graphics:
-    interpolatorEditItem->setRect(QRectF(rect().x(), rect().y(), rect().width(), rect().height() - 32), QRectF(0, 1, client->getEnvelope()->getDuration(), -2));
-    durationText->setText(QString("Duration: %1s").arg(client->getEnvelope()->getDuration()));
-    durationText->setPos(nodeItemDuration->x() + 8, nodeItemDuration->y() - 8);
-    nodeItemSustainPosition->setBoundsScaled(QRectF(0, 0, client->getEnvelope()->getDuration(), 0));
-    nodeItemSustainPosition->setXScaled(client->getEnvelope()->getSustainPosition());
-    sustainPositionLine->setPos(nodeItemSustainPosition->x(), interpolatorEditItem->rect().y());
-    sustainPositionText->setText(QString("Sustain: %1 sec.").arg(client->getEnvelope()->getSustainPosition()));
-    sustainPositionText->setPos(nodeItemSustainPosition->x() + 8, nodeItemSustainPosition->y() - 8);
-}
-
 void EnvelopeGraphicsItem::onSustainNodePositionChanged(qreal x)
 {
     client->postChangeSustainPosition(x);
     // update the graphics:
     sustainPositionLine->setPos(nodeItemSustainPosition->x(), interpolatorEditItem->rect().y());
-    sustainPositionText->setText(QString("Sustain: %1 sec.").arg(client->getEnvelope()->getSustainPosition()));
+    sustainPositionText->setText(QString("Sustain: %1 sec.").arg(client->getEnvelope()->getSustainPositionInSeconds()));
     sustainPositionText->setPos(nodeItemSustainPosition->x() + 8, nodeItemSustainPosition->y() - 8);
 }
 

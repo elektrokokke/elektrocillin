@@ -67,9 +67,9 @@ IirMoogFilterThread * IirMoogFilterClient::getMoogFilterThread()
     return (IirMoogFilterThread*)getJackThread();
 }
 
-QGraphicsItem * IirMoogFilterClient::createGraphicsItem(const QRectF &rect)
+QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
 {
-    return new IirMoogFilterGraphicsItem(this, rect);
+    return new IirMoogFilterGraphicsItem(this, QRectF(0, 0, 600, 420));
 }
 
 void IirMoogFilterClient::processEvent(const RingBufferEvent *event, jack_nframes_t)

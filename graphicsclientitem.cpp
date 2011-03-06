@@ -100,7 +100,7 @@ void GraphicsClientItem::showInnerItem(bool ensureVisible_)
     }
 }
 
-void GraphicsClientItem::onPortRegistered(QString fullPortName, QString type, int flags)
+void GraphicsClientItem::onPortRegistered(QString fullPortName, QString, int)
 {
     if (fullPortName.split(":")[0] == clientName) {
         initItem();

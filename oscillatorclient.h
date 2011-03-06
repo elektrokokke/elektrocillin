@@ -28,7 +28,7 @@ public:
 
     void postChangeGain(double gain);
 
-    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+    QGraphicsItem * createGraphicsItem();
 
 protected:
     virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);

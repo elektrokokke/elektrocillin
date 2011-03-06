@@ -167,7 +167,7 @@ public:
       client has no GUI. Subclasses may reimplement this to provide their own
       GUI.
       */
-    virtual QGraphicsItem * createGraphicsItem(const QRectF &rect);
+    virtual QGraphicsItem * createGraphicsItem();
 
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
     static int getMaximumPortNameLength();

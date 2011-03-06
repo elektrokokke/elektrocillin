@@ -1,13 +1,15 @@
 #include "graphicsinterpolatoredititem.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QtGlobal>
+#include <cmath>
 
-GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalSlices_, int horizontalSlices_, const QPen &nodePen_, const QBrush &nodeBrush_) :
+GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalSlices_, int horizontalSlices_, bool logarithmicX_, const QPen &nodePen_, const QBrush &nodeBrush_) :
     QGraphicsRectItem(parent),
     interpolator(interpolator_),
     child(0),
     verticalSlices(qMax(1, verticalSlices_)),
     horizontalSlices(qMax(1, horizontalSlices_)),
+    logarithmicX(logarithmicX_),
     nodePen(nodePen_),
     nodeBrush(nodeBrush_)
 {
@@ -30,7 +32,8 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
 
     qreal tickSize = 10;
     // create the first horizontal textual label:
-    QGraphicsSimpleTextItem *horizontalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(rectScaled.left(), 0, 'g', 5), this);
+    double t = (logarithmicX ? exp(rectScaled.left()) - 1 : rectScaled.left());
+    QGraphicsSimpleTextItem *horizontalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(t, 0, 'g', 5), this);
     qreal padding = horizontalLabel->boundingRect().height();
     // compute the inner rectangle's bottom and top:
     qreal innerBottom = rect().bottom() - tickSize - padding * 2;
@@ -64,18 +67,44 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
     qreal lastRight = innerLeft + horizontalLabel->boundingRect().width() * 0.5;
     // create horizontal ticks and dotted vertical lines:
     for (int i = 0; i <= verticalSlices; i++) {
-        double value = (double)i * (rectScaled.right() - rectScaled.left()) / (double)verticalSlices + rectScaled.left();
-        double x = (double)i * (innerRight - innerLeft) / (double)verticalSlices + innerLeft;
-        new QGraphicsLineItem(x, innerBottom, x, innerBottom + tickSize * 0.5, this);
-        (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(Qt::DotLine));
+        double value1 = (double)i * (rectScaled.right() - rectScaled.left()) / (double)verticalSlices + rectScaled.left();
+        double t1 = (logarithmicX ? exp(value1) - 1 : value1);
+        double x1 = (double)i * (innerRight - innerLeft) / (double)verticalSlices + innerLeft;
+        new QGraphicsLineItem(x1, innerBottom, x1, innerBottom + tickSize * 0.5, this);
+        (new QGraphicsLineItem(x1, innerTop, x1, innerBottom, this))->setPen(QPen(Qt::DotLine));
         // create another horizontal label if it fits:
-        QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem(QString("%1").arg(value, 0, 'g', 5));
-        if ((x - label->boundingRect().width() * 0.5 > lastRight) && (x + label->boundingRect().width() * 0.5 < rect().right())) {
-            label->setParentItem(this);
-            label->setPos(x - label->boundingRect().width() * 0.5, innerBottom + tickSize);
-            lastRight = x + label->boundingRect().width() * 0.5;
+        QGraphicsSimpleTextItem *label1 = new QGraphicsSimpleTextItem(QString("%1").arg(t1, 0, 'g', 5));
+        if ((x1 - label1->boundingRect().width() * 0.5 > lastRight) && (x1 + label1->boundingRect().width() * 0.5 < rect().right())) {
+            label1->setParentItem(this);
+            label1->setPos(x1 - label1->boundingRect().width() * 0.5, innerBottom + tickSize);
+            lastRight = x1 + label1->boundingRect().width() * 0.5;
         } else {
-            delete label;
+            delete label1;
+        }
+        if (logarithmicX && (i < verticalSlices)) {
+            double value2 = (double)(i + 1) * (rectScaled.right() - rectScaled.left()) / (double)verticalSlices + rectScaled.left();
+            double t2 = exp(value2) - 1;
+            double x2 = (double)(i + 1) * (innerRight - innerLeft) / (double)verticalSlices + innerLeft;
+            QGraphicsSimpleTextItem *label2 = new QGraphicsSimpleTextItem(QString("%1").arg(t2, 0, 'g', 5));
+            label2->setPos(x2 - label2->boundingRect().width() * 0.5, innerBottom + tickSize);
+            qreal nextLeft = x2 - label2->boundingRect().width() * 0.5;
+            delete label2;
+            for (int j = 1; j < 16; j++) {
+                double t = (double)j / 16.0 * (t2 - t1) + t1;
+                double value = log(t + 1);
+                double x = value * (innerRight - innerLeft) / (rectScaled.right() - rectScaled.left()) + innerLeft;
+                new QGraphicsLineItem(x, innerBottom, x, innerBottom + tickSize * 0.5, this);
+                (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(Qt::DotLine));
+                // create another horizontal label if it fits:
+                QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem(QString("%1").arg(t, 0, 'g', 5));
+                if ((x - label->boundingRect().width() * 0.5 > lastRight) && (x + label->boundingRect().width() * 0.5 < nextLeft)) {
+                    label->setParentItem(this);
+                    label->setPos(x - label->boundingRect().width() * 0.5, innerBottom + tickSize);
+                    lastRight = x + label->boundingRect().width() * 0.5;
+                } else {
+                    delete label;
+                }
+            }
         }
     }
 
@@ -99,6 +128,11 @@ void GraphicsInterpolatorEditItem::interpolatorChanged()
 Interpolator * GraphicsInterpolatorEditItem::getInterpolator()
 {
     return child->getInterpolator();
+}
+
+QRectF GraphicsInterpolatorEditItem::getInnerRectangle() const
+{
+    return child->rect();
 }
 
 GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, const QPen &nodePen_, const QBrush &nodeBrush_) :

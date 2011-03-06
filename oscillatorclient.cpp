@@ -45,9 +45,9 @@ void OscillatorClient::postChangeGain(double gain)
     postEvent(event);
 }
 
-QGraphicsItem * OscillatorClient::createGraphicsItem(const QRectF &rect)
+QGraphicsItem * OscillatorClient::createGraphicsItem()
 {
-    return new OscillatorClientGraphicsItem(rect, this);
+    return new OscillatorClientGraphicsItem(QRectF(0, 0, 600, 420), this);
 }
 
 void OscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t)

@@ -90,8 +90,9 @@ void LinearOscillatorClient::postChangeControlPoint(int index, double x, double 
     postEvent(event);
 }
 
-QGraphicsItem * LinearOscillatorClient::createGraphicsItem(const QRectF &rect)
+QGraphicsItem * LinearOscillatorClient::createGraphicsItem()
 {
+    QRectF rect(0, 0, 600, 420);
     QGraphicsRectItem *rectItem = new QGraphicsRectItem(rect);
     rectItem->setPen(QPen(Qt::NoPen));
     QRectF rectGain(rect.x(), rect.y(), 16, rect.height());

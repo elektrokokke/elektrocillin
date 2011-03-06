@@ -204,7 +204,7 @@ QString JackClient::getPortNameById(jack_port_id_t id)
     return jack_port_name(jack_port_by_id(client, id));
 }
 
-QGraphicsItem * JackClient::createGraphicsItem(const QRectF &)
+QGraphicsItem * JackClient::createGraphicsItem()
 {
     return 0;
 }

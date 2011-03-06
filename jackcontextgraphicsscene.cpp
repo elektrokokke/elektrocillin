@@ -5,8 +5,7 @@
 JackContextGraphicsScene::JackContextGraphicsScene() :
     clientStyle(1),
     portStyle(3),
-    font("Helvetica", 12),
-    clientsRect(0, 0, 600, 420)
+    font("Helvetica", 12)
 {
     setBackgroundBrush(QBrush(QColor("lightsteelblue")));
     // get all clients and create visual representations for them:
@@ -40,7 +39,7 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(JackClient *client)
     QString clientName = client->getClientName();
     // create a visual representation in the scene:
     GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(client, clientStyle, portStyle, font, 0, this);
-    QGraphicsItem *graphicsItem = client->createGraphicsItem(clientsRect);
+    QGraphicsItem *graphicsItem = client->createGraphicsItem();
     if (graphicsItem) {
         graphicsClientItem->setInnerItem(graphicsItem);
     }

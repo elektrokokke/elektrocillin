@@ -18,12 +18,13 @@ public:
         FIRST = 0,
         LAST = 1
     };
-    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, int verticalSlices = 8, int horizontalSlices = 8, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    GraphicsInterpolatorEditItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, QGraphicsItem *parent = 0, int verticalSlices = 8, int horizontalSlices = 8, bool logarithmicX = false, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 
     void setRect(const QRectF &rect, const QRectF &rectScaled);
     void setVisible(ControlPoint controlPoint, bool visible);
     void interpolatorChanged();
     Interpolator * getInterpolator();
+    QRectF getInnerRectangle() const;
 protected:
     virtual void increaseControlPoints() = 0;
     virtual void decreaseControlPoints() = 0;
@@ -33,6 +34,7 @@ private:
     Interpolator *interpolator;
     GraphicsInterpolatorEditSubItem *child;
     int verticalSlices, horizontalSlices;
+    bool logarithmicX;
     QPen nodePen;
     QBrush nodeBrush;
 };

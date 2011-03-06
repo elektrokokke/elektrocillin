@@ -23,7 +23,7 @@
 //    JackAudioModel * removeAudioModel(int i);
 //    JackAudioModel * popAudioModel();
 
-//    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+//    QGraphicsItem * createGraphicsItem();
 
 //signals:
 //    void recordingStarted();

@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(ui->graphicsView, SIGNAL(sceneChanged()), this, SLOT(onSceneChanged()));
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
-//    ui->graphicsView->setViewport(new QGLWidget());
+    ui->graphicsView->setViewport(new QGLWidget());
     ui->graphicsView->setScene(scene);
 }
 

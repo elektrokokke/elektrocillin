@@ -97,9 +97,9 @@ void LinearWaveShapingClient::postChangeControlPoint(int index, double x, double
     postEvent(event);
 }
 
-QGraphicsItem * LinearWaveShapingClient::createGraphicsItem(const QRectF &rect)
+QGraphicsItem * LinearWaveShapingClient::createGraphicsItem()
 {
-    return new LinearWaveShapingGraphicsItem(rect, this);
+    return new LinearWaveShapingGraphicsItem(QRectF(0, 0, 600, 420), this);
 }
 
 void LinearWaveShapingClient::processAudio(const double *inputs, double *outputs, jack_nframes_t)

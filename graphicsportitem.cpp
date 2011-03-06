@@ -168,7 +168,7 @@ void GraphicsPortItem::onPortRegistered(QString fullPortName, QString type, int 
     }
 }
 
-void GraphicsPortItem::onPortUnregistered(QString fullPortName, QString type, int flags)
+void GraphicsPortItem::onPortUnregistered(QString fullPortName, QString, int)
 {
     QAction *action = mapPortNamesToActions.value(fullPortName, 0);
     if (action) {

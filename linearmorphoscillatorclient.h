@@ -22,7 +22,7 @@ public:
     void postDecreaseControlPoints();
     void postChangeControlPoint(int state, int index, double x, double y);
 
-    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+    QGraphicsItem * createGraphicsItem();
 
 protected:
     virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);

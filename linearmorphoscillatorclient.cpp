@@ -116,8 +116,9 @@ void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int ind
     postEvent(event);
 }
 
-QGraphicsItem * LinearMorphOscillatorClient::createGraphicsItem(const QRectF &rect)
+QGraphicsItem * LinearMorphOscillatorClient::createGraphicsItem()
 {
+    QRectF rect(0, 0, 600, 420);
     QGraphicsRectItem *rectItem = new QGraphicsRectItem(rect);
     rectItem->setPen(QPen(Qt::NoPen));
     QRectF rectGain(rect.x(), rect.y(), 16, rect.height());
@@ -139,7 +140,7 @@ void LinearMorphOscillatorClient::processEvent(const RingBufferEvent *event, jac
 }
 
 LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
-    GraphicsInterpolatorEditItem(client_->getState(state_), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent, 8, 8, nodePen, nodeBrush),
+    GraphicsInterpolatorEditItem(client_->getState(state_), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent, 8, 8, false, nodePen, nodeBrush),
     client(client_),
     state(state_),
     twin(0)

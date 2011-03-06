@@ -39,7 +39,7 @@ public:
     IirMoogFilter * getMoogFilter();
     IirMoogFilterThread * getMoogFilterThread();
 
-    QGraphicsItem * createGraphicsItem(const QRectF &rect);
+    QGraphicsItem * createGraphicsItem();
 protected:
     // reimplemented from EventProcessorClient2:
     virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);

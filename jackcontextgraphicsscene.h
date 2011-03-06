@@ -39,7 +39,6 @@ protected:
 private:
     int clientStyle, portStyle;
     QFont font;
-    QRectF clientsRect;
     JackNullClient nullClient;
     QMap<QString, QPair<JackClient*, GraphicsClientItem*> > clientsMap;
     QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > portConnectionItems;

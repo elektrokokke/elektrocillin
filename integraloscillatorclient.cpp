@@ -74,8 +74,9 @@ void IntegralOscillatorClient::postChangeControlPoint(int index, double x, doubl
     postEvent(event);
 }
 
-QGraphicsItem * IntegralOscillatorClient::createGraphicsItem(const QRectF &rect)
+QGraphicsItem * IntegralOscillatorClient::createGraphicsItem()
 {
+    QRectF rect(0, 0, 600, 420);
     QGraphicsRectItem *rectItem = new QGraphicsRectItem(rect);
     rectItem->setPen(QPen(Qt::NoPen));
     QRectF rectGain(rect.x(), rect.y(), 16, rect.height());
