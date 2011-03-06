@@ -81,7 +81,10 @@ SOURCES += main.cpp\
     wheelzoominggraphicsview.cpp \
     graphicsclientitem.cpp \
     graphicsportitem.cpp \
-    metajack/sincfilter.cpp
+    metajack/sincfilter.cpp \
+    polynomialinterpolator.cpp \
+    integraloscillator.cpp \
+    integraloscillatorclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -157,7 +160,10 @@ HEADERS  += mainwindow.h \
     wheelzoominggraphicsview.h \
     graphicsportitem.h \
     graphicsclientitem.h \
-    metajack/sincfilter.h
+    metajack/sincfilter.h \
+    polynomialinterpolator.h \
+    integraloscillator.h \
+    integraloscillatorclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

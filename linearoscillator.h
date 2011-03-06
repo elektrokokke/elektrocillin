@@ -4,8 +4,6 @@
 #include "oscillator.h"
 #include "linearinterpolator.h"
 #include "cubicsplineinterpolator.h"
-#include <QQueue>
-#include <QPair>
 
 class LinearOscillator : public Oscillator
 {

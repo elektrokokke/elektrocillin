@@ -1,5 +1,4 @@
 #include "linearoscillatorclient.h"
-#include "graphicsnodeitem.h"
 #include <cmath>
 
 LinearOscillatorClient::LinearOscillatorClient(const QString &clientName, size_t ringBufferSize) :

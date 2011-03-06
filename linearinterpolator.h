@@ -11,7 +11,7 @@ public:
     LinearInterpolator();
     LinearInterpolator(const QVector<double> &xx, const QVector<double> &yy);
 
-    void save(QDataStream &stream);
+    void save(QDataStream &stream) const;
     void load(QDataStream &stream);
 
     const QVector<double> & getX() const;

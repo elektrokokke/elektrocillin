@@ -64,7 +64,7 @@ QVector<double> & IirFilter::getFeedBackCoefficients()
 
 QString IirFilter::toString() const
 {
-    return getNumeratorPolynomial().toString() + " / " + getDenominatorPolynomial().toString();
+    return polynomialToString(getNumeratorPolynomial()) + " / " + polynomialToString(getDenominatorPolynomial());
 }
 
 void IirFilter::reset()

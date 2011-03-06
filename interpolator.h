@@ -19,6 +19,8 @@ public:
         QVector<double> xx, yy;
     };
 
+    virtual ~Interpolator();
+
     /**
       @param index pointer to a variable where the current
         index should be written to, if non-zero

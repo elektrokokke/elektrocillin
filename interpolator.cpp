@@ -1,6 +1,10 @@
 #include "interpolator.h"
 #include <cmath>
 
+Interpolator::~Interpolator()
+{
+}
+
 double Interpolator::evaluate(double x, int *index)
 {
     int jlo = cor ? hunt(x) : locate(x);

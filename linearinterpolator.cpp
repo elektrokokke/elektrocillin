@@ -12,7 +12,7 @@ LinearInterpolator::LinearInterpolator(const QVector<double> &xx, const QVector<
 {
 }
 
-void LinearInterpolator::save(QDataStream &stream)
+void LinearInterpolator::save(QDataStream &stream) const
 {
     stream << xx << yy;
 }

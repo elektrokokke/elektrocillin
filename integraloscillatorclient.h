@@ -1,23 +1,24 @@
-#ifndef LINEAROSCILLATORCLIENT_H
-#define LINEAROSCILLATORCLIENT_H
+#ifndef INTEGRALOSCILLATORCLIENT_H
+#define INTEGRALOSCILLATORCLIENT_H
 
 #include "oscillatorclient.h"
-#include "linearoscillator.h"
+#include "integraloscillator.h"
 #include "graphicsinterpolatoredititem.h"
 #include <QPen>
 
-class LinearOscillatorClient : public OscillatorClient
+
+class IntegralOscillatorClient : public OscillatorClient
 {
 public:
-    LinearOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
-    virtual ~LinearOscillatorClient();
+    IntegralOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
+    virtual ~IntegralOscillatorClient();
 
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
     virtual void loadState(QDataStream &stream);
 
-    LinearOscillator * getLinearOscillator();
-    LinearInterpolator * getLinearInterpolator();
+    IntegralOscillator * getIntegralOscillator();
+    PolynomialInterpolator * getPolynomialInterpolator();
 
     void postIncreaseControlPoints();
     void postDecreaseControlPoints();
@@ -29,13 +30,13 @@ protected:
     virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:
-    LinearInterpolator interpolator;
+    IntegralOscillator oscillator;
 };
 
-class LinearOscillatorGraphicsItem : public GraphicsInterpolatorEditItem
+class IntegralOscillatorGraphicsItem : public GraphicsInterpolatorEditItem
 {
 public:
-    LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client, QGraphicsItem *parent = 0);
+    IntegralOscillatorGraphicsItem(const QRectF &rect, IntegralOscillatorClient *client, QGraphicsItem *parent = 0);
 
 protected:
     virtual void increaseControlPoints();
@@ -43,7 +44,7 @@ protected:
     virtual void changeControlPoint(int index, double x, double y);
 
 private:
-    LinearOscillatorClient *client;
+    IntegralOscillatorClient *client;
 };
 
-#endif // LINEAROSCILLATORCLIENT_H
+#endif // INTEGRALOSCILLATORCLIENT_H
