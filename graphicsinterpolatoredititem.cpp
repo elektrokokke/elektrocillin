@@ -30,7 +30,7 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
 
     qreal tickSize = 10;
     // create the first horizontal textual label:
-    QGraphicsSimpleTextItem *horizontalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(rectScaled.bottom(), 0, 'g', 5), this);
+    QGraphicsSimpleTextItem *horizontalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(rectScaled.left(), 0, 'g', 5), this);
     qreal padding = horizontalLabel->boundingRect().height();
     // compute the inner rectangle's bottom and top:
     qreal innerBottom = rect().bottom() - tickSize - padding * 2;

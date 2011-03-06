@@ -98,7 +98,7 @@ void PolynomialInterpolator::processEvent(const ChangeControlPointEvent *event)
         initializePolynomial(event->index - 1, x, y, event->x, event->y);
     }
     if (event->index < xx.size() - 1) {
-        double x = xx[event->index];
+        double x = xx[event->index + 1];
         double y = polynomials[event->index].evaluate(x);
         initializePolynomial(event->index, event->x, event->y, x, y);
     }

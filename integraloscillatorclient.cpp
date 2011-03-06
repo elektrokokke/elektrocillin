@@ -38,8 +38,8 @@ void IntegralOscillatorClient::postIncreaseControlPoints()
 {
     Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
     // TODO: initialize the event
-    oscillator.processEvent(event, 0);
-    postEvent(event);
+//    oscillator.processEvent(event, 0);
+//    postEvent(event);
 }
 
 void IntegralOscillatorClient::postDecreaseControlPoints()
@@ -47,8 +47,8 @@ void IntegralOscillatorClient::postDecreaseControlPoints()
     if (oscillator.getPolynomialInterpolator()->getX().size() > 2) {
         Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
         // TODO: initialize the event
-        oscillator.processEvent(event, 0);
-        postEvent(event);
+//        oscillator.processEvent(event, 0);
+//        postEvent(event);
     }
 }
 
