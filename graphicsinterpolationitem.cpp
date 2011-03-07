@@ -52,7 +52,9 @@ void GraphicsInterpolationItem::updatePath()
             }
         }
     } else {
-        // set the path according to the given spline:
+        // we are traversing the interpolator from start to end, reset it to make this most efficient:
+        interpolator->reset();
+        // set the path according to the given interpolator:
         double x = interpolator->getX()[0];
         double y = interpolator->evaluate(x);
         if (!bounds.isNull()) {

@@ -14,6 +14,12 @@ double Interpolator::evaluate(double x, int *index)
     return interpolate(jlo, x);
 }
 
+void Interpolator::reset()
+{
+    jsav = 0;
+    cor = 1;
+}
+
 const QVector<double> & Interpolator::getX() const
 {
     return xx;
@@ -36,7 +42,7 @@ Interpolator::Interpolator(const QVector<double> &xx_, int m_) :
 /**
   Comments from "Numerical Recipes"
 
-  Given a valu x, return a value j such that x is (insofar as possible) centered
+  Given a value x, return a value j such that x is (insofar as possible) centered
   in the subrange xx[j..j+mm-1], where xx is the stored pointer. The values in xx
   must be monotonic, either increasing or decreasing. The returned value is not
   less than 0, nor greater than xx.size()-1.
@@ -89,6 +95,8 @@ int Interpolator::hunt(double x)
                     ju = xx.size() - 1;
                     break;
                 } else if ((x < xx[ju]) == ascnd) {   // Found bracket.
+                    break;
+                } else if ((x == xx[ju]) && (x == xx[jl])) {
                     break;
                 } else {                // Not done, so double the increment and try again.
                     jl = ju;

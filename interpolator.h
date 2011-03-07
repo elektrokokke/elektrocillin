@@ -27,6 +27,12 @@ public:
       */
     double evaluate(double x, int *index = 0);
 
+    /**
+      Resets the interpolator in a way that traversing it from
+      start to end becomes more efficient.
+      */
+    void reset();
+
     const QVector<double> & getX() const;
     int getM() const;
 
