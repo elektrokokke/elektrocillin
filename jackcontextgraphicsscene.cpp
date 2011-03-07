@@ -43,7 +43,6 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(JackClient *client)
     if (graphicsItem) {
         graphicsClientItem->setInnerItem(graphicsItem);
     }
-    addItem(graphicsClientItem);
     clientsMap.insert(client->getClientName(), QPair<JackClient*, GraphicsClientItem*>(client, graphicsClientItem));
     return graphicsClientItem;
 }
@@ -58,7 +57,6 @@ GraphicsClientItem * JackContextGraphicsScene::addClient(const QString &clientNa
     } else {
         // create a visual representation in the scene:
         GraphicsClientItem *graphicsClientItem = new GraphicsClientItem(&nullClient, clientName, clientStyle, portStyle, font, 0, this);
-        addItem(graphicsClientItem);
         clientsMap.insert(clientName, QPair<JackClient*, GraphicsClientItem*>(0, graphicsClientItem));
         return graphicsClientItem;
     }
