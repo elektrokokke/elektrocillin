@@ -55,7 +55,7 @@ void LinearMorphOscillatorClient::postIncreaseControlPoints()
     QVector<RingBufferEvent*> events;
     for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
         double stretchFactor = (double)(state[stateIndex].getX().size() - 1) / (double)(size - 1);
-        state[stateIndex].getX().append(2 * M_PI);
+        state[stateIndex].getX().append(1);
         state[stateIndex].getY().append(1);
         for (int i = size - 1; i >= 0; i--) {
             if (i < size - 1) {
@@ -79,7 +79,7 @@ void LinearMorphOscillatorClient::postDecreaseControlPoints()
         for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
             state[stateIndex].getX().resize(size);
             state[stateIndex].getY().resize(size);
-            double stretchFactor = 2 * M_PI / state[stateIndex].getX().back();
+            double stretchFactor = 1.0 / state[stateIndex].getX().back();
             for (int i = size - 1; i >= 0; i--) {
                 state[stateIndex].getX()[i] = state[stateIndex].getX()[i] * stretchFactor;
             }
