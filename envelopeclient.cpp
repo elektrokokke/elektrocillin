@@ -172,7 +172,7 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     nodeItemSustainPosition->setBrush(nodeBrush);
     nodeItemSustainPosition->setZValue(1);
     nodeItemSustainPosition->setBounds(QRectF(rectSustain->rect().x(), rectSustain->rect().center().y(), rectSustain->rect().width(), 0));
-    nodeItemSustainPosition->setBoundsScaled(QRectF(0, 0, 20, 0));
+    nodeItemSustainPosition->setBoundsScaled(QRectF(0, 0, log(21), 0));
     nodeItemSustainPosition->setXScaled(client->getEnvelope()->getSustainPosition());
     QObject::connect(nodeItemSustainPosition, SIGNAL(xChangedScaled(qreal)), this, SLOT(onSustainNodePositionChanged(qreal)));
 
