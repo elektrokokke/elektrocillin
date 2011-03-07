@@ -59,6 +59,7 @@ private:
     QRectF bounds, boundsScaled, oldRect;
     Scale horizontalScale, verticalScale;
     bool considerBounds, considerBoundsScaled, sendPositionChanges, changingCoordinates;
+    QPointF previousPos;
 
     QPointF scale(const QPointF &p);
     qreal scaleX(qreal x);

@@ -166,16 +166,17 @@ QVariant GraphicsNodeItem::itemChange(GraphicsItemChange change, const QVariant 
             QPointF newPosition = value.toPointF();
             // adjust the coordinates to be within the specified bounds:
             newPosition = adjustToBounds(newPosition);
+            previousPos = pos();
             changingCoordinates = false;
             return QGraphicsItem::itemChange(change, newPosition);
         } else if ((change == ItemPositionHasChanged) && (getSendPositionChanges() || getSendPositionChangesScaled())) {
             QPointF newPosition = value.toPointF();
             if (getSendPositionChanges()) {
                 positionChanged(newPosition);
-                if (newPosition.x() != pos().x()) {
+                if (newPosition.x() != previousPos.x()) {
                     xChanged(newPosition.x());
                 }
-                if (newPosition.y() != pos().y()) {
+                if (newPosition.y() != previousPos.y()) {
                     yChanged(newPosition.y());
                 }
             }
@@ -183,10 +184,10 @@ QVariant GraphicsNodeItem::itemChange(GraphicsItemChange change, const QVariant 
                 // convert to scaled coordinates:
                 QPointF newPositionScaled = scale(newPosition);
                 positionChangedScaled(newPositionScaled);
-                if (newPosition.x() != pos().x()) {
+                if (newPosition.x() != previousPos.x()) {
                     xChangedScaled(newPositionScaled.x());
                 }
-                if (newPosition.y() != pos().y()) {
+                if (newPosition.y() != previousPos.y()) {
                     yChangedScaled(newPositionScaled.y());
                 }
             }
