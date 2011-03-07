@@ -8,11 +8,11 @@ PulseOscillator::PulseOscillator(double frequencyModulationIntensity, double sam
     LinearInterpolator pulse(QVector<double>(4), QVector<double>(4));
     pulse.getX()[0] = 0;
     pulse.getY()[0] = -1;
-    pulse.getX()[1] = M_PI;
+    pulse.getX()[1] = 0.5;
     pulse.getY()[1] = -1;
-    pulse.getX()[2] = M_PI;
+    pulse.getX()[2] = 0.5;
     pulse.getY()[2] = 1;
-    pulse.getX()[3] = 2 * M_PI;
+    pulse.getX()[3] = 1;
     pulse.getY()[3] = 1;
     setLinearInterpolator(pulse);
 }
