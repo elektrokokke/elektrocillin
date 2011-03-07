@@ -160,12 +160,16 @@ void GraphicsNodeItem::hoverLeaveEvent( QGraphicsSceneHoverEvent * event )
 
 QVariant GraphicsNodeItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    if ((change == ItemPositionChange) && !changingCoordinates && (getSendPositionChanges() || getSendPositionChangesScaled())) {
-        changingCoordinates = true;
-        QPointF newPosition = value.toPointF();
-        // adjust the coordinates to be within the specified bounds:
-        newPosition = adjustToBounds(newPosition);
-        if (newPosition != pos()) {
+    if (!changingCoordinates) {
+        if (change == ItemPositionChange) {
+            changingCoordinates = true;
+            QPointF newPosition = value.toPointF();
+            // adjust the coordinates to be within the specified bounds:
+            newPosition = adjustToBounds(newPosition);
+            changingCoordinates = false;
+            return QGraphicsItem::itemChange(change, newPosition);
+        } else if ((change == ItemPositionHasChanged) && (getSendPositionChanges() || getSendPositionChangesScaled())) {
+            QPointF newPosition = value.toPointF();
             if (getSendPositionChanges()) {
                 positionChanged(newPosition);
                 if (newPosition.x() != pos().x()) {
@@ -187,11 +191,8 @@ QVariant GraphicsNodeItem::itemChange(GraphicsItemChange change, const QVariant 
                 }
             }
         }
-        changingCoordinates = false;
-        return QGraphicsItem::itemChange(change, newPosition);
-    } else {
-        return QGraphicsItem::itemChange(change, value);
     }
+    return QGraphicsItem::itemChange(change, value);
 }
 
 void GraphicsNodeItem::init()
