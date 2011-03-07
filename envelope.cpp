@@ -70,7 +70,7 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
     double level = 0.0;
     if (currentPhase == ATTACK) {
         double x = log(currentTime + 1);
-        if (x >= sustainPosition) {
+        if (x >= qMin(sustainPosition, interpolator.getX().last())) {
             currentPhase = SUSTAIN;
         } else {
             level = interpolator.evaluate(x);
@@ -86,7 +86,7 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
             currentPhase = RELEASE;
             currentTime = sustainPositionInSeconds;
         } else {
-            level = interpolator.evaluate(sustainPosition);
+            level = interpolator.evaluate(qMin(sustainPosition, interpolator.getX().last()));
         }
     }
     if (currentPhase == RELEASE) {
