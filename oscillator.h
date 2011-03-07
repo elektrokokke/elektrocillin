@@ -20,20 +20,42 @@ public:
     void setGain(double gain);
     double getGain() const;
 
+    /**
+      Sets the current oscillator frequency
+      to the given value in Hertz.
+      */
     void setFrequency(double hertz);
+    /**
+      Returns the current oscillator frequency in Hertz.
+      */
     double getFrequency() const;
+    /**
+      Sets the detune (relative to the current frequency)
+      in cents (100 cents = 1 half tone, 1200 cents = 1 octave).
+      */
     void setDetune(double cents);
+    /**
+      Returns the current detune value in cents.
+      */
     double getDetune() const;
-    double getNormalizedAngularFrequency() const;
+    /**
+      Returns the current normalized frequency of this oscillator,
+      i.e. the number of cycles per sample. This number depends on
+      the current sample rate (given in Hertz) and the current
+      oscillator frequency (in Hertz).
+
+      The maximum normalized frequency is 0.5 (the Nyquist frequency).
+      */
+    double getNormalizedFrequency() const;
 
 protected:
     virtual double valueAtPhase(double phase);
 
 private:
     unsigned char detuneController;
-    double gain, frequency, frequencyDetuneFactor, detuneInCents, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, normalizedAngularFrequency;
+    double gain, frequency, frequencyDetuneFactor, detuneInCents, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, normalizedFrequency;
 
-    void computeNormalizedAngularFrequency();
+    void computeNormalizedFrequency();
 };
 
 #endif // OSCILLATOR_H

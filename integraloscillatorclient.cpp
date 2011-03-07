@@ -98,7 +98,12 @@ void IntegralOscillatorClient::processEvent(const RingBufferEvent *event, jack_n
 }
 
 IntegralOscillatorGraphicsItem::IntegralOscillatorGraphicsItem(const QRectF &rect, IntegralOscillatorClient *client_, QGraphicsItem *parent) :
-    GraphicsInterpolatorEditItem(client_->getPolynomialInterpolator(), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent),
+    GraphicsInterpolatorEditItem(
+        client_->getPolynomialInterpolator(),
+        rect,
+        QRectF(client_->getPolynomialInterpolator()->getX().first(), 1, client_->getPolynomialInterpolator()->getX().last() - client_->getPolynomialInterpolator()->getX().first(), -2),
+        parent
+        ),
     client(client_)
 {}
 

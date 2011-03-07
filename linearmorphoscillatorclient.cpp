@@ -7,13 +7,13 @@ LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientNa
 {
     state[0].getX().append(0);
     state[0].getY().append(-1);
-    state[0].getX().append(1.9 * M_PI);
+    state[0].getX().append(0.95);
     state[0].getY().append(1);
-    state[0].getX().append(2.0 * M_PI);
+    state[0].getX().append(1);
     state[0].getY().append(-1);
     getLinearMorphOscillator()->setState(0, state[0]);
     state[1] = state[0];
-    state[1].getX()[1] = 0.1 * M_PI;
+    state[1].getX()[1] = 0.05;
     getLinearMorphOscillator()->setState(1, state[1]);
 }
 
@@ -140,7 +140,16 @@ void LinearMorphOscillatorClient::processEvent(const RingBufferEvent *event, jac
 }
 
 LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
-    GraphicsInterpolatorEditItem(client_->getState(state_), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent, 8, 8, false, nodePen, nodeBrush),
+    GraphicsInterpolatorEditItem(client_->getState(state_),
+        rect,
+        QRectF(client_->getState(state_)->getX().first(), 1, client_->getState(state_)->getX().last() - client_->getState(state_)->getX().first(), -2),
+        parent,
+        8,
+        8,
+        false,
+        nodePen,
+        nodeBrush
+        ),
     client(client_),
     state(state_),
     twin(0)

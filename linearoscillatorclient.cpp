@@ -114,7 +114,11 @@ void LinearOscillatorClient::processEvent(const RingBufferEvent *event, jack_nfr
 }
 
 LinearOscillatorGraphicsItem::LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client_, QGraphicsItem *parent) :
-    GraphicsInterpolatorEditItem(client_->getLinearInterpolator(), rect, QRectF(0, 1, 2.0 * M_PI, -2), parent),
+    GraphicsInterpolatorEditItem(client_->getLinearInterpolator(),
+        rect,
+        QRectF(client_->getLinearInterpolator()->getX().first(), 1, client_->getLinearInterpolator()->getX().last() - client_->getLinearInterpolator()->getX().first(), -2),
+        parent
+        ),
     client(client_)
 {}
 

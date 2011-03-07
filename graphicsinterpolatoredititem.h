@@ -8,6 +8,8 @@
 #include <QGraphicsRectItem>
 #include <QMenu>
 #include <QPen>
+#include <QFont>
+#include <QGraphicsSimpleTextItem>
 
 class GraphicsInterpolatorEditSubItem;
 
@@ -37,6 +39,7 @@ private:
     bool logarithmicX;
     QPen nodePen;
     QBrush nodeBrush;
+    QFont font;
 };
 
 class GraphicsInterpolatorEditSubItem : public QObject, public QGraphicsRectItem
@@ -66,10 +69,12 @@ private:
     QBrush nodeBrush;
     QMap<QObject*, int> mapSenderToControlPointIndex;
     QVector<GraphicsNodeItem*> nodes;
+    QVector<QGraphicsSimpleTextItem*> nodesText;
     Interpolator *interpolator;
     GraphicsInterpolationItem *interpolationItem;
     QMenu contextMenu;
     bool visible[2];
+    QFont font;
 
     GraphicsNodeItem * createNode(qreal x, qreal y, const QRectF &rectScaled);
 };

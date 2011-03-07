@@ -7,6 +7,7 @@
 #include <QGraphicsRectItem>
 #include <QPen>
 #include <QBrush>
+#include <QFont>
 
 class EnvelopeClient : public EventProcessorClient
 {
@@ -60,6 +61,7 @@ private slots:
     void onSustainNodePositionChanged(qreal x);
 private:
     EnvelopeClient *client;
+    QFont font;
     EnvelopeGraphicsSubItem *interpolatorEditItem;
     GraphicsNodeItem *nodeItemSustainPosition;
     QGraphicsLineItem *sustainPositionLine;

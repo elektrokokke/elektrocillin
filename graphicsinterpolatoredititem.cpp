@@ -15,6 +15,7 @@ GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpo
 {
     setPen(QPen(QBrush(Qt::black), 2));
     setBrush(QBrush(Qt::white));
+    font.setPointSize(6);
 
     setRect(rectangle, rectScaled);
 }
@@ -33,7 +34,8 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
     qreal tickSize = 10;
     // create the first horizontal textual label:
     double t = (logarithmicX ? exp(rectScaled.left()) - 1 : rectScaled.left());
-    QGraphicsSimpleTextItem *horizontalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(t, 0, 'g', 5), this);
+    QGraphicsSimpleTextItem *horizontalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(t, 0, 'g', 3), this);
+    horizontalLabel->setFont(font);
     qreal padding = horizontalLabel->boundingRect().height();
     // compute the inner rectangle's bottom and top:
     qreal innerBottom = rect().bottom() - tickSize - padding * 2;
@@ -45,7 +47,8 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
         // compute the vertical position of the label:
         double y = (double)i * (innerTop - innerBottom) / (double)horizontalSlices + innerBottom;
         // create a vertical label:
-        QGraphicsSimpleTextItem *verticalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(value, 0, 'g', 5), this);
+        QGraphicsSimpleTextItem *verticalLabel = new QGraphicsSimpleTextItem(QString("%1").arg(value, 0, 'g', 3), this);
+        verticalLabel->setFont(font);
         if (verticalLabel->boundingRect().width() > maxLabelWidth) {
             maxLabelWidth = verticalLabel->boundingRect().width();
         }
@@ -73,7 +76,8 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
         new QGraphicsLineItem(x1, innerBottom, x1, innerBottom + tickSize * 0.5, this);
         (new QGraphicsLineItem(x1, innerTop, x1, innerBottom, this))->setPen(QPen(Qt::DotLine));
         // create another horizontal label if it fits:
-        QGraphicsSimpleTextItem *label1 = new QGraphicsSimpleTextItem(QString("%1").arg(t1, 0, 'g', 5));
+        QGraphicsSimpleTextItem *label1 = new QGraphicsSimpleTextItem(QString("%1").arg(t1, 0, 'g', 3));
+        label1->setFont(font);
         if ((x1 - label1->boundingRect().width() * 0.5 > lastRight) && (x1 + label1->boundingRect().width() * 0.5 < rect().right())) {
             label1->setParentItem(this);
             label1->setPos(x1 - label1->boundingRect().width() * 0.5, innerBottom + tickSize);
@@ -85,7 +89,8 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
             double value2 = (double)(i + 1) * (rectScaled.right() - rectScaled.left()) / (double)verticalSlices + rectScaled.left();
             double t2 = exp(value2) - 1;
             double x2 = (double)(i + 1) * (innerRight - innerLeft) / (double)verticalSlices + innerLeft;
-            QGraphicsSimpleTextItem *label2 = new QGraphicsSimpleTextItem(QString("%1").arg(t2, 0, 'g', 5));
+            QGraphicsSimpleTextItem *label2 = new QGraphicsSimpleTextItem(QString("%1").arg(t2, 0, 'g', 3));
+            label2->setFont(font);
             label2->setPos(x2 - label2->boundingRect().width() * 0.5, innerBottom + tickSize);
             qreal nextLeft = x2 - label2->boundingRect().width() * 0.5;
             delete label2;
@@ -96,7 +101,8 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
                 new QGraphicsLineItem(x, innerBottom, x, innerBottom + tickSize * 0.5, this);
                 (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(Qt::DotLine));
                 // create another horizontal label if it fits:
-                QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem(QString("%1").arg(t, 0, 'g', 5));
+                QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem(QString("%1").arg(t, 0, 'g', 3));
+                label->setFont(font);
                 if ((x - label->boundingRect().width() * 0.5 > lastRight) && (x + label->boundingRect().width() * 0.5 < nextLeft)) {
                     label->setParentItem(this);
                     label->setPos(x - label->boundingRect().width() * 0.5, innerBottom + tickSize);
@@ -143,18 +149,16 @@ GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *i
     nodeBrush(nodeBrush_),
     interpolator(interpolator_)
 {
+    font.setPointSize(8);
     visible[GraphicsInterpolatorEditItem::FIRST] = visible[GraphicsInterpolatorEditItem::LAST] = true;
     setPen(QPen(Qt::NoPen));
     setBrush(QBrush(Qt::NoBrush));
-    for (int i = 0; i < interpolator->getX().size(); i++) {
-        nodes.append(createNode(interpolator->getX()[i], interpolator->interpolate(i, interpolator->getX()[i]), rectScaled));
-        mapSenderToControlPointIndex[nodes.back()] = i;
-    }
-    nodes.first()->setVisible(visible[GraphicsInterpolatorEditItem::FIRST]);
-    nodes.back()->setVisible(visible[GraphicsInterpolatorEditItem::LAST]);
     interpolationItem = new GraphicsInterpolationItem(interpolator, 0.01, rectScaled.bottom(), rectScaled.top(), rect().width() / rectScaled.width(), rect().height() / rectScaled.height(), this);
     interpolationItem->setPen(QPen(QBrush(Qt::black), 2));
     interpolationItem->setPos(-rectScaled.left() * rect().width() / rectScaled.width() + rect().left(), -rectScaled.top() * rect().height() / rectScaled.height() + rect().top());
+
+    interpolatorChanged();
+
     // create the context menu:
     contextMenu.addAction(tr("Increase nr. of control points"), this, SLOT(onIncreaseControlPoints()));
     contextMenu.addAction(tr("Decrease nr. of control points"), this, SLOT(onDecreaseControlPoints()));
@@ -190,21 +194,35 @@ void GraphicsInterpolatorEditSubItem::setVisible(GraphicsInterpolatorEditItem::C
 void GraphicsInterpolatorEditSubItem::interpolatorChanged()
 {
     interpolationItem->updatePath();
-    nodes.first()->setVisible(true);
-    nodes.back()->setVisible(true);
+    if (nodes.size()) {
+        nodes.first()->setVisible(true);
+        nodes.back()->setVisible(true);
+    }
     for (; nodes.size() > interpolator->getX().size(); ) {
-        mapSenderToControlPointIndex.remove(nodes.back());
         delete nodes.back();
         nodes.remove(nodes.size() - 1);
     }
+    mapSenderToControlPointIndex.clear();
     for (int i = 0; i < nodes.size(); i++) {
-        nodes[i]->setXScaled(interpolator->getX()[i]);
-        nodes[i]->setYScaled(interpolator->interpolate(i, interpolator->getX()[i]));
+        double x = interpolator->getX()[i];
+        double y = interpolator->interpolate(i, x);
+        nodes[i]->setXScaled(x);
+        nodes[i]->setYScaled(y);
+        QGraphicsSimpleTextItem *text = nodesText[i];
+        text->setText(QString("%1, %2").arg(x).arg(y));
+        text->setPos(nodes.last()->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
         mapSenderToControlPointIndex[nodes[i]] = i;
     }
     for (int i = nodes.size(); i < interpolator->getX().size(); i++) {
         // add a new node:
-        nodes.append(createNode(interpolator->getX()[i], interpolator->interpolate(i, interpolator->getX()[i]), rectScaled));
+        double x = interpolator->getX()[i];
+        double y = interpolator->interpolate(i, x);
+        nodes.append(createNode(x, y, rectScaled));
+        QGraphicsSimpleTextItem *text = new QGraphicsSimpleTextItem(this);
+        text->setFont(font);
+        text->setText(QString("%1, %2").arg(x).arg(y));
+        text->setPos(nodes.last()->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
+        nodesText.append(text);
         mapSenderToControlPointIndex[nodes[i]] = i;
     }
     nodes.first()->setVisible(visible[GraphicsInterpolatorEditItem::FIRST]);
@@ -244,6 +262,9 @@ void GraphicsInterpolatorEditSubItem::onNodePositionChangedScaled(QPointF positi
 {
     // get the control point index:
     int index = mapSenderToControlPointIndex[sender()];
+    QGraphicsSimpleTextItem *text = nodesText[index];
+    text->setText(QString("%1, %2").arg(position.x()).arg(position.y()));
+    text->setPos(nodes[index]->pos() + QPointF(8, -text->boundingRect().height() * 0.3));
     // signal the control point change event and update our interpolator graphic item:
     parent->changeControlPoint(index, position.x(), position.y());
     interpolationItem->updatePath();

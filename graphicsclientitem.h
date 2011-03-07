@@ -27,6 +27,7 @@ public:
     QGraphicsItem * getInnerItem() const;
 public slots:
     void showInnerItem(bool ensureVisible = false);
+    void zoomToInnerItem();
     void onPortRegistered(QString fullPortName, QString type, int flags);
 
 protected:
@@ -45,7 +46,7 @@ private:
     QFont font;
     QRectF rect;
     QGraphicsItem *innerItem;
-    CommandTextItem *showInnerItemCommand;
+    CommandTextItem *showInnerItemCommand, *zoomToInnerItemCommand;
     QPainterPath pathWithoutInnerItem;
     QMenu *contextMenu;
     bool isMacro;

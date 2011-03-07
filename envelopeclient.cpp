@@ -82,7 +82,7 @@ void EnvelopeClient::postChangeControlPoint(int index, double x, double y)
        x = interpolator->getX()[0];
     }
     if (index == interpolator->getX().size() - 1) {
-        x = interpolator->getX().back();
+        y = 0;
     }
     if ((index > 0) && (x <= interpolator->getX()[index - 1])) {
         x = interpolator->getX()[index - 1];
@@ -126,7 +126,6 @@ EnvelopeGraphicsSubItem::EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGra
     parent(parent_)
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
-    setVisible(GraphicsInterpolatorEditItem::LAST, false);
 }
 
 void EnvelopeGraphicsSubItem::increaseControlPoints()
@@ -150,6 +149,7 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
 {
     setPen(QPen(Qt::NoPen));
     setBrush(QBrush(Qt::white));
+    font.setPointSize(8);
 
     interpolatorEditItem = new EnvelopeGraphicsSubItem(QRectF(rect.x(), rect.y(), rect.width(), rect.height() - 16), this, nodePen, nodeBrush);
     interpolatorEditItem->setBrush(QBrush(Qt::NoBrush));
@@ -172,7 +172,8 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     sustainPositionLine->setPos(nodeItemSustainPosition->x(), interpolatorEditItem->rect().y());
 
     sustainPositionText = new QGraphicsSimpleTextItem(QString("Sustain: %1s").arg(client->getEnvelope()->getSustainPositionInSeconds()), this);
-    sustainPositionText->setPos(nodeItemSustainPosition->x() + 8, nodeItemSustainPosition->y() - 8);
+    sustainPositionText->setFont(font);
+    sustainPositionText->setPos(nodeItemSustainPosition->x() + 8, nodeItemSustainPosition->y() - sustainPositionText->boundingRect().height() * 0.3);
 }
 
 EnvelopeClient * EnvelopeGraphicsItem::getClient()
@@ -186,7 +187,7 @@ void EnvelopeGraphicsItem::onSustainNodePositionChanged(qreal x)
     // update the graphics:
     sustainPositionLine->setPos(nodeItemSustainPosition->x(), interpolatorEditItem->rect().y());
     sustainPositionText->setText(QString("Sustain: %1 sec.").arg(client->getEnvelope()->getSustainPositionInSeconds()));
-    sustainPositionText->setPos(nodeItemSustainPosition->x() + 8, nodeItemSustainPosition->y() - 8);
+    sustainPositionText->setPos(nodeItemSustainPosition->x() + 8, nodeItemSustainPosition->y() - sustainPositionText->boundingRect().height() * 0.3);
 }
 
 class EnvelopeClientFactory : public JackClientFactory

@@ -71,7 +71,8 @@ void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
         innerItem->setParentItem(this);
         innerItem->setPos(getRect().topRight());
     }
-    showInnerItemAction->setEnabled(innerItem);
+    showInnerItemAction->setVisible(innerItem);
+    zoomToInnerItemCommand->setVisible(innerItem);
 }
 
 QGraphicsItem * GraphicsClientItem::getInnerItem() const
@@ -97,6 +98,14 @@ void GraphicsClientItem::showInnerItem(bool ensureVisible_)
             showInnerItemCommand->setText("[+]");
             showInnerItemAction->setText("Show controls");
         }
+    }
+}
+
+void GraphicsClientItem::zoomToInnerItem()
+{
+    if (innerItem) {
+        showInnerItem(true);
+        scene()->views().first()->fitInView(innerItem, Qt::KeepAspectRatio);
     }
 }
 
@@ -204,6 +213,11 @@ void GraphicsClientItem::initItem()
     showInnerItemCommand->setVisible(innerItem);
     showInnerItemCommand->setZValue(1);
     QObject::connect(showInnerItemCommand, SIGNAL(triggered()), this, SLOT(showInnerItem()));
+    zoomToInnerItemCommand = new CommandTextItem("[Z]", font, this);
+    zoomToInnerItemCommand->setPos(padding + fontMetrics.width("[+]"), padding + fontMetrics.lineSpacing());
+    zoomToInnerItemCommand->setVisible(innerItem);
+    zoomToInnerItemCommand->setZValue(1);
+    QObject::connect(zoomToInnerItemCommand, SIGNAL(triggered()), this, SLOT(zoomToInnerItem()));
 
     QStringList inputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
     QList<GraphicsPortItem*> inputPortItems;

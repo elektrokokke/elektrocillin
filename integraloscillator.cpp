@@ -6,7 +6,7 @@ IntegralOscillator::IntegralOscillator(double frequencyModulationIntensity, doub
     QVector<double> xx, yy;
     xx.append(0);
     yy.append(-1);
-    xx.append(2.0 * M_PI);
+    xx.append(1);
     yy.append(1);
     integrals.append(PolynomialInterpolator(xx, yy));
 }

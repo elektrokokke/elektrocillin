@@ -6,16 +6,15 @@ Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, 
     MidiProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
     detuneController(3),
     gain(1),
-    frequency(441),
+    frequency(440),
     frequencyDetuneFactor(1),
     detuneInCents(0),
     frequencyPitchBendFactor(1),
     frequencyModulationFactor(1),
     frequencyModulationIntensity(frequencyModulationIntensity_),
-    phase(0),
-    normalizedAngularFrequency(0)
+    phase(0)
 {
-    computeNormalizedAngularFrequency();
+    computeNormalizedFrequency();
 }
 
 void Oscillator::setDetuneController(unsigned char controller)
@@ -32,19 +31,19 @@ void Oscillator::setSampleRate(double sampleRate)
 {
     MidiProcessor::setSampleRate(sampleRate);
     // recompute phase increment:
-    computeNormalizedAngularFrequency();
+    computeNormalizedFrequency();
 }
 
 void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
     frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
-    computeNormalizedAngularFrequency();
+    computeNormalizedFrequency();
 }
 
 void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
 {
     frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(value);
-    computeNormalizedAngularFrequency();
+    computeNormalizedFrequency();
 }
 
 void Oscillator::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
@@ -60,10 +59,10 @@ void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframe
 {
     // consider frequency modulation input:
     frequencyModulationFactor = pow(1 + frequencyModulationIntensity, inputs[0]);
-    computeNormalizedAngularFrequency();
-    double phase2 = phase + normalizedAngularFrequency;
-    if (phase2 >= 2.0 * M_PI) {
-        phase2 -= 2.0 * M_PI;
+    computeNormalizedFrequency();
+    double phase2 = phase + normalizedFrequency;
+    if (phase2 >= 1) {
+        phase2 -= 1;
     }
     // compute the oscillator output:
     //outputs[0] = valueAtPhase(0.5 * (phase + phase2));
@@ -84,7 +83,7 @@ double Oscillator::getGain() const
 void Oscillator::setFrequency(double hertz)
 {
     frequency = hertz;
-    computeNormalizedAngularFrequency();
+    computeNormalizedFrequency();
 }
 
 double Oscillator::getFrequency() const
@@ -96,7 +95,7 @@ void Oscillator::setDetune(double cents)
 {
     detuneInCents = cents;
     frequencyDetuneFactor = pow(2.0, cents / 1200.0);
-    computeNormalizedAngularFrequency();
+    computeNormalizedFrequency();
 }
 
 double Oscillator::getDetune() const
@@ -104,23 +103,23 @@ double Oscillator::getDetune() const
     return detuneInCents;
 }
 
-double Oscillator::getNormalizedAngularFrequency() const
+double Oscillator::getNormalizedFrequency() const
 {
-    return normalizedAngularFrequency;
+    return normalizedFrequency;
 }
 
 double Oscillator::valueAtPhase(double phase)
 {
-    return sin(phase);
+    return sin(phase * 2 * M_PI);
 }
 
-void Oscillator::computeNormalizedAngularFrequency()
+void Oscillator::computeNormalizedFrequency()
 {
-    normalizedAngularFrequency = 2.0 * M_PI * frequency * frequencyDetuneFactor * frequencyPitchBendFactor * frequencyModulationFactor / getSampleRate();
-    if (normalizedAngularFrequency <= 0.0) {
-        normalizedAngularFrequency = 0.000000000001;
-    } else if (normalizedAngularFrequency >= M_PI) {
-        normalizedAngularFrequency = M_PI;
+    normalizedFrequency = frequency * frequencyDetuneFactor * frequencyPitchBendFactor * frequencyModulationFactor / getSampleRate();
+    if (normalizedFrequency <= 0.0) {
+        normalizedFrequency = 0.000000000001;
+    } else if (normalizedFrequency >= 0.5) {
+        normalizedFrequency = 0.5;
     }
 }
 
