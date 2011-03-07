@@ -124,7 +124,7 @@ void EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t t
 EnvelopeGraphicsSubItem::EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent_, const QPen &nodePen, const QBrush &nodeBrush) :
     GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(),
         rect,
-        QRectF(0, 1, log(21), -2),
+        QRectF(0, 1, log(parent_->getClient()->getEnvelope()->getDurationInSeconds() + 1), -2),
         parent_,
         4,
         8,
@@ -172,7 +172,7 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     nodeItemSustainPosition->setBrush(nodeBrush);
     nodeItemSustainPosition->setZValue(1);
     nodeItemSustainPosition->setBounds(QRectF(rectSustain->rect().x(), rectSustain->rect().center().y(), rectSustain->rect().width(), 0));
-    nodeItemSustainPosition->setBoundsScaled(QRectF(0, 0, log(21), 0));
+    nodeItemSustainPosition->setBoundsScaled(QRectF(0, 0, log(client->getEnvelope()->getDurationInSeconds() + 1), 0));
     nodeItemSustainPosition->setXScaled(client->getEnvelope()->getSustainPosition());
     QObject::connect(nodeItemSustainPosition, SIGNAL(xChangedScaled(qreal)), this, SLOT(onSustainNodePositionChanged(qreal)));
 

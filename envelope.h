@@ -19,7 +19,7 @@ public:
         double sustainPosition;
     };
 
-    Envelope(double sampleRate = 44100);
+    Envelope(double durationInSeconds = 20, double sampleRate = 44100);
 
     LinearInterpolator * getInterpolator();
     void setInterpolator(const LinearInterpolator &interpolator);
@@ -27,6 +27,8 @@ public:
     void setSustainPosition(double sustainPosition);
     double getSustainPosition() const;
     double getSustainPositionInSeconds() const;
+
+    double getDurationInSeconds() const;
 
     void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
@@ -36,6 +38,7 @@ public:
     virtual void processEvent(const Interpolator::ChangeAllControlPointsEvent *event, jack_nframes_t time);
     virtual void processEvent(const ChangeSustainPositionEvent *event, jack_nframes_t time);
 private:
+    double durationInSeconds;
     double currentTime, sustainPositionInSeconds, sustainPosition, previousLevel, minimumLevel, velocity;
     Phase currentPhase;
     bool release;

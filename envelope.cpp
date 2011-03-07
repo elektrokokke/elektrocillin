@@ -2,8 +2,9 @@
 #include <QtGlobal>
 #include <cmath>
 
-Envelope::Envelope(double sampleRate) :
+Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     MidiProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
+    durationInSeconds(durationInSeconds_),
     currentTime(0),
     // sustain position is at 0.5 seconds:
     sustainPositionInSeconds(0.5),
@@ -18,8 +19,7 @@ Envelope::Envelope(double sampleRate) :
     yy.append(0);
     xx.append(sustainPosition);
     yy.append(1);
-    // duration is 20 seconds (without sustain phase):
-    xx.append(log(20 + 1));
+    xx.append(log(durationInSeconds + 1));
     yy.append(0);
     interpolator = LinearInterpolator(xx, yy);
 }
@@ -48,6 +48,11 @@ double Envelope::getSustainPosition() const
 double Envelope::getSustainPositionInSeconds() const
 {
     return sustainPositionInSeconds;
+}
+
+double Envelope::getDurationInSeconds() const
+{
+    return durationInSeconds;
 }
 
 void Envelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t)
