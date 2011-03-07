@@ -6,6 +6,7 @@ EnvelopeClient::EnvelopeClient(const QString &clientName, size_t ringBufferSize)
 {
     envelopeProcess = (Envelope*)getAudioProcessor();
     envelope = new Envelope();
+    envelope->copyInterpolator(envelopeProcess);
 }
 
 EnvelopeClient::~EnvelopeClient()
@@ -17,20 +18,13 @@ EnvelopeClient::~EnvelopeClient()
 
 void EnvelopeClient::saveState(QDataStream &stream)
 {
-    envelope->getInterpolator()->save(stream);
-    stream << envelope->getSustainPosition();
+    envelope->save(stream);
 }
 
 void EnvelopeClient::loadState(QDataStream &stream)
 {
-    LinearInterpolator interpolator;
-    interpolator.load(stream);
-    envelope->setInterpolator(interpolator);
-    envelopeProcess->setInterpolator(interpolator);
-    double sustainPosition;
-    stream >> sustainPosition;
-    envelope->setSustainPosition(sustainPosition);
-    envelopeProcess->setSustainPosition(sustainPosition);
+    envelopeProcess->load(stream);
+    envelope->copyInterpolator(envelopeProcess);
 }
 
 Envelope * EnvelopeClient::getEnvelope()
@@ -40,44 +34,23 @@ Envelope * EnvelopeClient::getEnvelope()
 
 void EnvelopeClient::postIncreaseControlPoints()
 {
-    LinearInterpolator *interpolator = envelope->getInterpolator();
-    int size = interpolator->getX().size() + 1;
-    double stretchFactor = (double)(interpolator->getX().size() - 1) / (double)(size - 1);
-    interpolator->getX().append(interpolator->getX().back());
-    interpolator->getY().append(interpolator->getY().back());
-    for (int i = size - 1; i >= 0; i--) {
-        if (i < size - 1) {
-            interpolator->getX()[i] = interpolator->getX()[i] * stretchFactor;
-        }
-    }
-    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-    event->xx = interpolator->getX();
-    event->yy = interpolator->getY();
+    Interpolator::ChangeAllControlPointsEvent *event = envelope->createIncreaseControlPointsEvent();
+    envelope->processEvent(event, 0);
     postEvent(event);
 }
 
 void EnvelopeClient::postDecreaseControlPoints()
 {
-    LinearInterpolator *interpolator = envelope->getInterpolator();
-    if (interpolator->getX().size() > 2) {
-        int size = interpolator->getX().size() - 1;
-        double stretchFactor = interpolator->getX().back() / interpolator->getX()[size - 1];
-        interpolator->getX().resize(size);
-        interpolator->getY().resize(size);
-        for (int i = size - 1; i >= 0; i--) {
-            interpolator->getX()[i] = interpolator->getX()[i] * stretchFactor;
-        }
-        interpolator->getY().back() = 0;
-        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-        event->xx = interpolator->getX();
-        event->yy = interpolator->getY();
+    if (envelope->getInterpolator()->getX().size() > 2) {
+        Interpolator::ChangeAllControlPointsEvent *event = envelope->createDecreaseControlPointsEvent();
+        envelope->processEvent(event, 0);
         postEvent(event);
     }
 }
 
 void EnvelopeClient::postChangeControlPoint(int index, double x, double y)
 {
-    LinearInterpolator *interpolator = envelope->getInterpolator();
+    Interpolator *interpolator = envelope->getInterpolator();
     if (index == 0) {
        x = interpolator->getX()[0];
     }
@@ -92,8 +65,9 @@ void EnvelopeClient::postChangeControlPoint(int index, double x, double y)
     }
     Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
     event->index = index;
-    interpolator->getX()[index] = event->x = x;
-    interpolator->getY()[index] = event->y = y;
+    event->x = x;
+    event->y = y;
+    envelope->processEvent(event, 0);
     postEvent(event);
 }
 

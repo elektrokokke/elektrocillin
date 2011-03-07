@@ -14,24 +14,36 @@ Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     velocity(0)
 {
     // initialize the interpolators to represent a simple ASR envelope:
-    QVector<double> xx, yy;
-    xx.append(0);
-    yy.append(0);
-    xx.append(sustainPosition);
-    yy.append(1);
-    xx.append(log(durationInSeconds + 1));
-    yy.append(0);
-    interpolator = LinearInterpolator(xx, yy);
+    Interpolator::ChangeAllControlPointsEvent initEvent;
+    initEvent.xx.append(0);
+    initEvent.yy.append(0);
+    initEvent.xx.append(sustainPosition);
+    initEvent.yy.append(1);
+    initEvent.xx.append(log(durationInSeconds + 1));
+    initEvent.yy.append(0);
+    interpolator.processEvent(&initEvent);
 }
 
-LinearInterpolator * Envelope::getInterpolator()
+void Envelope::save(QDataStream &stream)
+{
+    interpolator.save(stream);
+    stream << sustainPosition;
+}
+
+void Envelope::load(QDataStream &stream)
+{
+    interpolator.load(stream);
+    stream >> sustainPosition;
+}
+
+Interpolator * Envelope::getInterpolator()
 {
     return &interpolator;
 }
 
-void Envelope::setInterpolator(const LinearInterpolator &interpolator)
+void Envelope::copyInterpolator(const Envelope *envelope)
 {
-    this->interpolator = interpolator;
+    interpolator = envelope->interpolator;
 }
 
 void Envelope::setSustainPosition(double sustainPosition)
@@ -105,6 +117,39 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
     currentTime += getSampleDuration();
     previousLevel = level;
     outputs[0] = level * velocity;
+}
+
+Interpolator::ChangeAllControlPointsEvent * Envelope::createIncreaseControlPointsEvent() const
+{
+    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
+    event->xx = interpolator.getX();
+    event->yy = interpolator.getY();
+    int size = event->xx.size() + 1;
+    double stretchFactor = (double)(event->xx.size() - 1) / (double)(size - 1);
+    event->xx.append(event->xx.back());
+    event->yy.append(event->yy.back());
+    for (int i = size - 1; i >= 0; i--) {
+        if (i < size - 1) {
+            event->xx[i] = event->xx[i] * stretchFactor;
+        }
+    }
+    return event;
+}
+
+Interpolator::ChangeAllControlPointsEvent * Envelope::createDecreaseControlPointsEvent() const
+{
+    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
+    event->xx = interpolator.getX();
+    event->yy = interpolator.getY();
+    int size = event->xx.size() - 1;
+    double stretchFactor = event->xx.back() / event->xx[size - 1];
+    event->xx.resize(size);
+    event->yy.resize(size);
+    for (int i = size - 1; i >= 0; i--) {
+        event->xx[i] = event->xx[i] * stretchFactor;
+    }
+    event->yy.back() = 0;
+    return event;
 }
 
 void Envelope::processEvent(const Interpolator::ChangeControlPointEvent *event, jack_nframes_t)

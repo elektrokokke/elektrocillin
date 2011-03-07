@@ -6,8 +6,8 @@
 class LogarithmicInterpolator : public Interpolator
 {
 public:
-    LogarithmicInterpolator();
-    LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy);
+    LogarithmicInterpolator(double base = 2.0);
+    LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy, double base = 2.0);
 
     void save(QDataStream &stream) const;
     void load(QDataStream &stream);
@@ -23,6 +23,7 @@ public:
     virtual void processEvent(const Interpolator::ChangeAllControlPointsEvent *event);
 private:
     QVector<double> yy;
+    double base;
 };
 
 #endif // LOGARITHMICINTERPOLATOR_H

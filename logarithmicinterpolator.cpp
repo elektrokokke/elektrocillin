@@ -1,14 +1,17 @@
 #include "logarithmicinterpolator.h"
 #include <QDebug>
+#include <cmath>
 
-LogarithmicInterpolator::LogarithmicInterpolator() :
-    Interpolator(QVector<double>(), 2)
+LogarithmicInterpolator::LogarithmicInterpolator(double base_) :
+    Interpolator(QVector<double>(), 2),
+    base(base_)
 {
 }
 
-LogarithmicInterpolator::LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy_) :
+LogarithmicInterpolator::LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy_, double base_) :
     Interpolator(xx, 2),
-    yy(yy_)
+    yy(yy_),
+    base(base_)
 {
 }
 
@@ -58,9 +61,9 @@ double LogarithmicInterpolator::interpolate(int j, double x)
     if (xx[j] == xx[j + 1]) {
         return yy[j];
     } else {
-        double a = (1.0 - exp(1.0)) / (xx[j] - xx[j + 1]);
+        double a = (1.0 - base) / (xx[j] - xx[j + 1]);
         double b = 1.0 - a * xx[j];
-        double weight2 = a * x + b;
+        double weight2 = log(a * x + b) / log(base);
         double weight1 = 1.0 - weight2;
         return yy[j] * weight1 + yy[j + 1] * weight2;
     }
