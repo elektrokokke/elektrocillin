@@ -1,5 +1,5 @@
 #include "envelopeclient.h"
-#include <math.h>
+#include <cmath>
 
 EnvelopeClient::EnvelopeClient(const QString &clientName, size_t ringBufferSize) :
     EventProcessorClient(clientName, new Envelope(), ringBufferSize)
@@ -122,7 +122,16 @@ void EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t t
 }
 
 EnvelopeGraphicsSubItem::EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent_, const QPen &nodePen, const QBrush &nodeBrush) :
-    GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(), rect, QRectF(0, 1, parent_->getClient()->getEnvelope()->getInterpolator()->getX().last(), -2), parent_, 4, 8, true, nodePen, nodeBrush),
+    GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(),
+        rect,
+        QRectF(0, 1, log(21), -2),
+        parent_,
+        4,
+        8,
+        true,
+        nodePen,
+        nodeBrush
+        ),
     parent(parent_)
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);

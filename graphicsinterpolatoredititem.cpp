@@ -202,6 +202,8 @@ void GraphicsInterpolatorEditSubItem::interpolatorChanged()
     for (; nodes.size() > interpolator->getX().size(); ) {
         delete nodes.back();
         nodes.remove(nodes.size() - 1);
+        delete nodesText.back();
+        nodesText.remove(nodesText.size() - 1);
     }
     mapSenderToControlPointIndex.clear();
     for (int i = 0; i < nodes.size(); i++) {
@@ -215,7 +217,7 @@ void GraphicsInterpolatorEditSubItem::interpolatorChanged()
         } else {
             text->setText(QString("%1, %2").arg(x).arg(y));
         }
-        text->setPos(nodes.last()->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
+        text->setPos(nodes[i]->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
         mapSenderToControlPointIndex[nodes[i]] = i;
     }
     for (int i = nodes.size(); i < interpolator->getX().size(); i++) {
@@ -229,7 +231,7 @@ void GraphicsInterpolatorEditSubItem::interpolatorChanged()
             text->setText(QString("%1, %2").arg(exp(x) - 1).arg(y));
         } else {
             text->setText(QString("%1, %2").arg(x).arg(y));
-        }text->setPos(nodes.last()->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
+        }text->setPos(nodes[i]->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
         nodesText.append(text);
         mapSenderToControlPointIndex[nodes[i]] = i;
     }
@@ -270,16 +272,17 @@ void GraphicsInterpolatorEditSubItem::onNodePositionChangedScaled(QPointF positi
 {
     // get the control point index:
     int index = mapSenderToControlPointIndex[sender()];
-    QGraphicsSimpleTextItem *text = nodesText[index];
-    if (logarithmicX) {
-        text->setText(QString("%1, %2").arg(exp(position.x()) - 1).arg(position.y()));
-    } else {
-        text->setText(QString("%1, %2").arg(position.x()).arg(position.y()));
-    }
-    text->setPos(nodes[index]->pos() + QPointF(8, -text->boundingRect().height() * 0.3));
     // signal the control point change event and update our interpolator graphic item:
     parent->changeControlPoint(index, position.x(), position.y());
-    interpolationItem->updatePath();
+//    QGraphicsSimpleTextItem *text = nodesText[index];
+//    if (logarithmicX) {
+//        text->setText(QString("%1, %2").arg(exp(position.x()) - 1).arg(position.y()));
+//    } else {
+//        text->setText(QString("%1, %2").arg(position.x()).arg(position.y()));
+//    }
+//    text->setPos(nodes[index]->pos() + QPointF(8, -text->boundingRect().height() * 0.3));
+//    interpolationItem->updatePath();
+    interpolatorChanged();
 }
 
 GraphicsNodeItem * GraphicsInterpolatorEditSubItem::createNode(qreal x, qreal y, const QRectF &rectScaled)
