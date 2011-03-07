@@ -6,8 +6,8 @@
 class LogarithmicInterpolator : public Interpolator
 {
 public:
-    LogarithmicInterpolator(double base = 2.0);
-    LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy, double base = 2.0);
+    LogarithmicInterpolator(double base);
+    LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy, double base);
 
     void save(QDataStream &stream) const;
     void load(QDataStream &stream);

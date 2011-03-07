@@ -60,10 +60,12 @@ double LogarithmicInterpolator::interpolate(int j, double x)
     }
     if (xx[j] == xx[j + 1]) {
         return yy[j];
+    } else if (x == xx[j]) {
+        return yy[j];
+    } else if (x == xx[j + 1]) {
+        return yy[j + 1];
     } else {
-        double a = (1.0 - base) / (xx[j] - xx[j + 1]);
-        double b = 1.0 - a * xx[j];
-        double weight2 = log(a * x + b) / log(base);
+        double weight2 = (1.0 - pow(base, (x - xx[j]) / (xx[j + 1] - xx[j]))) / (1.0 - base);
         double weight1 = 1.0 - weight2;
         return yy[j] * weight1 + yy[j + 1] * weight2;
     }

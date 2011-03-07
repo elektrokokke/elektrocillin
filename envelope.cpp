@@ -11,7 +11,8 @@ Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     sustainPosition(log(sustainPositionInSeconds + 1)),
     previousLevel(0),
     minimumLevel(0),
-    velocity(0)
+    velocity(0),
+    interpolator(0.01)
 {
     // initialize the interpolators to represent a simple ASR envelope:
     Interpolator::ChangeAllControlPointsEvent initEvent;
