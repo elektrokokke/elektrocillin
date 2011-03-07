@@ -10,6 +10,7 @@
 #include "jackclient.h"
 #include "jackaudiomodel.h"
 #include "graphview.h"
+#include "graphicsnodeitem.h"
 #include <jack/ringbuffer.h>
 
 class Record2MemoryThread;
@@ -82,8 +83,9 @@ public:
 
     GraphView * getGraphView();
 
-public slots:
+private slots:
     void onRecordingFinished();
+    void onZoomNode(qreal x);
 
 private:
     Record2MemoryClient *client;

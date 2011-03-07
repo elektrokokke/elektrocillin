@@ -239,11 +239,18 @@ Record2MemoryGraphicsItem::Record2MemoryGraphicsItem(const QRectF &rect, Record2
     QGraphicsRectItem(rect, parent),
     client(client_)
 {
+    GraphicsNodeItem *node = new GraphicsNodeItem(-5, -5, 10, 10, this);
+    node->setPen(QPen(QBrush(qRgb(114, 159, 207)), 3));
+    node->setBrush(QBrush(qRgb(52, 101, 164)));
+    node->setZValue(1);
+    node->setBounds(QRectF(rect.left(), 0, rect.width(), 0));
+    node->setBoundsScaled(QRectF(1, 0, 10, 0));
+    QObject::connect(node, SIGNAL(xChangedScaled(qreal)), this, SLOT(onZoomNode(qreal)));
     recordClientGraphView = new GraphView(0);
     recordClientGraphView->resize(rect.width(), rect.height());
     QGraphicsProxyWidget *recordClientGraphicsItem = new QGraphicsProxyWidget(this);
     recordClientGraphicsItem->setWidget(recordClientGraphView);
-    recordClientGraphicsItem->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+    /*recordClientGraphicsItem->*/setFlag(QGraphicsItem::ItemIgnoresTransformations);
     QObject::connect(client->getThread(), SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
 }
 
@@ -257,6 +264,12 @@ void Record2MemoryGraphicsItem::onRecordingFinished()
     // get the audio model from the record thread:
     JackAudioModel *model = client->getThread()->popAudioModel();
     recordClientGraphView->setModel(model);
+}
+
+void Record2MemoryGraphicsItem::onZoomNode(qreal x)
+{
+    int zoom = qRound(x);
+    recordClientGraphView->setHorizontalScale(zoom);
 }
 
 class Record2MemoryClientFactory : public JackClientFactory
