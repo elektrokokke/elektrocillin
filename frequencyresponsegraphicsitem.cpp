@@ -88,6 +88,7 @@ void FrequencyResponseGraphicsItem::initialize()
 {
     setPen(QPen(QBrush(Qt::black), 2));
     setBrush(QBrush(Qt::white));
+    font.setPointSize(6);
 
     frequencyResponsePens.append(QPen(QBrush(Qt::black), 2));
     frequencyResponsePens.append(QPen(QBrush(Qt::darkRed), 2));
@@ -104,6 +105,7 @@ void FrequencyResponseGraphicsItem::initialize()
 
     // create the first horizontal textual label:
     QGraphicsSimpleTextItem *horizontalLabel = new QGraphicsSimpleTextItem(QString("%1Hz").arg(lowestHertz, 0, 'g', 5), this);
+    horizontalLabel->setFont(font);
     qreal padding = horizontalLabel->boundingRect().height();
     // compute the inner rectangle's bottom and top:
     qreal innerBottom = rect().bottom() - tickSize - padding * 2;
@@ -117,6 +119,7 @@ void FrequencyResponseGraphicsItem::initialize()
         qreal y = (decibel - lowestDecibel) / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
         // create a vertical label:
         QGraphicsSimpleTextItem *verticalLabel = new QGraphicsSimpleTextItem(QString("%1dB").arg(decibel), this);
+        verticalLabel->setFont(font);
         if (verticalLabel->boundingRect().width() > maxLabelWidth) {
             maxLabelWidth = verticalLabel->boundingRect().width();
         }
@@ -128,6 +131,7 @@ void FrequencyResponseGraphicsItem::initialize()
         qreal y = (decibel - lowestDecibel) / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
         // create a vertical label:
         QGraphicsSimpleTextItem *verticalLabel = new QGraphicsSimpleTextItem(QString("%1dB").arg(decibel), this);
+        verticalLabel->setFont(font);
         if (verticalLabel->boundingRect().width() > maxLabelWidth) {
             maxLabelWidth = verticalLabel->boundingRect().width();
         }
@@ -159,6 +163,7 @@ void FrequencyResponseGraphicsItem::initialize()
         (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(Qt::DotLine));
         // create another horizontal label if it fits:
         QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem(QString("%1Hz").arg(hertz, 0, 'g', 5));
+        label->setFont(font);
         if ((x - label->boundingRect().width() * 0.5 > lastRight) && (x + label->boundingRect().width() * 0.5 < rect().right())) {
             label->setParentItem(this);
             label->setPos(x - label->boundingRect().width() * 0.5, innerBottom + tickSize);

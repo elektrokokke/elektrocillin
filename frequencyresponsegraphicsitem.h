@@ -3,6 +3,7 @@
 
 #include <QGraphicsRectItem>
 #include <QPen>
+#include <QFont>
 
 class QGraphicsPathItem;
 class FrequencyResponse;
@@ -26,6 +27,7 @@ public:
 private:
     double lowestHertz, highestHertz, lowestDecibel, highestDecibel;
     QRectF innerRectangle;
+    QFont font;
     qreal tickSize;
     double frequencyTickFactor;
     double frequencyResponseFactor;

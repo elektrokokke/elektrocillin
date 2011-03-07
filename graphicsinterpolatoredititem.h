@@ -47,7 +47,7 @@ class GraphicsInterpolatorEditSubItem : public QObject, public QGraphicsRectItem
     Q_OBJECT
 public:
 
-    GraphicsInterpolatorEditSubItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, GraphicsInterpolatorEditItem *parent, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    GraphicsInterpolatorEditSubItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, GraphicsInterpolatorEditItem *parent, bool logarithmicX, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 
     void setRect(const QRectF &rect, const QRectF &rectScaled);
     void setVisible(GraphicsInterpolatorEditItem::ControlPoint controlPoint, bool visible);
@@ -75,6 +75,7 @@ private:
     QMenu contextMenu;
     bool visible[2];
     QFont font;
+    bool logarithmicX;
 
     GraphicsNodeItem * createNode(qreal x, qreal y, const QRectF &rectScaled);
 };

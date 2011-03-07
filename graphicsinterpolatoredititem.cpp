@@ -117,7 +117,7 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
     if (child) {
         child->setRect(innerRectangle, rectScaled);
     } else {
-        child = new GraphicsInterpolatorEditSubItem(interpolator, innerRectangle, rectScaled, this, nodePen, nodeBrush);
+        child = new GraphicsInterpolatorEditSubItem(interpolator, innerRectangle, rectScaled, this, logarithmicX, nodePen, nodeBrush);
     }
 }
 
@@ -141,13 +141,14 @@ QRectF GraphicsInterpolatorEditItem::getInnerRectangle() const
     return child->rect();
 }
 
-GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, const QPen &nodePen_, const QBrush &nodeBrush_) :
+GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, bool logarithmicX_, const QPen &nodePen_, const QBrush &nodeBrush_) :
     QGraphicsRectItem(rectangle, parent_),
     rectScaled(rectScaled_),
     parent(parent_),
     nodePen(nodePen_),
     nodeBrush(nodeBrush_),
-    interpolator(interpolator_)
+    interpolator(interpolator_),
+    logarithmicX(logarithmicX_)
 {
     font.setPointSize(8);
     visible[GraphicsInterpolatorEditItem::FIRST] = visible[GraphicsInterpolatorEditItem::LAST] = true;
@@ -209,7 +210,11 @@ void GraphicsInterpolatorEditSubItem::interpolatorChanged()
         nodes[i]->setXScaled(x);
         nodes[i]->setYScaled(y);
         QGraphicsSimpleTextItem *text = nodesText[i];
-        text->setText(QString("%1, %2").arg(x).arg(y));
+        if (logarithmicX) {
+            text->setText(QString("%1, %2").arg(exp(x) - 1).arg(y));
+        } else {
+            text->setText(QString("%1, %2").arg(x).arg(y));
+        }
         text->setPos(nodes.last()->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
         mapSenderToControlPointIndex[nodes[i]] = i;
     }
@@ -220,8 +225,11 @@ void GraphicsInterpolatorEditSubItem::interpolatorChanged()
         nodes.append(createNode(x, y, rectScaled));
         QGraphicsSimpleTextItem *text = new QGraphicsSimpleTextItem(this);
         text->setFont(font);
-        text->setText(QString("%1, %2").arg(x).arg(y));
-        text->setPos(nodes.last()->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
+        if (logarithmicX) {
+            text->setText(QString("%1, %2").arg(exp(x) - 1).arg(y));
+        } else {
+            text->setText(QString("%1, %2").arg(x).arg(y));
+        }text->setPos(nodes.last()->pos() + QPointF(8, -text->boundingRect().height() * 0.5));
         nodesText.append(text);
         mapSenderToControlPointIndex[nodes[i]] = i;
     }
@@ -263,7 +271,11 @@ void GraphicsInterpolatorEditSubItem::onNodePositionChangedScaled(QPointF positi
     // get the control point index:
     int index = mapSenderToControlPointIndex[sender()];
     QGraphicsSimpleTextItem *text = nodesText[index];
-    text->setText(QString("%1, %2").arg(position.x()).arg(position.y()));
+    if (logarithmicX) {
+        text->setText(QString("%1, %2").arg(exp(position.x()) - 1).arg(position.y()));
+    } else {
+        text->setText(QString("%1, %2").arg(position.x()).arg(position.y()));
+    }
     text->setPos(nodes[index]->pos() + QPointF(8, -text->boundingRect().height() * 0.3));
     // signal the control point change event and update our interpolator graphic item:
     parent->changeControlPoint(index, position.x(), position.y());
