@@ -84,7 +84,8 @@ SOURCES += main.cpp\
     metajack/sincfilter.cpp \
     polynomialinterpolator.cpp \
     integraloscillator.cpp \
-    integraloscillatorclient.cpp
+    integraloscillatorclient.cpp \
+    logarithmicinterpolator.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -163,7 +164,8 @@ HEADERS  += mainwindow.h \
     metajack/sincfilter.h \
     polynomialinterpolator.h \
     integraloscillator.h \
-    integraloscillatorclient.h
+    integraloscillatorclient.h \
+    logarithmicinterpolator.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

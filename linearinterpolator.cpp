@@ -54,10 +54,12 @@ double LinearInterpolator::interpolate(int j, double x)
     if (j < 0) {
         j = 0;
     }
-    if (j == xx.size() - 1) {
-        return yy[j];
-    } else if (j > xx.size() - 1) {
-        j = xx.size() - 2;
+    if (j >= xx.size() - 1) {
+        if (xx[xx.size() - 1] == xx[xx.size() - 2]) {
+            return yy.last();
+        } else {
+            j = xx.size() - 2;
+        }
     }
     if (xx[j] == xx[j + 1]) {   // Table is defective, but we can recover.
         return yy[j];
