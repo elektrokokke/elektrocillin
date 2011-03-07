@@ -149,9 +149,9 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
                 jack_default_audio_sample_t *wrapperAudioBuffer = (jack_default_audio_sample_t*)me->wrapperInterface->port_get_buffer(wrapperPort, nframes / oversampling);
                 jack_default_audio_sample_t *audioBuffer = (jack_default_audio_sample_t*)me->context->getPortBuffer(port, nframes);
                 if (port->isInput()) {
-                    // downsampling:
-                    SincFilter &downsampler = me->downsamplers.at(port);
                     if (oversampling > 1) {
+                        // downsampling:
+                        SincFilter &downsampler = me->downsamplers.at(port);
                         for (jack_nframes_t i = 0, wrapperi = 0; i < nframes; i += oversampling, wrapperi++) {
                             // apply a sinc filter for bandlimiting:
                             for (jack_nframes_t j = 0; j < oversampling; j++) {
