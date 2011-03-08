@@ -241,7 +241,7 @@ void MetaJackInterfaceClient::portConnectCallback(jack_port_id_t a, jack_port_id
             me->connectedPorts[freePort] = wrapperPort;
             if (freePort->getType() == JACK_DEFAULT_AUDIO_TYPE) {
                 unsigned int oversampling = me->context->getOversampling();
-                me->downsamplers.insert(std::make_pair(freePort, SincFilter(oversampling * 3, 0.5, oversampling)));
+                me->downsamplers.insert(std::make_pair(freePort, SincFilter(8, 0.5, oversampling)));
             }
             me->freePorts.erase(freePort);
             // create a new free port:
