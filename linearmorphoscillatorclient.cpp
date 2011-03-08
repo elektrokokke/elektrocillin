@@ -191,11 +191,11 @@ LinearMorphOscillatorGraphicsItem::LinearMorphOscillatorGraphicsItem(const QRect
 {
     setPen(QPen(Qt::NoPen));
     LinearMorphOscillatorGraphicsSubItem *state1 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x(), rect.y(), rect.width() * 0.49, rect.height()), client, 0, this);
-    state1->setPen(QPen(QBrush(Qt::red), 3));
-    state1->setBrush(QBrush(Qt::darkRed));
+    state1->getGraphItem()->setNodePen(QPen(QBrush(Qt::red), 3));
+    state1->getGraphItem()->setNodeBrush(QBrush(Qt::darkRed));
     LinearMorphOscillatorGraphicsSubItem *state2 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x() + rect.width() * 0.51, rect.y(), rect.width() * 0.49, rect.height()), client, 1, this);
-    state2->setPen(QPen(QBrush(Qt::green), 3));
-    state2->setBrush(QBrush(Qt::darkGreen));
+    state2->getGraphItem()->setNodePen(QPen(QBrush(Qt::green), 3));
+    state2->getGraphItem()->setNodeBrush(QBrush(Qt::darkGreen));
     state1->setTwin(state2);
     state2->setTwin(state1);
 }
