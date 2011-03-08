@@ -8,10 +8,12 @@ LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double s
     sincWindowSize(sincWindowSize_),
     siInterpolator(QVector<double>(), QVector<double>(), QVector<double>())
 {
-    interpolator.getX().append(0);
-    interpolator.getY().append(-1);
-    interpolator.getX().append(1);
-    interpolator.getY().append(1);
+    Interpolator::ChangeAllControlPointsEvent event;
+    event.xx.append(0);
+    event.yy.append(-1);
+    event.xx.append(1);
+    event.yy.append(1);
+    interpolator.processEvent(&event);
     initializeSiInterpolator();
 }
 

@@ -17,6 +17,11 @@ public:
     class ChangeAllControlPointsEvent : public RingBufferEvent
     {
     public:
+        ChangeAllControlPointsEvent() {}
+        ChangeAllControlPointsEvent(const Interpolator &interpolator) :
+            xx(interpolator.getX()),
+            yy(interpolator.getY())
+        {}
         QVector<double> xx, yy;
     };
 

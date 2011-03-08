@@ -5,16 +5,20 @@
 LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientName, double frequencyModulationIntensity, size_t ringBufferSize) :
     OscillatorClient(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator(), frequencyModulationIntensity), ringBufferSize)
 {
-    state[0].getX().append(0);
-    state[0].getY().append(-1);
-    state[0].getX().append(0.95);
-    state[0].getY().append(1);
-    state[0].getX().append(1);
-    state[0].getY().append(-1);
-    getLinearMorphOscillator()->setState(0, state[0]);
-    state[1] = state[0];
-    state[1].getX()[1] = 0.05;
-    getLinearMorphOscillator()->setState(1, state[1]);
+    LinearMorphOscillator::ChangeAllControlPointsEvent event;
+    event.xx.append(0);
+    event.yy.append(-1);
+    event.xx.append(0.95);
+    event.yy.append(1);
+    event.xx.append(1);
+    event.yy.append(-1);
+    event.state = 0;
+    getLinearMorphOscillator()->processEvent(&event, 0);
+    state[0].processEvent(&event);
+    event.xx[1] = 0.05;
+    event.state = 1;
+    getLinearMorphOscillator()->processEvent(&event, 0);
+    state[1].processEvent(&event);
 }
 
 LinearMorphOscillatorClient::~LinearMorphOscillatorClient()
@@ -54,18 +58,19 @@ void LinearMorphOscillatorClient::postIncreaseControlPoints()
     int size = state[0].getX().size() + 1;
     QVector<RingBufferEvent*> events;
     for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
-        double stretchFactor = (double)(state[stateIndex].getX().size() - 1) / (double)(size - 1);
-        state[stateIndex].getX().append(1);
-        state[stateIndex].getY().append(1);
-        for (int i = size - 1; i >= 0; i--) {
-            if (i < size - 1) {
-                state[stateIndex].getX()[i] = state[stateIndex].getX()[i] * stretchFactor;
-            }
-        }
         LinearMorphOscillator::ChangeAllControlPointsEvent *event = new LinearMorphOscillator::ChangeAllControlPointsEvent();
         event->state = stateIndex;
         event->xx = state[stateIndex].getX();
         event->yy = state[stateIndex].getY();
+        double stretchFactor = (double)(event->xx.size() - 1) / (double)(size - 1);
+        event->xx.append(1);
+        event->yy.append(1);
+        for (int i = size - 1; i >= 0; i--) {
+            if (i < size - 1) {
+                event->xx[i] *= stretchFactor;
+            }
+        }
+        state[stateIndex].processEvent(event);
         events.append(event);
     }
     postEvents(events);
@@ -77,16 +82,17 @@ void LinearMorphOscillatorClient::postDecreaseControlPoints()
         QVector<RingBufferEvent*> events;
         int size = state[0].getX().size() - 1;
         for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
-            state[stateIndex].getX().resize(size);
-            state[stateIndex].getY().resize(size);
-            double stretchFactor = 1.0 / state[stateIndex].getX().back();
-            for (int i = size - 1; i >= 0; i--) {
-                state[stateIndex].getX()[i] = state[stateIndex].getX()[i] * stretchFactor;
-            }
             LinearMorphOscillator::ChangeAllControlPointsEvent *event = new LinearMorphOscillator::ChangeAllControlPointsEvent();
             event->state = stateIndex;
             event->xx = state[stateIndex].getX();
             event->yy = state[stateIndex].getY();
+            event->xx.resize(size);
+            event->yy.resize(size);
+            double stretchFactor = 1.0 / event->xx.back();
+            for (int i = size - 1; i >= 0; i--) {
+                event->xx[i] *= stretchFactor;
+            }
+            state[stateIndex].processEvent(event);
             events.append(event);
         }
         postEvents(events);
@@ -111,8 +117,9 @@ void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int ind
     LinearMorphOscillator::ChangeControlPointEvent *event = new LinearMorphOscillator::ChangeControlPointEvent();
     event->state = stateIndex;
     event->index = index;
-    state[stateIndex].getX()[index] = event->x = x;
-    state[stateIndex].getY()[index] = event->y = y;
+    event->x = x;
+    event->y = y;
+    state[stateIndex].processEvent(event);
     postEvent(event);
 }
 

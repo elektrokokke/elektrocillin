@@ -4,13 +4,16 @@
 #include <QtGlobal>
 
 LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
-    interpolator(QVector<double>(5), QVector<double>(5)),
-    interpolatorProcess(QVector<double>(5), QVector<double>(5))
+    EventProcessorClient(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize)
 {
-    for (int i = 0; i < interpolator.getX().size(); i++) {
-        interpolator.getX()[i] =  interpolator.getY()[i] = interpolatorProcess.getX()[i] = interpolatorProcess.getY()[i] = (double)i / (double)(interpolator.getX().size() - 1) * 2 - 1;
+    Interpolator::ChangeAllControlPointsEvent event;
+    int nrOfControlPoints = 5;
+    for (int i = 0; i < nrOfControlPoints; i++) {
+        double value = (double)i / (double)(nrOfControlPoints - 1) * 2 - 1;
+        event.xx.append(value);
+        event.yy.append(value);
     }
+    interpolator.processEvent(&event);
     activateMidiInput(false);
 }
 
@@ -37,40 +40,38 @@ LinearInterpolator * LinearWaveShapingClient::getLinearInterpolator()
 
 void LinearWaveShapingClient::postIncreaseControlPoints()
 {
-    int size = interpolator.getX().size() + 2;
-    double stretchFactor = (double)(interpolator.getX().size() - 1) / (double)(size - 1);
-    for (int i = 0; i < interpolator.getX().size() ; i++) {
-        interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
-        interpolator.getY()[i] = interpolator.getY()[i] * stretchFactor;
+    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent(interpolator);
+    int size = event->xx.size() + 2;
+    double stretchFactor = (double)(event->xx.size() - 1) / (double)(size - 1);
+    event->xx.insert(0, event->xx.first());
+    event->yy.insert(0, event->yy.first());
+    event->xx.append(event->xx.last());
+    event->yy.append(event->yy.last());
+    for (int i = 1; i < size - 1; i++) {
+        event->xx[i] *= stretchFactor;
+        event->yy[i] *= stretchFactor;
     }
-    interpolator.getX().insert(0, -1);
-    interpolator.getY().insert(0, -1);
-    interpolator.getX().append(1);
-    interpolator.getY().append(1);
-    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-    event->xx = interpolator.getX();
-    event->yy = interpolator.getY();
+    interpolator.processEvent(event);
     postEvent(event);
 }
 
 void LinearWaveShapingClient::postDecreaseControlPoints()
 {
     if (interpolator.getX().size() > 3) {
-        int size = interpolator.getX().size() - 2;
-        interpolator.getX().remove(0);
-        interpolator.getY().remove(0);
-        interpolator.getX().resize(size);
-        interpolator.getY().resize(size);
-        double stretchFactor1 = 1.0 / -interpolator.getX().first();
-        double stretchFactor2 = 1.0 / interpolator.getX().back();
-        for (int i = 0; i < interpolator.getX().size(); i++) {
+        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent(interpolator);
+        int size = event->xx.size() - 2;
+        event->xx.remove(0);
+        event->yy.remove(0);
+        event->xx.resize(size);
+        event->yy.resize(size);
+        double stretchFactor1 = 1.0 / -event->xx.first();
+        double stretchFactor2 = 1.0 / event->xx.back();
+        for (int i = 0; i < size; i++) {
             double stretchFactor = (i < size / 2 ? stretchFactor1 : stretchFactor2);
-            interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
-            interpolator.getY()[i] = qMin(1.0, qMax(-1.0, interpolator.getY()[i] * stretchFactor));
+            event->xx[i] *= stretchFactor;
+            event->yy[i] = qMin(1.0, qMax(-1.0, event->yy[i] * stretchFactor));
         }
-        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-        event->xx = interpolator.getX();
-        event->yy = interpolator.getY();
+        interpolator.processEvent(event);
         postEvent(event);
     }
 }

@@ -14,11 +14,6 @@ public:
     void save(QDataStream &stream) const;
     void load(QDataStream &stream);
 
-    const QVector<double> & getX() const;
-    const QVector<double> & getY() const;
-    QVector<double> & getX();
-    QVector<double> & getY();
-
     double interpolate(int jlo, double x);
 
     virtual void processEvent(const Interpolator::ChangeControlPointEvent *event);

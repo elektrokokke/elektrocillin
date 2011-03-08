@@ -5,14 +5,16 @@ PulseOscillator::PulseOscillator(double frequencyModulationIntensity, double sam
     LinearOscillator(frequencyModulationIntensity, sampleRate)
 {
     // initialize the square wave control points:
-    LinearInterpolator pulse(QVector<double>(4), QVector<double>(4));
-    pulse.getX()[0] = 0;
-    pulse.getY()[0] = -1;
-    pulse.getX()[1] = 0.5;
-    pulse.getY()[1] = -1;
-    pulse.getX()[2] = 0.5;
-    pulse.getY()[2] = 1;
-    pulse.getX()[3] = 1;
-    pulse.getY()[3] = 1;
-    setLinearInterpolator(pulse);
+    Interpolator::ChangeAllControlPointsEvent event;
+    event.xx.resize(4);
+    event.yy.resize(4);
+    event.xx[0] = 0;
+    event.yy[0] = -1;
+    event.xx[1] = 0.5;
+    event.yy[1] = -1;
+    event.xx[2] = 0.5;
+    event.yy[2] = 1;
+    event.xx[3] = 1;
+    event.yy[3] = 1;
+    LinearOscillator::processEvent(&event, 0);
 }

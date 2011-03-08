@@ -21,26 +21,6 @@ void LinearInterpolator::load(QDataStream &stream)
     stream >> xx >> yy;
 }
 
-const QVector<double> & LinearInterpolator::getX() const
-{
-    return Interpolator::getX();
-}
-
-const QVector<double> & LinearInterpolator::getY() const
-{
-    return Interpolator::getY();
-}
-
-QVector<double> & LinearInterpolator::getX()
-{
-    return xx;
-}
-
-QVector<double> & LinearInterpolator::getY()
-{
-    return yy;
-}
-
 /**
   Comments from "Numerical Recipes"
 

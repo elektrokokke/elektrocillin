@@ -37,34 +37,30 @@ LinearInterpolator * LinearOscillatorClient::getLinearInterpolator()
 
 void LinearOscillatorClient::postIncreaseControlPoints()
 {
-    int size = interpolator.getX().size() + 1;
-    double stretchFactor = (double)(interpolator.getX().size() - 1) / (double)(size - 1);
-    interpolator.getX().append(1);
-    interpolator.getY().append(1);
-    for (int i = size - 1; i >= 0; i--) {
-        if (i < size - 1) {
-            interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
-        }
+    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent(interpolator);
+    int size = event->xx.size() + 1;
+    double stretchFactor = (double)(event->xx.size() - 1) / (double)(size - 1);
+    event->xx.append(event->xx.last());
+    event->yy.append(event->yy.last());
+    for (int i = 0; i < size - 1; i++) {
+        event->xx[i] *= stretchFactor;
     }
-    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-    event->xx = interpolator.getX();
-    event->yy = interpolator.getY();
+    interpolator.processEvent(event);
     postEvent(event);
 }
 
 void LinearOscillatorClient::postDecreaseControlPoints()
 {
     if (interpolator.getX().size() > 2) {
-        int size = interpolator.getX().size() - 1;
-        interpolator.getX().resize(size);
-        interpolator.getY().resize(size);
-        double stretchFactor = 1.0 / interpolator.getX().back();
-        for (int i = size - 1; i >= 0; i--) {
-            interpolator.getX()[i] = interpolator.getX()[i] * stretchFactor;
+        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent(interpolator);
+        int size = event->xx.size() - 1;
+        event->xx.resize(size);
+        event->yy.resize(size);
+        double stretchFactor = 1.0 / event->xx.back();
+        for (int i = 0; i < size; i++) {
+            event->xx[i] *= stretchFactor;
         }
-        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-        event->xx = interpolator.getX();
-        event->yy = interpolator.getY();
+        interpolator.processEvent(event);
         postEvent(event);
     }
 }
@@ -85,8 +81,9 @@ void LinearOscillatorClient::postChangeControlPoint(int index, double x, double 
     }
     Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
     event->index = index;
-    interpolator.getX()[index] = event->x = x;
-    interpolator.getY()[index] = event->y = y;
+    event->x = x;
+    event->y = y;
+    interpolator.processEvent(event);
     postEvent(event);
 }
 

@@ -63,8 +63,9 @@ void LinearMorphOscillator::processEvent(const ChangeAllControlPointsEvent *even
 void LinearMorphOscillator::computeMorphedState()
 {
     Q_ASSERT_X(state[0].getX().size() == state[1].getY().size(), "void LinearMorphOscillator::computeMorphedState(double morph)", "Both morph states have to have the same number of control points");
-    morphedState.getX().resize(state[0].getX().size());
-    morphedState.getY().resize(state[0].getX().size());
+    Interpolator::ChangeAllControlPointsEvent event(morphedState);
+    event.xx.resize(state[0].getX().size());
+    event.yy.resize(state[0].getX().size());
     // make sure that morph lies in [-1,1] by reflecting at the top and bottom:
     double morph = morphAudio + morphMidi;
     if (morph < -1.0) {
@@ -76,8 +77,9 @@ void LinearMorphOscillator::computeMorphedState()
     double weight1 = 0.5 - morph * 0.5;
     double weight2 = 0.5 + morph * 0.5;
     for (int i = 0; i < morphedState.getX().size(); i++) {
-        morphedState.getX()[i] = state[0].getX()[i] * weight1 + state[1].getX()[i] * weight2;
-        morphedState.getY()[i] = state[0].getY()[i] * weight1 + state[1].getY()[i] * weight2;
+        event.xx[i] = state[0].getX()[i] * weight1 + state[1].getX()[i] * weight2;
+        event.yy[i] = state[0].getY()[i] * weight1 + state[1].getY()[i] * weight2;
     }
-    setLinearInterpolator(morphedState);
+    morphedState.processEvent(&event);
+    LinearOscillator::processEvent(&event, 0);
 }
