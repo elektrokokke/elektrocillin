@@ -139,16 +139,14 @@ void LinearMorphOscillatorClient::processEvent(const RingBufferEvent *event, jac
     }
 }
 
-LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
+LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent) :
     GraphicsInterpolatorEditItem(client_->getState(state_),
         rect,
         QRectF(client_->getState(state_)->getX().first(), 1, client_->getState(state_)->getX().last() - client_->getState(state_)->getX().first(), -2),
         parent,
         8,
         8,
-        false,
-        nodePen,
-        nodeBrush
+        false
         ),
     client(client_),
     state(state_),
@@ -185,8 +183,12 @@ LinearMorphOscillatorGraphicsItem::LinearMorphOscillatorGraphicsItem(const QRect
     QGraphicsRectItem(rect, parent)
 {
     setPen(QPen(Qt::NoPen));
-    LinearMorphOscillatorGraphicsSubItem *state1 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x(), rect.y(), rect.width() * 0.49, rect.height()), client, 0, this, QPen(QBrush(Qt::red), 3), QBrush(Qt::darkRed));
-    LinearMorphOscillatorGraphicsSubItem *state2 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x() + rect.width() * 0.51, rect.y(), rect.width() * 0.49, rect.height()), client, 1, this, QPen(QBrush(Qt::green), 3), QBrush(Qt::darkGreen));
+    LinearMorphOscillatorGraphicsSubItem *state1 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x(), rect.y(), rect.width() * 0.49, rect.height()), client, 0, this);
+    state1->setPen(QPen(QBrush(Qt::red), 3));
+    state1->setBrush(QBrush(Qt::darkRed));
+    LinearMorphOscillatorGraphicsSubItem *state2 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x() + rect.width() * 0.51, rect.y(), rect.width() * 0.49, rect.height()), client, 1, this);
+    state2->setPen(QPen(QBrush(Qt::green), 3));
+    state2->setBrush(QBrush(Qt::darkGreen));
     state1->setTwin(state2);
     state2->setTwin(state1);
 }

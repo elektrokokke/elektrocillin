@@ -3,15 +3,13 @@
 #include <QtGlobal>
 #include <cmath>
 
-GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalSlices_, int horizontalSlices_, bool logarithmicX_, const QPen &nodePen_, const QBrush &nodeBrush_) :
+GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalSlices_, int horizontalSlices_, bool logarithmicX_) :
     QGraphicsRectItem(parent),
     interpolator(interpolator_),
     child(0),
     verticalSlices(qMax(1, verticalSlices_)),
     horizontalSlices(qMax(1, horizontalSlices_)),
-    logarithmicX(logarithmicX_),
-    nodePen(nodePen_),
-    nodeBrush(nodeBrush_)
+    logarithmicX(logarithmicX_)
 {
     setPen(QPen(QBrush(Qt::black), 2));
     setBrush(QBrush(Qt::white));
@@ -117,7 +115,7 @@ void GraphicsInterpolatorEditItem::setRect(const QRectF &rectangle, const QRectF
     if (child) {
         child->setRect(innerRectangle, rectScaled);
     } else {
-        child = new GraphicsInterpolatorEditSubItem(interpolator, innerRectangle, rectScaled, this, logarithmicX, nodePen, nodeBrush);
+        child = new GraphicsInterpolatorEditSubItem(interpolator, innerRectangle, rectScaled, this, logarithmicX);
     }
 }
 
@@ -141,12 +139,17 @@ QRectF GraphicsInterpolatorEditItem::getInnerRectangle() const
     return child->rect();
 }
 
-GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, bool logarithmicX_, const QPen &nodePen_, const QBrush &nodeBrush_) :
+GraphicsInterpolatorEditSubItem * GraphicsInterpolatorEditItem::getGraphItem()
+{
+    return child;
+}
+
+GraphicsInterpolatorEditSubItem::GraphicsInterpolatorEditSubItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, bool logarithmicX_) :
     QGraphicsRectItem(rectangle, parent_),
     rectScaled(rectScaled_),
     parent(parent_),
-    nodePen(nodePen_),
-    nodeBrush(nodeBrush_),
+    nodePen(QPen(QBrush(qRgb(114, 159, 207)), 3)),
+    nodeBrush(QBrush(qRgb(52, 101, 164))),
     interpolator(interpolator_),
     logarithmicX(logarithmicX_)
 {
@@ -242,6 +245,34 @@ void GraphicsInterpolatorEditSubItem::interpolatorChanged()
 Interpolator * GraphicsInterpolatorEditSubItem::getInterpolator()
 {
     return interpolator;
+}
+
+void GraphicsInterpolatorEditSubItem::setNodePen(const QPen &pen)
+{
+    nodePen = pen;
+    // change existing nodes:
+    for (int i = 0; i < nodes.size(); i++) {
+        nodes[i]->setPen(pen);
+    }
+}
+
+const QPen & GraphicsInterpolatorEditSubItem::getNodePen() const
+{
+    return nodePen;
+}
+
+void GraphicsInterpolatorEditSubItem::setNodeBrush(const QBrush &brush)
+{
+    nodeBrush = brush;
+    // change existing nodes:
+    for (int i = 0; i < nodes.size(); i++) {
+        nodes[i]->setBrush(brush);
+    }
+}
+
+const QBrush & GraphicsInterpolatorEditSubItem::getNodeBrush() const
+{
+    return nodeBrush;
 }
 
 void GraphicsInterpolatorEditSubItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )

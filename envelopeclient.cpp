@@ -95,16 +95,14 @@ void EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t t
     }
 }
 
-EnvelopeGraphicsSubItem::EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent_, const QPen &nodePen, const QBrush &nodeBrush) :
+EnvelopeGraphicsSubItem::EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent_) :
     GraphicsInterpolatorEditItem(parent_->getClient()->getEnvelope()->getInterpolator(),
         rect,
         QRectF(0, 1, log(parent_->getClient()->getEnvelope()->getDurationInSeconds() + 1), -2),
         parent_,
         4,
         8,
-        true,
-        nodePen,
-        nodeBrush
+        true
         ),
     parent(parent_)
 {
@@ -126,7 +124,7 @@ void EnvelopeGraphicsSubItem::changeControlPoint(int index, double x, double y)
     parent->getClient()->postChangeControlPoint(index, x, y);
 }
 
-EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
+EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client_, QGraphicsItem *parent) :
         QGraphicsRectItem(rect, parent),
         client(client_)
 {
@@ -134,7 +132,7 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     setBrush(QBrush(Qt::white));
     font.setPointSize(8);
 
-    interpolatorEditItem = new EnvelopeGraphicsSubItem(QRectF(rect.x(), rect.y(), rect.width(), rect.height() - 16), this, nodePen, nodeBrush);
+    interpolatorEditItem = new EnvelopeGraphicsSubItem(QRectF(rect.x(), rect.y(), rect.width(), rect.height() - 16), this);
     interpolatorEditItem->setBrush(QBrush(Qt::NoBrush));
 
     QRectF innerRect = interpolatorEditItem->getInnerRectangle();
@@ -142,8 +140,8 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     rectSustain->setPen(QPen(QBrush(Qt::black), 2));
 
     nodeItemSustainPosition = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
-    nodeItemSustainPosition->setPen(nodePen);
-    nodeItemSustainPosition->setBrush(nodeBrush);
+    nodeItemSustainPosition->setPen(interpolatorEditItem->getGraphItem()->getNodePen());
+    nodeItemSustainPosition->setBrush(interpolatorEditItem->getGraphItem()->getNodeBrush());
     nodeItemSustainPosition->setZValue(1);
     nodeItemSustainPosition->setBounds(QRectF(rectSustain->rect().x(), rectSustain->rect().center().y(), rectSustain->rect().width(), 0));
     nodeItemSustainPosition->setBoundsScaled(QRectF(0, 0, log(client->getEnvelope()->getDurationInSeconds() + 1), 0));

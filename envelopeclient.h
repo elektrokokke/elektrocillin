@@ -39,7 +39,7 @@ class EnvelopeGraphicsItem;
 class EnvelopeGraphicsSubItem : public GraphicsInterpolatorEditItem
 {
 public:
-    EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent);
 protected:
     virtual void increaseControlPoints();
     virtual void decreaseControlPoints();
@@ -52,7 +52,7 @@ class EnvelopeGraphicsItem : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
-    EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client, QGraphicsItem *parent = 0, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client, QGraphicsItem *parent = 0);
 
     EnvelopeClient * getClient();
 
