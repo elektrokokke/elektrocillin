@@ -6,35 +6,35 @@ Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     MidiProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
     durationInSeconds(durationInSeconds_),
     currentTime(0),
-    // sustain position is at 0.5 seconds:
-    sustainPositionInSeconds(0.5),
-    sustainPosition(log(sustainPositionInSeconds + 1)),
     previousLevel(0),
     minimumLevel(0),
     velocity(0),
+    sustainIndex(1),
     interpolator(0.01)
 {
     // initialize the interpolators to represent a simple ASR envelope:
     Interpolator::ChangeAllControlPointsEvent initEvent;
     initEvent.xx.append(0);
     initEvent.yy.append(0);
-    initEvent.xx.append(sustainPosition);
+    initEvent.xx.append(log(0.5 + 1));
     initEvent.yy.append(1);
     initEvent.xx.append(log(durationInSeconds + 1));
     initEvent.yy.append(0);
     interpolator.processEvent(&initEvent);
+    interpolator.setControlPointName(sustainIndex, "Sustain");
 }
 
 void Envelope::save(QDataStream &stream)
 {
     interpolator.save(stream);
-    stream << sustainPosition;
+    stream << sustainIndex;
 }
 
 void Envelope::load(QDataStream &stream)
 {
     interpolator.load(stream);
-    stream >> sustainPosition;
+    stream >> sustainIndex;
+    interpolator.setControlPointName(sustainIndex, "Sustain");
 }
 
 Interpolator * Envelope::getInterpolator()
@@ -47,20 +47,13 @@ void Envelope::copyInterpolator(const Envelope *envelope)
     interpolator = envelope->interpolator;
 }
 
-void Envelope::setSustainPosition(double sustainPosition)
+void Envelope::setSustainIndex(int sustainIndex)
 {
-    this->sustainPosition = sustainPosition;
-    sustainPositionInSeconds = exp(sustainPosition) - 1;
-}
-
-double Envelope::getSustainPosition() const
-{
-    return sustainPosition;
-}
-
-double Envelope::getSustainPositionInSeconds() const
-{
-    return sustainPositionInSeconds;
+    if ((sustainIndex > 0) & (sustainIndex != this->sustainIndex)) {
+        interpolator.setControlPointName(this->sustainIndex, QString());
+        this->sustainIndex = sustainIndex;
+        interpolator.setControlPointName(this->sustainIndex, "Sustain");
+    }
 }
 
 double Envelope::getDurationInSeconds() const
@@ -88,7 +81,7 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
     double level = 0.0;
     if (currentPhase == ATTACK) {
         double x = log(currentTime + 1);
-        if (x >= qMin(sustainPosition, interpolator.getX().last())) {
+        if (x >= interpolator.getX()[sustainIndex]) {
             currentPhase = SUSTAIN;
         } else {
             level = interpolator.evaluate(x);
@@ -102,9 +95,9 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
     if (currentPhase == SUSTAIN) {
         if (release) {
             currentPhase = RELEASE;
-            currentTime = sustainPositionInSeconds;
+            currentTime = exp(interpolator.getX()[sustainIndex]) - 1;
         } else {
-            level = interpolator.evaluate(qMin(sustainPosition, interpolator.getX().last()));
+            level = interpolator.getY()[sustainIndex];
         }
     }
     if (currentPhase == RELEASE) {
@@ -165,5 +158,6 @@ void Envelope::processEvent(const Interpolator::ChangeAllControlPointsEvent *eve
 
 void Envelope::processEvent(const ChangeSustainPositionEvent *event, jack_nframes_t)
 {
-    setSustainPosition(event->sustainPosition);
+    Q_ASSERT(event->sustainIndex < interpolator.getX().size());
+    setSustainIndex(event->sustainIndex);
 }

@@ -17,7 +17,7 @@ public:
     class ChangeSustainPositionEvent : public RingBufferEvent
     {
     public:
-        double sustainPosition;
+        int sustainIndex;
     };
 
     Envelope(double durationInSeconds = 20, double sampleRate = 44100);
@@ -28,9 +28,7 @@ public:
     Interpolator * getInterpolator();
     void copyInterpolator(const Envelope *envelope);
 
-    void setSustainPosition(double sustainPosition);
-    double getSustainPosition() const;
-    double getSustainPositionInSeconds() const;
+    void setSustainIndex(int sustainIndex);
 
     double getDurationInSeconds() const;
 
@@ -46,7 +44,8 @@ public:
     virtual void processEvent(const ChangeSustainPositionEvent *event, jack_nframes_t time);
 private:
     double durationInSeconds;
-    double currentTime, sustainPositionInSeconds, sustainPosition, previousLevel, minimumLevel, velocity;
+    double currentTime, previousLevel, minimumLevel, velocity;
+    int sustainIndex;
     Phase currentPhase;
     bool release;
     //LinearInterpolator interpolator;

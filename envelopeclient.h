@@ -24,7 +24,7 @@ public:
     void postIncreaseControlPoints();
     void postDecreaseControlPoints();
     void postChangeControlPoint(int index, double x, double y);
-    void postChangeSustainPosition(double sustainPosition);
+    void postChangeSustainIndex(int sustainIndex);
 
     QGraphicsItem * createGraphicsItem();
 
@@ -34,38 +34,18 @@ private:
     Envelope *envelope, *envelopeProcess;
 };
 
-class EnvelopeGraphicsItem;
-
-class EnvelopeGraphicsSubItem : public GraphicsInterpolatorEditItem
+class EnvelopeGraphicsItem : public QObject, public GraphicsInterpolatorEditItem
 {
+    Q_OBJECT
 public:
-    EnvelopeGraphicsSubItem(const QRectF &rect, EnvelopeGraphicsItem *parent);
+    EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client, QGraphicsItem *parent = 0);
+    EnvelopeClient * getClient();
 protected:
     virtual void increaseControlPoints();
     virtual void decreaseControlPoints();
     virtual void changeControlPoint(int index, double x, double y);
 private:
-    EnvelopeGraphicsItem *parent;
-};
-
-class EnvelopeGraphicsItem : public QObject, public QGraphicsRectItem
-{
-    Q_OBJECT
-public:
-    EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client, QGraphicsItem *parent = 0);
-
-    EnvelopeClient * getClient();
-
-    void changeSustainLevel(double sustainLevel);
-private slots:
-    void onSustainNodePositionChanged(qreal x);
-private:
     EnvelopeClient *client;
-    QFont font;
-    EnvelopeGraphicsSubItem *interpolatorEditItem;
-    GraphicsNodeItem *nodeItemSustainPosition;
-    QGraphicsLineItem *sustainPositionLine;
-    QGraphicsSimpleTextItem *sustainPositionText, *durationText;
 };
 
 #endif // ENVELOPECLIENT_H

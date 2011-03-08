@@ -5,6 +5,17 @@ Interpolator::~Interpolator()
 {
 }
 
+void Interpolator::setControlPointName(int controlPointIndex, const QString &name)
+{
+    Q_ASSERT((controlPointIndex >= 0) && (controlPointIndex < xx.size()));
+    names[controlPointIndex] = name;
+}
+
+QString Interpolator::getControlPointName(int controlPointIndex) const
+{
+    return names.value(controlPointIndex);
+}
+
 double Interpolator::evaluate(double x, int *index)
 {
     int jlo = cor ? hunt(x) : locate(x);

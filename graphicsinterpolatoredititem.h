@@ -4,14 +4,16 @@
 #include "interpolator.h"
 #include "graphicsinterpolationitem.h"
 #include "graphicsnodeitem.h"
+#include "graphicslabelitem.h"
 #include <QObject>
 #include <QGraphicsRectItem>
 #include <QMenu>
 #include <QPen>
 #include <QFont>
+#include <QMap>
 #include <QGraphicsSimpleTextItem>
 
-class GraphicsInterpolatorEditSubItem;
+class GraphicsInterpolatorGraphItem;
 
 class GraphicsInterpolatorEditItem : public QGraphicsRectItem
 {
@@ -27,26 +29,26 @@ public:
     void interpolatorChanged();
     Interpolator * getInterpolator();
     QRectF getInnerRectangle() const;
-    GraphicsInterpolatorEditSubItem * getGraphItem();
+    GraphicsInterpolatorGraphItem * getGraphItem();
 protected:
     virtual void increaseControlPoints() = 0;
     virtual void decreaseControlPoints() = 0;
     virtual void changeControlPoint(int index, double x, double y) = 0;
-    friend class GraphicsInterpolatorEditSubItem;
+    friend class GraphicsInterpolatorGraphItem;
 private:
     Interpolator *interpolator;
-    GraphicsInterpolatorEditSubItem *child;
+    GraphicsInterpolatorGraphItem *child;
     int verticalSlices, horizontalSlices;
     bool logarithmicX;
     QFont font;
 };
 
-class GraphicsInterpolatorEditSubItem : public QObject, public QGraphicsRectItem
+class GraphicsInterpolatorGraphItem : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
 
-    GraphicsInterpolatorEditSubItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, GraphicsInterpolatorEditItem *parent, bool logarithmicX);
+    GraphicsInterpolatorGraphItem(Interpolator *interpolator, const QRectF &rect, const QRectF &rectScaled, GraphicsInterpolatorEditItem *parent, bool logarithmicX);
 
     void setRect(const QRectF &rect, const QRectF &rectScaled);
     void setVisible(GraphicsInterpolatorEditItem::ControlPoint controlPoint, bool visible);
@@ -69,11 +71,11 @@ private slots:
 private:
     QRectF rectScaled;
     GraphicsInterpolatorEditItem *parent;
-    QPen nodePen;
-    QBrush nodeBrush;
+    QPen nodePen, nodePenNamed;
+    QBrush nodeBrush, nodeBrushNamed;
     QMap<QObject*, int> mapSenderToControlPointIndex;
     QVector<GraphicsNodeItem*> nodes;
-    QVector<QGraphicsSimpleTextItem*> nodesText;
+    QVector<GraphicsLabelItem*> nodeLabels;
     Interpolator *interpolator;
     GraphicsInterpolationItem *interpolationItem;
     QMenu contextMenu;

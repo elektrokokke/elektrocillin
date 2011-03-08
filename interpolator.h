@@ -3,6 +3,7 @@
 
 #include "jackringbuffer.h"
 #include <QVector>
+#include <QMap>
 
 class Interpolator
 {
@@ -20,6 +21,9 @@ public:
     };
 
     virtual ~Interpolator();
+
+    void setControlPointName(int controlPointIndex, const QString &name);
+    QString getControlPointName(int controlPointIndex) const;
 
     /**
       @param index pointer to a variable where the current
@@ -49,6 +53,7 @@ protected:
     QVector<double> xx;
 private:
     int mm, jsav, cor, dj, previousN;
+    QMap<int, QString> names;
 };
 
 #endif // INTERPOLATOR_H
