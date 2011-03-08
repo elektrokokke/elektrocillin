@@ -30,7 +30,7 @@ public:
     virtual void processEvent(const ChangeControlPointEvent *event);
     virtual void processEvent(const ChangeAllControlPointsEvent *event);
 private:
-    QVector<double> yy, y2;
+    QVector<double> y2;
 
     void sety2(const QVector<double> &xx, const QVector<double> &yy, double yp1, double ypn);
     void sety2NaturalSpline(const QVector<double> &xx, const QVector<double> &yy);

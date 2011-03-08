@@ -38,6 +38,7 @@ public:
     void reset();
 
     const QVector<double> & getX() const;
+    const QVector<double> & getY() const;
     int getM() const;
 
     virtual double interpolate(int jlo, double x) = 0;
@@ -45,12 +46,12 @@ public:
     virtual void processEvent(const ChangeControlPointEvent *event) = 0;
     virtual void processEvent(const ChangeAllControlPointsEvent *event) = 0;
 protected:
-    Interpolator(const QVector<double> &xx, int m);
+    Interpolator(const QVector<double> &xx, const QVector<double> &yy, int m);
 
     int locate(double x);
     int hunt(double x);
 
-    QVector<double> xx;
+    QVector<double> xx, yy;
 private:
     int mm, jsav, cor, dj, previousN;
     QMap<int, QString> names;

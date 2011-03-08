@@ -22,7 +22,6 @@ public:
     virtual void processEvent(const Interpolator::ChangeControlPointEvent *event);
     virtual void processEvent(const Interpolator::ChangeAllControlPointsEvent *event);
 private:
-    QVector<double> yy;
     double base;
 };
 

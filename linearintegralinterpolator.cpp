@@ -1,7 +1,7 @@
 #include "linearintegralinterpolator.h"
 
 LinearIntegralInterpolator::LinearIntegralInterpolator(const LinearInterpolator &linear) :
-    Interpolator(linear.getX(), linear.getM()),
+    Interpolator(linear.getX(), linear.getY(), linear.getM()),
     a(linear.getX().size() - 1),
     b(linear.getX().size() - 1),
     c(linear.getX().size() - 1)

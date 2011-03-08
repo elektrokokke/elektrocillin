@@ -149,8 +149,8 @@ GraphicsInterpolatorGraphItem::GraphicsInterpolatorGraphItem(Interpolator *inter
     rectScaled(rectScaled_),
     parent(parent_),
     nodePen(QPen(QBrush(qRgb(114, 159, 207)), 3)),
-    nodeBrush(QBrush(qRgb(52, 101, 164))),
     nodePenNamed(QPen(QBrush(Qt::red), 3)),
+    nodeBrush(QBrush(qRgb(52, 101, 164))),
     nodeBrushNamed(QBrush(Qt::darkRed)),
     interpolator(interpolator_),
     logarithmicX(logarithmicX_)

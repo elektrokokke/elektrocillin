@@ -1,12 +1,12 @@
 #include "polynomialinterpolator.h"
 
 PolynomialInterpolator::PolynomialInterpolator() :
-    Interpolator(QVector<double>(), 2)
+    Interpolator(QVector<double>(), QVector<double>(), 2)
 {
 }
 
 PolynomialInterpolator::PolynomialInterpolator(const QVector<double> &xx, const QVector<double> &yy) :
-    Interpolator(xx, 2)
+    Interpolator(xx, yy, 2)
 {
     initialize(xx, yy);
 }

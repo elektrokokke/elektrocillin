@@ -1,24 +1,21 @@
 #include "cubicsplineinterpolator.h"
 
-CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy_, double yp1, double ypn) :
-    Interpolator(xx, 2),
-    yy(yy_),
+CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy, double yp1, double ypn) :
+    Interpolator(xx, yy, 2),
     y2(xx.size())
 {
     sety2(xx, yy, yp1, ypn);
 }
 
-CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy_) :
-    Interpolator(xx, 2),
-    yy(yy_),
+CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy) :
+    Interpolator(xx, yy, 2),
     y2(xx.size())
 {
     sety2NaturalSpline(xx, yy);
 }
 
-CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy_, const QVector<double> &y2_) :
-    Interpolator(xx, 2),
-    yy(yy_),
+CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, const QVector<double> &yy, const QVector<double> &y2_) :
+    Interpolator(xx, yy, 2),
     y2(y2_)
 {
 }

@@ -3,14 +3,13 @@
 #include <cmath>
 
 LogarithmicInterpolator::LogarithmicInterpolator(double base_) :
-    Interpolator(QVector<double>(), 2),
+    Interpolator(QVector<double>(), QVector<double>(), 2),
     base(base_)
 {
 }
 
-LogarithmicInterpolator::LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy_, double base_) :
-    Interpolator(xx, 2),
-    yy(yy_),
+LogarithmicInterpolator::LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy, double base_) :
+    Interpolator(xx, yy, 2),
     base(base_)
 {
 }
