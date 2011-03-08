@@ -13,15 +13,16 @@ Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     interpolator(0.01)
 {
     // initialize the interpolators to represent a simple ASR envelope:
-    Interpolator::ChangeAllControlPointsEvent initEvent;
-    initEvent.xx.append(0);
-    initEvent.yy.append(0);
-    initEvent.xx.append(log(0.5 + 1));
-    initEvent.yy.append(1);
-    initEvent.xx.append(log(durationInSeconds + 1));
-    initEvent.yy.append(0);
-    interpolator.processEvent(&initEvent);
+    QVector<double> xx, yy;
+    xx.append(0);
+    yy.append(0);
+    xx.append(log(0.5 + 1));
+    yy.append(1);
+    xx.append(log(durationInSeconds + 1));
+    yy.append(0);
+    interpolator.changeControlPoints(xx, yy);
     interpolator.setControlPointName(sustainIndex, "Sustain");
+    interpolator.setEndPointConstraints(false, true);
 }
 
 void Envelope::save(QDataStream &stream)
@@ -49,7 +50,7 @@ void Envelope::copyInterpolator(const Envelope *envelope)
 
 void Envelope::setSustainIndex(int sustainIndex)
 {
-    if ((sustainIndex > 0) & (sustainIndex != this->sustainIndex)) {
+    if ((sustainIndex > 0) && (sustainIndex < interpolator.getX().size()) && (sustainIndex != this->sustainIndex)) {
         interpolator.setControlPointName(this->sustainIndex, QString());
         this->sustainIndex = sustainIndex;
         interpolator.setControlPointName(this->sustainIndex, "Sustain");
@@ -113,51 +114,20 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
     outputs[0] = level * velocity;
 }
 
-Interpolator::ChangeAllControlPointsEvent * Envelope::createIncreaseControlPointsEvent() const
+bool Envelope::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-    event->xx = interpolator.getX();
-    event->yy = interpolator.getY();
-    int size = event->xx.size() + 1;
-    double stretchFactor = (double)(event->xx.size() - 1) / (double)(size - 1);
-    event->xx.append(event->xx.back());
-    event->yy.append(event->yy.back());
-    for (int i = size - 1; i >= 0; i--) {
-        if (i < size - 1) {
-            event->xx[i] = event->xx[i] * stretchFactor;
-        }
+    if (const Interpolator::ChangeControlPointEvent *event_ = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
+        interpolator.changeControlPoint(event_);
+        return true;
+    } else if (const Interpolator::AddControlPointsEvent *event_ = dynamic_cast<const Interpolator::AddControlPointsEvent*>(event)) {
+        interpolator.addControlPoints(event_);
+        return true;
+    } else if (const Interpolator::DeleteControlPointsEvent *event_ = dynamic_cast<const Interpolator::DeleteControlPointsEvent*>(event)) {
+        interpolator.deleteControlPoints(event_);
+        return true;
+    } else if (const ChangeSustainPositionEvent *event_ = dynamic_cast<const ChangeSustainPositionEvent*>(event)) {
+        setSustainIndex(event_->sustainIndex);
+        return true;
     }
-    return event;
-}
-
-Interpolator::ChangeAllControlPointsEvent * Envelope::createDecreaseControlPointsEvent() const
-{
-    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-    event->xx = interpolator.getX();
-    event->yy = interpolator.getY();
-    int size = event->xx.size() - 1;
-    double stretchFactor = event->xx.back() / event->xx[size - 1];
-    event->xx.resize(size);
-    event->yy.resize(size);
-    for (int i = size - 1; i >= 0; i--) {
-        event->xx[i] = event->xx[i] * stretchFactor;
-    }
-    event->yy.back() = 0;
-    return event;
-}
-
-void Envelope::processEvent(const Interpolator::ChangeControlPointEvent *event, jack_nframes_t)
-{
-    interpolator.processEvent(event);
-}
-
-void Envelope::processEvent(const Interpolator::ChangeAllControlPointsEvent *event, jack_nframes_t)
-{
-    interpolator.processEvent(event);
-}
-
-void Envelope::processEvent(const ChangeSustainPositionEvent *event, jack_nframes_t)
-{
-    Q_ASSERT(event->sustainIndex < interpolator.getX().size());
-    setSustainIndex(event->sustainIndex);
+    return false;
 }

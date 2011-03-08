@@ -26,7 +26,7 @@ public:
     QGraphicsItem * createGraphicsItem();
 
 protected:
-    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:
     LinearInterpolator interpolator;

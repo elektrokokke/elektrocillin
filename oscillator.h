@@ -2,10 +2,17 @@
 #define OSCILLATOR_H
 
 #include "midiprocessor.h"
+#include "eventprocessorclient.h"
 
 class Oscillator : public MidiProcessor
 {
 public:
+    class ChangeGainEvent : public RingBufferEvent
+    {
+    public:
+        double gain;
+    };
+
     Oscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
 
     void setDetuneController(unsigned char controller);
@@ -16,6 +23,7 @@ public:
     virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
     void setGain(double gain);
     double getGain() const;

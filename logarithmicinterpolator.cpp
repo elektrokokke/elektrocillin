@@ -64,21 +64,11 @@ double LogarithmicInterpolator::interpolate(int j, double x)
     } else if (x == xx[j + 1]) {
         return yy[j + 1];
     } else {
-        double weight2 = (1.0 - pow(base, (x - xx[j]) / (xx[j + 1] - xx[j]))) / (1.0 - base);
+        double weight2 = (x - xx[j]) / (xx[j + 1] - xx[j]);
+        if (base != 1) {
+            weight2 = (1.0 - pow(base, weight2)) / (1.0 - base);
+        }
         double weight1 = 1.0 - weight2;
         return yy[j] * weight1 + yy[j + 1] * weight2;
     }
-}
-
-void LogarithmicInterpolator::processEvent(const Interpolator::ChangeControlPointEvent *event)
-{
-    Q_ASSERT((event->index >= 0) && (event->index < xx.size()));
-    xx[event->index] = event->x;
-    yy[event->index] = event->y;
-}
-
-void LogarithmicInterpolator::processEvent(const Interpolator::ChangeAllControlPointsEvent *event)
-{
-    xx = event->xx;
-    yy = event->yy;
 }

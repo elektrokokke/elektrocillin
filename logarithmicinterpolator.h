@@ -18,9 +18,6 @@ public:
     QVector<double> & getY();
 
     double interpolate(int jlo, double x);
-
-    virtual void processEvent(const Interpolator::ChangeControlPointEvent *event);
-    virtual void processEvent(const Interpolator::ChangeAllControlPointsEvent *event);
 private:
     double base;
 };

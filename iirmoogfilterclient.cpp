@@ -72,11 +72,13 @@ QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
     return new IirMoogFilterGraphicsItem(this, QRectF(0, 0, 600, 420));
 }
 
-void IirMoogFilterClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
+bool IirMoogFilterClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
     if (const IirMoogFilter::Parameters *parameters = dynamic_cast<const IirMoogFilter::Parameters*>(event)) {
         getMoogFilter()->processEvent(parameters);
+        return true;
     }
+    return false;
 }
 
 void IirMoogFilterClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)

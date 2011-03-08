@@ -35,7 +35,7 @@ protected:
     EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16));
 
     virtual bool process(jack_nframes_t nframes);
-    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time) = 0;
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time) = 0;
 
 private:
     RingBuffer ringBuffer;

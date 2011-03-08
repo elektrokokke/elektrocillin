@@ -34,7 +34,7 @@ Envelope * EnvelopeClient::getEnvelope()
 
 void EnvelopeClient::postIncreaseControlPoints()
 {
-    Interpolator::ChangeAllControlPointsEvent *event = envelope->createIncreaseControlPointsEvent();
+    Interpolator::AddControlPointsEvent *event = new Interpolator::AddControlPointsEvent(true, false, false, true);
     envelope->processEvent(event, 0);
     postEvent(event);
 }
@@ -42,7 +42,7 @@ void EnvelopeClient::postIncreaseControlPoints()
 void EnvelopeClient::postDecreaseControlPoints()
 {
     if (envelope->getInterpolator()->getX().size() > 2) {
-        Interpolator::ChangeAllControlPointsEvent *event = envelope->createDecreaseControlPointsEvent();
+        Interpolator::DeleteControlPointsEvent *event = new Interpolator::DeleteControlPointsEvent(true, false, false, true);
         envelope->processEvent(event, 0);
         postEvent(event);
     }
@@ -50,23 +50,7 @@ void EnvelopeClient::postDecreaseControlPoints()
 
 void EnvelopeClient::postChangeControlPoint(int index, double x, double y)
 {
-    Interpolator *interpolator = envelope->getInterpolator();
-    if (index == 0) {
-       x = interpolator->getX()[0];
-    }
-    if (index == interpolator->getX().size() - 1) {
-        y = 0;
-    }
-    if ((index > 0) && (x <= interpolator->getX()[index - 1])) {
-        x = interpolator->getX()[index - 1];
-    }
-    if ((index < interpolator->getX().size() - 1) && (x >= interpolator->getX()[index + 1])) {
-        x = interpolator->getX()[index + 1];
-    }
-    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
-    event->index = index;
-    event->x = x;
-    event->y = y;
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
     envelope->processEvent(event, 0);
     postEvent(event);
 }
@@ -84,15 +68,9 @@ QGraphicsItem * EnvelopeClient::createGraphicsItem()
     return new EnvelopeGraphicsItem(QRectF(0, 0, 1200, 420), this);
 }
 
-void EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+bool EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const Interpolator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
-        envelopeProcess->processEvent(changeControlPointEvent, time);
-    } else if (const Interpolator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const Interpolator::ChangeAllControlPointsEvent*>(event)) {
-        envelopeProcess->processEvent(changeAllControlPointsEvent, time);
-    } else if (const Envelope::ChangeSustainPositionEvent *changeSustainPositionEvent = dynamic_cast<const Envelope::ChangeSustainPositionEvent*>(event)) {
-        envelopeProcess->processEvent(changeSustainPositionEvent, time);
-    }
+    return envelopeProcess->processEvent(event, time);
 }
 
 EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client_, QGraphicsItem *parent_) :

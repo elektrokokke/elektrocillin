@@ -21,14 +21,20 @@ void IntegralOscillator::setPolynomialInterpolator(const PolynomialInterpolator 
     integrals[0] = interpolator;
 }
 
-void IntegralOscillator::processEvent(const Interpolator::ChangeControlPointEvent *event, jack_nframes_t)
+bool IntegralOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    integrals.first().processEvent(event);
-}
-
-void IntegralOscillator::processEvent(const Interpolator::ChangeAllControlPointsEvent *event, jack_nframes_t)
-{
-    integrals.first().processEvent(event);
+    if (const Interpolator::ChangeControlPointEvent *event_ = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
+        integrals.first().changeControlPoint(event_);
+        return true;
+    } else if (const Interpolator::AddControlPointsEvent *event_ = dynamic_cast<const Interpolator::AddControlPointsEvent*>(event)) {
+        integrals.first().addControlPoints(event_);
+        return true;
+    } else if (const Interpolator::DeleteControlPointsEvent *event_ = dynamic_cast<const Interpolator::DeleteControlPointsEvent*>(event)) {
+        integrals.first().deleteControlPoints(event_);
+        return true;
+    } else {
+        return Oscillator::processEvent(event, time);
+    }
 }
 
 double IntegralOscillator::valueAtPhase(double phase)

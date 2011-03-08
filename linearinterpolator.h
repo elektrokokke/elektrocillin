@@ -15,9 +15,6 @@ public:
     void load(QDataStream &stream);
 
     double interpolate(int jlo, double x);
-
-    virtual void processEvent(const Interpolator::ChangeControlPointEvent *event);
-    virtual void processEvent(const Interpolator::ChangeAllControlPointsEvent *event);
 };
 
 #endif // LINEARINTERPOLATOR_H

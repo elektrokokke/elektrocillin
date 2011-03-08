@@ -37,53 +37,24 @@ LinearInterpolator * LinearOscillatorClient::getLinearInterpolator()
 
 void LinearOscillatorClient::postIncreaseControlPoints()
 {
-    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent(interpolator);
-    int size = event->xx.size() + 1;
-    double stretchFactor = (double)(event->xx.size() - 1) / (double)(size - 1);
-    event->xx.append(event->xx.last());
-    event->yy.append(event->yy.last());
-    for (int i = 0; i < size - 1; i++) {
-        event->xx[i] *= stretchFactor;
-    }
-    interpolator.processEvent(event);
+    Interpolator::AddControlPointsEvent *event = new Interpolator::AddControlPointsEvent(true, false, false, true);
+    interpolator.addControlPoints(event);
     postEvent(event);
 }
 
 void LinearOscillatorClient::postDecreaseControlPoints()
 {
     if (interpolator.getX().size() > 2) {
-        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent(interpolator);
-        int size = event->xx.size() - 1;
-        event->xx.resize(size);
-        event->yy.resize(size);
-        double stretchFactor = 1.0 / event->xx.back();
-        for (int i = 0; i < size; i++) {
-            event->xx[i] *= stretchFactor;
-        }
-        interpolator.processEvent(event);
+        Interpolator::DeleteControlPointsEvent *event = new Interpolator::DeleteControlPointsEvent(true, false, false, true);
+        interpolator.deleteControlPoints(event);
         postEvent(event);
     }
 }
 
 void LinearOscillatorClient::postChangeControlPoint(int index, double x, double y)
 {
-    if (index == 0) {
-       x = interpolator.getX()[0];
-    }
-    if (index == interpolator.getX().size() - 1) {
-        x = interpolator.getX().back();
-    }
-    if ((index > 0) && (x <= interpolator.getX()[index - 1])) {
-        x = interpolator.getX()[index - 1];
-    }
-    if ((index < interpolator.getX().size() - 1) && (x >= interpolator.getX()[index + 1])) {
-        x = interpolator.getX()[index + 1];
-    }
-    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
-    event->index = index;
-    event->x = x;
-    event->y = y;
-    interpolator.processEvent(event);
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
+    interpolator.changeControlPoint(event);
     postEvent(event);
 }
 
@@ -99,14 +70,12 @@ QGraphicsItem * LinearOscillatorClient::createGraphicsItem()
     return rectItem;
 }
 
-void LinearOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+bool LinearOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const Interpolator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
-        getLinearOscillator()->processEvent(changeControlPointEvent, time);
-    } else if (const Interpolator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const Interpolator::ChangeAllControlPointsEvent*>(event)) {
-        getLinearOscillator()->processEvent(changeAllControlPointsEvent, time);
+    if (getLinearOscillator()->processEvent(event, time)) {
+        return true;
     } else {
-        OscillatorClient::processEvent(event, time);
+        return OscillatorClient::processEvent(event, time);
     }
 }
 

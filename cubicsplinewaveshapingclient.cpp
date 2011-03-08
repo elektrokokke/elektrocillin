@@ -48,69 +48,24 @@ CubicSplineInterpolator * CubicSplineWaveShapingClient::getInterpolator()
 
 void CubicSplineWaveShapingClient::postIncreaseControlPoints()
 {
-    QVector<double> xx = interpolator.getX();
-    QVector<double> yy = interpolator.getY();
-    int size = xx.size() + 2;
-    double stretchFactor = (double)(xx.size() - 1) / (double)(size - 1);
-    for (int i = 0; i < xx.size() ; i++) {
-        xx[i] = xx[i] * stretchFactor;
-        yy[i] = yy[i] * stretchFactor;
-    }
-    xx.insert(0, -1);
-    yy.insert(0, -1);
-    xx.append(1);
-    yy.append(1);
-    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-    event->xx = xx;
-    event->yy = yy;
-    interpolator.processEvent(event);
+    Interpolator::AddControlPointsEvent *event = new Interpolator::AddControlPointsEvent(true, true, true, true);
+    interpolator.addControlPoints(event);
     postEvent(event);
 }
 
 void CubicSplineWaveShapingClient::postDecreaseControlPoints()
 {
     if (interpolator.getX().size() > 3) {
-        QVector<double> xx = interpolator.getX();
-        QVector<double> yy = interpolator.getY();
-        int size = xx.size() - 2;
-        xx.remove(0);
-        yy.remove(0);
-        xx.resize(size);
-        yy.resize(size);
-        double stretchFactor1 = 1.0 / -xx.first();
-        double stretchFactor2 = 1.0 / xx.back();
-        for (int i = 0; i < xx.size(); i++) {
-            double stretchFactor = (i < size / 2 ? stretchFactor1 : stretchFactor2);
-            xx[i] = xx[i] * stretchFactor;
-            yy[i] = qMin(1.0, qMax(-1.0, yy[i] * stretchFactor));
-        }
-        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-        event->xx = xx;
-        event->yy = yy;
-        interpolator.processEvent(event);
+        Interpolator::DeleteControlPointsEvent *event = new Interpolator::DeleteControlPointsEvent(true, true, true, true);
+        interpolator.deleteControlPoints(event);
         postEvent(event);
     }
 }
 
 void CubicSplineWaveShapingClient::postChangeControlPoint(int index, double x, double y)
 {
-    if (index == 0) {
-       x = interpolator.getX()[0];
-    }
-    if (index == interpolator.getX().size() - 1) {
-        x = interpolator.getX().back();
-    }
-    if ((index > 0) && (x <= interpolator.getX()[index - 1])) {
-        return;
-    }
-    if ((index < interpolator.getX().size() - 1) && (x >= interpolator.getX()[index + 1])) {
-        return;
-    }
-    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
-    event->index = index;
-    event->x = x;
-    event->y = y;
-    interpolator.processEvent(event);
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
+    interpolator.changeControlPoint(event);
     postEvent(event);
 }
 
@@ -124,13 +79,19 @@ void CubicSplineWaveShapingClient::processAudio(const double *inputs, double *ou
     outputs[0] = std::max(std::min(interpolatorProcess.evaluate(inputs[0]), 1.0), -1.0);
 }
 
-void CubicSplineWaveShapingClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
+bool CubicSplineWaveShapingClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
-    if (const Interpolator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
-        interpolatorProcess.processEvent(changeControlPointEvent);
-    } else if (const Interpolator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const Interpolator::ChangeAllControlPointsEvent*>(event)) {
-        interpolatorProcess.processEvent(changeAllControlPointsEvent);
+    if (const Interpolator::ChangeControlPointEvent *event_ = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
+        interpolatorProcess.changeControlPoint(event_);
+        return true;
+    } else if (const Interpolator::AddControlPointsEvent *event_ = dynamic_cast<const Interpolator::AddControlPointsEvent*>(event)) {
+        interpolatorProcess.addControlPoints(event_);
+        return true;
+    } else if (const Interpolator::DeleteControlPointsEvent *event_ = dynamic_cast<const Interpolator::DeleteControlPointsEvent*>(event)) {
+        interpolatorProcess.deleteControlPoints(event_);
+        return true;
     }
+    return false;
 }
 
 CubicSplineWaveShapingGraphicsItem::CubicSplineWaveShapingGraphicsItem(CubicSplineWaveShapingClient *client_, const QRectF &rect, QGraphicsItem *parent) :

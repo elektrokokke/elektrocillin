@@ -4,6 +4,7 @@
 #include "jackringbuffer.h"
 #include <QVector>
 #include <QMap>
+#include <QPair>
 
 class Interpolator
 {
@@ -11,18 +12,27 @@ public:
     class ChangeControlPointEvent : public RingBufferEvent
     {
     public:
+        ChangeControlPointEvent(int index_, double x_, double y_) :
+            index(index_), x(x_), y(y_)
+        {}
         int index;
         double x, y;
     };
-    class ChangeAllControlPointsEvent : public RingBufferEvent
+    class AddControlPointsEvent : public RingBufferEvent
     {
     public:
-        ChangeAllControlPointsEvent() {}
-        ChangeAllControlPointsEvent(const Interpolator &interpolator) :
-            xx(interpolator.getX()),
-            yy(interpolator.getY())
+        AddControlPointsEvent(bool scaleX_, bool scaleY_, bool addAtStart_, bool addAtEnd_) :
+            scaleX(scaleX_), scaleY(scaleY_), addAtStart(addAtStart_), addAtEnd(addAtEnd_)
         {}
-        QVector<double> xx, yy;
+        bool scaleX, scaleY, addAtStart, addAtEnd;
+    };
+    class DeleteControlPointsEvent : public RingBufferEvent
+    {
+    public:
+        DeleteControlPointsEvent(bool scaleX_, bool scaleY_, bool deleteAtStart_, bool deleteAtEnd_) :
+            scaleX(scaleX_), scaleY(scaleY_), deleteAtStart(deleteAtStart_), deleteAtEnd(deleteAtEnd_)
+        {}
+        bool scaleX, scaleY, deleteAtStart, deleteAtEnd;
     };
 
     virtual ~Interpolator();
@@ -48,8 +58,21 @@ public:
 
     virtual double interpolate(int jlo, double x) = 0;
 
-    virtual void processEvent(const ChangeControlPointEvent *event) = 0;
-    virtual void processEvent(const ChangeAllControlPointsEvent *event) = 0;
+    virtual void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
+    virtual void changeControlPoint(const ChangeControlPointEvent *event);
+    virtual void addControlPoints(const AddControlPointsEvent *event);
+    virtual void deleteControlPoints(const DeleteControlPointsEvent *event);
+    // overloaded convenience methods for the above:
+    void changeControlPoint(int index, double x, double y);
+    void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
+    void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
+
+    void setMonotonicity(bool isStrictlyMonotonic);
+    void setStartPointConstraints(bool xIsStatic, bool yIsStatic);
+    void setEndPointConstraints(bool xIsStatic, bool yIsStatic);
+    void setYRange(double yMin, double yMax);
+
+//    virtual void processEvent(const ChangeAllControlPointsEvent *event) = 0;
 protected:
     Interpolator(const QVector<double> &xx, const QVector<double> &yy, int m);
 
@@ -60,6 +83,9 @@ protected:
 private:
     int mm, jsav, cor, dj, previousN;
     QMap<int, QString> names;
+    bool isStrictlyMonotonic;
+    QPair<bool, bool> xIsStatic, yIsStatic;
+    double yMin, yMax;
 };
 
 #endif // INTERPOLATOR_H

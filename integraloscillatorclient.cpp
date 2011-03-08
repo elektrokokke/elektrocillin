@@ -36,40 +36,23 @@ PolynomialInterpolator * IntegralOscillatorClient::getPolynomialInterpolator()
 
 void IntegralOscillatorClient::postIncreaseControlPoints()
 {
-    Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-    // TODO: initialize the event
-//    oscillator.processEvent(event, 0);
-//    postEvent(event);
+    Interpolator::AddControlPointsEvent *event = new Interpolator::AddControlPointsEvent(true, false, false, true);
+    oscillator.processEvent(event, 0);
+    postEvent(event);
 }
 
 void IntegralOscillatorClient::postDecreaseControlPoints()
 {
     if (oscillator.getPolynomialInterpolator()->getX().size() > 2) {
-        Interpolator::ChangeAllControlPointsEvent *event = new Interpolator::ChangeAllControlPointsEvent();
-        // TODO: initialize the event
-//        oscillator.processEvent(event, 0);
-//        postEvent(event);
+        Interpolator::DeleteControlPointsEvent *event = new Interpolator::DeleteControlPointsEvent(true, false, false, true);
+        oscillator.processEvent(event, 0);
+        postEvent(event);
     }
 }
 
 void IntegralOscillatorClient::postChangeControlPoint(int index, double x, double y)
 {
-    if (index == 0) {
-       x = oscillator.getPolynomialInterpolator()->getX()[0];
-    }
-    if (index == oscillator.getPolynomialInterpolator()->getX().size() - 1) {
-        x = oscillator.getPolynomialInterpolator()->getX().back();
-    }
-    if ((index > 0) && (x <= oscillator.getPolynomialInterpolator()->getX()[index - 1])) {
-        x = oscillator.getPolynomialInterpolator()->getX()[index - 1];
-    }
-    if ((index < oscillator.getPolynomialInterpolator()->getX().size() - 1) && (x >= oscillator.getPolynomialInterpolator()->getX()[index + 1])) {
-        x = oscillator.getPolynomialInterpolator()->getX()[index + 1];
-    }
-    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent();
-    event->index = index;
-    event->x = x;
-    event->y = y;
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
     oscillator.processEvent(event, 0);
     postEvent(event);
 }
@@ -86,15 +69,9 @@ QGraphicsItem * IntegralOscillatorClient::createGraphicsItem()
     return rectItem;
 }
 
-void IntegralOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+bool IntegralOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const Interpolator::ChangeControlPointEvent *changeControlPointEvent = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
-        getIntegralOscillator()->processEvent(changeControlPointEvent, time);
-    } else if (const Interpolator::ChangeAllControlPointsEvent *changeAllControlPointsEvent = dynamic_cast<const Interpolator::ChangeAllControlPointsEvent*>(event)) {
-        getIntegralOscillator()->processEvent(changeAllControlPointsEvent, time);
-    } else {
-        OscillatorClient::processEvent(event, time);
-    }
+    return getIntegralOscillator()->processEvent(event, time);
 }
 
 IntegralOscillatorGraphicsItem::IntegralOscillatorGraphicsItem(const QRectF &rect, IntegralOscillatorClient *client_, QGraphicsItem *parent) :

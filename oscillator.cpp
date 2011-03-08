@@ -70,6 +70,15 @@ void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframe
     phase = phase2;
 }
 
+bool Oscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+{
+    if (const ChangeGainEvent *changeGainEvent = dynamic_cast<const ChangeGainEvent*>(event)) {
+        setGain(changeGainEvent->gain);
+        return true;
+    }
+    return false;
+}
+
 void Oscillator::setGain(double gain)
 {
     this->gain = gain;

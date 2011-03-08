@@ -25,7 +25,7 @@ public:
 
 protected:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
-    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:
     LinearInterpolator interpolator, interpolatorProcess;

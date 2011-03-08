@@ -40,7 +40,7 @@ Oscillator * OscillatorClient::getOscillator()
 
 void OscillatorClient::postChangeGain(double gain)
 {
-    OscillatorClient::ChangeGainEvent *event = new OscillatorClient::ChangeGainEvent();
+    Oscillator::ChangeGainEvent *event = new Oscillator::ChangeGainEvent();
     event->gain = gain;
     postEvent(event);
 }
@@ -50,11 +50,9 @@ QGraphicsItem * OscillatorClient::createGraphicsItem()
     return new OscillatorClientGraphicsItem(QRectF(0, 0, 600, 420), this);
 }
 
-void OscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
+bool OscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const ChangeGainEvent *changeGainEvent = dynamic_cast<const ChangeGainEvent*>(event)) {
-        getOscillator()->setGain(changeGainEvent->gain);
-    }
+    return oscillator->processEvent(event, time);
 }
 
 OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(const QRectF &rect, OscillatorClient *client_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :

@@ -57,7 +57,6 @@ SOURCES += main.cpp\
     linearoscillator.cpp \
     linearoscillatorclient.cpp \
     linearmorphoscillator.cpp \
-    pulseoscillator.cpp \
     multiplyprocessor.cpp \
     metajack/midiport.cpp \
     metajack/metajackclient.cpp \
@@ -138,7 +137,6 @@ HEADERS  += mainwindow.h \
     linearoscillator.h \
     linearoscillatorclient.h \
     linearmorphoscillator.h \
-    pulseoscillator.h \
     multiplyprocessor.h \
     metajack/midiport.h \
     metajack/metajackclient.h \

@@ -187,12 +187,14 @@ QGraphicsItem * MidiSignalClient::createGraphicsItem()
     return new MidiSignalGraphicsItem(this);
 }
 
-void MidiSignalClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+bool MidiSignalClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
     if (const MidiProcessorClient::MidiEvent *midiEvent = dynamic_cast<const MidiProcessorClient::MidiEvent*>(event)) {
         // write this event to the MIDI output buffer:
         writeMidi(*midiEvent, time);
+        return true;
     }
+    return false;
 }
 
 void MidiSignalClient::processMidi(const MidiProcessorClient::MidiEvent &event, jack_nframes_t)

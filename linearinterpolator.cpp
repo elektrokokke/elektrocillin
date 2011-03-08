@@ -47,15 +47,3 @@ double LinearInterpolator::interpolate(int j, double x)
     }
 }
 
-void LinearInterpolator::processEvent(const Interpolator::ChangeControlPointEvent *event)
-{
-    Q_ASSERT((event->index >= 0) && (event->index < xx.size()));
-    xx[event->index] = event->x;
-    yy[event->index] = event->y;
-}
-
-void LinearInterpolator::processEvent(const Interpolator::ChangeAllControlPointsEvent *event)
-{
-    xx = event->xx;
-    yy = event->yy;
-}

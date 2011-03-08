@@ -12,8 +12,8 @@ public:
     PolynomialInterpolator * getPolynomialInterpolator();
     void setPolynomialInterpolator(const PolynomialInterpolator &interpolator);
 
-    virtual void processEvent(const Interpolator::ChangeControlPointEvent *event, jack_nframes_t time);
-    virtual void processEvent(const Interpolator::ChangeAllControlPointsEvent *event, jack_nframes_t time);
+    // Reimplemented from Oscillator:
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 protected:
     double valueAtPhase(double phase);
 

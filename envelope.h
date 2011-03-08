@@ -36,12 +36,7 @@ public:
     void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
-    Interpolator::ChangeAllControlPointsEvent * createIncreaseControlPointsEvent() const;
-    Interpolator::ChangeAllControlPointsEvent * createDecreaseControlPointsEvent() const;
-
-    virtual void processEvent(const Interpolator::ChangeControlPointEvent *event, jack_nframes_t time);
-    virtual void processEvent(const Interpolator::ChangeAllControlPointsEvent *event, jack_nframes_t time);
-    virtual void processEvent(const ChangeSustainPositionEvent *event, jack_nframes_t time);
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 private:
     double durationInSeconds;
     double currentTime, previousLevel, minimumLevel, velocity;

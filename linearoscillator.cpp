@@ -8,12 +8,12 @@ LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double s
     sincWindowSize(sincWindowSize_),
     siInterpolator(QVector<double>(), QVector<double>(), QVector<double>())
 {
-    Interpolator::ChangeAllControlPointsEvent event;
-    event.xx.append(0);
-    event.yy.append(-1);
-    event.xx.append(1);
-    event.yy.append(1);
-    interpolator.processEvent(&event);
+    QVector<double> xx, yy;
+    xx.append(0);
+    yy.append(-1);
+    xx.append(1);
+    yy.append(1);
+    interpolator.changeControlPoints(xx, yy);
     initializeSiInterpolator();
 }
 
@@ -38,15 +38,25 @@ void LinearOscillator::setLinearInterpolator(const LinearInterpolator &interpola
     this->interpolator = interpolator;
 }
 
-void LinearOscillator::processEvent(const Interpolator::ChangeControlPointEvent *event, jack_nframes_t)
+void LinearOscillator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
 {
-    // set the interpolator control point at "index" accordingly:
-    interpolator.processEvent(event);
+    interpolator.changeControlPoints(xx, yy);
 }
 
-void LinearOscillator::processEvent(const Interpolator::ChangeAllControlPointsEvent *event, jack_nframes_t)
+bool LinearOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    interpolator.processEvent(event);
+    if (const Interpolator::ChangeControlPointEvent *event_ = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
+        interpolator.changeControlPoint(event_);
+        return true;
+    } else if (const Interpolator::AddControlPointsEvent *event_ = dynamic_cast<const Interpolator::AddControlPointsEvent*>(event)) {
+        interpolator.addControlPoints(event_);
+        return true;
+    } else if (const Interpolator::DeleteControlPointsEvent *event_ = dynamic_cast<const Interpolator::DeleteControlPointsEvent*>(event)) {
+        interpolator.deleteControlPoints(event_);
+        return true;
+    } else {
+        return Oscillator::processEvent(event, time);
+    }
 }
 
 double LinearOscillator::valueAtPhase(double phase)

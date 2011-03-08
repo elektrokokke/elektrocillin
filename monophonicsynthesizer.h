@@ -2,7 +2,7 @@
 #define MONOPHONICSYNTHESIZER_H
 
 #include "simplelowpassfilter.h"
-#include "pulseoscillator.h"
+#include "linearoscillator.h"
 #include "envelope.h"
 #include "iirbutterworthfilter.h"
 #include <QStack>
@@ -21,7 +21,7 @@ public:
 
 private:
     double controller;
-    PulseOscillator osc;
+    LinearOscillator osc;
     //Oscillator osc;
     Envelope envelope;
     IirButterworthFilter filterAudio, filterController;

@@ -4,6 +4,7 @@ CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, cons
     Interpolator(xx, yy, 2),
     y2(xx.size())
 {
+    setMonotonicity(true);
     sety2(xx, yy, yp1, ypn);
 }
 
@@ -11,6 +12,7 @@ CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, cons
     Interpolator(xx, yy, 2),
     y2(xx.size())
 {
+    setMonotonicity(true);
     sety2NaturalSpline(xx, yy);
 }
 
@@ -18,6 +20,7 @@ CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, cons
     Interpolator(xx, yy, 2),
     y2(y2_)
 {
+    setMonotonicity(true);
 }
 
 void CubicSplineInterpolator::save(QDataStream &stream)
@@ -64,18 +67,31 @@ double CubicSplineInterpolator::interpolate(int jl, double x)
     return y;
 }
 
-void CubicSplineInterpolator::processEvent(const ChangeControlPointEvent *event)
+void CubicSplineInterpolator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
 {
-    Q_ASSERT((event->index >= 0) && (event->index < xx.size()));
-    xx[event->index] = event->x;
-    yy[event->index] = event->y;
+    Interpolator::changeControlPoints(xx, yy);
+    // recompute coefficients:
     sety2NaturalSpline(xx, yy);
 }
 
-void CubicSplineInterpolator::processEvent(const ChangeAllControlPointsEvent *event)
+void CubicSplineInterpolator::changeControlPoint(const ChangeControlPointEvent *event)
 {
-    xx = event->xx;
-    yy = event->yy;
+    Interpolator::changeControlPoint(event);
+    // recompute coefficients:
+    sety2NaturalSpline(xx, yy);
+}
+
+void CubicSplineInterpolator::addControlPoints(const AddControlPointsEvent *event)
+{
+    Interpolator::addControlPoints(event);
+    // recompute coefficients:
+    sety2NaturalSpline(xx, yy);
+}
+
+void CubicSplineInterpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
+{
+    Interpolator::deleteControlPoints(event);
+    // recompute coefficients:
     sety2NaturalSpline(xx, yy);
 }
 

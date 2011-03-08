@@ -51,7 +51,7 @@ public:
 
 protected:
     // reimplemented from EventProcessorClient2:
-    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimplemented from MidiProcessor:
     virtual void processMidi(const MidiProcessorClient::MidiEvent &event, jack_nframes_t time);
 

@@ -86,27 +86,37 @@ double PolynomialInterpolator::interpolate(int jlo, double x)
     }
 }
 
-void PolynomialInterpolator::processEvent(const ChangeControlPointEvent *event)
+void PolynomialInterpolator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
 {
-    Q_ASSERT((event->index >= 0) && (event->index < xx.size()));
-    Q_ASSERT((event->index == 0) || (xx[event->index] >= xx[event->index - 1]));
-    Q_ASSERT((event->index == xx.size() - 1) || (xx[event->index] <= xx[event->index + 1]));
-    xx[event->index] = event->x;
+    Interpolator::changeControlPoints(xx, yy);
+    initialize(xx, yy);
+}
+
+void PolynomialInterpolator::changeControlPoint(const ChangeControlPointEvent *event)
+{
+    Interpolator::changeControlPoint(event);
     if (event->index > 0) {
         double x = xx[event->index - 1];
         double y = polynomials[event->index - 1].evaluate(x);
-        initializePolynomial(event->index - 1, x, y, event->x, event->y);
+        initializePolynomial(event->index - 1, x, y, xx[event->index], yy[event->index]);
     }
     if (event->index < xx.size() - 1) {
         double x = xx[event->index + 1];
         double y = polynomials[event->index].evaluate(x);
-        initializePolynomial(event->index, event->x, event->y, x, y);
+        initializePolynomial(event->index, xx[event->index], yy[event->index], x, y);
     }
 }
 
-void PolynomialInterpolator::processEvent(const ChangeAllControlPointsEvent *event)
+void PolynomialInterpolator::addControlPoints(const AddControlPointsEvent *event)
 {
-    initialize(event->xx, event->yy);
+    Interpolator::addControlPoints(event);
+    initialize(getX(), getY());
+}
+
+void PolynomialInterpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
+{
+    Interpolator::deleteControlPoints(event);
+    initialize(getX(), getY());
 }
 
 void PolynomialInterpolator::initialize(const QVector<double> &xx, const QVector<double> &yy)

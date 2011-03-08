@@ -10,12 +10,6 @@
 class OscillatorClient : public EventProcessorClient
 {
 public:
-    class ChangeGainEvent : public RingBufferEvent
-    {
-    public:
-        double gain;
-    };
-
     OscillatorClient(const QString &clientName, Oscillator *oscillator, size_t ringBufferSize = 1024);
     OscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~OscillatorClient();
@@ -31,7 +25,7 @@ public:
     QGraphicsItem * createGraphicsItem();
 
 protected:
-    virtual void processEvent(const RingBufferEvent *event, jack_nframes_t time);
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:
     Oscillator *oscillator;

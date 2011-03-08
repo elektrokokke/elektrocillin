@@ -28,15 +28,18 @@ public:
     void smoothen();
 
     virtual double interpolate(int jlo, double x);
+
+    virtual void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
     /**
       Calling this sets both polynomials around the given index
       to line segments, regardless of their previous degree.
       */
-    virtual void processEvent(const ChangeControlPointEvent *event);
+    virtual void changeControlPoint(const ChangeControlPointEvent *event);
     /**
-      Calling this sets all polynomials to line segments, regardless of their previous degree.
+      Calling these sets all polynomials to line segments, regardless of their previous degree.
       */
-    virtual void processEvent(const ChangeAllControlPointsEvent *event);
+    virtual void addControlPoints(const AddControlPointsEvent *event);
+    virtual void deleteControlPoints(const DeleteControlPointsEvent *event);
 private:
     QVector<Polynomial<double> > polynomials;
 
