@@ -84,13 +84,16 @@ void GraphicsInterpolationItem::updatePath()
                 }
             }
             path.lineTo(x * xscale, y * yscale);
+            if (x == interpolator->getX().back()) {
+                for (int i = index + 1; i < interpolator->getX().size(); i++) {
+                    double yIndex = interpolator->interpolate(i, x);
+                    if (!bounds.isNull()) {
+                        yIndex = std::max(std::min(yIndex, bounds.top()), bounds.bottom());
+                    }
+                    path.lineTo(x * xscale, yIndex * yscale);
+                }
+            }
         }
-        x = interpolator->getX().back();
-        y = interpolator->evaluate(x);
-        if (!bounds.isNull()) {
-            y = std::max(std::min(y, bounds.top()), bounds.bottom());
-        }
-        path.lineTo(x * xscale, y * yscale);
     }
     setPath(path);
 }
