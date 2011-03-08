@@ -14,6 +14,7 @@ LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size
         event.yy.append(value);
     }
     interpolator.processEvent(&event);
+    interpolatorProcess.processEvent(&event);
     activateMidiInput(false);
 }
 
