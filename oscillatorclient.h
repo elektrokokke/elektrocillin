@@ -20,19 +20,23 @@ public:
 
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
+    /**
+      To call this method is only safe when the client is not running,
+      as it accesses the internal Oscillator object used by the Jack
+      process thread in a non-threadsafe way.
+
+      To change the oscillator gain while the client is running use
+      postChangeGain() method.
+      */
     virtual void loadState(QDataStream &stream);
 
-    Oscillator * getOscillator();
-
+    double getGain() const;
     void postChangeGain(double gain);
 
     QGraphicsItem * createGraphicsItem();
-
-protected:
-    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
-
 private:
-    Oscillator *oscillator;
+    Oscillator *oscillatorProcess;
+    double gain;
 };
 
 class OscillatorClientGraphicsItem : public QObject, public QGraphicsRectItem

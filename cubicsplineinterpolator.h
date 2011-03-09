@@ -28,9 +28,9 @@ public:
     double interpolate(int jlo, double x);
 
     virtual void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
-    virtual void changeControlPoint(const ChangeControlPointEvent *event);
-    virtual void addControlPoints(const AddControlPointsEvent *event);
-    virtual void deleteControlPoints(const DeleteControlPointsEvent *event);
+    virtual void changeControlPoint(int index, double x, double y);
+    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
+    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
 private:
     QVector<double> y2;
 

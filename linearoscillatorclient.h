@@ -24,10 +24,6 @@ public:
     void postChangeControlPoint(int index, double x, double y);
 
     QGraphicsItem * createGraphicsItem();
-
-protected:
-    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
-
 private:
     LinearInterpolator interpolator;
 };

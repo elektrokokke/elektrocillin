@@ -51,13 +51,11 @@ void LinearMorphOscillator::processAudio(const double *inputs, double *outputs, 
 bool LinearMorphOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
     if (const ChangeControlPointEvent *event_ = dynamic_cast<const ChangeControlPointEvent*>(event)) {
-        state[event_->state].changeControlPoint(event_);
+        InterpolatorProcessor::changeControlPoint(&state[event_->state], event_);
         return true;
-    } else if (const AddControlPointsEvent *event_ = dynamic_cast<const AddControlPointsEvent*>(event)) {
-        state[event_->state].addControlPoints(event_);
-        return true;
-    } else if (const DeleteControlPointsEvent *event_ = dynamic_cast<const DeleteControlPointsEvent*>(event)) {
-        state[event_->state].deleteControlPoints(event_);
+    } else if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
+        InterpolatorProcessor::processInterpolatorEvent(&state[0], event_);
+        InterpolatorProcessor::processInterpolatorEvent(&state[1], event_);
         return true;
     } else {
         return LinearOscillator::processEvent(event, time);

@@ -23,14 +23,8 @@ void IntegralOscillator::setPolynomialInterpolator(const PolynomialInterpolator 
 
 bool IntegralOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const Interpolator::ChangeControlPointEvent *event_ = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
-        integrals.first().changeControlPoint(event_);
-        return true;
-    } else if (const Interpolator::AddControlPointsEvent *event_ = dynamic_cast<const Interpolator::AddControlPointsEvent*>(event)) {
-        integrals.first().addControlPoints(event_);
-        return true;
-    } else if (const Interpolator::DeleteControlPointsEvent *event_ = dynamic_cast<const Interpolator::DeleteControlPointsEvent*>(event)) {
-        integrals.first().deleteControlPoints(event_);
+    if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
+        InterpolatorProcessor::processInterpolatorEvent(&integrals.first(), event_);
         return true;
     } else {
         return Oscillator::processEvent(event, time);

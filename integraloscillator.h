@@ -2,9 +2,10 @@
 #define INTEGRALOSCILLATOR_H
 
 #include "oscillator.h"
+#include "interpolatorprocessor.h"
 #include "polynomialinterpolator.h"
 
-class IntegralOscillator : public Oscillator
+class IntegralOscillator : public Oscillator, public InterpolatorProcessor
 {
 public:
     IntegralOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());

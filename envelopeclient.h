@@ -34,8 +34,6 @@ public:
 
     QGraphicsItem * createGraphicsItem();
 
-protected:
-    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 private:
     Envelope *envelope, *envelopeProcess;
 };

@@ -1,7 +1,6 @@
 #ifndef INTERPOLATOR_H
 #define INTERPOLATOR_H
 
-#include "jackringbuffer.h"
 #include <QVector>
 #include <QMap>
 #include <QPair>
@@ -9,32 +8,6 @@
 class Interpolator
 {
 public:
-    class ChangeControlPointEvent : public RingBufferEvent
-    {
-    public:
-        ChangeControlPointEvent(int index_, double x_, double y_) :
-            index(index_), x(x_), y(y_)
-        {}
-        int index;
-        double x, y;
-    };
-    class AddControlPointsEvent : public RingBufferEvent
-    {
-    public:
-        AddControlPointsEvent(bool scaleX_, bool scaleY_, bool addAtStart_, bool addAtEnd_) :
-            scaleX(scaleX_), scaleY(scaleY_), addAtStart(addAtStart_), addAtEnd(addAtEnd_)
-        {}
-        bool scaleX, scaleY, addAtStart, addAtEnd;
-    };
-    class DeleteControlPointsEvent : public RingBufferEvent
-    {
-    public:
-        DeleteControlPointsEvent(bool scaleX_, bool scaleY_, bool deleteAtStart_, bool deleteAtEnd_) :
-            scaleX(scaleX_), scaleY(scaleY_), deleteAtStart(deleteAtStart_), deleteAtEnd(deleteAtEnd_)
-        {}
-        bool scaleX, scaleY, deleteAtStart, deleteAtEnd;
-    };
-
     virtual ~Interpolator();
 
     void setControlPointName(int controlPointIndex, const QString &name);
@@ -59,13 +32,9 @@ public:
     virtual double interpolate(int jlo, double x) = 0;
 
     virtual void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
-    virtual void changeControlPoint(const ChangeControlPointEvent *event);
-    virtual void addControlPoints(const AddControlPointsEvent *event);
-    virtual void deleteControlPoints(const DeleteControlPointsEvent *event);
-    // overloaded convenience methods for the above:
-    void changeControlPoint(int index, double x, double y);
-    void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
-    void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
+    virtual void changeControlPoint(int index, double x, double y);
+    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
+    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
 
     void setMonotonicity(bool isStrictlyMonotonic);
     void setStartPointConstraints(bool xIsStatic, bool yIsStatic);

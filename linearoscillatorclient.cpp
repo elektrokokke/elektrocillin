@@ -37,24 +37,24 @@ LinearInterpolator * LinearOscillatorClient::getLinearInterpolator()
 
 void LinearOscillatorClient::postIncreaseControlPoints()
 {
-    Interpolator::AddControlPointsEvent *event = new Interpolator::AddControlPointsEvent(true, false, false, true);
-    interpolator.addControlPoints(event);
+    InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, false, false, true);
+    interpolator.addControlPoints(true, false, false, true);
     postEvent(event);
 }
 
 void LinearOscillatorClient::postDecreaseControlPoints()
 {
     if (interpolator.getX().size() > 2) {
-        Interpolator::DeleteControlPointsEvent *event = new Interpolator::DeleteControlPointsEvent(true, false, false, true);
-        interpolator.deleteControlPoints(event);
+        InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, false, false, true);
+        interpolator.deleteControlPoints(true, false, false, true);
         postEvent(event);
     }
 }
 
 void LinearOscillatorClient::postChangeControlPoint(int index, double x, double y)
 {
-    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
-    interpolator.changeControlPoint(event);
+    InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
+    interpolator.changeControlPoint(index, x, y);
     postEvent(event);
 }
 
@@ -68,15 +68,6 @@ QGraphicsItem * LinearOscillatorClient::createGraphicsItem()
     (new OscillatorClientGraphicsItem(rectGain, this))->setParentItem(rectItem);
     (new LinearOscillatorGraphicsItem(rectOscillator, this))->setParentItem(rectItem);
     return rectItem;
-}
-
-bool LinearOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
-{
-    if (getLinearOscillator()->processEvent(event, time)) {
-        return true;
-    } else {
-        return OscillatorClient::processEvent(event, time);
-    }
 }
 
 LinearOscillatorGraphicsItem::LinearOscillatorGraphicsItem(const QRectF &rect, LinearOscillatorClient *client_, QGraphicsItem *parent) :

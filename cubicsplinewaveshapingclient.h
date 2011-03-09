@@ -1,11 +1,12 @@
 #ifndef SPLINEWAVESHAPINGCLIENT_H
 #define SPLINEWAVESHAPINGCLIENT_H
 
+#include "interpolatorprocessor.h"
 #include "eventprocessorclient.h"
 #include "cubicsplineinterpolator.h"
 #include "graphicsinterpolatoredititem.h"
 
-class CubicSplineWaveShapingClient : public EventProcessorClient
+class CubicSplineWaveShapingClient : public EventProcessorClient, public InterpolatorProcessor
 {
 public:
     CubicSplineWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);

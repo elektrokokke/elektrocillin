@@ -54,25 +54,19 @@ LinearInterpolator * LinearMorphOscillatorClient::getState(int stateIndex)
 
 void LinearMorphOscillatorClient::postIncreaseControlPoints()
 {
-    QVector<RingBufferEvent*> events;
-    for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
-        LinearMorphOscillator::AddControlPointsEvent *event = new LinearMorphOscillator::AddControlPointsEvent(stateIndex, true, false, false, true);
-        state[stateIndex].addControlPoints(event);
-        events.append(event);
-    }
-    postEvents(events);
+    InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, false, false, true);
+    state[0].addControlPoints(true, false, false, true);
+    state[1].addControlPoints(true, false, false, true);
+    postEvent(event);
 }
 
 void LinearMorphOscillatorClient::postDecreaseControlPoints()
 {
     if (state[0].getX().size() > 2) {
-        QVector<RingBufferEvent*> events;
-        for (int stateIndex = 0; stateIndex < 2; stateIndex++) {
-            LinearMorphOscillator::DeleteControlPointsEvent *event = new LinearMorphOscillator::DeleteControlPointsEvent(stateIndex, true, false, false, true);
-            state[stateIndex].deleteControlPoints(event);
-            events.append(event);
-        }
-        postEvents(events);
+        InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, false, false, true);
+        state[0].deleteControlPoints(true, false, false, true);
+        state[1].deleteControlPoints(true, false, false, true);
+        postEvent(event);
     }
 }
 
@@ -80,7 +74,7 @@ void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int ind
 {
     Q_ASSERT((stateIndex >= 0) && (stateIndex < 2));
     LinearMorphOscillator::ChangeControlPointEvent *event = new LinearMorphOscillator::ChangeControlPointEvent(stateIndex, index, x, y);
-    state[stateIndex].changeControlPoint(event);
+    state[stateIndex].changeControlPoint(index, x, y);
     postEvent(event);
 }
 
@@ -94,15 +88,6 @@ QGraphicsItem * LinearMorphOscillatorClient::createGraphicsItem()
     (new OscillatorClientGraphicsItem(rectGain, this))->setParentItem(rectItem);
     (new LinearMorphOscillatorGraphicsItem(rectOscillator, this))->setParentItem(rectItem);
     return rectItem;
-}
-
-bool LinearMorphOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
-{
-    if (getLinearMorphOscillator()->processEvent(event, time)) {
-        return true;
-    } else {
-        return OscillatorClient::processEvent(event, time);
-    }
 }
 
 LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent) :

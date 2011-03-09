@@ -74,23 +74,23 @@ void CubicSplineInterpolator::changeControlPoints(const QVector<double> &xx, con
     sety2NaturalSpline(xx, yy);
 }
 
-void CubicSplineInterpolator::changeControlPoint(const ChangeControlPointEvent *event)
+void CubicSplineInterpolator::changeControlPoint(int index, double x, double y)
 {
-    Interpolator::changeControlPoint(event);
+    Interpolator::changeControlPoint(index, x, y);
     // recompute coefficients:
     sety2NaturalSpline(xx, yy);
 }
 
-void CubicSplineInterpolator::addControlPoints(const AddControlPointsEvent *event)
+void CubicSplineInterpolator::addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd)
 {
-    Interpolator::addControlPoints(event);
+    Interpolator::addControlPoints(scaleX, scaleY, addAtStart, addAtEnd);
     // recompute coefficients:
     sety2NaturalSpline(xx, yy);
 }
 
-void CubicSplineInterpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
+void CubicSplineInterpolator::deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd)
 {
-    Interpolator::deleteControlPoints(event);
+    Interpolator::deleteControlPoints(scaleX, scaleY, deleteAtStart, deleteAtEnd);
     // recompute coefficients:
     sety2NaturalSpline(xx, yy);
 }

@@ -3,48 +3,44 @@
 
 OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator_, size_t ringBufferSize) :
     EventProcessorClient(clientName, oscillator_, oscillator_, oscillator_, ringBufferSize),
-    oscillator(oscillator_)
+    oscillatorProcess(oscillator_),
+    gain(oscillatorProcess->getGain())
 {
 }
 
 OscillatorClient::~OscillatorClient()
 {
     close();
-    delete oscillator;
+    delete oscillatorProcess;
 }
 
 void OscillatorClient::saveState(QDataStream &stream)
 {
-    stream << getOscillator()->getGain();
+    stream << gain;
 }
 
 void OscillatorClient::loadState(QDataStream &stream)
 {
-    double gain;
     stream >> gain;
-    getOscillator()->setGain(gain);
+    oscillatorProcess->setGain(gain);
 }
 
-Oscillator * OscillatorClient::getOscillator()
+double OscillatorClient::getGain() const
 {
-    return (Oscillator*)getAudioProcessor();
+    return gain;
 }
 
 void OscillatorClient::postChangeGain(double gain)
 {
     Oscillator::ChangeGainEvent *event = new Oscillator::ChangeGainEvent();
     event->gain = gain;
+    this->gain = gain;
     postEvent(event);
 }
 
 QGraphicsItem * OscillatorClient::createGraphicsItem()
 {
     return new OscillatorClientGraphicsItem(QRectF(0, 0, 600, 420), this);
-}
-
-bool OscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
-{
-    return oscillator->processEvent(event, time);
 }
 
 OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(const QRectF &rect, OscillatorClient *client_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
@@ -59,7 +55,7 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(const QRectF &rect, O
     nodeItem->setZValue(1);
     nodeItem->setBounds(QRectF(rect.center().x(), rect.top(), 0, rect.height()));
     nodeItem->setBoundsScaled(QRectF(0, 1, 0, -1));
-    nodeItem->setYScaled(client->getOscillator()->getGain());
+    nodeItem->setYScaled(client->getGain());
     QObject::connect(nodeItem, SIGNAL(yChangedScaled(qreal)), this, SLOT(onNodeYChanged(qreal)));
 }
 

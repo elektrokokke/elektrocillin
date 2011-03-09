@@ -36,7 +36,7 @@ PolynomialInterpolator * IntegralOscillatorClient::getPolynomialInterpolator()
 
 void IntegralOscillatorClient::postIncreaseControlPoints()
 {
-    Interpolator::AddControlPointsEvent *event = new Interpolator::AddControlPointsEvent(true, false, false, true);
+    InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, false, false, true);
     oscillator.processEvent(event, 0);
     postEvent(event);
 }
@@ -44,7 +44,7 @@ void IntegralOscillatorClient::postIncreaseControlPoints()
 void IntegralOscillatorClient::postDecreaseControlPoints()
 {
     if (oscillator.getPolynomialInterpolator()->getX().size() > 2) {
-        Interpolator::DeleteControlPointsEvent *event = new Interpolator::DeleteControlPointsEvent(true, false, false, true);
+        InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, false, false, true);
         oscillator.processEvent(event, 0);
         postEvent(event);
     }
@@ -52,7 +52,7 @@ void IntegralOscillatorClient::postDecreaseControlPoints()
 
 void IntegralOscillatorClient::postChangeControlPoint(int index, double x, double y)
 {
-    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
+    InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
     oscillator.processEvent(event, 0);
     postEvent(event);
 }
@@ -67,11 +67,6 @@ QGraphicsItem * IntegralOscillatorClient::createGraphicsItem()
     (new OscillatorClientGraphicsItem(rectGain, this))->setParentItem(rectItem);
     (new IntegralOscillatorGraphicsItem(rectOscillator, this))->setParentItem(rectItem);
     return rectItem;
-}
-
-bool IntegralOscillatorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
-{
-    return getIntegralOscillator()->processEvent(event, time);
 }
 
 IntegralOscillatorGraphicsItem::IntegralOscillatorGraphicsItem(const QRectF &rect, IntegralOscillatorClient *client_, QGraphicsItem *parent) :

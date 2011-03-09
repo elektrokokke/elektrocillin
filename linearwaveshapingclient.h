@@ -1,11 +1,12 @@
 #ifndef LINEARWAVESHAPINGCLIENT_H
 #define LINEARWAVESHAPINGCLIENT_H
 
+#include "interpolatorprocessor.h"
 #include "linearinterpolator.h"
 #include "eventprocessorclient.h"
 #include "graphicsinterpolatoredititem.h"
 
-class LinearWaveShapingClient : public EventProcessorClient
+class LinearWaveShapingClient : public EventProcessorClient, public InterpolatorProcessor
 {
 public:
     LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);
@@ -13,6 +14,15 @@ public:
 
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
+    /**
+      To call this method is only safe when the client is not running,
+      as it accesses the internal interpolator object used by the Jack
+      process thread in a non-threadsafe way.
+
+      To change the state while the client is running use
+      postEvent() with a InterpolatorProcessor::InterpolatorEvent object
+      or any of the other post...() methods.
+      */
     virtual void loadState(QDataStream &stream);
 
     LinearInterpolator * getLinearInterpolator();

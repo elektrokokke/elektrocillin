@@ -17,6 +17,10 @@ Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, 
     computeNormalizedFrequency();
 }
 
+Oscillator::~Oscillator()
+{
+}
+
 void Oscillator::setDetuneController(unsigned char controller)
 {
     detuneController = controller;

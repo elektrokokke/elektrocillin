@@ -4,10 +4,11 @@
 #include "audioprocessor.h"
 #include "midiprocessor.h"
 #include "eventprocessor.h"
+#include "interpolatorprocessor.h"
 #include "linearinterpolator.h"
 #include "logarithmicinterpolator.h"
 
-class Envelope : public AudioProcessor, public MidiProcessor, public EventProcessor
+class Envelope : public AudioProcessor, public MidiProcessor, public EventProcessor, public InterpolatorProcessor
 {
 public:
     enum Phase {
@@ -19,6 +20,9 @@ public:
     class ChangeSustainPositionEvent : public RingBufferEvent
     {
     public:
+        ChangeSustainPositionEvent(int sustainIndex_) :
+            sustainIndex(sustainIndex_)
+        {}
         int sustainIndex;
     };
 

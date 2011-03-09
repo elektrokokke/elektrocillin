@@ -41,24 +41,24 @@ LinearInterpolator * LinearWaveShapingClient::getLinearInterpolator()
 
 void LinearWaveShapingClient::postIncreaseControlPoints()
 {
-    Interpolator::AddControlPointsEvent *event = new Interpolator::AddControlPointsEvent(true, true, true, true);
-    interpolator.addControlPoints(event);
+    InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, true, true, true);
+    InterpolatorProcessor::addControlPoints(&interpolator, event);
     postEvent(event);
 }
 
 void LinearWaveShapingClient::postDecreaseControlPoints()
 {
     if (interpolator.getX().size() > 3) {
-        Interpolator::DeleteControlPointsEvent *event = new Interpolator::DeleteControlPointsEvent(true, true, true, true);
-        interpolator.deleteControlPoints(event);
+        InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, true, true, true);
+        InterpolatorProcessor::deleteControlPoints(&interpolator, event);
         postEvent(event);
     }
 }
 
 void LinearWaveShapingClient::postChangeControlPoint(int index, double x, double y)
 {
-    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
-    interpolator.changeControlPoint(event);
+    InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
+    InterpolatorProcessor::changeControlPoint(&interpolator, event);
     postEvent(event);
 }
 
@@ -74,14 +74,8 @@ void LinearWaveShapingClient::processAudio(const double *inputs, double *outputs
 
 bool LinearWaveShapingClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
-    if (const Interpolator::ChangeControlPointEvent *event_ = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
-        interpolatorProcess.changeControlPoint(event_);
-        return true;
-    } else if (const Interpolator::AddControlPointsEvent *event_ = dynamic_cast<const Interpolator::AddControlPointsEvent*>(event)) {
-        interpolatorProcess.addControlPoints(event_);
-        return true;
-    } else if (const Interpolator::DeleteControlPointsEvent *event_ = dynamic_cast<const Interpolator::DeleteControlPointsEvent*>(event)) {
-        interpolatorProcess.deleteControlPoints(event_);
+    if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
+        InterpolatorProcessor::processInterpolatorEvent(&interpolatorProcess, event_);
         return true;
     }
     return false;

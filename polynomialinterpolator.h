@@ -34,12 +34,12 @@ public:
       Calling this sets both polynomials around the given index
       to line segments, regardless of their previous degree.
       */
-    virtual void changeControlPoint(const ChangeControlPointEvent *event);
+    virtual void changeControlPoint(int index, double x, double y);
     /**
       Calling these sets all polynomials to line segments, regardless of their previous degree.
       */
-    virtual void addControlPoints(const AddControlPointsEvent *event);
-    virtual void deleteControlPoints(const DeleteControlPointsEvent *event);
+    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
+    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
 private:
     QVector<Polynomial<double> > polynomials;
 

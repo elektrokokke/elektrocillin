@@ -15,6 +15,7 @@ public:
     };
 
     Oscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
+    virtual ~Oscillator();
 
     void setDetuneController(unsigned char controller);
     unsigned char getDetuneController() const;

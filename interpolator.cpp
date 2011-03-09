@@ -53,12 +53,10 @@ void Interpolator::changeControlPoints(const QVector<double> &xx, const QVector<
     this->yy = yy;
 }
 
-void Interpolator::changeControlPoint(const ChangeControlPointEvent *event)
+void Interpolator::changeControlPoint(int index, double x, double y)
 {
-    Q_ASSERT((event->index >= 0) && (event->index < xx.size()));
-    double x = event->x;
-    double y = event->y;
-    if (event->index == 0) {
+    Q_ASSERT((index >= 0) && (index < xx.size()));
+    if (index == 0) {
         // fix the start point if desired:
         if (xIsStatic.first) {
             x = xx.first();
@@ -68,13 +66,13 @@ void Interpolator::changeControlPoint(const ChangeControlPointEvent *event)
         }
     } else {
         // make sure that all x values increase monotonically:
-        if (isStrictlyMonotonic && (x <= xx[event->index - 1])) {
+        if (isStrictlyMonotonic && (x <= xx[index - 1])) {
             return;
-        } else if (x < xx[event->index - 1]) {
-            x = xx[event->index - 1];
+        } else if (x < xx[index - 1]) {
+            x = xx[index - 1];
         }
     }
-    if (event->index == xx.size() - 1) {
+    if (index == xx.size() - 1) {
         // fix the end points if desired:
         if (xIsStatic.second) {
             x = xx.last();
@@ -84,38 +82,38 @@ void Interpolator::changeControlPoint(const ChangeControlPointEvent *event)
         }
     } else {
         // make sure that all x values increase monotonically:
-        if (isStrictlyMonotonic && (x >= xx[event->index + 1])) {
+        if (isStrictlyMonotonic && (x >= xx[index + 1])) {
             return;
-        } else if (x > xx[event->index + 1]) {
-            x = xx[event->index + 1];
+        } else if (x > xx[index + 1]) {
+            x = xx[index + 1];
         }
     }
     // enforce the y range constraint:
     y = qMax(qMin(y, yMax), yMin);
-    xx[event->index] = x;
-    yy[event->index] = y;
+    xx[index] = x;
+    yy[index] = y;
 }
 
-void Interpolator::addControlPoints(const AddControlPointsEvent *event)
+void Interpolator::addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd)
 {
-    Q_ASSERT(event->addAtStart || event->addAtEnd);
+    Q_ASSERT(addAtStart || addAtEnd);
     int origin = xx.size() / 2;
-    if (!event->addAtEnd) {
+    if (!addAtEnd) {
         origin = xx.size() - 1;
-    } else if (!event->addAtStart) {
+    } else if (!addAtStart) {
         origin = 0;
     }
-    if (event->addAtEnd) {
+    if (addAtEnd) {
         int pointsAfterOrigin = xx.size() - origin - 1;
         double x = xx.last();
         double y = yy.last();
         // scale the points after the origin:
         double scaleFactor = (double)pointsAfterOrigin / (double)(pointsAfterOrigin + 1);
         for (int i = origin + 1; i < xx.size(); i++) {
-            if (event->scaleX) {
+            if (scaleX) {
                 xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
             }
-            if (event->scaleY) {
+            if (scaleY) {
                 yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
             }
         }
@@ -123,17 +121,17 @@ void Interpolator::addControlPoints(const AddControlPointsEvent *event)
         xx.append(x);
         yy.append(y);
     }
-    if (event->addAtStart) {
+    if (addAtStart) {
         int pointsBeforeOrigin = origin;
         double x = xx.first();
         double y = yy.first();
         // scale the points before the origin:
         double scaleFactor = (double)pointsBeforeOrigin / (double)(pointsBeforeOrigin + 1);
         for (int i = 0; i < origin; i++) {
-            if (event->scaleX) {
+            if (scaleX) {
                 xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
             }
-            if (event->scaleY) {
+            if (scaleY) {
                 yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
             }
         }
@@ -143,16 +141,16 @@ void Interpolator::addControlPoints(const AddControlPointsEvent *event)
     }
 }
 
-void Interpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
+void Interpolator::deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd)
 {
-    Q_ASSERT(event->deleteAtStart || event->deleteAtEnd);
+    Q_ASSERT(deleteAtStart || deleteAtEnd);
     int origin = xx.size() / 2;
-    if (!event->deleteAtEnd) {
+    if (!deleteAtEnd) {
         origin = xx.size() - 1;
-    } else if (!event->deleteAtStart) {
+    } else if (!deleteAtStart) {
         origin = 0;
     }
-    if (event->deleteAtEnd) {
+    if (deleteAtEnd) {
         int pointsAfterOrigin = xx.size() - origin - 1;
         // only remove a point if there are enough:
         if (pointsAfterOrigin > 1) {
@@ -164,10 +162,10 @@ void Interpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
             // scale the remaining ones after the origin:
             double scaleFactor = (double)pointsAfterOrigin / (double)(pointsAfterOrigin - 1);
             for (int i = origin + 1; i < xx.size(); i++) {
-                if (event->scaleX) {
+                if (scaleX) {
                     xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
                 }
-                if (event->scaleY) {
+                if (scaleY) {
                     yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
                     // enforce the y range constraint:
                     yy[i] = qMax(qMin(yy[i], yMax), yMin);
@@ -182,7 +180,7 @@ void Interpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
             }
         }
     }
-    if (event->deleteAtStart) {
+    if (deleteAtStart) {
         int pointsBeforeOrigin = origin;
         // only remove a point if there are enough:
         if (pointsBeforeOrigin > 1) {
@@ -195,10 +193,10 @@ void Interpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
             // scale the remaining ones before the origin:
             double scaleFactor = (double)pointsBeforeOrigin / (double)(pointsBeforeOrigin - 1);
             for (int i = 0; i < origin; i++) {
-                if (event->scaleX) {
+                if (scaleX) {
                     xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
                 }
-                if (event->scaleY) {
+                if (scaleY) {
                     yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
                     // enforce the y range constraint:
                     yy[i] = qMax(qMin(yy[i], yMax), yMin);
@@ -236,24 +234,6 @@ void Interpolator::setYRange(double yMin, double yMax)
 {
     this->yMin = yMin;
     this->yMax = yMax;
-}
-
-void Interpolator::changeControlPoint(int index, double x, double y)
-{
-    ChangeControlPointEvent event(index, x, y);
-    changeControlPoint(&event);
-}
-
-void Interpolator::addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd)
-{
-    AddControlPointsEvent event(scaleX, scaleY, addAtStart, addAtEnd);
-    addControlPoints(&event);
-}
-
-void Interpolator::deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd)
-{
-    DeleteControlPointsEvent event(scaleX, scaleY, deleteAtStart, deleteAtEnd);
-    deleteControlPoints(&event);
 }
 
 Interpolator::Interpolator(const QVector<double> &xx_, const QVector<double> &yy_, int m_) :

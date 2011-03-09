@@ -15,6 +15,14 @@ public:
 
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
+    /**
+      To call this method is only safe when the client is not running,
+      as it accesses the internal oscillator object used by the Jack
+      process thread in a non-threadsafe way.
+
+      To change the oscillator parameters while the client is running use
+      post...() methods.
+      */
     virtual void loadState(QDataStream &stream);
 
     IntegralOscillator * getIntegralOscillator();
@@ -25,10 +33,6 @@ public:
     void postChangeControlPoint(int index, double x, double y);
 
     QGraphicsItem * createGraphicsItem();
-
-protected:
-    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
-
 private:
     IntegralOscillator oscillator;
 };

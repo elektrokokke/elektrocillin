@@ -34,7 +34,7 @@ Envelope * EnvelopeClient::getEnvelope()
 
 void EnvelopeClient::postIncreaseControlPoints()
 {
-    Interpolator::AddControlPointsEvent *event = new Interpolator::AddControlPointsEvent(true, false, false, true);
+    InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, false, false, true);
     envelope->processEvent(event, 0);
     postEvent(event);
 }
@@ -42,7 +42,7 @@ void EnvelopeClient::postIncreaseControlPoints()
 void EnvelopeClient::postDecreaseControlPoints()
 {
     if (envelope->getInterpolator()->getX().size() > 2) {
-        Interpolator::DeleteControlPointsEvent *event = new Interpolator::DeleteControlPointsEvent(true, false, false, true);
+        InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, false, false, true);
         envelope->processEvent(event, 0);
         postEvent(event);
     }
@@ -50,15 +50,14 @@ void EnvelopeClient::postDecreaseControlPoints()
 
 void EnvelopeClient::postChangeControlPoint(int index, double x, double y)
 {
-    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
+    InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
     envelope->processEvent(event, 0);
     postEvent(event);
 }
 
 void EnvelopeClient::postChangeSustainIndex(int sustainIndex)
 {
-    Envelope::ChangeSustainPositionEvent *event = new Envelope::ChangeSustainPositionEvent();
-    event->sustainIndex = sustainIndex;
+    Envelope::ChangeSustainPositionEvent *event = new Envelope::ChangeSustainPositionEvent(sustainIndex);
     envelope->processEvent(event, 0);
     postEvent(event);
 }
@@ -66,11 +65,6 @@ void EnvelopeClient::postChangeSustainIndex(int sustainIndex)
 QGraphicsItem * EnvelopeClient::createGraphicsItem()
 {
     return new EnvelopeGraphicsItem(QRectF(0, 0, 1200, 420), this);
-}
-
-bool EnvelopeClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
-{
-    return envelopeProcess->processEvent(event, time);
 }
 
 EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client_, QGraphicsItem *parent_) :

@@ -45,14 +45,8 @@ void LinearOscillator::changeControlPoints(const QVector<double> &xx, const QVec
 
 bool LinearOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const Interpolator::ChangeControlPointEvent *event_ = dynamic_cast<const Interpolator::ChangeControlPointEvent*>(event)) {
-        interpolator.changeControlPoint(event_);
-        return true;
-    } else if (const Interpolator::AddControlPointsEvent *event_ = dynamic_cast<const Interpolator::AddControlPointsEvent*>(event)) {
-        interpolator.addControlPoints(event_);
-        return true;
-    } else if (const Interpolator::DeleteControlPointsEvent *event_ = dynamic_cast<const Interpolator::DeleteControlPointsEvent*>(event)) {
-        interpolator.deleteControlPoints(event_);
+    if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
+        InterpolatorProcessor::processInterpolatorEvent(&interpolator, event_);
         return true;
     } else {
         return Oscillator::processEvent(event, time);

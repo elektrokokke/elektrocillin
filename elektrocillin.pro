@@ -85,7 +85,8 @@ SOURCES += main.cpp\
     integraloscillatorclient.cpp \
     logarithmicinterpolator.cpp \
     graphicslabelitem.cpp \
-    eventprocessor.cpp
+    eventprocessor.cpp \
+    interpolatorprocessor.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -165,7 +166,8 @@ HEADERS  += mainwindow.h \
     integraloscillatorclient.h \
     logarithmicinterpolator.h \
     graphicslabelitem.h \
-    eventprocessor.h
+    eventprocessor.h \
+    interpolatorprocessor.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
