@@ -3,7 +3,7 @@
 #include <QtGlobal>
 
 Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, const QStringList &additionalInputPortNames) :
-    MidiProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
+    EventProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
     detuneController(3),
     gain(1),
     frequency(440),
@@ -29,7 +29,7 @@ unsigned char Oscillator::getDetuneController() const
 
 void Oscillator::setSampleRate(double sampleRate)
 {
-    MidiProcessor::setSampleRate(sampleRate);
+    EventProcessor::setSampleRate(sampleRate);
     // recompute phase increment:
     computeNormalizedFrequency();
 }
@@ -70,7 +70,7 @@ void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframe
     phase = phase2;
 }
 
-bool Oscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+bool Oscillator::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
     if (const ChangeGainEvent *changeGainEvent = dynamic_cast<const ChangeGainEvent*>(event)) {
         setGain(changeGainEvent->gain);

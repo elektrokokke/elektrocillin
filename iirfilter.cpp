@@ -2,7 +2,7 @@
 #include <QDebug>
 
 IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames, double sampleRate) :
-    MidiProcessor(QStringList("Audio in") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
+    EventProcessor(QStringList("Audio in") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
     feedForward(feedForwardCoefficients),
     feedBack(feedBackCoefficients),
     x(feedForwardCoefficients),
@@ -12,7 +12,7 @@ IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, cons
 }
 
 IirFilter::IirFilter(const IirFilter &tocopy) :
-    MidiProcessor(tocopy),
+    EventProcessor(tocopy),
     feedForward(tocopy.feedForward),
     feedBack(tocopy.feedBack),
     x(tocopy.x),
@@ -42,6 +42,11 @@ void IirFilter::processAudio(const double *inputs, double *outputs, jack_nframes
     } else {
         outputs[0] = 0.0;
     }
+}
+
+bool IirFilter::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+{
+    return false;
 }
 
 double IirFilter::getSquaredAmplitudeResponse(double hertz)

@@ -1,11 +1,11 @@
 #ifndef ENVELOPE_H
 #define ENVELOPE_H
 
-#include "midiprocessor.h"
+#include "eventprocessor.h"
 #include "linearinterpolator.h"
 #include "logarithmicinterpolator.h"
 
-class Envelope : public MidiProcessor
+class Envelope : public EventProcessor
 {
 public:
     enum Phase {
@@ -32,10 +32,12 @@ public:
 
     double getDurationInSeconds() const;
 
-    void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
-    void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
-    void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
-
+    // reimplemented from MidiProcessor:
+    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    // reimplemented from AudioProcessor:
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
+    // reimplemented from EventProcessor:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 private:
     double durationInSeconds;

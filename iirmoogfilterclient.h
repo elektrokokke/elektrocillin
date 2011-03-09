@@ -41,8 +41,6 @@ public:
 
     QGraphicsItem * createGraphicsItem();
 protected:
-    // reimplemented from EventProcessorClient2:
-    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimplemented from MidiProcessorClient:
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);

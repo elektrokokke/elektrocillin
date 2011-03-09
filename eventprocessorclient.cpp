@@ -1,9 +1,14 @@
 #include "eventprocessorclient.h"
 
-EventProcessorClient::EventProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize) :
-    MidiProcessorClient(clientName, midiProcessor_),
+EventProcessorClient::EventProcessorClient(const QString &clientName, EventProcessor *eventProcessor, size_t ringBufferSize) :
+    MidiProcessorClient(clientName, eventProcessor),
     ringBuffer(ringBufferSize)
 {}
+
+EventProcessor * EventProcessorClient::getEventProcessor()
+{
+    return (EventProcessor*)getAudioProcessor();
+}
 
 bool EventProcessorClient::postEvent(RingBufferEvent *event)
 {
@@ -73,4 +78,9 @@ bool EventProcessorClient::process(jack_nframes_t nframes)
         }
     }
     return true;
+}
+
+bool EventProcessorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+{
+    return getEventProcessor()->processEvent(event, time);
 }

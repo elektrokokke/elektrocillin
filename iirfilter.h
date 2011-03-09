@@ -3,11 +3,11 @@
 
 #include <QVector>
 #include <complex>
-#include "midiprocessor.h"
+#include "eventprocessor.h"
 #include "frequencyresponse.h"
 #include "polynomial.h"
 
-class IirFilter : public MidiProcessor, public FrequencyResponse
+class IirFilter : public EventProcessor, public FrequencyResponse
 {
 public:
     IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames = QStringList(), double sampleRate = 44100);
@@ -15,6 +15,8 @@ public:
 
     // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
+    // reimplemented from EventProcessor:
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimplenented from FrequencyResponse:
     double getSquaredAmplitudeResponse(double hertz);
 

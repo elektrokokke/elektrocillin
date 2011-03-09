@@ -89,6 +89,15 @@ void IirMoogFilter::processController(unsigned char channel, unsigned char contr
     }
 }
 
+bool IirMoogFilter::processEvent(const RingBufferEvent *event, jack_nframes_t)
+{
+    if (const Parameters *parameters = dynamic_cast<const Parameters*>(event)) {
+        setParameters(parameters);
+        return true;
+    }
+    return false;
+}
+
 void IirMoogFilter::setSampleRate(double sampleRate)
 {
     IirFilter::setSampleRate(sampleRate);
@@ -96,9 +105,9 @@ void IirMoogFilter::setSampleRate(double sampleRate)
     computeCoefficients();
 }
 
-void IirMoogFilter::processEvent(const Parameters *event)
+void IirMoogFilter::setParameters(const Parameters *parameters)
 {
-    this->parameters = *event;
+    this->parameters = *parameters;
     computeCoefficients();
 }
 

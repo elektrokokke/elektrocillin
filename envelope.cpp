@@ -3,7 +3,7 @@
 #include <cmath>
 
 Envelope::Envelope(double durationInSeconds_, double sampleRate) :
-    MidiProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
+    EventProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
     durationInSeconds(durationInSeconds_),
     currentTime(0),
     previousLevel(0),

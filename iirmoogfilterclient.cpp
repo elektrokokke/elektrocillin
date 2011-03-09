@@ -54,12 +54,12 @@ void IirMoogFilterClient::loadState(QDataStream &stream)
     stream >> parameters.frequencyModulationFactor;
     stream >> parameters.frequencyModulationIntensity;
     stream >> parameters.resonance;
-    getMoogFilter()->processEvent(&parameters);
+    getMoogFilter()->setParameters(&parameters);
 }
 
 IirMoogFilter * IirMoogFilterClient::getMoogFilter()
 {
-    return (IirMoogFilter*)getMidiProcessor();
+    return (IirMoogFilter*)getAudioProcessor();
 }
 
 IirMoogFilterThread * IirMoogFilterClient::getMoogFilterThread()
@@ -70,15 +70,6 @@ IirMoogFilterThread * IirMoogFilterClient::getMoogFilterThread()
 QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
 {
     return new IirMoogFilterGraphicsItem(this, QRectF(0, 0, 600, 420));
-}
-
-bool IirMoogFilterClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
-{
-    if (const IirMoogFilter::Parameters *parameters = dynamic_cast<const IirMoogFilter::Parameters*>(event)) {
-        getMoogFilter()->processEvent(parameters);
-        return true;
-    }
-    return false;
 }
 
 void IirMoogFilterClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
@@ -122,7 +113,7 @@ void IirMoogFilterGraphicsItem::onGuiChangedFilterParameters(const QPointF &cuto
     *parameters = filterCopy.getParameters();
     parameters->frequency = cutoffResonance.x();
     parameters->resonance = cutoffResonance.y();
-    filterCopy.processEvent(parameters);
+    filterCopy.setParameters(parameters);
     client->postEvent(parameters);
     updateFrequencyResponse(0);
 }
@@ -132,7 +123,7 @@ void IirMoogFilterGraphicsItem::onClientChangedFilterParameters(double frequency
     IirMoogFilter::Parameters parameters = filterCopy.getParameters();
     parameters.frequency = frequency;
     parameters.resonance = resonance;
-    filterCopy.processEvent(&parameters);
+    filterCopy.setParameters(&parameters);
     cutoffResonanceNode->setXScaled(parameters.frequency);
     cutoffResonanceNode->setYScaled(parameters.resonance);
     updateFrequencyResponse(0);

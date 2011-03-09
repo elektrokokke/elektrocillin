@@ -2,21 +2,23 @@
 #define EVENTPROCESSORCLIENT_H
 
 #include "midiprocessorclient.h"
-#include "jackringbuffer.h"
+#include "eventprocessor.h"
 #include <QVector>
 
 class EventProcessorClient : public MidiProcessorClient
 {
 public:
-    EventProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, size_t ringBufferSize = (2 << 16));
+    EventProcessorClient(const QString &clientName, EventProcessor *eventProcessor_, size_t ringBufferSize = (2 << 16));
+
+    EventProcessor * getEventProcessor();
 
     bool postEvent(RingBufferEvent *event);
     bool postEvents(const QVector<RingBufferEvent*> &events);
 
 protected:
     /**
-      Constructor for subclasses that do not want to use a MidiProcessor,
-      but reimplement the respective methods such as to do the MidiProcessor's
+      Constructor for subclasses that do not want to use an EventProcessor,
+      but reimplement the respective methods such as to do the EventProcessor's
       work themselves.
 
       See AudioProcessorClient::AudioProcessorClient(const QString &, const QStringList &, const QStringList &)
@@ -35,7 +37,7 @@ protected:
     EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16));
 
     virtual bool process(jack_nframes_t nframes);
-    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time) = 0;
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:
     RingBuffer ringBuffer;
