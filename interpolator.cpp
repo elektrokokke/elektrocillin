@@ -111,7 +111,7 @@ void Interpolator::addControlPoints(const AddControlPointsEvent *event)
         origin = 0;
     }
     if (event->addAtEnd) {
-        int pointsAfterOrigin = xx.size() - origin;
+        int pointsAfterOrigin = xx.size() - origin - 1;
         double x = xx.last();
         double y = yy.last();
         // scale the points after the origin:
@@ -158,7 +158,7 @@ void Interpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
         origin = 0;
     }
     if (event->deleteAtEnd) {
-        int pointsAfterOrigin = xx.size() - origin;
+        int pointsAfterOrigin = xx.size() - origin - 1;
         // only remove a point if there are enough:
         if (pointsAfterOrigin > 1) {
             double x = xx.last();

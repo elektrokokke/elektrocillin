@@ -112,6 +112,7 @@ void CubicSplineInterpolator::sety2(const QVector<double> &xx, const QVector<dou
 {
     double p, qn, sig, un;
     QVector<double> u(xx.size() - 1);
+    y2.resize(xx.size());
                                         // The lower boundary condition is set either to be "natural" (see sety2NaturalSpline())
     y2[0] = -0.5;                       // or else to have a specified first derivative.
     u[0] = (3.0 / (xx[1] - xx[0])) * ((yy[1] - yy[0]) / (xx[1] - xx[0]) - yp1);
@@ -135,13 +136,14 @@ void CubicSplineInterpolator::sety2NaturalSpline(const QVector<double> &xx, cons
 {
     double p, qn, sig, un;
     QVector<double> u(xx.size() - 1);
+    y2.resize(xx.size());
     y2[0] = u[0] = 0.0;                 // The lower boundary condition is set either to be "natural"
                                         // or else to have a specified first derivative (see sety2()).
     for (int i = 1; i < xx.size() - 1; i++) {   // This is the decomposition loop of the tridiagonal algorithm. y2 and u are used for temporary storage of the decomposed factors.
         sig = (xx[i] - xx[i - 1]) / (xx[i + 1] - xx[i - 1]);
         p = sig * y2[i - 1] + 2.0;
         y2[i] = (sig - 1.0) / p;
-        u[i] = (yy[i + 1] - yy[i]) / (xx[i+ 1] - xx[i]) - (yy[i] - yy[i - 1]) / (xx[i] - xx[i - 1]);
+        u[i] = (yy[i + 1] - yy[i]) / (xx[i + 1] - xx[i]) - (yy[i] - yy[i - 1]) / (xx[i] - xx[i - 1]);
         u[i] = (6.0 * u[i] / (xx[i + 1] - xx[i - 1]) - sig * u[i - 1]) / p;
     }
     qn = un = 0.0;                      // The upper boundary condition is set either to be "natural"
