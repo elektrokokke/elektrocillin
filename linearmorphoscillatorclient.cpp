@@ -8,12 +8,12 @@ LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientNa
     QVector<double> xx, yy;
     xx.append(0);
     yy.append(-1);
-    xx.append(0.95);
+    xx.append(1);
     yy.append(1);
     xx.append(1);
     yy.append(-1);
     state[0].changeControlPoints(xx, yy);
-    xx[1] = 0.05;
+    xx[1] = 0;
     state[1].changeControlPoints(xx, yy);
     for (int i = 0; i < 2; i++) {
         getLinearMorphOscillator()->setState(i, state[i]);
