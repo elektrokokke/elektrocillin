@@ -91,12 +91,7 @@ void Interpolator::changeControlPoint(const ChangeControlPointEvent *event)
         }
     }
     // enforce the y range constraint:
-    if (y < yMin) {
-        y = yMin;
-    }
-    if (y > yMax) {
-        y = yMax;
-    }
+    y = qMax(qMin(y, yMax), yMin);
     xx[event->index] = x;
     yy[event->index] = y;
 }
@@ -174,6 +169,8 @@ void Interpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
                 }
                 if (event->scaleY) {
                     yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
+                    // enforce the y range constraint:
+                    yy[i] = qMax(qMin(yy[i], yMax), yMin);
                 }
             }
             // enforce the end point constraints:
@@ -196,13 +193,15 @@ void Interpolator::deleteControlPoints(const DeleteControlPointsEvent *event)
             yy.remove(0);
             origin--;
             // scale the remaining ones before the origin:
-            double scaleFactor = (double)pointsBeforeOrigin / (double)(pointsBeforeOrigin + 1);
+            double scaleFactor = (double)pointsBeforeOrigin / (double)(pointsBeforeOrigin - 1);
             for (int i = 0; i < origin; i++) {
                 if (event->scaleX) {
                     xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
                 }
                 if (event->scaleY) {
                     yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
+                    // enforce the y range constraint:
+                    yy[i] = qMax(qMin(yy[i], yMax), yMin);
                 }
             }
             // enforce the start point constraints:
