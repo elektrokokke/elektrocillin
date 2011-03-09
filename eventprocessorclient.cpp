@@ -1,13 +1,20 @@
 #include "eventprocessorclient.h"
 
-EventProcessorClient::EventProcessorClient(const QString &clientName, EventProcessor *eventProcessor, size_t ringBufferSize) :
-    MidiProcessorClient(clientName, eventProcessor),
+EventProcessorClient::EventProcessorClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor_, size_t ringBufferSize) :
+    MidiProcessorClient(clientName, audioProcessor, midiProcessor),
+    eventProcessor(eventProcessor_),
+    ringBuffer(ringBufferSize)
+{}
+
+EventProcessorClient::EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize) :
+    MidiProcessorClient(clientName, inputPortNames, outputPortNames),
+    eventProcessor(0),
     ringBuffer(ringBufferSize)
 {}
 
 EventProcessor * EventProcessorClient::getEventProcessor()
 {
-    return (EventProcessor*)getAudioProcessor();
+    return eventProcessor;
 }
 
 bool EventProcessorClient::postEvent(RingBufferEvent *event)
@@ -35,11 +42,6 @@ bool EventProcessorClient::postEvents(const QVector<RingBufferEvent*> &events)
         return false;
     }
 }
-
-EventProcessorClient::EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize) :
-    MidiProcessorClient(clientName, inputPortNames, outputPortNames),
-    ringBuffer(ringBufferSize)
-{}
 
 bool EventProcessorClient::process(jack_nframes_t nframes)
 {
@@ -82,5 +84,6 @@ bool EventProcessorClient::process(jack_nframes_t nframes)
 
 bool EventProcessorClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
+    Q_ASSERT(eventProcessor);
     return getEventProcessor()->processEvent(event, time);
 }

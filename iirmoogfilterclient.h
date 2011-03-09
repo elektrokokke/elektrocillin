@@ -29,11 +29,25 @@ private:
 class IirMoogFilterClient : public JackThreadEventProcessorClient
 {
 public:
-    IirMoogFilterClient(const QString &clientName, size_t ringBufferSize = 1024);
+    /**
+      Creates a new Moog filter client object with the given name. An associated IirMoogFilterThread will be
+      automatically created and also deleted at destruction time.
+
+      This object takes ownership of the given IirMoogFilter object, i.e., it will be deleted at destruction time.
+      */
+    IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter, size_t ringBufferSize = 1024);
     virtual ~IirMoogFilterClient();
 
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
+    /**
+      To call this method is only safe when the client is not running,
+      as it accesses the internal IirMoogFilter object used by the Jack
+      process thread in a non-threadsafe way.
+
+      To change the filter state while the client is running use
+      postEvent() with a IirMoogFilter::Parameters object.
+      */
     virtual void loadState(QDataStream &stream);
 
     IirMoogFilter * getMoogFilter();
@@ -41,11 +55,21 @@ public:
 
     QGraphicsItem * createGraphicsItem();
 protected:
-    // reimplemented from MidiProcessorClient:
+    /**
+      This method has been reimplemented from MidiProcessorClient to notify
+      the associated IirMoogFilterThread of changes to the filter parameters
+      that occur through MIDI events.
+      */
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    /**
+      This method has been reimplemented from MidiProcessorClient to notify
+      the associated IirMoogFilterThread of changes to the filter parameters
+      that occur through MIDI events.
+      */
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
 
 private:
+    IirMoogFilter *iirMoogFilterProcess, *iirMoogFilter;
     JackRingBuffer<IirMoogFilter::Parameters> ringBufferToThread;
 };
 
@@ -56,7 +80,6 @@ public:
     IirMoogFilterGraphicsItem(IirMoogFilterClient *client, const QRectF &rect, QGraphicsItem *parent = 0);
 private:
     IirMoogFilterClient *client;
-    IirMoogFilter filterCopy;
     GraphicsNodeItem *cutoffResonanceNode;
 private slots:
     void onGuiChangedFilterParameters(const QPointF &cutoffResonance);

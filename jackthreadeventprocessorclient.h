@@ -7,8 +7,8 @@
 class JackThreadEventProcessorClient : public EventProcessorClient
 {
 public:
-    JackThreadEventProcessorClient(JackThread *thread, const QString &clientName, EventProcessor *eventProcessor, size_t ringBufferSize = 1024) :
-        EventProcessorClient(clientName, eventProcessor, ringBufferSize),
+    JackThreadEventProcessorClient(JackThread *thread, const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor, size_t ringBufferSize = 1024) :
+        EventProcessorClient(clientName, audioProcessor, midiProcessor, eventProcessor, ringBufferSize),
         jackThread(thread)
     {}
     /**

@@ -1,7 +1,7 @@
 #include "midiprocessorclient.h"
 
-MidiProcessorClient::MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor_, unsigned int channels_) :
-    AudioProcessorClient(clientName, midiProcessor_),
+MidiProcessorClient::MidiProcessorClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor_, unsigned int channels_) :
+    AudioProcessorClient(clientName, audioProcessor),
     midiProcessor(midiProcessor_),
     midiInput(true),
     midiOutput(false),
@@ -35,7 +35,7 @@ void MidiProcessorClient::activateMidiOutput(bool active)
 
 MidiProcessor * MidiProcessorClient::getMidiProcessor()
 {
-    return (MidiProcessor*)getAudioProcessor();
+    return midiProcessor;
 }
 
 void MidiProcessorClient::setChannelMask(unsigned int channelMask)

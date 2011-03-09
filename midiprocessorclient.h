@@ -15,7 +15,7 @@ public:
         jack_midi_data_t buffer[3];
     };
 
-    MidiProcessorClient(const QString &clientName, MidiProcessor *midiProcessor, unsigned int channelMask = (1 << 16) - 1);
+    MidiProcessorClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, unsigned int channelMask = (1 << 16) - 1);
     virtual ~MidiProcessorClient();
 
     MidiProcessor * getMidiProcessor();
@@ -47,8 +47,10 @@ protected:
     void activateMidiInput(bool active);
     void activateMidiOutput(bool active);
 
+    // reimplemented methods from AudioProcessorClient:
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);
+
     virtual void processMidi(jack_nframes_t start, jack_nframes_t end);
     virtual void processMidi(const MidiEvent &event, jack_nframes_t time);
 

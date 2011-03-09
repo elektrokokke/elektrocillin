@@ -1,11 +1,13 @@
 #ifndef ENVELOPE_H
 #define ENVELOPE_H
 
+#include "audioprocessor.h"
+#include "midiprocessor.h"
 #include "eventprocessor.h"
 #include "linearinterpolator.h"
 #include "logarithmicinterpolator.h"
 
-class Envelope : public EventProcessor
+class Envelope : public AudioProcessor, public MidiProcessor, public EventProcessor
 {
 public:
     enum Phase {
@@ -26,7 +28,7 @@ public:
     void load(QDataStream &stream);
 
     Interpolator * getInterpolator();
-    void copyInterpolator(const Envelope *envelope);
+    void copyInterpolatorFrom(const Envelope *envelope);
 
     void setSustainIndex(int sustainIndex);
 

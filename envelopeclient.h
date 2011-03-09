@@ -12,7 +12,13 @@
 class EnvelopeClient : public EventProcessorClient
 {
 public:
-    EnvelopeClient(const QString &clientName, size_t ringBufferSize = (2 << 16));
+    /**
+      Creates a new envelope client with the given name.
+
+      This object takes ownership of the given envelope object, i.e., it
+      is deleted at destruction time.
+      */
+    EnvelopeClient(const QString &clientName, Envelope *envelope, size_t ringBufferSize = (2 << 16));
     virtual ~EnvelopeClient();
 
     virtual JackClientFactory * getFactory();

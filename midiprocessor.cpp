@@ -1,37 +1,7 @@
 #include "midiprocessor.h"
 #include <cmath>
 
-MidiProcessor::MidiProcessor(const QStringList &inputPortNames, const QStringList &outputPortNames, double sampleRate) :
-    AudioProcessor(inputPortNames, outputPortNames, sampleRate)
-{
-}
-
-MidiProcessor::MidiProcessor(const MidiProcessor &tocopy) :
-    AudioProcessor(tocopy)
-{
-}
-
-void MidiProcessor::processNoteOn(unsigned char, unsigned char, unsigned char, jack_nframes_t)
-{
-}
-
-void MidiProcessor::processNoteOff(unsigned char, unsigned char, unsigned char, jack_nframes_t)
-{
-}
-
-void MidiProcessor::processAfterTouch(unsigned char, unsigned char, unsigned char, jack_nframes_t)
-{
-}
-
-void MidiProcessor::processController(unsigned char, unsigned char, unsigned char, jack_nframes_t)
-{
-}
-
-void MidiProcessor::processPitchBend(unsigned char, unsigned int, jack_nframes_t)
-{
-}
-
-void MidiProcessor::processChannelPressure(unsigned char, unsigned char, jack_nframes_t)
+MidiProcessor::~MidiProcessor()
 {
 }
 
@@ -50,4 +20,24 @@ double MidiProcessor::computePitchBendFactorFromMidiPitch(unsigned int pitchBend
     // -8192 means minus two half tones => -49152 is one octave => factor 2^(-1)
     // +8192 means plus two half tones => +49152 is one octave => factor 2^1
     return pow(2.0, (double)pitchCentered / 49152.0);
+}
+
+void MidiProcessor::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
+{
+}
+
+void MidiProcessor::processAfterTouch(unsigned char channel, unsigned char noteNumber, unsigned char pressure, jack_nframes_t time)
+{
+}
+
+void MidiProcessor::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
+{
+}
+
+void MidiProcessor::processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time)
+{
+}
+
+void MidiProcessor::processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time)
+{
 }

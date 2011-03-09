@@ -1,9 +1,11 @@
 #ifndef OSCILLATOR_H
 #define OSCILLATOR_H
 
+#include "audioprocessor.h"
+#include "midiprocessor.h"
 #include "eventprocessor.h"
 
-class Oscillator : public EventProcessor
+class Oscillator : public AudioProcessor, public MidiProcessor, public EventProcessor
 {
 public:
     class ChangeGainEvent : public RingBufferEvent
@@ -17,6 +19,7 @@ public:
     void setDetuneController(unsigned char controller);
     unsigned char getDetuneController() const;
 
+    // reimplemented from AudioProcessor:
     virtual void setSampleRate(double sampleRate);
     // reimplemented from MidiProcessor:
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);

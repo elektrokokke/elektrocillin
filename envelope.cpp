@@ -3,7 +3,7 @@
 #include <cmath>
 
 Envelope::Envelope(double durationInSeconds_, double sampleRate) :
-    EventProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
+    AudioProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
     durationInSeconds(durationInSeconds_),
     currentTime(0),
     previousLevel(0),
@@ -43,7 +43,7 @@ Interpolator * Envelope::getInterpolator()
     return &interpolator;
 }
 
-void Envelope::copyInterpolator(const Envelope *envelope)
+void Envelope::copyInterpolatorFrom(const Envelope *envelope)
 {
     interpolator = envelope->interpolator;
 }

@@ -10,8 +10,12 @@
 class OscillatorClient : public EventProcessorClient
 {
 public:
+    /**
+      Creates a new oscillator client object with the given name.
+
+      This object takes ownership of the given Oscillator object, i.e., it will be deleted at destruction time.
+      */
     OscillatorClient(const QString &clientName, Oscillator *oscillator, size_t ringBufferSize = 1024);
-    OscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~OscillatorClient();
 
     virtual JackClientFactory * getFactory();

@@ -84,8 +84,6 @@ void IirMoogFilter::processController(unsigned char channel, unsigned char contr
         parameters.frequencyOffsetFactor = pow(2.0, (double)value / 127.0 * 5.0 + 1);
         parameters.frequency *= parameters.frequencyOffsetFactor;
         computeCoefficients();
-    } else {
-        IirFilter::processController(channel, controller, value, time);
     }
 }
 

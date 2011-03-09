@@ -8,7 +8,7 @@
 class EventProcessorClient : public MidiProcessorClient
 {
 public:
-    EventProcessorClient(const QString &clientName, EventProcessor *eventProcessor_, size_t ringBufferSize = (2 << 16));
+    EventProcessorClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor_, size_t ringBufferSize = (2 << 16));
 
     EventProcessor * getEventProcessor();
 
@@ -36,10 +36,13 @@ protected:
       */
     EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16));
 
+    // reimplemented from MidiProcessorClient:
     virtual bool process(jack_nframes_t nframes);
+
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:
+    EventProcessor *eventProcessor;
     RingBuffer ringBuffer;
 };
 

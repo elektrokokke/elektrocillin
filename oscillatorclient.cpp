@@ -1,24 +1,16 @@
 #include "oscillatorclient.h"
 #include "graphicsnodeitem.h"
 
-OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator, size_t ringBufferSize) :
-    EventProcessorClient(clientName, oscillator, ringBufferSize),
-    oscillator(0)
+OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator_, size_t ringBufferSize) :
+    EventProcessorClient(clientName, oscillator_, oscillator_, oscillator_, ringBufferSize),
+    oscillator(oscillator_)
 {
-}
-
-OscillatorClient::OscillatorClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient(clientName, new Oscillator(), ringBufferSize)
-{
-    oscillator = (Oscillator*)getAudioProcessor();
 }
 
 OscillatorClient::~OscillatorClient()
 {
     close();
-    if (oscillator) {
-        delete oscillator;
-    }
+    delete oscillator;
 }
 
 void OscillatorClient::saveState(QDataStream &stream)
@@ -89,7 +81,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new OscillatorClient(clientName);
+        return new OscillatorClient(clientName, new Oscillator());
     }
     static OscillatorClientFactory factory;
 };

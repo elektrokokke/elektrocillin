@@ -16,7 +16,6 @@ SOURCES += main.cpp\
     midi2audioclient.cpp \
     jackclient.cpp \
     oscillator.cpp \
-    monophonicsynthesizer.cpp \
     simplelowpassfilter.cpp \
     midicontrollerslider.cpp \
     midicontrollercheckbox.cpp \
@@ -92,7 +91,6 @@ HEADERS  += mainwindow.h \
     midi2audioclient.h \
     jackclient.h \
     oscillator.h \
-    monophonicsynthesizer.h \
     simplelowpassfilter.h \
     midicontrollerslider.h \
     midicontrollercheckbox.h \

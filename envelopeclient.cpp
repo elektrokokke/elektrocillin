@@ -1,12 +1,12 @@
 #include "envelopeclient.h"
 #include <cmath>
 
-EnvelopeClient::EnvelopeClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient(clientName, new Envelope(), ringBufferSize)
+EnvelopeClient::EnvelopeClient(const QString &clientName, Envelope *envelope_, size_t ringBufferSize) :
+    EventProcessorClient(clientName, envelope_, envelope_, envelope_, ringBufferSize),
+    envelopeProcess(envelope_)
 {
-    envelopeProcess = (Envelope*)getAudioProcessor();
     envelope = new Envelope();
-    envelope->copyInterpolator(envelopeProcess);
+    envelope->copyInterpolatorFrom(envelopeProcess);
 }
 
 EnvelopeClient::~EnvelopeClient()
@@ -24,7 +24,7 @@ void EnvelopeClient::saveState(QDataStream &stream)
 void EnvelopeClient::loadState(QDataStream &stream)
 {
     envelopeProcess->load(stream);
-    envelope->copyInterpolator(envelopeProcess);
+    envelope->copyInterpolatorFrom(envelopeProcess);
 }
 
 Envelope * EnvelopeClient::getEnvelope()
@@ -120,7 +120,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new EnvelopeClient(clientName);
+        return new EnvelopeClient(clientName, new Envelope());
     }
     static EnvelopeClientFactory factory;
 };
