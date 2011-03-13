@@ -16,32 +16,14 @@ LogarithmicInterpolator::LogarithmicInterpolator(const QVector<double> &xx, cons
 
 void LogarithmicInterpolator::save(QDataStream &stream) const
 {
-    stream << xx << yy;
+    Interpolator::save(stream);
+    stream << base;
 }
 
 void LogarithmicInterpolator::load(QDataStream &stream)
 {
-    stream >> xx >> yy;
-}
-
-const QVector<double> & LogarithmicInterpolator::getX() const
-{
-    return Interpolator::getX();
-}
-
-const QVector<double> & LogarithmicInterpolator::getY() const
-{
-    return yy;
-}
-
-QVector<double> & LogarithmicInterpolator::getX()
-{
-    return xx;
-}
-
-QVector<double> & LogarithmicInterpolator::getY()
-{
-    return yy;
+    Interpolator::load(stream);
+    stream >> base;
 }
 
 double LogarithmicInterpolator::interpolate(int j, double x)

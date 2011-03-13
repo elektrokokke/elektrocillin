@@ -13,12 +13,14 @@ public:
       */
     PolynomialInterpolator(const QVector<double> &xx, const QVector<double> &yy);
 
-    void save(QDataStream &stream) const;
-    void load(QDataStream &stream);
+    virtual void save(QDataStream &stream) const;
+    virtual void load(QDataStream &stream);
 
     /**
       Integrate the given polynomial segment-wise and stick the segments together
       such that they match at the segment bounds (i.e., the control points).
+
+      The resulting segment-wise polynomial is then assigned to this object.
       */
     void integrate(const PolynomialInterpolator &polynomialInterpolator);
     /**

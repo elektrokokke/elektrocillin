@@ -16,7 +16,6 @@ public:
     virtual void saveState(QDataStream &stream);
     virtual void loadState(QDataStream &stream);
 
-    LinearOscillator * getLinearOscillator();
     LinearInterpolator * getLinearInterpolator();
 
     void postIncreaseControlPoints();
@@ -24,6 +23,8 @@ public:
     void postChangeControlPoint(int index, double x, double y);
 
     QGraphicsItem * createGraphicsItem();
+protected:
+    LinearOscillator * getLinearOscillator();
 private:
     LinearInterpolator interpolator;
 };

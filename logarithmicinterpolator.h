@@ -9,15 +9,10 @@ public:
     LogarithmicInterpolator(double base);
     LogarithmicInterpolator(const QVector<double> &xx, const QVector<double> &yy, double base);
 
-    void save(QDataStream &stream) const;
-    void load(QDataStream &stream);
+    virtual void save(QDataStream &stream) const;
+    virtual void load(QDataStream &stream);
 
-    const QVector<double> & getX() const;
-    const QVector<double> & getY() const;
-    QVector<double> & getX();
-    QVector<double> & getY();
-
-    double interpolate(int jlo, double x);
+    virtual double interpolate(int jlo, double x);
 private:
     double base;
 };

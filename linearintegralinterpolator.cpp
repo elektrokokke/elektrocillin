@@ -24,6 +24,18 @@ LinearIntegralInterpolator::LinearIntegralInterpolator(const LinearInterpolator 
     }
 }
 
+void LinearIntegralInterpolator::save(QDataStream &stream) const
+{
+    Interpolator::save(stream);
+    stream << a << b << c;
+}
+
+void LinearIntegralInterpolator::load(QDataStream &stream)
+{
+    Interpolator::load(stream);
+    stream >> a >> b >> c;
+}
+
 double LinearIntegralInterpolator::interpolate(int jlo, double x)
 {
     return a[jlo] * x * x + b[jlo] * x + c[jlo];

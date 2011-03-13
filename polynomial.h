@@ -123,7 +123,7 @@ public:
     {
         resize(tointegrate.size() + 1);
         std::vector<T>::at(0) = 0;
-        for (size_t i = 0; i < std::vector<T>::size(); i++) {
+        for (size_t i = 0; i < std::vector<T>::size() - 1; i++) {
             std::vector<T>::at(i + 1) = tointegrate.at(i) / (T)(i + 1);
         }
     }

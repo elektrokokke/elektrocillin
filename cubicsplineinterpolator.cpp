@@ -23,14 +23,16 @@ CubicSplineInterpolator::CubicSplineInterpolator(const QVector<double> &xx, cons
     setMonotonicity(true);
 }
 
-void CubicSplineInterpolator::save(QDataStream &stream)
+void CubicSplineInterpolator::save(QDataStream &stream) const
 {
-    stream << xx << yy << y2;
+    Interpolator::save(stream);
+    stream << y2;
 }
 
 void CubicSplineInterpolator::load(QDataStream &stream)
 {
-    stream >> xx >> yy >> y2;
+    Interpolator::load(stream);
+    stream >> y2;
 }
 
 const QVector<double> & CubicSplineInterpolator::getY() const

@@ -25,7 +25,6 @@ public:
       */
     virtual void loadState(QDataStream &stream);
 
-    IntegralOscillator * getIntegralOscillator();
     PolynomialInterpolator * getPolynomialInterpolator();
 
     void postIncreaseControlPoints();
@@ -33,6 +32,8 @@ public:
     void postChangeControlPoint(int index, double x, double y);
 
     QGraphicsItem * createGraphicsItem();
+protected:
+    IntegralOscillator * getIntegralOscillator();
 private:
     IntegralOscillator oscillator;
 };

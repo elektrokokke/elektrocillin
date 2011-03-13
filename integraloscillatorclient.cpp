@@ -2,7 +2,8 @@
 #include <cmath>
 
 IntegralOscillatorClient::IntegralOscillatorClient(const QString &clientName, size_t ringBufferSize) :
-    OscillatorClient(clientName, new IntegralOscillator(), ringBufferSize)
+    OscillatorClient(clientName, new IntegralOscillator(4), ringBufferSize),
+    oscillator(4)
 {
 }
 
@@ -20,13 +21,10 @@ void IntegralOscillatorClient::saveState(QDataStream &stream)
 void IntegralOscillatorClient::loadState(QDataStream &stream)
 {
     OscillatorClient::loadState(stream);
-    oscillator.getPolynomialInterpolator()->load(stream);
-    getIntegralOscillator()->setPolynomialInterpolator(*oscillator.getPolynomialInterpolator());
-}
-
-IntegralOscillator * IntegralOscillatorClient::getIntegralOscillator()
-{
-    return (IntegralOscillator*)getAudioProcessor();
+    PolynomialInterpolator interpolator;
+    interpolator.load(stream);
+    oscillator.setPolynomialInterpolator(interpolator);
+    getIntegralOscillator()->setPolynomialInterpolator(interpolator);
 }
 
 PolynomialInterpolator * IntegralOscillatorClient::getPolynomialInterpolator()
@@ -55,6 +53,11 @@ void IntegralOscillatorClient::postChangeControlPoint(int index, double x, doubl
     InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
     oscillator.processEvent(event, 0);
     postEvent(event);
+}
+
+IntegralOscillator * IntegralOscillatorClient::getIntegralOscillator()
+{
+    return (IntegralOscillator*)getAudioProcessor();
 }
 
 QGraphicsItem * IntegralOscillatorClient::createGraphicsItem()

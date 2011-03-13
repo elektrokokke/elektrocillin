@@ -13,9 +13,8 @@ PolynomialInterpolator::PolynomialInterpolator(const QVector<double> &xx, const 
 
 void PolynomialInterpolator::save(QDataStream &stream) const
 {
-    int size = polynomials.size();
-    stream << size;
-    for (int i = 0; i < size; i++) {
+    Interpolator::save(stream);
+    for (int i = 0; i < polynomials.size(); i++) {
         int polynomialSize = polynomials[i].size();
         stream << polynomialSize;
         for (int j = 0; j < polynomialSize; j++) {
@@ -26,10 +25,9 @@ void PolynomialInterpolator::save(QDataStream &stream) const
 
 void PolynomialInterpolator::load(QDataStream &stream)
 {
-    int size;
-    stream >> size;
-    polynomials.resize(size);
-    for (int i = 0; i < size; i++) {
+    Interpolator::load(stream);
+    polynomials.resize(xx.size() - 1);
+    for (int i = 0; i < polynomials.size(); i++) {
         int polynomialSize;
         stream >> polynomialSize;
         polynomials[i].resize(polynomialSize);
@@ -129,7 +127,7 @@ void PolynomialInterpolator::initializePolynomial(int i, double x1, double y1, d
     // initialize the single-degree polynomials based on the given control points:
     if (x1 == x2) {
         polynomials[i].resize(1);
-        polynomials[i].at(0) = x1;
+        polynomials[i].at(0) = y1;
     } else {
         double a = (y2 - y1) / (x2 - x1);
         double b = y1 - a * x1;

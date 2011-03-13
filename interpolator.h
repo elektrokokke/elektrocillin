@@ -29,6 +29,9 @@ public:
     const QVector<double> & getY() const;
     int getM() const;
 
+    virtual void save(QDataStream &stream) const;
+    virtual void load(QDataStream &stream);
+
     virtual double interpolate(int jlo, double x) = 0;
 
     virtual void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
@@ -40,8 +43,6 @@ public:
     void setStartPointConstraints(bool xIsStatic, bool yIsStatic);
     void setEndPointConstraints(bool xIsStatic, bool yIsStatic);
     void setYRange(double yMin, double yMax);
-
-//    virtual void processEvent(const ChangeAllControlPointsEvent *event) = 0;
 protected:
     Interpolator(const QVector<double> &xx, const QVector<double> &yy, int m);
 

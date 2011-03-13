@@ -45,6 +45,16 @@ int Interpolator::getM() const {
     return mm;
 }
 
+void Interpolator::save(QDataStream &stream) const
+{
+    stream << xx << yy;
+}
+
+void Interpolator::load(QDataStream &stream)
+{
+    stream >> xx >> yy;
+}
+
 void Interpolator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
 {
     // note: no check is done here wether the given points adhere to all constraints

@@ -13,7 +13,10 @@ class LinearIntegralInterpolator : public Interpolator
 public:
     LinearIntegralInterpolator(const LinearInterpolator &linearInterpolator);
 
-    double interpolate(int jlo, double x);
+    virtual void save(QDataStream &stream) const;
+    virtual void load(QDataStream &stream);
+
+    virtual double interpolate(int jlo, double x);
 
 private:
     QVector<double> a, b, c;

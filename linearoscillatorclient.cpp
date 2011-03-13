@@ -25,11 +25,6 @@ void LinearOscillatorClient::loadState(QDataStream &stream)
     getLinearOscillator()->setLinearInterpolator(interpolator);
 }
 
-LinearOscillator * LinearOscillatorClient::getLinearOscillator()
-{
-    return (LinearOscillator*)getAudioProcessor();
-}
-
 LinearInterpolator * LinearOscillatorClient::getLinearInterpolator()
 {
     return &interpolator;
@@ -56,6 +51,11 @@ void LinearOscillatorClient::postChangeControlPoint(int index, double x, double 
     InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
     interpolator.changeControlPoint(index, x, y);
     postEvent(event);
+}
+
+LinearOscillator * LinearOscillatorClient::getLinearOscillator()
+{
+    return (LinearOscillator*)getAudioProcessor();
 }
 
 QGraphicsItem * LinearOscillatorClient::createGraphicsItem()
