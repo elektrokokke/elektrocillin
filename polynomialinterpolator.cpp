@@ -73,15 +73,19 @@ void PolynomialInterpolator::smoothen()
     }
 }
 
-double PolynomialInterpolator::interpolate(int jlo, double x)
+double PolynomialInterpolator::interpolate(int j, double x)
 {
-    if (jlo < 0) {
-        return polynomials.first().evaluate(x);
-    } else if (jlo >= polynomials.size()) {
-        return polynomials.back().evaluate(x);
-    } else {
-        return polynomials[jlo].evaluate(x);
+    if (j < 0) {
+        j = 0;
     }
+    if (j >= xx.size() - 1) {
+        if (xx[xx.size() - 1] == xx[xx.size() - 2]) {
+            return yy.last();
+        } else {
+            j = xx.size() - 2;
+        }
+    }
+    return polynomials[j].evaluate(x);
 }
 
 void PolynomialInterpolator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
