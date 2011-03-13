@@ -4,6 +4,7 @@
 #include "oscillator.h"
 #include "interpolatorprocessor.h"
 #include "polynomialinterpolator.h"
+#include <QQueue>
 
 class IntegralOscillator : public Oscillator, public InterpolatorProcessor
 {
@@ -17,12 +18,13 @@ public:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 protected:
     double valueAtPhase(double normalizedPhase);
+    double valueAtPhase(double previousPhase, double phase);
 
 private:
     int nrOfIntegrations;
     QVector<PolynomialInterpolator> integrals;
     QVector<double> previousIntegralValues;
-    double previousPhase;
+    QQueue<double> previousPhases;
 
     void computeIntegrals();
 };
