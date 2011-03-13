@@ -59,8 +59,8 @@ double IntegralOscillator::valueAtPhase(double previousPhase, double phase)
     double value = integrals.back().evaluate(phase);
     // differentiate as many times as we have integrated:
     for (int i = 0; i < nrOfIntegrations; i++) {
-        double previousValue = previousIntegralValues[nrOfIntegrations - i - 1];
-        previousIntegralValues[nrOfIntegrations - i - 1] = value;
+        double previousValue = previousIntegralValues[i];
+        previousIntegralValues[i] = value;
         value = (value - previousValue) / phaseDifference;
     }
     return value;
