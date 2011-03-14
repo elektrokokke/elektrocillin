@@ -12,7 +12,11 @@ class GraphicsMeterItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsMeterItem(const QRectF &rect, const QString &name, double minValue, double maxValue, double value, int slices, QGraphicsItem *parent = 0);
+    enum EllipsisHalf {
+        TOP_HALF,
+        BOTTOM_HALF
+    };
+    GraphicsMeterItem(const QRectF &rect, const QString &name, double minValue, double maxValue, double value, int slices, EllipsisHalf half = TOP_HALF, QGraphicsItem *parent = 0);
 
 public slots:
     void setValue(double value);
@@ -23,6 +27,8 @@ private slots:
 private:
     QString name;
     double minValue, maxValue, value;
+    int slices;
+    EllipsisHalf half;
     int verticalPadding;
     QPen nodePen;
     QBrush nodeBrush;

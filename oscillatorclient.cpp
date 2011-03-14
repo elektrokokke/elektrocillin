@@ -59,11 +59,13 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
     QGraphicsPathItem(parent),
     client(client_)
 {
-    GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 100, 50), "Gain", 0, 1, client->getGain(), 10, this);
-    GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 50, 100, 50), "Tune", -100, 100, client->getTune(), 10, this);
+    GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Gain", 0, 1, client->getGain(), 10, GraphicsMeterItem::TOP_HALF, this);
+    GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 66, 116, 66), "Tune", -100, 100, client->getTune(), 20, GraphicsMeterItem::BOTTOM_HALF, this);
     QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
     QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
-    setPath(gainItem->shape() + detuneItem->shape());
+    QPainterPath path;
+    path.addRect(gainItem->boundingRect() | detuneItem->boundingRect());
+    setPath(path);
     setPen(QPen(Qt::NoPen));
 }
 
