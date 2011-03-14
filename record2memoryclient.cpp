@@ -250,7 +250,6 @@ Record2MemoryGraphicsItem::Record2MemoryGraphicsItem(const QRectF &rect, Record2
     recordClientGraphView->resize(rect.width(), rect.height());
     QGraphicsProxyWidget *recordClientGraphicsItem = new QGraphicsProxyWidget(this);
     recordClientGraphicsItem->setWidget(recordClientGraphView);
-    /*recordClientGraphicsItem->*/setFlag(QGraphicsItem::ItemIgnoresTransformations);
     QObject::connect(client->getThread(), SIGNAL(recordingFinished()), this, SLOT(onRecordingFinished()));
 }
 
