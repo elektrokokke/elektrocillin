@@ -16,6 +16,7 @@ IntegralOscillator::IntegralOscillator(int nrOfIntegrations_, double frequencyMo
         previousPhases.enqueue(0);
         previousPhaseDifferences.enqueue(1);
     }
+    previousPhases.enqueue(0);
     computeIntegrals();
 }
 
@@ -58,7 +59,7 @@ double IntegralOscillator::valueAtPhase(double phase)
 double IntegralOscillator::differentiate(int order)
 {
     // evaluate the top integral at the given phase:
-    double value = integrals.back().evaluate(previousPhases[order - 1]);
+    double value = integrals.back().evaluate(previousPhases[order]);
     // differentiate "order" times:
     double phaseDifferencesSum = 0;
     double factor = 0;

@@ -2,8 +2,8 @@
 #include <cmath>
 
 IntegralOscillatorClient::IntegralOscillatorClient(const QString &clientName, size_t ringBufferSize) :
-    OscillatorClient(clientName, new IntegralOscillator(4), ringBufferSize),
-    oscillator(4)
+    OscillatorClient(clientName, new IntegralOscillator(3), ringBufferSize),
+    oscillator(3)
 {
 }
 
