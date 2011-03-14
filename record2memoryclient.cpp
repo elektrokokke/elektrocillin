@@ -244,7 +244,7 @@ Record2MemoryGraphicsItem::Record2MemoryGraphicsItem(const QRectF &rect, Record2
     node->setBrush(QBrush(qRgb(52, 101, 164)));
     node->setZValue(1);
     node->setBounds(QRectF(rect.left(), 0, rect.width(), 0));
-    node->setBoundsScaled(QRectF(1, 0, 10, 0));
+    node->setBoundsScaled(QRectF(0, 0, 10, 0));
     QObject::connect(node, SIGNAL(xChangedScaled(qreal)), this, SLOT(onZoomNode(qreal)));
     recordClientGraphView = new GraphView(0);
     recordClientGraphView->resize(rect.width(), rect.height());
