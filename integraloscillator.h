@@ -18,13 +18,13 @@ public:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 protected:
     double valueAtPhase(double normalizedPhase);
-    double valueAtPhase(double previousPhase, double phase);
+    double valueAtPhase(double phase, double phaseDifference);
 
 private:
     int nrOfIntegrations;
     QVector<PolynomialInterpolator> integrals;
     QVector<double> previousIntegralValues;
-    QQueue<double> previousPhases;
+    QQueue<double> previousPhases, previousPhaseDifferences;
 
     void computeIntegrals();
 };

@@ -12,8 +12,9 @@ IntegralOscillator::IntegralOscillator(int nrOfIntegrations_, double frequencyMo
     xx.append(1);
     yy.append(1);
     integrals[0] = PolynomialInterpolator(xx, yy);
-    for (int i = 0; i < nrOfIntegrations + 1; i++) {
+    for (int i = 0; i < nrOfIntegrations; i++) {
         previousPhases.enqueue(0);
+        previousPhaseDifferences.enqueue(1);
     }
     computeIntegrals();
 
@@ -43,25 +44,31 @@ bool IntegralOscillator::processEvent(const RingBufferEvent *event, jack_nframes
 
 double IntegralOscillator::valueAtPhase(double phase)
 {
-    double value = valueAtPhase(previousPhases.back(), phase);
-    previousPhases.enqueue(phase);
-    previousPhases.dequeue();
-    return value;
-}
-
-double IntegralOscillator::valueAtPhase(double previousPhase, double phase)
-{
-    double phaseDifference = phase - previousPhase;
+    double phaseDifference = phase - previousPhases.back();
     if (phaseDifference <= 0) {
         phaseDifference += 1;
     }
+    double value = valueAtPhase(phase, phaseDifference);
+    previousPhases.enqueue(phase);
+    previousPhases.dequeue();
+    previousPhaseDifferences.enqueue(phaseDifference);
+    previousPhaseDifferences.dequeue();
+    return value;
+}
+
+double IntegralOscillator::valueAtPhase(double phase, double phaseDifference)
+{
     // evaluate the top integral at the current phase:
     double value = integrals.back().evaluate(phase);
     // differentiate as many times as we have integrated:
+    double phaseDifferencesSum = phaseDifference;
+    double factor = 1;
     for (int i = 0; i < nrOfIntegrations; i++) {
         double previousValue = previousIntegralValues[i];
         previousIntegralValues[i] = value;
-        value = (value - previousValue) / phaseDifference;
+        value = (value - previousValue) * factor / phaseDifferencesSum;
+        phaseDifferencesSum += previousPhaseDifferences[previousPhaseDifferences.size() - i - 1];
+        factor++;
     }
     return value;
 }
@@ -74,8 +81,8 @@ void IntegralOscillator::computeIntegrals()
         // smoothen the result (match start and end points):
         integrals[i].smoothen();
     }
-    // compute previous integral values:
-    for (int i = 1; i < previousPhases.size(); i++) {
-        valueAtPhase(previousPhases[i - 1], previousPhases[i]);
-    }
+//    // compute previous integral values:
+//    for (int i = 0; i < previousPhases.size(); i++) {
+//        valueAtPhase(previousPhases[i], previousPhaseDifferences[i]);
+//    }
 }
