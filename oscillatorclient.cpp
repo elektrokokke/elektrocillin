@@ -3,7 +3,8 @@
 OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator_, size_t ringBufferSize) :
     EventProcessorClient(clientName, oscillator_, oscillator_, oscillator_, ringBufferSize),
     oscillatorProcess(oscillator_),
-    gain(oscillatorProcess->getGain())
+    gain(oscillatorProcess->getGain()),
+    tune(oscillatorProcess->getTune())
 {
 }
 
@@ -15,13 +16,14 @@ OscillatorClient::~OscillatorClient()
 
 void OscillatorClient::saveState(QDataStream &stream)
 {
-    stream << gain;
+    stream << gain << tune;
 }
 
 void OscillatorClient::loadState(QDataStream &stream)
 {
-    stream >> gain;
+    stream >> gain >> tune;
     oscillatorProcess->setGain(gain);
+    oscillatorProcess->setTune(tune);
 }
 
 double OscillatorClient::getGain() const
@@ -31,9 +33,20 @@ double OscillatorClient::getGain() const
 
 void OscillatorClient::postChangeGain(double gain)
 {
-    Oscillator::ChangeGainEvent *event = new Oscillator::ChangeGainEvent();
-    event->gain = gain;
+    Oscillator::ChangeGainEvent *event = new Oscillator::ChangeGainEvent(gain);
     this->gain = gain;
+    postEvent(event);
+}
+
+double OscillatorClient::getTune() const
+{
+    return tune;
+}
+
+void OscillatorClient::postChangeTune(double tune)
+{
+    Oscillator::ChangeTuneEvent *event = new Oscillator::ChangeTuneEvent(tune);
+    this->tune = tune;
     postEvent(event);
 }
 
@@ -47,7 +60,7 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
     client(client_)
 {
     GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 100, 50), "Gain", 0, 1, client->getGain(), 10, this);
-    GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 50, 100, 50), "Tune", -100, 100, 0, 10, this);
+    GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 50, 100, 50), "Tune", -100, 100, client->getTune(), 10, this);
     QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
     QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
     setPath(gainItem->shape() + detuneItem->shape());
@@ -61,7 +74,7 @@ void OscillatorClientGraphicsItem::onGainChanged(double value)
 
 void OscillatorClientGraphicsItem::onDetuneChanged(double value)
 {
-    // TODO: post detune change
+    client->postChangeTune(value);
 }
 
 class OscillatorClientFactory : public JackClientFactory

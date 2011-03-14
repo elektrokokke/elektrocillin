@@ -4,11 +4,11 @@
 
 Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, const QStringList &additionalInputPortNames) :
     AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
-    detuneController(3),
+    tuneController(3),
     gain(1),
     frequency(440),
     frequencyDetuneFactor(1),
-    detuneInCents(0),
+    tuneInCents(0),
     frequencyPitchBendFactor(1),
     frequencyModulationFactor(1),
     frequencyModulationIntensity(frequencyModulationIntensity_),
@@ -23,12 +23,12 @@ Oscillator::~Oscillator()
 
 void Oscillator::setDetuneController(unsigned char controller)
 {
-    detuneController = controller;
+    tuneController = controller;
 }
 
 unsigned char Oscillator::getDetuneController() const
 {
-    return detuneController;
+    return tuneController;
 }
 
 void Oscillator::setSampleRate(double sampleRate)
@@ -52,8 +52,8 @@ void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframe
 
 void Oscillator::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
-    if (controller == detuneController) {
-        setDetune(((double)value - 64.0) / 128.0 * 200.0);
+    if (controller == tuneController) {
+        setTune(((double)value - 64.0) / 128.0 * 200.0);
     } else {
         MidiProcessor::processController(channel, controller, value, time);
     }
@@ -76,8 +76,11 @@ void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframe
 
 bool Oscillator::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
-    if (const ChangeGainEvent *changeGainEvent = dynamic_cast<const ChangeGainEvent*>(event)) {
-        setGain(changeGainEvent->gain);
+    if (const ChangeGainEvent *event_ = dynamic_cast<const ChangeGainEvent*>(event)) {
+        setGain(event_->gain);
+        return true;
+    } else if (const ChangeTuneEvent *event_ = dynamic_cast<const ChangeTuneEvent*>(event)) {
+        setTune(event_->tune);
         return true;
     }
     return false;
@@ -104,16 +107,16 @@ double Oscillator::getFrequency() const
     return frequency;
 }
 
-void Oscillator::setDetune(double cents)
+void Oscillator::setTune(double cents)
 {
-    detuneInCents = cents;
+    tuneInCents = cents;
     frequencyDetuneFactor = pow(2.0, cents / 1200.0);
     computeNormalizedFrequency();
 }
 
-double Oscillator::getDetune() const
+double Oscillator::getTune() const
 {
-    return detuneInCents;
+    return tuneInCents;
 }
 
 double Oscillator::getNormalizedFrequency() const

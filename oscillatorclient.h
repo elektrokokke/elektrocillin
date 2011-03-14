@@ -30,11 +30,13 @@ public:
 
     double getGain() const;
     void postChangeGain(double gain);
+    double getTune() const;
+    void postChangeTune(double tune);
 
     QGraphicsItem * createGraphicsItem();
 private:
     Oscillator *oscillatorProcess;
-    double gain;
+    double gain, tune;
 };
 
 class OscillatorClientGraphicsItem : public QObject, public QGraphicsPathItem

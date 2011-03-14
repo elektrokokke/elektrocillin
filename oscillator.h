@@ -11,7 +11,18 @@ public:
     class ChangeGainEvent : public RingBufferEvent
     {
     public:
+        ChangeGainEvent(double gain_) :
+            gain(gain_)
+        {}
         double gain;
+    };
+    class ChangeTuneEvent : public RingBufferEvent
+    {
+    public:
+        ChangeTuneEvent(double tune_) :
+            tune(tune_)
+        {}
+        double tune;
     };
 
     Oscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
@@ -44,14 +55,14 @@ public:
       */
     double getFrequency() const;
     /**
-      Sets the detune (relative to the current frequency)
+      Sets the tune (relative to the current frequency)
       in cents (100 cents = 1 half tone, 1200 cents = 1 octave).
       */
-    void setDetune(double cents);
+    void setTune(double cents);
     /**
-      Returns the current detune value in cents.
+      Returns the current tune value in cents.
       */
-    double getDetune() const;
+    double getTune() const;
     /**
       Returns the current normalized frequency of this oscillator,
       i.e. the number of cycles per sample. This number depends on
@@ -66,8 +77,8 @@ protected:
     virtual double valueAtPhase(double phase);
 
 private:
-    unsigned char detuneController;
-    double gain, frequency, frequencyDetuneFactor, detuneInCents, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, normalizedFrequency;
+    unsigned char tuneController;
+    double gain, frequency, frequencyDetuneFactor, tuneInCents, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, normalizedFrequency;
 
     void computeNormalizedFrequency();
 };
