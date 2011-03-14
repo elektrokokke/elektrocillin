@@ -17,7 +17,6 @@ IntegralOscillator::IntegralOscillator(int nrOfIntegrations_, double frequencyMo
         previousPhaseDifferences.enqueue(1);
     }
     computeIntegrals();
-
 }
 
 PolynomialInterpolator * IntegralOscillator::getPolynomialInterpolator()
@@ -48,41 +47,40 @@ double IntegralOscillator::valueAtPhase(double phase)
     if (phaseDifference <= 0) {
         phaseDifference += 1;
     }
-    double value = valueAtPhase(phase, phaseDifference);
     previousPhases.enqueue(phase);
     previousPhases.dequeue();
     previousPhaseDifferences.enqueue(phaseDifference);
     previousPhaseDifferences.dequeue();
+    double value = differentiate(nrOfIntegrations);
     return value;
 }
 
-double IntegralOscillator::valueAtPhase(double phase, double phaseDifference)
+double IntegralOscillator::differentiate(int order)
 {
-    // evaluate the top integral at the current phase:
-    double value = integrals.back().evaluate(phase);
-    // differentiate as many times as we have integrated:
-    double phaseDifferencesSum = phaseDifference;
-    double factor = 1;
-    for (int i = 0; i < nrOfIntegrations; i++) {
+    // evaluate the top integral at the given phase:
+    double value = integrals.back().evaluate(previousPhases[order - 1]);
+    // differentiate "order" times:
+    double phaseDifferencesSum = 0;
+    double factor = 0;
+    for (int i = 0; i < order; i++) {
         double previousValue = previousIntegralValues[i];
         previousIntegralValues[i] = value;
-        value = (value - previousValue) * factor / phaseDifferencesSum;
-        phaseDifferencesSum += previousPhaseDifferences[previousPhaseDifferences.size() - i - 1];
+        phaseDifferencesSum += previousPhaseDifferences[order - i - 1];
         factor++;
+        value = (value - previousValue) * factor / phaseDifferencesSum;
     }
     return value;
 }
 
 void IntegralOscillator::computeIntegrals()
 {
-    for (int i = 1; i < integrals.size(); i++) {
+    for (int i = 0; i < nrOfIntegrations; i++) {
         // integrate the previous piece-wise polynomial:
-        integrals[i].integrate(integrals[i - 1]);
+        integrals[i + 1].integrate(integrals[i]);
         // smoothen the result (match start and end points):
-        integrals[i].smoothen();
+        integrals[i + 1].smoothen();
     }
-//    // compute previous integral values:
-//    for (int i = 0; i < previousPhases.size(); i++) {
-//        valueAtPhase(previousPhases[i], previousPhaseDifferences[i]);
-//    }
+    for (int i = 0; i < nrOfIntegrations; i++) {
+        differentiate(i + 1);
+    }
 }

@@ -18,7 +18,7 @@ public:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 protected:
     double valueAtPhase(double normalizedPhase);
-    double valueAtPhase(double phase, double phaseDifference);
+    double differentiate(int order);
 
 private:
     int nrOfIntegrations;
