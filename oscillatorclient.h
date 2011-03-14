@@ -3,9 +3,7 @@
 
 #include "eventprocessorclient.h"
 #include "oscillator.h"
-#include <QGraphicsRectItem>
-#include <QBrush>
-#include <QPen>
+#include "graphicsmeteritem.h"
 
 class OscillatorClient : public EventProcessorClient
 {
@@ -39,13 +37,13 @@ private:
     double gain;
 };
 
-class OscillatorClientGraphicsItem : public QObject, public QGraphicsRectItem
+class OscillatorClientGraphicsItem : public GraphicsMeterItem
 {
     Q_OBJECT
 public:
     OscillatorClientGraphicsItem(const QRectF &rect, OscillatorClient *client, QGraphicsItem *parent = 0, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 private slots:
-    void onNodeYChanged(qreal y);
+    void onValueChanged(double value);
 private:
     OscillatorClient *client;
 };

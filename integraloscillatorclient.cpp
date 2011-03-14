@@ -1,5 +1,4 @@
 #include "integraloscillatorclient.h"
-#include <cmath>
 
 IntegralOscillatorClient::IntegralOscillatorClient(const QString &clientName, size_t ringBufferSize) :
     OscillatorClient(clientName, new IntegralOscillator(3), ringBufferSize),
@@ -63,13 +62,17 @@ IntegralOscillator * IntegralOscillatorClient::getIntegralOscillator()
 QGraphicsItem * IntegralOscillatorClient::createGraphicsItem()
 {
     QRectF rect(0, 0, 600, 420);
-    QGraphicsRectItem *rectItem = new QGraphicsRectItem(rect);
-    rectItem->setPen(QPen(Qt::NoPen));
-    QRectF rectGain(rect.x(), rect.y(), 16, rect.height());
-    QRectF rectOscillator = rect.adjusted(rectGain.width(), 0, 0, 0);
-    (new OscillatorClientGraphicsItem(rectGain, this))->setParentItem(rectItem);
-    (new IntegralOscillatorGraphicsItem(rectOscillator, this))->setParentItem(rectItem);
-    return rectItem;
+    QGraphicsPathItem *pathItem = new QGraphicsPathItem();
+    QGraphicsItem *oscillatorItem = OscillatorClient::createGraphicsItem();
+    oscillatorItem->setParentItem(pathItem);
+    oscillatorItem->setPos(rect.left() - oscillatorItem->boundingRect().width(), rect.bottom() - oscillatorItem->boundingRect().height());
+    (new IntegralOscillatorGraphicsItem(rect, this))->setParentItem(pathItem);
+    QPainterPath path;
+    path.addRect(rect);
+    path.addRect(oscillatorItem->boundingRect().translated(oscillatorItem->pos()));
+    pathItem->setPen(QPen(Qt::NoPen));
+    pathItem->setPath(path);
+    return pathItem;
 }
 
 IntegralOscillatorGraphicsItem::IntegralOscillatorGraphicsItem(const QRectF &rect, IntegralOscillatorClient *client_, QGraphicsItem *parent) :

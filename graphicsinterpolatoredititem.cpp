@@ -337,7 +337,6 @@ GraphicsNodeItem * GraphicsInterpolatorGraphItem::createNode(qreal x, qreal y, c
     nodeItem->setBoundsScaled(rectScaled);
     nodeItem->setXScaled(x);
     nodeItem->setYScaled(y);
-    nodeItem->setSendPositionChanges(true);
     QObject::connect(nodeItem, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onNodePositionChangedScaled(QPointF)));
     return nodeItem;
 }

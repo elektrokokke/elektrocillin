@@ -1,5 +1,4 @@
 #include "oscillatorclient.h"
-#include "graphicsnodeitem.h"
 
 OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator_, size_t ringBufferSize) :
     EventProcessorClient(clientName, oscillator_, oscillator_, oscillator_, ringBufferSize),
@@ -40,26 +39,19 @@ void OscillatorClient::postChangeGain(double gain)
 
 QGraphicsItem * OscillatorClient::createGraphicsItem()
 {
-    return new OscillatorClientGraphicsItem(QRectF(0, 0, 16, 420), this);
+    return new OscillatorClientGraphicsItem(QRectF(0, 0, 100, 50), this);
 }
 
 OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(const QRectF &rect, OscillatorClient *client_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
-    QGraphicsRectItem(rect, parent),
+    GraphicsMeterItem(rect, "Gain", 0, 1, client_->getGain(), 10, parent),
     client(client_)
 {
-    GraphicsNodeItem *nodeItem = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
-    nodeItem->setPen(nodePen);
-    nodeItem->setBrush(nodeBrush);
-    nodeItem->setZValue(1);
-    nodeItem->setBounds(QRectF(rect.center().x(), rect.top(), 0, rect.height()));
-    nodeItem->setBoundsScaled(QRectF(0, 1, 0, -1));
-    nodeItem->setYScaled(client->getGain());
-    QObject::connect(nodeItem, SIGNAL(yChangedScaled(qreal)), this, SLOT(onNodeYChanged(qreal)));
+    QObject::connect(this, SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
 }
 
-void OscillatorClientGraphicsItem::onNodeYChanged(qreal y)
+void OscillatorClientGraphicsItem::onValueChanged(double value)
 {
-    client->postChangeGain(y);
+    client->postChangeGain(value);
 }
 
 class OscillatorClientFactory : public JackClientFactory

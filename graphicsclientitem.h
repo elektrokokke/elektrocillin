@@ -10,6 +10,7 @@
 #include <QFont>
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
+#include <QPainterPathStroker>
 
 class CommandTextItem;
 class JackContextGraphicsScene;
@@ -51,6 +52,7 @@ private:
     QMenu *contextMenu;
     bool isMacro;
     QAction *showInnerItemAction;
+    QPainterPathStroker pathStroker;
 
     void initItem();
     void initRest();

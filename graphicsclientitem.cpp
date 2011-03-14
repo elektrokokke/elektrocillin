@@ -92,7 +92,9 @@ void GraphicsClientItem::showInnerItem(bool ensureVisible_)
         // show the inner item if requested:
         innerItem->setVisible(ensureVisible_ || !innerItem->isVisible());
         if (innerItem->isVisible()) {
-            setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-padding, -padding, padding, padding).translated(innerItem->pos())));
+//            setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-padding, -padding, padding, padding).translated(innerItem->pos())));
+            QPainterPath innerItemPath = innerItem->shape().translated(innerItem->pos());
+            setPath(pathWithoutInnerItem + innerItemPath + pathStroker.createStroke(innerItemPath));
             showInnerItemCommand->setText("[-]");
             showInnerItemAction->setText("Hide controls");
         } else {
@@ -195,6 +197,7 @@ void GraphicsClientItem::initItem()
         delete children[i];
     }
 
+    pathStroker.setWidth(this->padding * 2);
     bool gradient = false;
     setCursor(Qt::ArrowCursor);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
