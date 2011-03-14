@@ -15,6 +15,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portT
     clientName(client->getClientName()),
     type(type_),
     portType(portType_),
+    padding(4),
     font(font_),
     innerItem(0),
     isMacro(RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data()))
@@ -28,6 +29,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clien
     clientName(clientName_),
     type(type_),
     portType(portType_),
+    padding(4),
     font(font_),
     innerItem(0),
     isMacro(RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data()))
@@ -69,7 +71,7 @@ void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
     if (innerItem) {
         innerItem->setVisible(false);
         innerItem->setParentItem(this);
-        innerItem->setPos(getRect().topRight());
+        innerItem->setPos(getRect().topRight() + QPointF(0, padding));
     }
     showInnerItemAction->setVisible(innerItem);
     zoomToInnerItemCommand->setVisible(innerItem);
@@ -90,7 +92,7 @@ void GraphicsClientItem::showInnerItem(bool ensureVisible_)
         // show the inner item if requested:
         innerItem->setVisible(ensureVisible_ || !innerItem->isVisible());
         if (innerItem->isVisible()) {
-            setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().translated(innerItem->pos())));
+            setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-padding, -padding, padding, padding).translated(innerItem->pos())));
             showInnerItemCommand->setText("[-]");
             showInnerItemAction->setText("Hide controls");
         } else {
@@ -322,16 +324,18 @@ void GraphicsClientItem::initItem()
     }
     QPainterPath combinedPath = bodyPath;
 
-    QGraphicsPathItem *bodyItem = new QGraphicsPathItem(bodyPath, this);
+//    QGraphicsPathItem *bodyItem = new QGraphicsPathItem(bodyPath, this);
     if (isMacro) {
-        bodyItem->setPen(QPen(QBrush(QColor("steelblue")), 3));
+        /*bodyItem->*/setPen(QPen(QBrush(QColor("steelblue")), 3));
     } else {
-        bodyItem->setPen(QPen(QBrush(Qt::black), 3));
+        /*bodyItem->*/setPen(QPen(QBrush(Qt::black), 3));
     }
-    bodyItem->setBrush(QBrush(Qt::white));
+    /*bodyItem->*/setBrush(QBrush(Qt::white));
     setPath(combinedPath);
-    setPen(QPen(Qt::NoPen));
-    setBrush(QBrush(Qt::NoBrush));
+//    setPen(QPen(Qt::NoPen));
+//    setBrush(QBrush(Qt::NoBrush));
+//    bodyItem->setPen(QPen(Qt::NoPen));
+//    bodyItem->setBrush(QBrush(Qt::NoBrush));
 
     // try to get the position:
     QVariant clientProperty = RecursiveJackContext::getInstance()->getClientProperty(clientName);

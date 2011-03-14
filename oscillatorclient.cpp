@@ -40,15 +40,13 @@ void OscillatorClient::postChangeGain(double gain)
 
 QGraphicsItem * OscillatorClient::createGraphicsItem()
 {
-    return new OscillatorClientGraphicsItem(QRectF(0, 0, 600, 420), this);
+    return new OscillatorClientGraphicsItem(QRectF(0, 0, 16, 420), this);
 }
 
 OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(const QRectF &rect, OscillatorClient *client_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
     QGraphicsRectItem(rect, parent),
     client(client_)
 {
-    setPen(QPen(QBrush(Qt::black), 2));
-    setBrush(Qt::white);
     GraphicsNodeItem *nodeItem = new GraphicsNodeItem(-5.0, -5.0, 10.0, 10.0, this);
     nodeItem->setPen(nodePen);
     nodeItem->setBrush(nodeBrush);

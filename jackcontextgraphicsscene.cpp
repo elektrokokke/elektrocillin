@@ -3,7 +3,7 @@
 #include "metajack/recursivejackcontext.h"
 
 JackContextGraphicsScene::JackContextGraphicsScene() :
-    clientStyle(1),
+    clientStyle(3),
     portStyle(3),
     font("Helvetica", 12)
 {

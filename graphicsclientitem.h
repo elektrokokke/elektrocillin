@@ -42,7 +42,7 @@ private slots:
 private:
     JackClient *client;
     QString clientName;
-    int type, portType;
+    int type, portType, padding;
     QFont font;
     QRectF rect;
     QGraphicsItem *innerItem;

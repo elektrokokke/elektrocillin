@@ -11,8 +11,6 @@ GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpo
     horizontalSlices(qMax(1, horizontalSlices_)),
     logarithmicX(logarithmicX_)
 {
-    setPen(QPen(QBrush(Qt::black), 2));
-    setBrush(QBrush(Qt::white));
     font.setPointSize(6);
 
     setRect(rectangle, rectScaled);
