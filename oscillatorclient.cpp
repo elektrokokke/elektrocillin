@@ -39,19 +39,29 @@ void OscillatorClient::postChangeGain(double gain)
 
 QGraphicsItem * OscillatorClient::createGraphicsItem()
 {
-    return new OscillatorClientGraphicsItem(QRectF(0, 0, 100, 50), this);
+    return new OscillatorClientGraphicsItem(this);
 }
 
-OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(const QRectF &rect, OscillatorClient *client_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
-    GraphicsMeterItem(rect, "Gain", 0, 1, client_->getGain(), 10, parent),
+OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *client_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
+    QGraphicsPathItem(parent),
     client(client_)
 {
-    QObject::connect(this, SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
+    GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 100, 50), "Gain", 0, 1, client->getGain(), 10, this);
+    GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 50, 100, 50), "Tune", -100, 100, 0, 10, this);
+    QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
+    QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
+    setPath(gainItem->shape() + detuneItem->shape());
+    setPen(QPen(Qt::NoPen));
 }
 
-void OscillatorClientGraphicsItem::onValueChanged(double value)
+void OscillatorClientGraphicsItem::onGainChanged(double value)
 {
     client->postChangeGain(value);
+}
+
+void OscillatorClientGraphicsItem::onDetuneChanged(double value)
+{
+    // TODO: post detune change
 }
 
 class OscillatorClientFactory : public JackClientFactory

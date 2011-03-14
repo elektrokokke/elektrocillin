@@ -37,13 +37,14 @@ private:
     double gain;
 };
 
-class OscillatorClientGraphicsItem : public GraphicsMeterItem
+class OscillatorClientGraphicsItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    OscillatorClientGraphicsItem(const QRectF &rect, OscillatorClient *client, QGraphicsItem *parent = 0, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    OscillatorClientGraphicsItem(OscillatorClient *client, QGraphicsItem *parent = 0, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
 private slots:
-    void onValueChanged(double value);
+    void onGainChanged(double value);
+    void onDetuneChanged(double value);
 private:
     OscillatorClient *client;
 };

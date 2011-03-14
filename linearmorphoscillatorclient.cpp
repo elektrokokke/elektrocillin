@@ -81,13 +81,17 @@ void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int ind
 QGraphicsItem * LinearMorphOscillatorClient::createGraphicsItem()
 {
     QRectF rect(0, 0, 600, 420);
-    QGraphicsRectItem *rectItem = new QGraphicsRectItem(rect);
-    rectItem->setPen(QPen(Qt::NoPen));
-    QRectF rectGain(rect.x(), rect.y(), 16, rect.height());
-    QRectF rectOscillator = rect.adjusted(rectGain.width(), 0, 0, 0);
-    (new OscillatorClientGraphicsItem(rectGain, this))->setParentItem(rectItem);
-    (new LinearMorphOscillatorGraphicsItem(rectOscillator, this))->setParentItem(rectItem);
-    return rectItem;
+    QGraphicsPathItem *pathItem = new QGraphicsPathItem();
+    QGraphicsItem *oscillatorItem = OscillatorClient::createGraphicsItem();
+    oscillatorItem->setParentItem(pathItem);
+    oscillatorItem->setPos(rect.left() - oscillatorItem->boundingRect().width(), rect.bottom() - oscillatorItem->boundingRect().height());
+    (new LinearMorphOscillatorGraphicsItem(rect, this))->setParentItem(pathItem);
+    QPainterPath path;
+    path.addRect(rect);
+    path.addRect(oscillatorItem->boundingRect().translated(oscillatorItem->pos()));
+    pathItem->setPen(QPen(Qt::NoPen));
+    pathItem->setPath(path);
+    return pathItem;
 }
 
 LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent) :
