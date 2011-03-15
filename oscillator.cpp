@@ -2,7 +2,7 @@
 #include <cmath>
 #include <QtGlobal>
 
-Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, const QStringList &additionalInputPortNames) :
+Oscillator::Oscillator(double sampleRate, const QStringList &additionalInputPortNames) :
     AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
     tuneController(3),
     gain(1),
@@ -11,7 +11,7 @@ Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, 
     tuneInCents(0),
     frequencyPitchBendFactor(1),
     frequencyModulationFactor(1),
-    frequencyModulationIntensity(frequencyModulationIntensity_),
+    frequencyModulationIntensity(2),
     phase(0)
 {
 }

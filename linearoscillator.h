@@ -9,11 +9,11 @@
 class LinearOscillator : public Oscillator, public InterpolatorProcessor
 {
 public:
-    LinearOscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList(), int sincWindowSize = 4);
+    LinearOscillator(double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList(), int sincWindowSize = 4);
     /**
       @param interpolator has to span the interval [0..2 * pi]
       */
-    LinearOscillator(const LinearInterpolator &interpolator, double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, int sincWindowSize = 8);
+    LinearOscillator(const LinearInterpolator &interpolator, double sampleRate = 44100, int sincWindowSize = 8);
 
     const LinearInterpolator & getLinearInterpolator() const;
     void setLinearInterpolator(const LinearInterpolator &interpolator);

@@ -1,7 +1,7 @@
 #include "integraloscillator.h"
 
-IntegralOscillator::IntegralOscillator(int nrOfIntegrations_, double frequencyModulationIntensity, double sampleRate, const QStringList &additionalInputPortNames) :
-    Oscillator(frequencyModulationIntensity, sampleRate, additionalInputPortNames),
+IntegralOscillator::IntegralOscillator(int nrOfIntegrations_, double sampleRate, const QStringList &additionalInputPortNames) :
+    Oscillator(sampleRate, additionalInputPortNames),
     nrOfIntegrations(nrOfIntegrations_),
     integrals(nrOfIntegrations + 1),
     previousIntegralValues(nrOfIntegrations, 0)

@@ -9,7 +9,7 @@
 class IntegralOscillator : public Oscillator, public InterpolatorProcessor
 {
 public:
-    IntegralOscillator(int nrOfIntegrations, double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
+    IntegralOscillator(int nrOfIntegrations, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
 
     PolynomialInterpolator * getPolynomialInterpolator();
     void setPolynomialInterpolator(const PolynomialInterpolator &interpolator);

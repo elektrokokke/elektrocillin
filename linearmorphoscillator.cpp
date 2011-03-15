@@ -1,16 +1,7 @@
 #include "linearmorphoscillator.h"
 
-LinearMorphOscillator::LinearMorphOscillator(const LinearOscillator &state1, const LinearOscillator &state2, double frequencyModulationIntensity, double sampleRate) :
-    LinearOscillator(frequencyModulationIntensity, sampleRate, QStringList("Morph modulation")),
-    morphAudio(0),
-    morphMidi(0)
-{
-    state[0] = state1.getLinearInterpolator();
-    state[1] = state2.getLinearInterpolator();
-}
-
-LinearMorphOscillator::LinearMorphOscillator(const LinearInterpolator &state1, const LinearInterpolator &state2, double frequencyModulationIntensity, double sampleRate) :
-    LinearOscillator(frequencyModulationIntensity, sampleRate, QStringList("Morph modulation")),
+LinearMorphOscillator::LinearMorphOscillator(const LinearInterpolator &state1, const LinearInterpolator &state2, double sampleRate) :
+    LinearOscillator(sampleRate, QStringList("Morph modulation")),
     morphAudio(0),
     morphMidi(0)
 {

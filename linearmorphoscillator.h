@@ -17,8 +17,7 @@ public:
         int state;
     };
 
-    LinearMorphOscillator(const LinearOscillator &state1, const LinearOscillator &state2, double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100);
-    LinearMorphOscillator(const LinearInterpolator &state1, const LinearInterpolator &state2, double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100);
+    LinearMorphOscillator(const LinearInterpolator &state1, const LinearInterpolator &state2, double sampleRate = 44100);
 
     const LinearInterpolator & getState(int state) const;
     void setState(int state, const LinearInterpolator &interpolator);

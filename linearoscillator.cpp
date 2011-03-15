@@ -3,8 +3,8 @@
 #include <cmath>
 #include <QDebug>
 
-LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double sampleRate, const QStringList &additionalInputPortNames, int sincWindowSize_) :
-    Oscillator(frequencyModulationIntensity, sampleRate, additionalInputPortNames),
+LinearOscillator::LinearOscillator(double sampleRate, const QStringList &additionalInputPortNames, int sincWindowSize_) :
+    Oscillator(sampleRate, additionalInputPortNames),
     sincWindowSize(sincWindowSize_),
     siInterpolator(QVector<double>(), QVector<double>(), QVector<double>())
 {
@@ -17,8 +17,8 @@ LinearOscillator::LinearOscillator(double frequencyModulationIntensity, double s
     initializeSiInterpolator();
 }
 
-LinearOscillator::LinearOscillator(const LinearInterpolator &interpolator_, double frequencyModulationIntensity, double sampleRate, int sincWindowSize_) :
-    Oscillator(frequencyModulationIntensity, sampleRate),
+LinearOscillator::LinearOscillator(const LinearInterpolator &interpolator_, double sampleRate, int sincWindowSize_) :
+    Oscillator(sampleRate),
     interpolator(interpolator_),
     sincWindowSize(sincWindowSize_),
     siInterpolator(QVector<double>(), QVector<double>(), QVector<double>())

@@ -74,7 +74,7 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
 {
     GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Gain", 0, 1, client->getGain(), 10, GraphicsMeterItem::TOP_HALF, this);
     GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 66, 116, 66), "Tune", -100, 100, client->getTune(), 20, GraphicsMeterItem::BOTTOM_HALF, this);
-    GraphicsMeterItem *pitchModItem = new GraphicsMeterItem(QRectF(0, 132, 116, 66), "Max.pitchmod.", -12, 12, client->getPitchModulationIntensity(), 12, GraphicsMeterItem::TOP_HALF, this);
+    GraphicsMeterItem *pitchModItem = new GraphicsMeterItem(QRectF(0, 132, 116, 66), "Pitchmod", 0, 12, client->getPitchModulationIntensity(), 12, GraphicsMeterItem::TOP_HALF, this);
     QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
     QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
     QObject::connect(pitchModItem, SIGNAL(valueChanged(double)), this, SLOT(onPitchModulationIntensityChanged(double)));
