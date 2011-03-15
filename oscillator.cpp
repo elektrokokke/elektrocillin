@@ -14,6 +14,7 @@ Oscillator::Oscillator(double sampleRate, const QStringList &additionalInputPort
     frequencyDetuneFactor(1),
     frequencyModulationFactor(1)
 {
+    frequencyModulationFactorBase = pow(2.0, frequencyModulationIntensity / 12.0);
     computeNormalizedFrequency();
 }
 
@@ -33,6 +34,7 @@ Oscillator & Oscillator::operator=(const Oscillator &oscillator)
     phase = 0;
     frequency = 440;
     frequencyDetuneFactor = 1;
+    frequencyModulationFactorBase = pow(2.0, frequencyModulationIntensity / 12.0);
     frequencyModulationFactor = 1;
     computeNormalizedFrequency();
     return *this;
@@ -90,7 +92,7 @@ void Oscillator::processController(unsigned char channel, unsigned char controll
 void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     // consider frequency modulation input:
-    frequencyModulationFactor = pow(1 + frequencyModulationIntensity / 12.0, inputs[0]);
+    frequencyModulationFactor = pow(frequencyModulationFactorBase, inputs[0]);
     computeNormalizedFrequency();
     double phase2 = phase + normalizedFrequency;
     if (phase2 >= 1) {
@@ -135,6 +137,7 @@ double Oscillator::getPitchModulationIntensity() const
 void Oscillator::setPitchModulationIntensity(double halfTones)
 {
     frequencyModulationIntensity = halfTones;
+    frequencyModulationFactorBase = pow(2.0, frequencyModulationIntensity / 12.0);
 }
 
 void Oscillator::setTune(double cents)

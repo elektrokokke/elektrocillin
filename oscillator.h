@@ -95,7 +95,7 @@ private:
     unsigned char tuneController;
     double gain, tuneInCents, frequencyPitchBendFactor, frequencyModulationIntensity;
     // derived member variables:
-    double phase, frequency, frequencyDetuneFactor, frequencyModulationFactor, normalizedFrequency;
+    double phase, frequency, frequencyDetuneFactor, frequencyModulationFactorBase, frequencyModulationFactor, normalizedFrequency;
 
     void computeNormalizedFrequency();
 };
