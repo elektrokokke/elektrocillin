@@ -14,7 +14,6 @@ Oscillator::Oscillator(double frequencyModulationIntensity_, double sampleRate, 
     frequencyModulationIntensity(frequencyModulationIntensity_),
     phase(0)
 {
-    computeNormalizedFrequency();
 }
 
 Oscillator::~Oscillator()
@@ -34,20 +33,16 @@ unsigned char Oscillator::getDetuneController() const
 void Oscillator::setSampleRate(double sampleRate)
 {
     AudioProcessor::setSampleRate(sampleRate);
-    // recompute phase increment:
-    computeNormalizedFrequency();
 }
 
 void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
     frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
-    computeNormalizedFrequency();
 }
 
 void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
 {
     frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(value);
-    computeNormalizedFrequency();
 }
 
 void Oscillator::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
@@ -62,7 +57,7 @@ void Oscillator::processController(unsigned char channel, unsigned char controll
 void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     // consider frequency modulation input:
-    frequencyModulationFactor = pow(1 + frequencyModulationIntensity, inputs[0]);
+    frequencyModulationFactor = pow(1 + frequencyModulationIntensity / 12.0, inputs[0]);
     computeNormalizedFrequency();
     double phase2 = phase + normalizedFrequency;
     if (phase2 >= 1) {
@@ -82,6 +77,9 @@ bool Oscillator::processEvent(const RingBufferEvent *event, jack_nframes_t)
     } else if (const ChangeTuneEvent *event_ = dynamic_cast<const ChangeTuneEvent*>(event)) {
         setTune(event_->tune);
         return true;
+    } else if (const ChangePitchModulationIntensityEvent *event_ = dynamic_cast<const ChangePitchModulationIntensityEvent*>(event)) {
+        setPitchModulationIntensity(event_->halfTones);
+        return true;
     }
     return false;
 }
@@ -96,10 +94,19 @@ double Oscillator::getGain() const
     return gain;
 }
 
+double Oscillator::getPitchModulationIntensity() const
+{
+    return frequencyModulationIntensity;
+}
+
+void Oscillator::setPitchModulationIntensity(double halfTones)
+{
+    frequencyModulationIntensity = halfTones;
+}
+
 void Oscillator::setFrequency(double hertz)
 {
     frequency = hertz;
-    computeNormalizedFrequency();
 }
 
 double Oscillator::getFrequency() const
@@ -111,7 +118,6 @@ void Oscillator::setTune(double cents)
 {
     tuneInCents = cents;
     frequencyDetuneFactor = pow(2.0, cents / 1200.0);
-    computeNormalizedFrequency();
 }
 
 double Oscillator::getTune() const

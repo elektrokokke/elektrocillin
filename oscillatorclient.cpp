@@ -4,7 +4,8 @@ OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscill
     EventProcessorClient(clientName, oscillator_, oscillator_, oscillator_, ringBufferSize),
     oscillatorProcess(oscillator_),
     gain(oscillatorProcess->getGain()),
-    tune(oscillatorProcess->getTune())
+    tune(oscillatorProcess->getTune()),
+    pitchModulationIntensity(oscillatorProcess->getPitchModulationIntensity())
 {
 }
 
@@ -50,21 +51,35 @@ void OscillatorClient::postChangeTune(double tune)
     postEvent(event);
 }
 
+double OscillatorClient::getPitchModulationIntensity() const
+{
+    return pitchModulationIntensity;
+}
+
+void OscillatorClient::postChangePitchModulationIntensity(double halfTones)
+{
+    Oscillator::ChangePitchModulationIntensityEvent *event = new Oscillator::ChangePitchModulationIntensityEvent(halfTones);
+    this->pitchModulationIntensity = halfTones;
+    postEvent(event);
+}
+
 QGraphicsItem * OscillatorClient::createGraphicsItem()
 {
     return new OscillatorClientGraphicsItem(this);
 }
 
-OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *client_, QGraphicsItem *parent, const QPen &nodePen, const QBrush &nodeBrush) :
+OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *client_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     client(client_)
 {
     GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Gain", 0, 1, client->getGain(), 10, GraphicsMeterItem::TOP_HALF, this);
     GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 66, 116, 66), "Tune", -100, 100, client->getTune(), 20, GraphicsMeterItem::BOTTOM_HALF, this);
+    GraphicsMeterItem *pitchModItem = new GraphicsMeterItem(QRectF(0, 132, 116, 66), "Max.pitchmod.", -12, 12, client->getPitchModulationIntensity(), 12, GraphicsMeterItem::TOP_HALF, this);
     QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
     QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
+    QObject::connect(pitchModItem, SIGNAL(valueChanged(double)), this, SLOT(onPitchModulationIntensityChanged(double)));
     QPainterPath path;
-    path.addRect(gainItem->boundingRect() | detuneItem->boundingRect());
+    path.addRect(gainItem->boundingRect() | detuneItem->boundingRect() | pitchModItem->boundingRect());
     setPath(path);
     setPen(QPen(Qt::NoPen));
 }
@@ -77,6 +92,11 @@ void OscillatorClientGraphicsItem::onGainChanged(double value)
 void OscillatorClientGraphicsItem::onDetuneChanged(double value)
 {
     client->postChangeTune(value);
+}
+
+void OscillatorClientGraphicsItem::onPitchModulationIntensityChanged(double value)
+{
+    client->postChangePitchModulationIntensity(value);
 }
 
 class OscillatorClientFactory : public JackClientFactory

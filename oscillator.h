@@ -24,8 +24,16 @@ public:
         {}
         double tune;
     };
+    class ChangePitchModulationIntensityEvent : public RingBufferEvent
+    {
+    public:
+        ChangePitchModulationIntensityEvent(double halfTones_) :
+            halfTones(halfTones_)
+        {}
+        double halfTones;
+    };
 
-    Oscillator(double frequencyModulationIntensity = 2.0/12.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
+    Oscillator(double frequencyModulationIntensity = 2.0, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
     virtual ~Oscillator();
 
     void setDetuneController(unsigned char controller);
@@ -44,6 +52,17 @@ public:
 
     void setGain(double gain);
     double getGain() const;
+
+    /**
+      Returns the maximum pitch modulation in half ones
+      (12 = +-1 octave maximum pitch modulation).
+      */
+    double getPitchModulationIntensity() const;
+    /**
+      Sets the maximum pitch modulation to the value given
+      in half tones.
+      */
+    void setPitchModulationIntensity(double halfTones);
 
     /**
       Sets the current oscillator frequency

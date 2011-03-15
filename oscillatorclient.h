@@ -32,21 +32,24 @@ public:
     void postChangeGain(double gain);
     double getTune() const;
     void postChangeTune(double tune);
+    double getPitchModulationIntensity() const;
+    void postChangePitchModulationIntensity(double halfTones);
 
     QGraphicsItem * createGraphicsItem();
 private:
     Oscillator *oscillatorProcess;
-    double gain, tune;
+    double gain, tune, pitchModulationIntensity;
 };
 
 class OscillatorClientGraphicsItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    OscillatorClientGraphicsItem(OscillatorClient *client, QGraphicsItem *parent = 0, const QPen &nodePen = QPen(QBrush(qRgb(114, 159, 207)), 3), const QBrush &nodeBrush = QBrush(qRgb(52, 101, 164)));
+    OscillatorClientGraphicsItem(OscillatorClient *client, QGraphicsItem *parent = 0);
 private slots:
     void onGainChanged(double value);
     void onDetuneChanged(double value);
+    void onPitchModulationIntensityChanged(double value);
 private:
     OscillatorClient *client;
 };
