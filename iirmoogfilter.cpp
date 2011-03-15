@@ -66,7 +66,7 @@ void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsig
 void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
 {
     // set cutoff frequency pitch bend factor:
-    parameters.frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(value);
+    parameters.frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(2.0, value);
     computeCoefficients();
 }
 

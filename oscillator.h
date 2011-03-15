@@ -93,11 +93,12 @@ protected:
 private:
     // persistent member variables:
     unsigned char tuneController;
-    double gain, tuneInCents, frequencyPitchBendFactor, frequencyModulationIntensity;
+    double gain, tuneInCents, frequencyModulationIntensity;
     // derived member variables:
-    double phase, frequency, frequencyDetuneFactor, frequencyModulationFactorBase, frequencyModulationFactor, normalizedFrequency;
+    double phase, frequency, frequencyDetuneFactor, frequencyModulationFactorBase, frequencyModulationFactor, frequencyPitchBendFactor, normalizedFrequency;
 
     void computeNormalizedFrequency();
+    void init();
 };
 
 #endif // OSCILLATOR_H

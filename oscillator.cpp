@@ -7,15 +7,9 @@ Oscillator::Oscillator(double sampleRate, const QStringList &additionalInputPort
     tuneController(3),
     gain(1),
     tuneInCents(0),
-    frequencyPitchBendFactor(1),
-    frequencyModulationIntensity(2),
-    phase(0),
-    frequency(440),
-    frequencyDetuneFactor(1),
-    frequencyModulationFactor(1)
+    frequencyModulationIntensity(2)
 {
-    frequencyModulationFactorBase = pow(2.0, frequencyModulationIntensity / 12.0);
-    computeNormalizedFrequency();
+    init();
 }
 
 Oscillator::~Oscillator()
@@ -28,31 +22,19 @@ Oscillator & Oscillator::operator=(const Oscillator &oscillator)
     tuneController = oscillator.tuneController;
     gain = oscillator.gain;
     tuneInCents = oscillator.tuneInCents;
-    frequencyPitchBendFactor = oscillator.frequencyPitchBendFactor;
     frequencyModulationIntensity = oscillator.frequencyModulationIntensity;
-    // set derived attributes:
-    phase = 0;
-    frequency = 440;
-    frequencyDetuneFactor = 1;
-    frequencyModulationFactorBase = pow(2.0, frequencyModulationIntensity / 12.0);
-    frequencyModulationFactor = 1;
-    computeNormalizedFrequency();
+    init();
     return *this;
 }
 
 void Oscillator::save(QDataStream &stream) const
 {
-    stream << tuneController << gain << frequency << tuneInCents << frequencyPitchBendFactor << frequencyModulationIntensity << normalizedFrequency;
+    stream << tuneController << gain << frequency << tuneInCents << frequencyModulationIntensity << normalizedFrequency;
 }
 
 void Oscillator::load(QDataStream &stream){
-    stream >> tuneController >> gain >> frequency >> tuneInCents >> frequencyPitchBendFactor >> frequencyModulationIntensity >> normalizedFrequency;
-    // set derived attributes:
-    phase = 0;
-    frequency = 440;
-    frequencyDetuneFactor = 1;
-    frequencyModulationFactor = 1;
-    computeNormalizedFrequency();
+    stream >> tuneController >> gain >> frequency >> tuneInCents >> frequencyModulationIntensity >> normalizedFrequency;
+    init();
 }
 
 void Oscillator::setDetuneController(unsigned char controller)
@@ -77,7 +59,7 @@ void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned
 
 void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
 {
-    frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(value);
+    frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(frequencyModulationFactorBase, value);
 }
 
 void Oscillator::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
@@ -171,3 +153,16 @@ void Oscillator::computeNormalizedFrequency()
     }
 }
 
+void Oscillator::init()
+{
+    setDetuneController(tuneController);
+    setGain(gain);
+    setTune(tuneInCents);
+    setPitchModulationIntensity(frequencyModulationIntensity);
+    // set derived attributes:
+    phase = 0;
+    frequency = 440;
+    frequencyModulationFactor = 1;
+    frequencyPitchBendFactor = 1;
+    computeNormalizedFrequency();
+}

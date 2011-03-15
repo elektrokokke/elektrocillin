@@ -16,7 +16,7 @@ public:
     virtual void processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time);
 
     static double computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber);
-    static double computePitchBendFactorFromMidiPitch(unsigned int processPitchBend);
+    static double computePitchBendFactorFromMidiPitch(double base, unsigned int processPitchBend);
 };
 
 #endif // NOTETRIGGERED_H

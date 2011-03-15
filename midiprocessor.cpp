@@ -13,13 +13,13 @@ double MidiProcessor::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteN
     return frequency;
 }
 
-double MidiProcessor::computePitchBendFactorFromMidiPitch(unsigned int pitchBend)
+double MidiProcessor::computePitchBendFactorFromMidiPitch(double base, unsigned int pitchBend)
 {
     // center it around 0x2000:
     int pitchCentered = (int)pitchBend - 0x2000;
     // -8192 means minus two half tones => -49152 is one octave => factor 2^(-1)
     // +8192 means plus two half tones => +49152 is one octave => factor 2^1
-    return pow(2.0, (double)pitchCentered / 49152.0);
+    return pow(base, (double)pitchCentered / 49152.0);
 }
 
 void MidiProcessor::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
