@@ -1,10 +1,10 @@
 #ifndef LINEARMORPHOSCILLATOR_H
 #define LINEARMORPHOSCILLATOR_H
 
-#include "integraloscillator.h"
+#include "polynomialoscillator.h"
 #include "linearinterpolator.h"
 
-class LinearMorphOscillator : public IntegralOscillator
+class LinearMorphOscillator : public PolynomialOscillator
 {
 public:
     class ChangeControlPointEvent : public InterpolatorProcessor::ChangeControlPointEvent

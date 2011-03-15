@@ -6,10 +6,10 @@
 #include "polynomialinterpolator.h"
 #include <QQueue>
 
-class IntegralOscillator : public Oscillator, public InterpolatorProcessor
+class PolynomialOscillator : public Oscillator, public InterpolatorProcessor
 {
 public:
-    IntegralOscillator(int nrOfIntegrations, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
+    PolynomialOscillator(int nrOfIntegrations, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
 
     PolynomialInterpolator * getPolynomialInterpolator();
     void setPolynomialInterpolator(const PolynomialInterpolator &interpolator);

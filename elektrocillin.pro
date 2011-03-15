@@ -79,13 +79,13 @@ SOURCES += main.cpp\
     graphicsportitem.cpp \
     metajack/sincfilter.cpp \
     polynomialinterpolator.cpp \
-    integraloscillator.cpp \
-    integraloscillatorclient.cpp \
     logarithmicinterpolator.cpp \
     graphicslabelitem.cpp \
     eventprocessor.cpp \
     interpolatorprocessor.cpp \
-    graphicsmeteritem.cpp
+    graphicsmeteritem.cpp \
+    polynomialoscillator.cpp \
+    polynomialoscillatorclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -159,13 +159,13 @@ HEADERS  += mainwindow.h \
     graphicsclientitem.h \
     metajack/sincfilter.h \
     polynomialinterpolator.h \
-    integraloscillator.h \
-    integraloscillatorclient.h \
     logarithmicinterpolator.h \
     graphicslabelitem.h \
     eventprocessor.h \
     interpolatorprocessor.h \
-    graphicsmeteritem.h
+    graphicsmeteritem.h \
+    polynomialoscillator.h \
+    polynomialoscillatorclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

@@ -1,6 +1,6 @@
-#include "integraloscillator.h"
+#include "polynomialoscillator.h"
 
-IntegralOscillator::IntegralOscillator(int nrOfIntegrations_, double sampleRate, const QStringList &additionalInputPortNames) :
+PolynomialOscillator::PolynomialOscillator(int nrOfIntegrations_, double sampleRate, const QStringList &additionalInputPortNames) :
     Oscillator(sampleRate, additionalInputPortNames),
     nrOfIntegrations(nrOfIntegrations_),
     integrals(nrOfIntegrations + 1),
@@ -20,18 +20,18 @@ IntegralOscillator::IntegralOscillator(int nrOfIntegrations_, double sampleRate,
     computeIntegrals();
 }
 
-PolynomialInterpolator * IntegralOscillator::getPolynomialInterpolator()
+PolynomialInterpolator * PolynomialOscillator::getPolynomialInterpolator()
 {
     return &integrals.first();
 }
 
-void IntegralOscillator::setPolynomialInterpolator(const PolynomialInterpolator &interpolator)
+void PolynomialOscillator::setPolynomialInterpolator(const PolynomialInterpolator &interpolator)
 {
     integrals[0] = interpolator;
     computeIntegrals();
 }
 
-bool IntegralOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+bool PolynomialOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
     if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
         InterpolatorProcessor::processInterpolatorEvent(&integrals.first(), event_);
@@ -42,7 +42,7 @@ bool IntegralOscillator::processEvent(const RingBufferEvent *event, jack_nframes
     }
 }
 
-double IntegralOscillator::valueAtPhase(double phase)
+double PolynomialOscillator::valueAtPhase(double phase)
 {
     double phaseDifference = phase - previousPhases.back();
     if (phaseDifference <= 0) {
@@ -56,7 +56,7 @@ double IntegralOscillator::valueAtPhase(double phase)
     return value;
 }
 
-double IntegralOscillator::differentiate(int order)
+double PolynomialOscillator::differentiate(int order)
 {
     // evaluate the top integral at the given phase:
     double value = integrals.back().evaluate(previousPhases[order]);
@@ -73,13 +73,13 @@ double IntegralOscillator::differentiate(int order)
     return value;
 }
 
-void IntegralOscillator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
+void PolynomialOscillator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
 {
     integrals.first().changeControlPoints(xx, yy);
     computeIntegrals();
 }
 
-void IntegralOscillator::computeIntegrals()
+void PolynomialOscillator::computeIntegrals()
 {
     for (int i = 0; i < nrOfIntegrations; i++) {
         // integrate the previous piece-wise polynomial:

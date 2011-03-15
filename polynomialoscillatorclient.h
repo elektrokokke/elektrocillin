@@ -2,16 +2,16 @@
 #define INTEGRALOSCILLATORCLIENT_H
 
 #include "oscillatorclient.h"
-#include "integraloscillator.h"
+#include "polynomialoscillator.h"
 #include "graphicsinterpolatoredititem.h"
 #include <QPen>
 
 
-class IntegralOscillatorClient : public OscillatorClient
+class PolynomialOscillatorClient : public OscillatorClient
 {
 public:
-    IntegralOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
-    virtual ~IntegralOscillatorClient();
+    PolynomialOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
+    virtual ~PolynomialOscillatorClient();
 
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
@@ -33,15 +33,15 @@ public:
 
     QGraphicsItem * createGraphicsItem();
 protected:
-    IntegralOscillator * getIntegralOscillator();
+    PolynomialOscillator * getIntegralOscillator();
 private:
-    IntegralOscillator oscillator;
+    PolynomialOscillator oscillator;
 };
 
 class IntegralOscillatorGraphicsItem : public GraphicsInterpolatorEditItem
 {
 public:
-    IntegralOscillatorGraphicsItem(const QRectF &rect, IntegralOscillatorClient *client, QGraphicsItem *parent = 0);
+    IntegralOscillatorGraphicsItem(const QRectF &rect, PolynomialOscillatorClient *client, QGraphicsItem *parent = 0);
 
 protected:
     virtual void increaseControlPoints();
@@ -49,7 +49,7 @@ protected:
     virtual void changeControlPoint(int index, double x, double y);
 
 private:
-    IntegralOscillatorClient *client;
+    PolynomialOscillatorClient *client;
 };
 
 #endif // INTEGRALOSCILLATORCLIENT_H

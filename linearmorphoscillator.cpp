@@ -1,7 +1,7 @@
 #include "linearmorphoscillator.h"
 
 LinearMorphOscillator::LinearMorphOscillator(const LinearInterpolator &state1, const LinearInterpolator &state2, double sampleRate) :
-    IntegralOscillator(3, sampleRate, QStringList("Morph modulation")),
+    PolynomialOscillator(3, sampleRate, QStringList("Morph modulation")),
     morphAudio(0),
     morphMidi(0)
 {
@@ -26,7 +26,7 @@ void LinearMorphOscillator::processController(unsigned char channel, unsigned ch
     if (controller == 4) {
         morphMidi = (double)value / 127.0 * 2.0 - 1.0;
     } else {
-        IntegralOscillator::processController(channel, controller, value, time);
+        PolynomialOscillator::processController(channel, controller, value, time);
     }
 }
 
@@ -36,7 +36,7 @@ void LinearMorphOscillator::processAudio(const double *inputs, double *outputs, 
     morphAudio = inputs[1];
     computeMorphedState();
     // call the base implementation:
-    IntegralOscillator::processAudio(inputs, outputs, time);
+    PolynomialOscillator::processAudio(inputs, outputs, time);
 }
 
 bool LinearMorphOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
@@ -49,7 +49,7 @@ bool LinearMorphOscillator::processEvent(const RingBufferEvent *event, jack_nfra
         InterpolatorProcessor::processInterpolatorEvent(&state[1], event_);
         return true;
     } else {
-        return IntegralOscillator::processEvent(event, time);
+        return PolynomialOscillator::processEvent(event, time);
     }
 }
 

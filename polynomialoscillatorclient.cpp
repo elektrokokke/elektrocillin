@@ -1,23 +1,23 @@
-#include "integraloscillatorclient.h"
+#include "polynomialoscillatorclient.h"
 
-IntegralOscillatorClient::IntegralOscillatorClient(const QString &clientName, size_t ringBufferSize) :
-    OscillatorClient(clientName, new IntegralOscillator(3), ringBufferSize),
+PolynomialOscillatorClient::PolynomialOscillatorClient(const QString &clientName, size_t ringBufferSize) :
+    OscillatorClient(clientName, new PolynomialOscillator(3), ringBufferSize),
     oscillator(3)
 {
 }
 
-IntegralOscillatorClient::~IntegralOscillatorClient()
+PolynomialOscillatorClient::~PolynomialOscillatorClient()
 {
     close();
 }
 
-void IntegralOscillatorClient::saveState(QDataStream &stream)
+void PolynomialOscillatorClient::saveState(QDataStream &stream)
 {
     OscillatorClient::saveState(stream);
     oscillator.getPolynomialInterpolator()->save(stream);
 }
 
-void IntegralOscillatorClient::loadState(QDataStream &stream)
+void PolynomialOscillatorClient::loadState(QDataStream &stream)
 {
     OscillatorClient::loadState(stream);
     PolynomialInterpolator interpolator;
@@ -26,19 +26,19 @@ void IntegralOscillatorClient::loadState(QDataStream &stream)
     getIntegralOscillator()->setPolynomialInterpolator(interpolator);
 }
 
-PolynomialInterpolator * IntegralOscillatorClient::getPolynomialInterpolator()
+PolynomialInterpolator * PolynomialOscillatorClient::getPolynomialInterpolator()
 {
     return oscillator.getPolynomialInterpolator();
 }
 
-void IntegralOscillatorClient::postIncreaseControlPoints()
+void PolynomialOscillatorClient::postIncreaseControlPoints()
 {
     InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, false, false, true);
     oscillator.processEvent(event, 0);
     postEvent(event);
 }
 
-void IntegralOscillatorClient::postDecreaseControlPoints()
+void PolynomialOscillatorClient::postDecreaseControlPoints()
 {
     if (oscillator.getPolynomialInterpolator()->getX().size() > 2) {
         InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, false, false, true);
@@ -47,19 +47,19 @@ void IntegralOscillatorClient::postDecreaseControlPoints()
     }
 }
 
-void IntegralOscillatorClient::postChangeControlPoint(int index, double x, double y)
+void PolynomialOscillatorClient::postChangeControlPoint(int index, double x, double y)
 {
     InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
     oscillator.processEvent(event, 0);
     postEvent(event);
 }
 
-IntegralOscillator * IntegralOscillatorClient::getIntegralOscillator()
+PolynomialOscillator * PolynomialOscillatorClient::getIntegralOscillator()
 {
-    return (IntegralOscillator*)getAudioProcessor();
+    return (PolynomialOscillator*)getAudioProcessor();
 }
 
-QGraphicsItem * IntegralOscillatorClient::createGraphicsItem()
+QGraphicsItem * PolynomialOscillatorClient::createGraphicsItem()
 {
     QRectF rect(0, 0, 600, 420);
     QGraphicsPathItem *pathItem = new QGraphicsPathItem();
@@ -75,7 +75,7 @@ QGraphicsItem * IntegralOscillatorClient::createGraphicsItem()
     return pathItem;
 }
 
-IntegralOscillatorGraphicsItem::IntegralOscillatorGraphicsItem(const QRectF &rect, IntegralOscillatorClient *client_, QGraphicsItem *parent) :
+IntegralOscillatorGraphicsItem::IntegralOscillatorGraphicsItem(const QRectF &rect, PolynomialOscillatorClient *client_, QGraphicsItem *parent) :
     GraphicsInterpolatorEditItem(
         client_->getPolynomialInterpolator(),
         rect,
@@ -113,14 +113,14 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new IntegralOscillatorClient(clientName);
+        return new PolynomialOscillatorClient(clientName);
     }
     static IntegralOscillatorClientFactory factory;
 };
 
 IntegralOscillatorClientFactory IntegralOscillatorClientFactory::factory;
 
-JackClientFactory * IntegralOscillatorClient::getFactory()
+JackClientFactory * PolynomialOscillatorClient::getFactory()
 {
     return &IntegralOscillatorClientFactory::factory;
 }
