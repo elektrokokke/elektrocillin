@@ -133,6 +133,9 @@ bool Envelope::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
     if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
         InterpolatorProcessor::processInterpolatorEvent(&interpolator, event_);
+        if (sustainIndex >= interpolator.getX().size()) {
+            setSustainIndex(interpolator.getX().size() - 1);
+        }
         return true;
     } else if (const ChangeSustainPositionEvent *event_ = dynamic_cast<const ChangeSustainPositionEvent*>(event)) {
         setSustainIndex(event_->sustainIndex);
