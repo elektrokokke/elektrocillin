@@ -73,6 +73,12 @@ double IntegralOscillator::differentiate(int order)
     return value;
 }
 
+void IntegralOscillator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
+{
+    integrals.first().changeControlPoints(xx, yy);
+    computeIntegrals();
+}
+
 void IntegralOscillator::computeIntegrals()
 {
     for (int i = 0; i < nrOfIntegrations; i++) {

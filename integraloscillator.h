@@ -19,7 +19,7 @@ public:
 protected:
     double valueAtPhase(double normalizedPhase);
     double differentiate(int order);
-
+    void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
 private:
     int nrOfIntegrations;
     QVector<PolynomialInterpolator> integrals;

@@ -1,10 +1,10 @@
 #ifndef LINEARMORPHOSCILLATOR_H
 #define LINEARMORPHOSCILLATOR_H
 
-#include "linearoscillator.h"
+#include "integraloscillator.h"
+#include "linearinterpolator.h"
 
-
-class LinearMorphOscillator : public LinearOscillator
+class LinearMorphOscillator : public IntegralOscillator
 {
 public:
     class ChangeControlPointEvent : public InterpolatorProcessor::ChangeControlPointEvent
@@ -29,7 +29,7 @@ public:
     // reimplemented from LinearOscillator:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 private:
-    LinearInterpolator state[2], morphedState;
+    LinearInterpolator state[2];
     double morphAudio, morphMidi;
 
     void computeMorphedState();

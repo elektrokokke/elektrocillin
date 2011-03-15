@@ -53,8 +53,6 @@ SOURCES += main.cpp\
     linearwaveshapingclient.cpp \
     cubicsplinewaveshapingclient.cpp \
     linearintegralinterpolator.cpp \
-    linearoscillator.cpp \
-    linearoscillatorclient.cpp \
     linearmorphoscillator.cpp \
     multiplyprocessor.cpp \
     metajack/midiport.cpp \
@@ -135,8 +133,6 @@ HEADERS  += mainwindow.h \
     linearwaveshapingclient.h \
     cubicsplinewaveshapingclient.h \
     linearintegralinterpolator.h \
-    linearoscillator.h \
-    linearoscillatorclient.h \
     linearmorphoscillator.h \
     multiplyprocessor.h \
     metajack/midiport.h \
