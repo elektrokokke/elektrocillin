@@ -109,7 +109,7 @@ public:
     }
     QString getName()
     {
-        return "Polynomial integration oscillator";
+        return "Polynomial oscillator";
     }
     JackClient * createClient(const QString &clientName)
     {
