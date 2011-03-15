@@ -155,6 +155,16 @@ void JackContextGraphicsScene::clear()
     portConnectionItems.clear();
 }
 
+void JackContextGraphicsScene::showAllInnerItems(bool visible)
+{
+    for (QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {
+        GraphicsClientItem *clientItem = i.value().second;
+        if (clientItem) {
+            clientItem->showInnerItem(visible);
+        }
+    }
+}
+
 void JackContextGraphicsScene::deleteAllClients()
 {
     for (QMap<QString, QPair<JackClient*, GraphicsClientItem*> >::iterator i = clientsMap.begin(); i != clientsMap.end(); i++) {

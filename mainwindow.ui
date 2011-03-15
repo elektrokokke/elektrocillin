@@ -77,6 +77,8 @@
     <addaction name="actionParent_level"/>
     <addaction name="separator"/>
     <addaction name="actionReset"/>
+    <addaction name="actionShow_all_controls"/>
+    <addaction name="actionHide_all_controls"/>
    </widget>
    <widget class="QMenu" name="menuCreate_client">
     <property name="title">
@@ -112,6 +114,16 @@
   <action name="actionCreate_macro">
    <property name="text">
     <string>Create macro</string>
+   </property>
+  </action>
+  <action name="actionShow_all_controls">
+   <property name="text">
+    <string>Show all controls</string>
+   </property>
+  </action>
+  <action name="actionHide_all_controls">
+   <property name="text">
+    <string>Hide all controls</string>
    </property>
   </action>
  </widget>

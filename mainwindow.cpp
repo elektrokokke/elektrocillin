@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(ui->graphicsView, SIGNAL(sceneChanged()), this, SLOT(onSceneChanged()));
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
-    ui->graphicsView->setViewport(new QGLWidget());
+//    ui->graphicsView->setViewport(new QGLWidget());
     ui->graphicsView->setScene(scene);
 }
 
@@ -102,4 +102,14 @@ void MainWindow::on_actionCreate_macro_triggered()
 void MainWindow::onSceneChanged()
 {
     ui->actionParent_level->setEnabled(RecursiveJackContext::getInstance()->getContextStackSize() > 2);
+}
+
+void MainWindow::on_actionShow_all_controls_triggered()
+{
+    ((JackContextGraphicsScene*)ui->graphicsView->scene())->showAllInnerItems();
+}
+
+void MainWindow::on_actionHide_all_controls_triggered()
+{
+    ((JackContextGraphicsScene*)ui->graphicsView->scene())->showAllInnerItems(false);
 }

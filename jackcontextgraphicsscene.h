@@ -32,6 +32,7 @@ public:
 
 public slots:
     void clear();
+    void showAllInnerItems(bool visible = true);
 
 protected:
     void deleteAllClients();

@@ -30,6 +30,10 @@ private slots:
     void on_actionCreate_macro_triggered();
     void onSceneChanged();
 
+    void on_actionShow_all_controls_triggered();
+
+    void on_actionHide_all_controls_triggered();
+
 private:
     Ui::MainWindow *ui;
     QSettings settings;
