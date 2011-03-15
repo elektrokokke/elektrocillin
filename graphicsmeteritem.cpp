@@ -74,7 +74,7 @@ void GraphicsMeterItem::setRange(double minValue, double maxValue, double value,
 
 void GraphicsMeterItem::setValue(double newValue)
 {
-    double angle = 0;
+    double angle = 0.5 * M_PI;
     if (slices && (maxValue != minValue)) {
         newValue = qRound((newValue - minValue) * (slices * valuesPerSlice) / (maxValue - minValue)) * (maxValue - minValue) / (slices * valuesPerSlice) + minValue;
         value = qBound(minValue, newValue, maxValue);
@@ -116,7 +116,10 @@ void GraphicsMeterItem::initTicks()
     // draw ticks at regular intervals:
     int ticksBetween = qMin(4, valuesPerSlice);
     for (int i = 0; i <= slices * ticksBetween; i++) {
-        double angle = M_PI * i / (slices * ticksBetween);
+        double angle = 0.5 * M_PI;
+        if (slices) {
+            angle = M_PI * i / (slices * ticksBetween);
+        }
         double x = -cos(angle);
         double y = sin(angle);
         QPointF tickEnd = (half == TOP_HALF
