@@ -25,6 +25,15 @@ Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     interpolator.setEndPointConstraints(false, true);
 }
 
+Envelope & Envelope::operator=(const Envelope &envelope)
+{
+    // copy all attributes of the given envelope:
+    durationInSeconds = envelope.durationInSeconds;
+    sustainIndex = envelope.sustainIndex;
+    interpolator = envelope.interpolator;
+    return *this;
+}
+
 void Envelope::save(QDataStream &stream) const
 {
     interpolator.save(stream);

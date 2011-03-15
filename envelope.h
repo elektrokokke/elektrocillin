@@ -28,6 +28,8 @@ public:
 
     Envelope(double durationInSeconds = 20, double sampleRate = 44100);
 
+    Envelope & operator=(const Envelope &envelope);
+
     void save(QDataStream &stream) const;
     void load(QDataStream &stream);
 

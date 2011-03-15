@@ -24,8 +24,7 @@ void EnvelopeClient::saveState(QDataStream &stream)
 void EnvelopeClient::loadState(QDataStream &stream)
 {
     envelopeProcess->load(stream);
-    envelope->copyInterpolatorFrom(envelopeProcess);
-    envelope->setSustainIndex(envelopeProcess->getSustainIndex());
+    *envelope = *envelopeProcess;
 }
 
 Envelope * EnvelopeClient::getEnvelope()
