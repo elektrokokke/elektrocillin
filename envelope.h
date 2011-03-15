@@ -28,7 +28,7 @@ public:
 
     Envelope(double durationInSeconds = 20, double sampleRate = 44100);
 
-    void save(QDataStream &stream);
+    void save(QDataStream &stream) const;
     void load(QDataStream &stream);
 
     Interpolator * getInterpolator();

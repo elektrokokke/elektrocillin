@@ -25,7 +25,7 @@ Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     interpolator.setEndPointConstraints(false, true);
 }
 
-void Envelope::save(QDataStream &stream)
+void Envelope::save(QDataStream &stream) const
 {
     interpolator.save(stream);
     stream << sustainIndex;
