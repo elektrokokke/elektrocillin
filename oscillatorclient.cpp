@@ -17,14 +17,15 @@ OscillatorClient::~OscillatorClient()
 
 void OscillatorClient::saveState(QDataStream &stream)
 {
-    stream << gain << tune;
+    stream << gain << tune << pitchModulationIntensity;
 }
 
 void OscillatorClient::loadState(QDataStream &stream)
 {
-    stream >> gain >> tune;
+    stream >> gain >> tune >> pitchModulationIntensity;
     oscillatorProcess->setGain(gain);
     oscillatorProcess->setTune(tune);
+    oscillatorProcess->setPitchModulationIntensity(pitchModulationIntensity);
 }
 
 double OscillatorClient::getGain() const
