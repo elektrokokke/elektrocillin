@@ -36,7 +36,7 @@ public:
     QGraphicsItem * createGraphicsItem();
 
 private:
-    Envelope *envelope, *envelopeProcess;
+    Envelope envelope, *envelopeProcess;
 };
 
 class EnvelopeGraphicsItem : public QObject, public GraphicsInterpolatorEditItem

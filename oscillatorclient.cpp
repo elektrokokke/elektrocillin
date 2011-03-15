@@ -2,11 +2,9 @@
 
 OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator_, size_t ringBufferSize) :
     EventProcessorClient(clientName, oscillator_, oscillator_, oscillator_, ringBufferSize),
-    oscillatorProcess(oscillator_),
-    gain(oscillatorProcess->getGain()),
-    tune(oscillatorProcess->getTune()),
-    pitchModulationIntensity(oscillatorProcess->getPitchModulationIntensity())
+    oscillatorProcess(oscillator_)
 {
+    oscillator = *oscillatorProcess;
 }
 
 OscillatorClient::~OscillatorClient()
@@ -17,50 +15,38 @@ OscillatorClient::~OscillatorClient()
 
 void OscillatorClient::saveState(QDataStream &stream)
 {
-    stream << gain << tune << pitchModulationIntensity;
+    oscillator.save(stream);
 }
 
 void OscillatorClient::loadState(QDataStream &stream)
 {
-    stream >> gain >> tune >> pitchModulationIntensity;
-    oscillatorProcess->setGain(gain);
-    oscillatorProcess->setTune(tune);
-    oscillatorProcess->setPitchModulationIntensity(pitchModulationIntensity);
+    oscillatorProcess->load(stream);
+    oscillator = *oscillatorProcess;
 }
 
-double OscillatorClient::getGain() const
+Oscillator * OscillatorClient::getOscillator()
 {
-    return gain;
+    return &oscillator;
 }
 
 void OscillatorClient::postChangeGain(double gain)
 {
     Oscillator::ChangeGainEvent *event = new Oscillator::ChangeGainEvent(gain);
-    this->gain = gain;
+    oscillator.setGain(gain);
     postEvent(event);
-}
-
-double OscillatorClient::getTune() const
-{
-    return tune;
 }
 
 void OscillatorClient::postChangeTune(double tune)
 {
     Oscillator::ChangeTuneEvent *event = new Oscillator::ChangeTuneEvent(tune);
-    this->tune = tune;
+    oscillator.setTune(tune);
     postEvent(event);
-}
-
-double OscillatorClient::getPitchModulationIntensity() const
-{
-    return pitchModulationIntensity;
 }
 
 void OscillatorClient::postChangePitchModulationIntensity(double halfTones)
 {
     Oscillator::ChangePitchModulationIntensityEvent *event = new Oscillator::ChangePitchModulationIntensityEvent(halfTones);
-    this->pitchModulationIntensity = halfTones;
+    oscillator.setPitchModulationIntensity(halfTones);
     postEvent(event);
 }
 
@@ -73,9 +59,9 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
     QGraphicsPathItem(parent),
     client(client_)
 {
-    GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Gain", 0, 1, client->getGain(), 10, 10, GraphicsMeterItem::TOP_HALF, this);
-    GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 66, 116, 66), "Tune", -100, 100, client->getTune(), 10, 20, GraphicsMeterItem::BOTTOM_HALF, this);
-    GraphicsMeterItem *pitchModItem = new GraphicsMeterItem(QRectF(0, 132, 116, 66), "Pitchmod", 0, 12, client->getPitchModulationIntensity(), 12, 1, GraphicsMeterItem::TOP_HALF, this);
+    GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Gain", 0, 1, client->getOscillator()->getGain(), 10, 10, GraphicsMeterItem::TOP_HALF, this);
+    GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 66, 116, 66), "Tune", -100, 100, client->getOscillator()->getTune(), 10, 20, GraphicsMeterItem::BOTTOM_HALF, this);
+    GraphicsMeterItem *pitchModItem = new GraphicsMeterItem(QRectF(0, 132, 116, 66), "Pitchmod", 0, 12, client->getOscillator()->getPitchModulationIntensity(), 12, 1, GraphicsMeterItem::TOP_HALF, this);
     QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
     QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
     QObject::connect(pitchModItem, SIGNAL(valueChanged(double)), this, SLOT(onPitchModulationIntensityChanged(double)));

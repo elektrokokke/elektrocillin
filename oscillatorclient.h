@@ -28,17 +28,15 @@ public:
       */
     virtual void loadState(QDataStream &stream);
 
-    double getGain() const;
+    Oscillator * getOscillator();
+
     void postChangeGain(double gain);
-    double getTune() const;
     void postChangeTune(double tune);
-    double getPitchModulationIntensity() const;
     void postChangePitchModulationIntensity(double halfTones);
 
     QGraphicsItem * createGraphicsItem();
 private:
-    Oscillator *oscillatorProcess;
-    double gain, tune, pitchModulationIntensity;
+    Oscillator oscillator, *oscillatorProcess;
 };
 
 class OscillatorClientGraphicsItem : public QObject, public QGraphicsPathItem

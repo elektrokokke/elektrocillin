@@ -6,18 +6,51 @@ Oscillator::Oscillator(double sampleRate, const QStringList &additionalInputPort
     AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
     tuneController(3),
     gain(1),
-    frequency(440),
-    frequencyDetuneFactor(1),
     tuneInCents(0),
     frequencyPitchBendFactor(1),
-    frequencyModulationFactor(1),
     frequencyModulationIntensity(2),
-    phase(0)
+    phase(0),
+    frequency(440),
+    frequencyDetuneFactor(1),
+    frequencyModulationFactor(1)
 {
+    computeNormalizedFrequency();
 }
 
 Oscillator::~Oscillator()
 {
+}
+
+Oscillator & Oscillator::operator=(const Oscillator &oscillator)
+{
+    // copy all relevant attributes of the given oscillator:
+    tuneController = oscillator.tuneController;
+    gain = oscillator.gain;
+    tuneInCents = oscillator.tuneInCents;
+    frequencyPitchBendFactor = oscillator.frequencyPitchBendFactor;
+    frequencyModulationIntensity = oscillator.frequencyModulationIntensity;
+    // set derived attributes:
+    phase = 0;
+    frequency = 440;
+    frequencyDetuneFactor = 1;
+    frequencyModulationFactor = 1;
+    computeNormalizedFrequency();
+    return *this;
+}
+
+void Oscillator::save(QDataStream &stream) const
+{
+    stream << tuneController << gain << frequency << tuneInCents << frequencyPitchBendFactor << frequencyModulationIntensity << normalizedFrequency;
+}
+
+void Oscillator::load(QDataStream &stream){
+    stream >> tuneController >> gain >> frequency >> tuneInCents >> frequencyPitchBendFactor >> frequencyModulationIntensity >> normalizedFrequency;
+    // set derived attributes:
+    phase = 0;
+    frequency = 440;
+    frequencyDetuneFactor = 1;
+    frequencyModulationFactor = 1;
+    computeNormalizedFrequency();
 }
 
 void Oscillator::setDetuneController(unsigned char controller)
@@ -104,16 +137,6 @@ void Oscillator::setPitchModulationIntensity(double halfTones)
     frequencyModulationIntensity = halfTones;
 }
 
-void Oscillator::setFrequency(double hertz)
-{
-    frequency = hertz;
-}
-
-double Oscillator::getFrequency() const
-{
-    return frequency;
-}
-
 void Oscillator::setTune(double cents)
 {
     tuneInCents = cents;
@@ -138,9 +161,9 @@ double Oscillator::valueAtPhase(double phase)
 void Oscillator::computeNormalizedFrequency()
 {
     normalizedFrequency = frequency * frequencyDetuneFactor * frequencyPitchBendFactor * frequencyModulationFactor / getSampleRate();
-    if (normalizedFrequency <= 0.0) {
-        normalizedFrequency = 0.000000000001;
-    } else if (normalizedFrequency >= 0.5) {
+    if (normalizedFrequency < 0.0) {
+        normalizedFrequency = 0;
+    } else if (normalizedFrequency > 0.5) {
         normalizedFrequency = 0.5;
     }
 }

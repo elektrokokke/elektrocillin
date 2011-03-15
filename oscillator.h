@@ -36,6 +36,11 @@ public:
     Oscillator(double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
     virtual ~Oscillator();
 
+    Oscillator & operator=(const Oscillator &oscillator);
+
+    virtual void save(QDataStream &stream) const;
+    virtual void load(QDataStream &stream);
+
     void setDetuneController(unsigned char controller);
     unsigned char getDetuneController() const;
 
@@ -65,15 +70,6 @@ public:
     void setPitchModulationIntensity(double halfTones);
 
     /**
-      Sets the current oscillator frequency
-      to the given value in Hertz.
-      */
-    void setFrequency(double hertz);
-    /**
-      Returns the current oscillator frequency in Hertz.
-      */
-    double getFrequency() const;
-    /**
       Sets the tune (relative to the current frequency)
       in cents (100 cents = 1 half tone, 1200 cents = 1 octave).
       */
@@ -82,6 +78,7 @@ public:
       Returns the current tune value in cents.
       */
     double getTune() const;
+protected:
     /**
       Returns the current normalized frequency of this oscillator,
       i.e. the number of cycles per sample. This number depends on
@@ -91,13 +88,14 @@ public:
       The maximum normalized frequency is 0.5 (the Nyquist frequency).
       */
     double getNormalizedFrequency() const;
-
-protected:
     virtual double valueAtPhase(double phase);
 
 private:
+    // persistent member variables:
     unsigned char tuneController;
-    double gain, frequency, frequencyDetuneFactor, tuneInCents, frequencyPitchBendFactor, frequencyModulationFactor, frequencyModulationIntensity, phase, normalizedFrequency;
+    double gain, tuneInCents, frequencyPitchBendFactor, frequencyModulationIntensity;
+    // derived member variables:
+    double phase, frequency, frequencyDetuneFactor, frequencyModulationFactor, normalizedFrequency;
 
     void computeNormalizedFrequency();
 };
