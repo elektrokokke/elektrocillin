@@ -78,10 +78,11 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
     // create a child that allows selection of the sustain node:
-    sustainNodeItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Sustain node", 1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2, 1, GraphicsMeterItem::TOP_HALF, this);
+    sustainNodeItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Sustain node", 1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2, 1, GraphicsMeterItem::BOTTOM_HALF, this);
     sustainNodeItem->setBrush(QBrush(Qt::white));
     sustainNodeItem->setPen(QPen(QBrush(Qt::black), 2));
     sustainNodeItem->setFlag(QGraphicsItem::ItemIsMovable);
+    sustainNodeItem->setPos(getInnerRectangle().topRight() - QPointF(sustainNodeItem->boundingRect().width(), 0));
     QObject::connect(sustainNodeItem, SIGNAL(valueChanged(double)), this, SLOT(onSustainNodeChanged(double)));
 }
 
