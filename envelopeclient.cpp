@@ -25,6 +25,7 @@ void EnvelopeClient::loadState(QDataStream &stream)
 {
     envelopeProcess->load(stream);
     envelope->copyInterpolatorFrom(envelopeProcess);
+    envelope->setSustainIndex(envelopeProcess->getSustainIndex());
 }
 
 Envelope * EnvelopeClient::getEnvelope()
@@ -79,6 +80,12 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     client(client_)
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
+    // create a child that allows selection of the sustain node:
+    sustainNodeItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Sustain node", 1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2, 1, GraphicsMeterItem::TOP_HALF, this);
+    sustainNodeItem->setBrush(QBrush(Qt::white));
+    sustainNodeItem->setPen(QPen(QBrush(Qt::black), 2));
+    sustainNodeItem->setFlag(QGraphicsItem::ItemIsMovable);
+    QObject::connect(sustainNodeItem, SIGNAL(valueChanged(double)), this, SLOT(onSustainNodeChanged(double)));
 }
 
 EnvelopeClient * EnvelopeGraphicsItem::getClient()
@@ -89,16 +96,24 @@ EnvelopeClient * EnvelopeGraphicsItem::getClient()
 void EnvelopeGraphicsItem::increaseControlPoints()
 {
     client->postIncreaseControlPoints();
+    sustainNodeItem->setRange(1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2);
 }
 
 void EnvelopeGraphicsItem::decreaseControlPoints()
 {
     client->postDecreaseControlPoints();
+    sustainNodeItem->setRange(1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2);
 }
 
 void EnvelopeGraphicsItem::changeControlPoint(int index, double x, double y)
 {
     client->postChangeControlPoint(index, x, y);
+}
+
+void EnvelopeGraphicsItem::onSustainNodeChanged(double value)
+{
+    client->postChangeSustainIndex(qRound(value));
+    interpolatorChanged();
 }
 
 class EnvelopeClientFactory : public JackClientFactory

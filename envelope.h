@@ -34,6 +34,7 @@ public:
     Interpolator * getInterpolator();
     void copyInterpolatorFrom(const Envelope *envelope);
 
+    int getSustainIndex() const;
     void setSustainIndex(int sustainIndex);
 
     double getDurationInSeconds() const;

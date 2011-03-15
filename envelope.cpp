@@ -34,8 +34,9 @@ void Envelope::save(QDataStream &stream)
 void Envelope::load(QDataStream &stream)
 {
     interpolator.load(stream);
-    stream >> sustainIndex;
-    interpolator.setControlPointName(sustainIndex, "Sustain");
+    int sustainIndex_;
+    stream >> sustainIndex_;
+    setSustainIndex(sustainIndex_);
 }
 
 Interpolator * Envelope::getInterpolator()
@@ -46,6 +47,11 @@ Interpolator * Envelope::getInterpolator()
 void Envelope::copyInterpolatorFrom(const Envelope *envelope)
 {
     interpolator = envelope->interpolator;
+}
+
+int Envelope::getSustainIndex() const
+{
+    return sustainIndex;
 }
 
 void Envelope::setSustainIndex(int sustainIndex)
@@ -114,7 +120,7 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
     outputs[0] = level * velocity;
 }
 
-bool Envelope::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+bool Envelope::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
     if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
         InterpolatorProcessor::processInterpolatorEvent(&interpolator, event_);

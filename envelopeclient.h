@@ -4,6 +4,7 @@
 #include "envelope.h"
 #include "eventprocessorclient.h"
 #include "graphicsinterpolatoredititem.h"
+#include "graphicsmeteritem.h"
 #include <QGraphicsRectItem>
 #include <QPen>
 #include <QBrush>
@@ -48,8 +49,11 @@ protected:
     virtual void increaseControlPoints();
     virtual void decreaseControlPoints();
     virtual void changeControlPoint(int index, double x, double y);
+private slots:
+    void onSustainNodeChanged(double value);
 private:
     EnvelopeClient *client;
+    GraphicsMeterItem *sustainNodeItem;
 };
 
 #endif // ENVELOPECLIENT_H

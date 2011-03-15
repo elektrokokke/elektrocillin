@@ -1,20 +1,23 @@
 #include "graphicsmeteritem.h"
 #include <cmath>
 
-GraphicsMeterItem::GraphicsMeterItem(const QRectF &rect, const QString &name_, double minValue_, double maxValue_, double value_, int slices_, EllipsisHalf half_, QGraphicsItem *parent) :
+GraphicsMeterItem::GraphicsMeterItem(const QRectF &rect, const QString &name_, double minValue_, double maxValue_, double value_, int slices_, int valuesPerSlice_, EllipsisHalf half_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     name(name_),
     minValue(minValue_),
     maxValue(maxValue_),
     value(value_),
     slices(slices_),
+    valuesPerSlice(valuesPerSlice_),
     half(half_),
     verticalPadding(8),
     nodePen(QPen(QBrush(qRgb(114, 159, 207)), 3)),
-    nodeBrush(QBrush(qRgb(52, 101, 164)))
+    nodeBrush(QBrush(qRgb(52, 101, 164))),
+    nodeItem(0),
+    labelItem(0),
+    needleItem(0)
 {
     setPen(QPen(Qt::NoPen));
-
     QPainterPath path;
     if (half == TOP_HALF) {
         path.moveTo(rect.bottomLeft());
@@ -37,23 +40,12 @@ GraphicsMeterItem::GraphicsMeterItem(const QRectF &rect, const QString &name_, d
                    : QPointF(0.5 * (innerRect.left() + innerRect.right()), innerRect.top())
         );
 
-    // draw ticks at regular intervals:
-    for (int i = 0; i <= slices * 2; i++) {
-        double angle = M_PI * 0.5 * i / slices;
-        double x = -cos(angle);
-        double y = sin(angle);
-        QPointF tickEnd = (half == TOP_HALF
-                           ? QPointF(0.5 * (x + 1) * innerRect.width() + innerRect.left(), innerRect.bottom() - y * innerRect.height())
-                           : QPointF(0.5 * (x + 1) * innerRect.width() + innerRect.left(), innerRect.top() + y * innerRect.height())
-            );
-        QPointF tickStart = (i % 2 == 0 ? 0.8 * tickEnd + 0.2 * innerCenter : 0.9 * tickEnd + 0.1 * innerCenter);
-        new QGraphicsLineItem(QLineF(tickEnd, tickStart), this);
-    }
+    initTicks();
 
     nodeItem = new GraphicsNodeItem(-5, -5, 10, 10, this);
     nodeItem->setPen(nodePen);
     nodeItem->setBrush(nodeBrush);
-    nodeItem->setZValue(1);
+    nodeItem->setZValue(2);
     nodeItem->setBounds(innerRect);
     if (half == TOP_HALF) {
         nodeItem->setBoundsScaled(QRectF(-1, 1, 2, -1));
@@ -64,16 +56,32 @@ GraphicsMeterItem::GraphicsMeterItem(const QRectF &rect, const QString &name_, d
 
     needleItem = new QGraphicsLineItem(this);
     needleItem->setPen(QPen(QBrush(Qt::black), 3));
+    needleItem->setZValue(1);
     labelItem = new GraphicsLabelItem(this);
+    labelItem->setZValue(1);
 
+    setValue(value);
+}
+
+void GraphicsMeterItem::setRange(double minValue, double maxValue, double value, int slices)
+{
+    this->minValue = minValue;
+    this->maxValue = maxValue;
+    this->slices = slices;
+    initTicks();
     setValue(value);
 }
 
 void GraphicsMeterItem::setValue(double newValue)
 {
-    newValue = qRound((newValue - minValue) * (slices * 10) / (maxValue - minValue)) * (maxValue - minValue) / (slices * 10) + minValue;
-    value = qBound(minValue, newValue, maxValue);
-    double angle = (value - minValue) / (maxValue - minValue) * M_PI;
+    double angle = 0;
+    if (slices && (maxValue != minValue)) {
+        newValue = qRound((newValue - minValue) * (slices * valuesPerSlice) / (maxValue - minValue)) * (maxValue - minValue) / (slices * valuesPerSlice) + minValue;
+        value = qBound(minValue, newValue, maxValue);
+        angle = (value - minValue) / (maxValue - minValue) * M_PI;
+    } else {
+        value = minValue;
+    }
     double x = -cos(angle);
     double y = sin(angle);
     nodeItem->setXScaled(x);
@@ -91,6 +99,31 @@ void GraphicsMeterItem::setValue(double newValue)
 void GraphicsMeterItem::onNodePositionChangedScaled(QPointF pos)
 {
     double angle = M_PI - atan2(pos.y(), pos.x());
+    double previousValue = value;
     setValue(angle / M_PI * (maxValue - minValue) + minValue);
-    valueChanged(value);
+    if (previousValue != value) {
+        valueChanged(value);
+    }
+}
+
+void GraphicsMeterItem::initTicks()
+{
+    // delete all existing ticks:
+    for (int i = 0; i < ticks.size(); i++) {
+        delete ticks[i];
+    }
+    ticks.clear();
+    // draw ticks at regular intervals:
+    int ticksBetween = qMin(4, valuesPerSlice);
+    for (int i = 0; i <= slices * ticksBetween; i++) {
+        double angle = M_PI * i / (slices * ticksBetween);
+        double x = -cos(angle);
+        double y = sin(angle);
+        QPointF tickEnd = (half == TOP_HALF
+                           ? QPointF(0.5 * (x + 1) * innerRect.width() + innerRect.left(), innerRect.bottom() - y * innerRect.height())
+                           : QPointF(0.5 * (x + 1) * innerRect.width() + innerRect.left(), innerRect.top() + y * innerRect.height())
+            );
+        QPointF tickStart = (i % ticksBetween == 0 ? 0.8 * tickEnd + 0.2 * innerCenter : 0.9 * tickEnd + 0.1 * innerCenter);
+        ticks.append(new QGraphicsLineItem(QLineF(tickEnd, tickStart), this));
+    }
 }
