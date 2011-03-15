@@ -1,7 +1,7 @@
 #include "graphicsmeteritem.h"
 #include <cmath>
 
-GraphicsMeterItem::GraphicsMeterItem(const QRectF &rect, const QString &name_, double minValue_, double maxValue_, double value_, int slices_, int valuesPerSlice_, EllipsisHalf half_, QGraphicsItem *parent) :
+GraphicsMeterItem::GraphicsMeterItem(const QRectF &rect_, const QString &name_, double minValue_, double maxValue_, double value_, int slices_, int valuesPerSlice_, EllipsisHalf half_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     name(name_),
     minValue(minValue_),
@@ -13,6 +13,7 @@ GraphicsMeterItem::GraphicsMeterItem(const QRectF &rect, const QString &name_, d
     verticalPadding(8),
     nodePen(QPen(QBrush(qRgb(114, 159, 207)), 3)),
     nodeBrush(QBrush(qRgb(52, 101, 164))),
+    rect(rect_),
     nodeItem(0),
     labelItem(0),
     needleItem(0)
@@ -88,9 +89,9 @@ void GraphicsMeterItem::setValue(double newValue)
     nodeItem->setYScaled(y);
     labelItem->setText(QString("%1: %2").arg(name).arg(value));
     if (half == TOP_HALF) {
-        labelItem->setPos(innerRect.bottomLeft() + QPointF(0.5 * (innerRect.width() - labelItem->boundingRect().width()), -labelItem->boundingRect().height()));
+        labelItem->setPos(rect.bottomLeft() + QPointF(0.5 * (rect.width() - labelItem->boundingRect().width()), -labelItem->boundingRect().height()));
     } else {
-        labelItem->setPos(innerRect.topLeft() + QPointF(0.5 * (innerRect.width() - labelItem->boundingRect().width()), 0));
+        labelItem->setPos(rect.topLeft() + QPointF(0.5 * (rect.width() - labelItem->boundingRect().width()), 0));
     }
     QPointF needleEnd = nodeItem->pos();
     needleItem->setLine(QLineF(innerCenter, needleEnd));

@@ -34,7 +34,7 @@ private:
     int verticalPadding;
     QPen nodePen;
     QBrush nodeBrush;
-    QRectF innerRect;
+    QRectF rect, innerRect;
     QPointF innerCenter;
     GraphicsNodeItem *nodeItem;
     GraphicsLabelItem *labelItem;
