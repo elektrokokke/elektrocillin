@@ -206,8 +206,8 @@ void GraphicsClientItem::initItem()
     commandsFont.setBold(true);
     commandsFont.setStyleStrategy(QFont::PreferAntialias);
     QFontMetrics fontMetrics(font);
-    int padding = fontMetrics.height() * 2;
-    int portPadding = fontMetrics.height() / 2;
+    int portPadding = fontMetrics.height() / 3;
+    int padding = fontMetrics.height() + portPadding * 2;
 
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
     textItem->setFont(font);
@@ -229,7 +229,7 @@ void GraphicsClientItem::initItem()
     int inputPortsWidth = -portPadding;
     int minimumInputPortWidth = 0;
     for (int i = 0; i < inputPorts.size(); i++) {
-        inputPortItems.append(new GraphicsPortItem(client, inputPorts[i], 3, font, this, (JackContextGraphicsScene*)scene()));
+        inputPortItems.append(new GraphicsPortItem(client, inputPorts[i], 3, font, portPadding, this, (JackContextGraphicsScene*)scene()));
         if (isMacro) {
             QPen pen = inputPortItems.back()->pen();
             pen.setColor(QColor("steelblue"));
@@ -245,7 +245,7 @@ void GraphicsClientItem::initItem()
     int outputPortsWidth = -portPadding;
     int minimumOutputPortWidth = 0;
     for (int i = 0; i < outputPorts.size(); i++) {
-        outputPortItems.append(new GraphicsPortItem(client, outputPorts[i], 3, font, this, (JackContextGraphicsScene*)scene()));
+        outputPortItems.append(new GraphicsPortItem(client, outputPorts[i], 3, font, portPadding, this, (JackContextGraphicsScene*)scene()));
         if (isMacro) {
             QPen pen = outputPortItems.back()->pen();
             pen.setColor(QColor("steelblue"));
@@ -257,7 +257,7 @@ void GraphicsClientItem::initItem()
         }
     }
 
-    rect = textItem->boundingRect().adjusted(0, 0, padding * 2, padding * 2 + fontMetrics.height());
+    rect = (textItem->boundingRect().translated(textItem->pos()) | showInnerItemCommand->boundingRect().translated(showInnerItemCommand->pos())).adjusted(-padding, -padding, padding, padding);
     if (rect.width() < inputPortsWidth + (portPadding - minimumInputPortWidth) * 2) {
         rect.setWidth(inputPortsWidth + (portPadding - minimumInputPortWidth) * 2);
     }

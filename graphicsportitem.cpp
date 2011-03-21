@@ -10,7 +10,7 @@
 #include <QSet>
 #include <QGraphicsSceneMouseEvent>
 
-GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, int style_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
+GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, int style_, QFont font_, int padding, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
     QGraphicsPathItem(parent, scene),
     client(client_),
     fullPortName(fullPortName_),
@@ -29,7 +29,7 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     setCursor(Qt::ArrowCursor);
     font.setStyleStrategy(QFont::PreferAntialias);
     QFontMetrics fontMetrics(font);
-    int portPadding = fontMetrics.height() / 2;
+    int portPadding = padding;
 
     QGraphicsSimpleTextItem *portTextItem = new QGraphicsSimpleTextItem(shortPortName, this);
     portTextItem->setFont(font);

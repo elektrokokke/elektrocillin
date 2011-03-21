@@ -11,7 +11,7 @@ class GraphicsPortItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsPortItem(JackClient *client, const QString &fullPortName, int style, QFont font, QGraphicsItem *parent, JackContextGraphicsScene *scene);
+    GraphicsPortItem(JackClient *client, const QString &fullPortName, int style, QFont font, int padding, QGraphicsItem *parent, JackContextGraphicsScene *scene);
     const QRectF & getRect() const;
     QPointF getConnectionScenePos() const;
 
