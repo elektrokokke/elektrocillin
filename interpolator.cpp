@@ -7,8 +7,12 @@ Interpolator::~Interpolator()
 
 void Interpolator::setControlPointName(int controlPointIndex, const QString &name)
 {
-    Q_ASSERT((controlPointIndex >= 0) && (controlPointIndex < xx.size()));
-    names[controlPointIndex] = name;
+    if (name.isNull()) {
+        names.remove(controlPointIndex);
+    } else {
+        Q_ASSERT((controlPointIndex >= 0) && (controlPointIndex < xx.size()));
+        names[controlPointIndex] = name;
+    }
 }
 
 QString Interpolator::getControlPointName(int controlPointIndex) const
