@@ -85,6 +85,7 @@ public:
     JackPortRenameCallbackHandler portRenameCallbackHandler;
     JackGraphOrderCallbackHandler graphOrderCallbackHandler;
     JackXRunCallbackHandler xRunCallbackHandler;
+    JackSyncCallbackHandler syncCallbackHandler;
 private:
     static MetaJackContext instance;
 
@@ -220,6 +221,19 @@ public:
     virtual void set_error_function (void (*func)(const char *));
     virtual void set_info_function (void (*func)(const char *));
     virtual void free(void* ptr);
+    // Jack transport API methods:
+    virtual int  release_timebase (jack_client_t *client);
+    virtual int  set_sync_callback (jack_client_t *client, JackSyncCallback sync_callback, void *arg);
+    virtual int  set_sync_timeout (jack_client_t *client, jack_time_t timeout);
+    virtual int  set_timebase_callback (jack_client_t *client, int conditional, JackTimebaseCallback timebase_callback, void *arg);
+    virtual int  transport_locate (jack_client_t *client, jack_nframes_t frame);
+    virtual jack_transport_state_t transport_query (const jack_client_t *client, jack_position_t *pos);
+    virtual jack_nframes_t get_current_transport_frame (const jack_client_t *client);
+    virtual int  transport_reposition (jack_client_t *client, jack_position_t *pos);
+    virtual void transport_start (jack_client_t *client);
+    virtual void transport_stop (jack_client_t *client);
+    virtual void get_transport_info (jack_client_t *client, jack_transport_info_t *tinfo);
+    virtual void set_transport_info (jack_client_t *client, jack_transport_info_t *tinfo);
 };
 
 #endif // METAJACKCONTEXTNEW_H

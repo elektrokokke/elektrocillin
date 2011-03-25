@@ -34,6 +34,8 @@ MetaJackContext::MetaJackContext(JackContext *jackInterface_, const std::string 
         wrapperInterface->set_sample_rate_callback(wrapperClient, JackSampleRateCallbackHandler::invokeCallbacksWithArgs, &sampleRateCallbackHandler);
         // register the xrun callback:
         wrapperInterface->set_xrun_callback(wrapperClient, JackXRunCallbackHandler::invokeCallbacksWithoutArgs, &xRunCallbackHandler);
+        // register the transport sync callback:
+        wrapperInterface->set_sync_callback(wrapperClient, JackSyncCallbackHandler::invokeCallbacksWithArgs, &syncCallbackHandler);
         // activate the client:
         if (wrapperInterface->activate(wrapperClient)) {
             wrapperInterface->client_close(wrapperClient);
@@ -1069,4 +1071,65 @@ void MetaJackContext::free(void* ptr)
         }
         delete [] names;
     }
+}
+
+int MetaJackContext::release_timebase (jack_client_t *client)
+{
+    return wrapperInterface->release_timebase(wrapperClient);
+}
+
+int MetaJackContext::set_sync_callback (jack_client_t *client, JackSyncCallback sync_callback, void *arg)
+{
+    syncCallbackHandler.setCallback((MetaJackClient*)client, sync_callback, arg);
+    return 0;
+}
+
+int MetaJackContext::set_sync_timeout (jack_client_t *client, jack_time_t timeout)
+{
+    return wrapperInterface->set_sync_timeout(wrapperClient, timeout);
+}
+
+int MetaJackContext::set_timebase_callback (jack_client_t *client, int conditional, JackTimebaseCallback timebase_callback, void *arg)
+{
+    return wrapperInterface->set_timebase_callback(wrapperClient, conditional, timebase_callback, arg);
+}
+
+int MetaJackContext::transport_locate (jack_client_t *client, jack_nframes_t frame)
+{
+    return wrapperInterface->transport_locate(wrapperClient, frame);
+}
+
+jack_transport_state_t MetaJackContext::transport_query (const jack_client_t *client, jack_position_t *pos)
+{
+    return wrapperInterface->transport_query(wrapperClient, pos);
+}
+
+jack_nframes_t MetaJackContext::get_current_transport_frame (const jack_client_t *client)
+{
+    return wrapperInterface->get_current_transport_frame(wrapperClient);
+}
+
+int MetaJackContext::transport_reposition (jack_client_t *client, jack_position_t *pos)
+{
+    return wrapperInterface->transport_reposition(wrapperClient, pos);
+}
+
+void MetaJackContext::transport_start (jack_client_t *client)
+{
+    wrapperInterface->transport_start(wrapperClient);
+}
+
+void MetaJackContext::transport_stop (jack_client_t *client)
+{
+    wrapperInterface->transport_stop(wrapperClient);
+}
+
+void MetaJackContext::get_transport_info (jack_client_t *client, jack_transport_info_t *tinfo)
+{
+    wrapperInterface->get_transport_info(wrapperClient, tinfo);
+}
+
+void MetaJackContext::set_transport_info (jack_client_t *client, jack_transport_info_t *tinfo)
+{
+    wrapperInterface->set_transport_info(wrapperClient, tinfo);
 }

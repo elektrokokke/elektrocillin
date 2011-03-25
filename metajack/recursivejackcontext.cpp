@@ -663,6 +663,66 @@ void RecursiveJackContext::free(void* ptr)
     mapPointerToInterface.erase(ptr);
 }
 
+int RecursiveJackContext::release_timebase (jack_client_t *client)
+{
+    return mapClientToInterface[client]->release_timebase(client);
+}
+
+int RecursiveJackContext::set_sync_callback (jack_client_t *client, JackSyncCallback sync_callback, void *arg)
+{
+    return mapClientToInterface[client]->set_sync_callback(client, sync_callback, arg);
+}
+
+int RecursiveJackContext::set_sync_timeout (jack_client_t *client, jack_time_t timeout)
+{
+    return mapClientToInterface[client]->set_sync_timeout(client, timeout);
+}
+
+int RecursiveJackContext::set_timebase_callback (jack_client_t *client, int conditional, JackTimebaseCallback timebase_callback, void *arg)
+{
+    return mapClientToInterface[client]->set_timebase_callback(client, conditional, timebase_callback, arg);
+}
+
+int RecursiveJackContext::transport_locate (jack_client_t *client, jack_nframes_t frame)
+{
+    return mapClientToInterface[client]->transport_locate(client, frame);
+}
+
+jack_transport_state_t RecursiveJackContext::transport_query (const jack_client_t *client, jack_position_t *pos)
+{
+    return mapClientToInterface[client]->transport_query(client, pos);
+}
+
+jack_nframes_t RecursiveJackContext::get_current_transport_frame (const jack_client_t *client)
+{
+    return mapClientToInterface[client]->get_current_transport_frame(client);
+}
+
+int RecursiveJackContext::transport_reposition (jack_client_t *client, jack_position_t *pos)
+{
+    return mapClientToInterface[client]->transport_reposition(client, pos);
+}
+
+void RecursiveJackContext::transport_start (jack_client_t *client)
+{
+    mapClientToInterface[client]->transport_start(client);
+}
+
+void RecursiveJackContext::transport_stop (jack_client_t *client)
+{
+    mapClientToInterface[client]->transport_stop(client);
+}
+
+void RecursiveJackContext::get_transport_info (jack_client_t *client, jack_transport_info_t *tinfo)
+{
+    mapClientToInterface[client]->get_transport_info(client, tinfo);
+}
+
+void RecursiveJackContext::set_transport_info (jack_client_t *client, jack_transport_info_t *tinfo)
+{
+    mapClientToInterface[client]->set_transport_info(client, tinfo);
+}
+
 jack_nframes_t RecursiveJackContext::midi_get_event_count(void* port_buffer)
 {
     MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)port_buffer;

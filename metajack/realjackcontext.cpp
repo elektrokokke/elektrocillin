@@ -1,5 +1,6 @@
 #include "realjackcontext.h"
 #include <jack/jack.h>
+#include <jack/transport.h>
 
 RealJackContext::RealJackContext() :
     name("Jack server")
@@ -391,6 +392,66 @@ void RealJackContext::set_info_function (void (*func)(const char *))
 void RealJackContext::free(void* ptr)
 {
     jack_free(ptr);
+}
+
+int RealJackContext::release_timebase (jack_client_t *client)
+{
+    return jack_release_timebase(client);
+}
+
+int RealJackContext::set_sync_callback (jack_client_t *client, JackSyncCallback sync_callback, void *arg)
+{
+    return jack_set_sync_callback(client, sync_callback, arg);
+}
+
+int RealJackContext::set_sync_timeout (jack_client_t *client, jack_time_t timeout)
+{
+    return jack_set_sync_timeout(client, timeout);
+}
+
+int RealJackContext::set_timebase_callback (jack_client_t *client, int conditional, JackTimebaseCallback timebase_callback, void *arg)
+{
+    return jack_set_timebase_callback(client, conditional, timebase_callback, arg);
+}
+
+int RealJackContext::transport_locate (jack_client_t *client, jack_nframes_t frame)
+{
+    return jack_transport_locate(client, frame);
+}
+
+jack_transport_state_t RealJackContext::transport_query (const jack_client_t *client, jack_position_t *pos)
+{
+    return jack_transport_query(client, pos);
+}
+
+jack_nframes_t RealJackContext::get_current_transport_frame (const jack_client_t *client)
+{
+    return jack_get_current_transport_frame(client);
+}
+
+int RealJackContext::transport_reposition (jack_client_t *client, jack_position_t *pos)
+{
+    return jack_transport_reposition(client, pos);
+}
+
+void RealJackContext::transport_start (jack_client_t *client)
+{
+    jack_transport_start(client);
+}
+
+void RealJackContext::transport_stop (jack_client_t *client)
+{
+    jack_transport_stop(client);
+}
+
+void RealJackContext::get_transport_info (jack_client_t *client, jack_transport_info_t *tinfo)
+{
+    jack_get_transport_info(client, tinfo);
+}
+
+void RealJackContext::set_transport_info (jack_client_t *client, jack_transport_info_t *tinfo)
+{
+    jack_set_transport_info(client, tinfo);
 }
 
 jack_nframes_t RealJackContext::midi_get_event_count(void* port_buffer)

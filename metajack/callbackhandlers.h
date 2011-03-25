@@ -195,4 +195,25 @@ protected:
     }
 };
 
+class JackSyncCallbackHandler : public CallbackHandler<JackSyncCallback> {
+public:
+    void invokeCallbacksWithArgs(jack_transport_state_t state, jack_position_t *pos) {
+        this->state = state;
+        this->pos = pos;
+        invokeCallbacks();
+    }
+    static int invokeCallbacksWithArgs(jack_transport_state_t state, jack_position_t *pos, void *arg) {
+        JackSyncCallbackHandler *callbackHandler = (JackSyncCallbackHandler*)arg;
+        callbackHandler->invokeCallbacksWithArgs(state, pos);
+        return 0;
+    }
+protected:
+    virtual void invokeCallback(JackSyncCallback callback, void *arg) {
+        callback(state, pos, arg);
+    }
+private:
+    jack_transport_state_t state;
+    jack_position_t *pos;
+};
+
 #endif//CALLBACKHANDLERS_H

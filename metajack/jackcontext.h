@@ -84,6 +84,19 @@ public:
     virtual void set_error_function (void (*func)(const char *)) = 0;
     virtual void set_info_function (void (*func)(const char *)) = 0;
     virtual void free(void* ptr) = 0;
+    // Jack transport API methods:
+    virtual int  release_timebase (jack_client_t *client) = 0;
+    virtual int  set_sync_callback (jack_client_t *client, JackSyncCallback sync_callback, void *arg) = 0;
+    virtual int  set_sync_timeout (jack_client_t *client, jack_time_t timeout) = 0;
+    virtual int  set_timebase_callback (jack_client_t *client, int conditional, JackTimebaseCallback timebase_callback, void *arg) = 0;
+    virtual int  transport_locate (jack_client_t *client, jack_nframes_t frame) = 0;
+    virtual jack_transport_state_t transport_query (const jack_client_t *client, jack_position_t *pos) = 0;
+    virtual jack_nframes_t get_current_transport_frame (const jack_client_t *client) = 0;
+    virtual int  transport_reposition (jack_client_t *client, jack_position_t *pos) = 0;
+    virtual void transport_start (jack_client_t *client) = 0;
+    virtual void transport_stop (jack_client_t *client) = 0;
+    virtual void get_transport_info (jack_client_t *client, jack_transport_info_t *tinfo) = 0;
+    virtual void set_transport_info (jack_client_t *client, jack_transport_info_t *tinfo) = 0;
 };
 
 #endif // METAJACKINTERFACE_H

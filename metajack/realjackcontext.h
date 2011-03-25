@@ -90,6 +90,20 @@ public:
     void set_error_function (void (*func)(const char *));
     void set_info_function (void (*func)(const char *));
     void free(void* ptr);
+    // Jack transport API methods:
+    int  release_timebase (jack_client_t *client);
+    int  set_sync_callback (jack_client_t *client, JackSyncCallback sync_callback, void *arg);
+    int  set_sync_timeout (jack_client_t *client, jack_time_t timeout);
+    int  set_timebase_callback (jack_client_t *client, int conditional, JackTimebaseCallback timebase_callback, void *arg);
+    int  transport_locate (jack_client_t *client, jack_nframes_t frame);
+    jack_transport_state_t transport_query (const jack_client_t *client, jack_position_t *pos);
+    jack_nframes_t get_current_transport_frame (const jack_client_t *client);
+    int  transport_reposition (jack_client_t *client, jack_position_t *pos);
+    void transport_start (jack_client_t *client);
+    void transport_stop (jack_client_t *client);
+    void get_transport_info (jack_client_t *client, jack_transport_info_t *tinfo);
+    void set_transport_info (jack_client_t *client, jack_transport_info_t *tinfo);
+
     static jack_nframes_t midi_get_event_count(void* port_buffer);
     static int midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index);
     static void midi_clear_buffer(void *port_buffer);

@@ -368,6 +368,66 @@ void meta_jack_free(void* ptr)
     RecursiveJackContext::getInstance()->free(ptr);
 }
 
+int  meta_jack_release_timebase (jack_client_t *client)
+{
+    return RecursiveJackContext::getInstance()->release_timebase(client);
+}
+
+int  meta_jack_set_sync_callback (jack_client_t *client, JackSyncCallback sync_callback, void *arg)
+{
+    return RecursiveJackContext::getInstance()->set_sync_callback(client, sync_callback, arg);
+}
+
+int  meta_jack_set_sync_timeout (jack_client_t *client, jack_time_t timeout)
+{
+    return RecursiveJackContext::getInstance()->set_sync_timeout(client, timeout);
+}
+
+int  meta_jack_set_timebase_callback (jack_client_t *client, int conditional, JackTimebaseCallback timebase_callback, void *arg)
+{
+    return RecursiveJackContext::getInstance()->set_timebase_callback(client, conditional, timebase_callback, arg);
+}
+
+int  meta_jack_transport_locate (jack_client_t *client, jack_nframes_t frame)
+{
+    return RecursiveJackContext::getInstance()->transport_locate(client, frame);
+}
+
+jack_transport_state_t meta_jack_transport_query (const jack_client_t *client, jack_position_t *pos)
+{
+    return RecursiveJackContext::getInstance()->transport_query(client, pos);
+}
+
+jack_nframes_t meta_jack_get_current_transport_frame (const jack_client_t *client)
+{
+    return RecursiveJackContext::getInstance()->get_current_transport_frame(client);
+}
+
+int  meta_jack_transport_reposition (jack_client_t *client, jack_position_t *pos)
+{
+    return RecursiveJackContext::getInstance()->transport_reposition(client, pos);
+}
+
+void meta_jack_transport_start (jack_client_t *client)
+{
+    RecursiveJackContext::getInstance()->transport_start(client);
+}
+
+void meta_jack_transport_stop (jack_client_t *client)
+{
+    RecursiveJackContext::getInstance()->transport_stop(client);
+}
+
+void meta_jack_get_transport_info (jack_client_t *client, jack_transport_info_t *tinfo)
+{
+    RecursiveJackContext::getInstance()->get_transport_info(client, tinfo);
+}
+
+void meta_jack_set_transport_info (jack_client_t *client, jack_transport_info_t *tinfo)
+{
+    RecursiveJackContext::getInstance()->set_transport_info(client, tinfo);
+}
+
 #ifdef __cplusplus
 }
 #endif
