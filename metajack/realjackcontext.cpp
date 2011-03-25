@@ -392,3 +392,38 @@ void RealJackContext::free(void* ptr)
 {
     jack_free(ptr);
 }
+
+jack_nframes_t RealJackContext::midi_get_event_count(void* port_buffer)
+{
+    return jack_midi_get_event_count(port_buffer);
+}
+
+int RealJackContext::midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index)
+{
+    return jack_midi_event_get(event, port_buffer, event_index);
+}
+
+void RealJackContext::midi_clear_buffer(void *port_buffer)
+{
+    jack_midi_clear_buffer(port_buffer);
+}
+
+size_t RealJackContext::midi_max_event_size(void* port_buffer)
+{
+    return jack_midi_max_event_size(port_buffer);
+}
+
+jack_midi_data_t * RealJackContext::midi_event_reserve(void *port_buffer, jack_nframes_t time, size_t data_size)
+{
+    return jack_midi_event_reserve(port_buffer, time, data_size);
+}
+
+int RealJackContext::midi_event_write(void *port_buffer, jack_nframes_t time, const jack_midi_data_t *data, size_t data_size)
+{
+    return jack_midi_event_write(port_buffer, time, data, data_size);
+}
+
+jack_nframes_t RealJackContext::midi_get_lost_event_count(void *port_buffer)
+{
+    return jack_midi_get_lost_event_count(port_buffer);
+}

@@ -135,7 +135,6 @@ HEADERS  += mainwindow.h \
     linearintegralinterpolator.h \
     linearmorphoscillator.h \
     multiplyprocessor.h \
-    metajack/midiport.h \
     metajack/metajackclient.h \
     metajack/metajackport.h \
     metajack/metajackcontext.h \
@@ -165,7 +164,9 @@ HEADERS  += mainwindow.h \
     interpolatorprocessor.h \
     graphicsmeteritem.h \
     polynomialoscillator.h \
-    polynomialoscillatorclient.h
+    polynomialoscillatorclient.h \
+    metajack/midiport.h \
+    metajack/metajackclientserializer.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

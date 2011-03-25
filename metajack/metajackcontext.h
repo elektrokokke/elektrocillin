@@ -2,11 +2,11 @@
 #define METAJACKCONTEXTNEW_H
 
 #include "jackcontext.h"
+#include "midiport.h"
 #include "metajackclient.h"
 #include "metajackport.h"
 #include "callbackhandlers.h"
 #include "jackringbuffer.h"
-#include <jack/midiport.h>
 #include <map>
 #include <QWaitCondition>
 #include <QMutex>
@@ -15,6 +15,8 @@ class MetaJackContext : public JackContext
 {
 public:
     struct MetaJackContextMidiBufferHead {
+        enum { MAGIC = 0x42424242 };
+        uint32_t magic;
         size_t bufferSize, midiEventCount, midiDataSize;
         jack_nframes_t lostMidiEvents;
     };
@@ -60,14 +62,15 @@ public:
     jack_nframes_t  convert_time_to_frames(jack_time_t time) const;
 
     // MIDI-related methods:
-    static jack_nframes_t      midi_get_event_count(void* port_buffer);
-    static int                 midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index);
-    static void                midi_clear_buffer(void *port_buffer);
-    static size_t              midi_max_event_size(void* port_buffer);
-    static jack_midi_data_t*   midi_event_reserve(void *port_buffer, jack_nframes_t  time, size_t data_size);
-    static int                 midi_event_write(void *port_buffer, jack_nframes_t time, const jack_midi_data_t *data, size_t data_size);
-    static jack_nframes_t      midi_get_lost_event_count(void *port_buffer);
-    static bool                compare_midi_events(const jack_midi_event_t &event1, const jack_midi_event_t &event2);
+    static void midi_init_buffer(void *port_buffer, size_t bufferSizeInBytes);
+    static jack_nframes_t midi_get_event_count(void* port_buffer);
+    static int midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index);
+    static void midi_clear_buffer(void *port_buffer);
+    static size_t midi_max_event_size(void* port_buffer);
+    static jack_midi_data_t * midi_event_reserve(void *port_buffer, jack_nframes_t time, size_t data_size);
+    static int midi_event_write(void *port_buffer, jack_nframes_t time, const jack_midi_data_t *data, size_t data_size);
+    static jack_nframes_t midi_get_lost_event_count(void *port_buffer);
+    static bool compare_midi_events(const jack_midi_event_t &event1, const jack_midi_event_t &event2);
 
     // callback handlers for the internal clients:
     JackThreadInitCallbackHandler threadInitCallbackHandler;

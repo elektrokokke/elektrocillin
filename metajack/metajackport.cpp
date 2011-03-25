@@ -170,9 +170,7 @@ void MetaJackPortProcess::changeBufferSize(jack_nframes_t bufferSize)
         buffer = new char [bufferSizeInBytes];
         // if this is a MIDI port, write its size to the head of the buffer:
         if (getType() == JACK_DEFAULT_MIDI_TYPE) {
-            MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)buffer;
-            head->bufferSize = bufferSizeInBytes - sizeof(MetaJackContext::MetaJackContextMidiBufferHead);
-            head->midiDataSize = head->midiEventCount = head->lostMidiEvents = 0;
+            MetaJackContext::midi_init_buffer(buffer, bufferSizeInBytes);
         }
     }
 }

@@ -15,8 +15,8 @@ RecursiveJackContext::RecursiveJackContext()
     // put the interface to the real server on the stack as the first interface to be used:
     interfaces.push(new RealJackContext());
     interfaceStack.push(interfaces.top());
-    // put one meta jack instance on the stack:
-    pushNewContext("metajack");
+//    // put one meta jack instance on the stack:
+//    pushNewContext("metajack");
 }
 
 RecursiveJackContext::~RecursiveJackContext()
@@ -103,7 +103,7 @@ size_t RecursiveJackContext::getContextStackSize() const
     return interfaceStack.size();
 }
 
-void RecursiveJackContext::saveCurrentContext(QDataStream &stream, JackClientSerializer *clientSaver)
+void RecursiveJackContext::saveCurrentContext(QDataStream &stream, MetaJackClientSerializer *clientSaver)
 {
     JackContext *context = getCurrentContext();
     // get all clients in the context:
@@ -158,7 +158,7 @@ void RecursiveJackContext::saveCurrentContext(QDataStream &stream, JackClientSer
     stream << connections;
 }
 
-void RecursiveJackContext::loadCurrentContext(QDataStream &stream, JackClientSerializer *clientLoader)
+void RecursiveJackContext::loadCurrentContext(QDataStream &stream, MetaJackClientSerializer *clientLoader)
 {
     // load the client count:
     int clientCount;
@@ -661,4 +661,74 @@ void RecursiveJackContext::free(void* ptr)
 {
     mapPointerToInterface[ptr]->free(ptr);
     mapPointerToInterface.erase(ptr);
+}
+
+jack_nframes_t RecursiveJackContext::midi_get_event_count(void* port_buffer)
+{
+    MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)port_buffer;
+    if (head->magic == MetaJackContext::MetaJackContextMidiBufferHead::MAGIC) {
+        return MetaJackContext::midi_get_event_count(port_buffer);
+    } else {
+        return RealJackContext::midi_get_event_count(port_buffer);
+    }
+}
+
+int RecursiveJackContext::midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index)
+{
+    MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)port_buffer;
+    if (head->magic == MetaJackContext::MetaJackContextMidiBufferHead::MAGIC) {
+        return MetaJackContext::midi_event_get(event, port_buffer, event_index);
+    } else {
+        return RealJackContext::midi_event_get(event, port_buffer, event_index);
+    }
+}
+
+void RecursiveJackContext::midi_clear_buffer(void *port_buffer)
+{
+    MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)port_buffer;
+    if (head->magic == MetaJackContext::MetaJackContextMidiBufferHead::MAGIC) {
+        MetaJackContext::midi_clear_buffer(port_buffer);
+    } else {
+        RealJackContext::midi_clear_buffer(port_buffer);
+    }
+}
+
+size_t RecursiveJackContext::midi_max_event_size(void* port_buffer)
+{
+    MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)port_buffer;
+    if (head->magic == MetaJackContext::MetaJackContextMidiBufferHead::MAGIC) {
+        return MetaJackContext::midi_max_event_size(port_buffer);
+    } else {
+        return RealJackContext::midi_max_event_size(port_buffer);
+    }
+}
+
+jack_midi_data_t * RecursiveJackContext::midi_event_reserve(void *port_buffer, jack_nframes_t time, size_t data_size)
+{
+    MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)port_buffer;
+    if (head->magic == MetaJackContext::MetaJackContextMidiBufferHead::MAGIC) {
+        return MetaJackContext::midi_event_reserve(port_buffer, time, data_size);
+    } else {
+        return RealJackContext::midi_event_reserve(port_buffer, time, data_size);
+    }
+}
+
+int RecursiveJackContext::midi_event_write(void *port_buffer, jack_nframes_t time, const jack_midi_data_t *data, size_t data_size)
+{
+    MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)port_buffer;
+    if (head->magic == MetaJackContext::MetaJackContextMidiBufferHead::MAGIC) {
+        return MetaJackContext::midi_event_write(port_buffer, time, data, data_size);
+    } else {
+        return RealJackContext::midi_event_write(port_buffer, time, data, data_size);
+    }
+}
+
+jack_nframes_t RecursiveJackContext::midi_get_lost_event_count(void *port_buffer)
+{
+    MetaJackContext::MetaJackContextMidiBufferHead *head = (MetaJackContext::MetaJackContextMidiBufferHead*)port_buffer;
+    if (head->magic == MetaJackContext::MetaJackContextMidiBufferHead::MAGIC) {
+        return MetaJackContext::midi_get_lost_event_count(port_buffer);
+    } else {
+        return RealJackContext::midi_get_lost_event_count(port_buffer);
+    }
 }

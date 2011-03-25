@@ -17,17 +17,19 @@ extern "C" {
 #define jack_midi_event_write           meta_jack_midi_event_write
 #define jack_midi_get_lost_event_count  meta_jack_midi_get_lost_event_count
 
-/** Type for raw event data contained in @ref jack_midi_event_t. */
-typedef unsigned char jack_midi_data_t;
+#include <jack/midiport.h>
+
+///** Type for raw event data contained in @ref jack_midi_event_t. */
+//typedef unsigned char jack_midi_data_t;
 
 
-/** A Jack MIDI event. */
-typedef struct _jack_midi_event
-{
-        jack_nframes_t    time;   /**< Sample index at which event is valid */
-        size_t            size;   /**< Number of bytes of data in \a buffer */
-        jack_midi_data_t *buffer; /**< Raw MIDI data */
-} jack_midi_event_t;
+///** A Jack MIDI event. */
+//typedef struct _jack_midi_event
+//{
+//        jack_nframes_t    time;   /**< Sample index at which event is valid */
+//        size_t            size;   /**< Number of bytes of data in \a buffer */
+//        jack_midi_data_t *buffer; /**< Raw MIDI data */
+//} jack_midi_event_t;
 
 
 /**

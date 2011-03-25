@@ -502,6 +502,14 @@ void * MetaJackContext::getPortBuffer(MetaJackPort *port, jack_nframes_t nframes
     }
 }
 
+void MetaJackContext::midi_init_buffer(void *port_buffer, size_t bufferSizeInBytes)
+{
+    MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;
+    head->magic = MetaJackContextMidiBufferHead::MAGIC;
+    head->bufferSize = bufferSizeInBytes - sizeof(MetaJackContext::MetaJackContextMidiBufferHead);
+    head->midiDataSize = head->midiEventCount = head->lostMidiEvents = 0;
+}
+
 jack_nframes_t MetaJackContext::midi_get_event_count(void* port_buffer)
 {
     MetaJackContextMidiBufferHead *head = (MetaJackContextMidiBufferHead*)port_buffer;

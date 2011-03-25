@@ -2,22 +2,16 @@
 #define RECURSIVEJACKCONTEXT_H
 
 #include "jackcontext.h"
+#include "metajackclientserializer.h"
+#include <jack/midiport.h>
 #include <map>
 #include <stack>
 #include <string>
-#include <QDataStream>
 #include <QVariant>
 
 class RecursiveJackContext : public JackContext
 {
 public:
-    class JackClientSerializer
-    {
-    public:
-        virtual void save(jack_client_t *client, QDataStream &stream) = 0;
-        virtual jack_client_t * load(const QString &clientName, QDataStream &stream) = 0;
-    };
-
     static RecursiveJackContext * getInstance();
     virtual ~RecursiveJackContext();
 
@@ -30,8 +24,8 @@ public:
     void deleteContext(JackContext *context);
     size_t getContextStackSize() const;
 
-    void saveCurrentContext(QDataStream &stream, JackClientSerializer *clientSaver);
-    void loadCurrentContext(QDataStream &stream, JackClientSerializer *clientLoader);
+    void saveCurrentContext(QDataStream &stream, MetaJackClientSerializer *clientSaver);
+    void loadCurrentContext(QDataStream &stream, MetaJackClientSerializer *clientLoader);
 
     void setClientProperty(const QString &clientName, QVariant property);
     QVariant getClientProperty(const QString &clientName);
@@ -133,6 +127,13 @@ public:
     void set_error_function (void (*func)(const char *));
     void set_info_function (void (*func)(const char *));
     void free(void* ptr);
+    static jack_nframes_t midi_get_event_count(void* port_buffer);
+    static int midi_event_get(jack_midi_event_t *event, void *port_buffer, jack_nframes_t event_index);
+    static void midi_clear_buffer(void *port_buffer);
+    static size_t midi_max_event_size(void* port_buffer);
+    static jack_midi_data_t * midi_event_reserve(void *port_buffer, jack_nframes_t time, size_t data_size);
+    static int midi_event_write(void *port_buffer, jack_nframes_t time, const jack_midi_data_t *data, size_t data_size);
+    static jack_nframes_t midi_get_lost_event_count(void *port_buffer);
 
 private:
     std::stack<JackContext*> interfaces, interfaceStack;

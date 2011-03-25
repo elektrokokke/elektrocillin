@@ -101,7 +101,7 @@ void MainWindow::on_actionCreate_macro_triggered()
 
 void MainWindow::onSceneChanged()
 {
-    ui->actionParent_level->setEnabled(RecursiveJackContext::getInstance()->getContextStackSize() > 2);
+    ui->actionParent_level->setEnabled(RecursiveJackContext::getInstance()->getContextStackSize() > 1);
 }
 
 void MainWindow::on_actionShow_all_controls_triggered()

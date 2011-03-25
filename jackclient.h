@@ -2,7 +2,7 @@
 #define JACKCLIENT_H
 
 #include "metajack/metajack.h"
-#include "metajack/recursivejackcontext.h"
+#include "metajack/metajackclientserializer.h"
 #include <QStringList>
 #include <QMap>
 #include <QRectF>
@@ -262,7 +262,7 @@ private:
     static void portRegisterCallback(jack_port_id_t id, int registered, void *arg);
 };
 
-class JackClientSerializer : public RecursiveJackContext::JackClientSerializer
+class JackClientSerializer : public MetaJackClientSerializer
 {
 public:
     static JackClientSerializer * getInstance();

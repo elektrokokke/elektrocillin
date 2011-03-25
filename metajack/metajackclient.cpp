@@ -1,7 +1,7 @@
 #include "metajackclient.h"
 #include "metajackport.h"
 #include "metajackcontext.h"
-#include <jack/midiport.h>
+#include "recursivejackcontext.h"
 #include <sstream>
 #include <cassert>
 
@@ -177,36 +177,22 @@ int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
                 // copy midi:
                 void *wrapperMidiBuffer = me->wrapperInterface->port_get_buffer(wrapperPort, nframes / oversampling);
                 void *midiBuffer = me->context->getPortBuffer(port, nframes);
-                // important: check wether the midi port is from the real jack server or from a MetaJackContext:
-                bool metaJackMidi = dynamic_cast<MetaJackContext*>(me->wrapperInterface);
                 if (port->isInput()) {
-                    if (metaJackMidi) {
-                        MetaJackContext::midi_clear_buffer(wrapperMidiBuffer);
-                    } else {
-                        jack_midi_clear_buffer(wrapperMidiBuffer);
-                    }
+                    RecursiveJackContext::midi_clear_buffer(wrapperMidiBuffer);
                     jack_nframes_t midiEventCount = MetaJackContext::midi_get_event_count(midiBuffer);
                     for (jack_nframes_t i = 0; i < midiEventCount; i++) {
                         jack_midi_event_t event;
                         MetaJackContext::midi_event_get(&event, midiBuffer, i);
                         // downsampling:
                         event.time /= oversampling;
-                        if (metaJackMidi) {
-                            MetaJackContext::midi_event_write(wrapperMidiBuffer, event.time, event.buffer, event.size);
-                        } else {
-                            jack_midi_event_write(wrapperMidiBuffer, event.time, event.buffer, event.size);
-                        }
+                        RecursiveJackContext::midi_event_write(wrapperMidiBuffer, event.time, event.buffer, event.size);
                     }
                 } else {
                     MetaJackContext::midi_clear_buffer(midiBuffer);
-                    jack_nframes_t midiEventCount = (metaJackMidi ? MetaJackContext::midi_get_event_count(wrapperMidiBuffer) : jack_midi_get_event_count(wrapperMidiBuffer));
+                    jack_nframes_t midiEventCount = RecursiveJackContext::midi_get_event_count(wrapperMidiBuffer);
                     for (jack_nframes_t i = 0; i < midiEventCount; i++) {
                         jack_midi_event_t event;
-                        if (metaJackMidi) {
-                            MetaJackContext::midi_event_get(&event, wrapperMidiBuffer, i);
-                        } else {
-                            jack_midi_event_get(&event, wrapperMidiBuffer, i);
-                        }
+                        RecursiveJackContext::midi_event_get(&event, wrapperMidiBuffer, i);
                         // upsampling:
                         event.time *= oversampling;
                         MetaJackContext::midi_event_write(midiBuffer, event.time, event.buffer, event.size);
