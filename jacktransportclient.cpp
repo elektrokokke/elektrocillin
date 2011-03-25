@@ -52,9 +52,8 @@ void JackTransportThread::processDeferred()
         ringBufferFromClient->readAdvance(ringBufferFromClient->readSpace() - 1);
         jack_position_t pos = ringBufferFromClient->read();
         // create a string describing the current position:
-        QString posText = QString("unique_1: %1\nusecs: %2\nframe_rate: %3\nframe: %4")
-                .arg(pos.unique_1)
-                .arg(pos.usecs)
+        // (ignore unique_1 and usecs because these are rather unnerving)
+        QString posText = QString("frame_rate: %1\nframe: %2")
                 .arg(pos.frame_rate)
                 .arg(pos.frame);
         if (pos.valid & JackPositionBBT) {
