@@ -37,8 +37,8 @@ IirMoogFilterClient::~IirMoogFilterClient()
     // deleting the filter is now safe, as it is not used anymore (the Jack process thread is stopped):
     delete iirMoogFilterProcess;
     delete iirMoogFilter;
-    // deleting the associated IirMoogFilterThread is now safe, as it has been stopped:
-    delete getMoogFilterThread();
+    // deleting the associated thread is now safe, as it has been stopped:
+    delete getJackThread();
 }
 
 void IirMoogFilterClient::saveState(QDataStream &stream)

@@ -7,6 +7,10 @@ JackThread::JackThread(JackClient *client_, QObject *parent) :
 {
 }
 
+JackThread::~JackThread()
+{
+}
+
 JackClient * JackThread::getClient()
 {
     return client;

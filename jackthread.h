@@ -47,6 +47,7 @@ class JackThread : public QThread
     Q_OBJECT
 public:
     explicit JackThread(JackClient *client, QObject *parent = 0);
+    virtual ~JackThread();
 
     JackClient * getClient();
 
