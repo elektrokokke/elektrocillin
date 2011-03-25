@@ -86,23 +86,28 @@ void GraphicsClientItem::showInnerItem(bool ensureVisible_)
 {
     if (innerItem) {
         setFocus();
-        if (!innerItem->isVisible()) {
-            pathWithoutInnerItem = path();
-        }
         // show the inner item if requested:
         innerItem->setVisible(ensureVisible_ || !innerItem->isVisible());
         if (innerItem->isVisible()) {
-//            setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-padding, -padding, padding, padding).translated(innerItem->pos())));
-            QPainterPath innerItemPath = innerItem->shape().translated(innerItem->pos());
-            setPath(pathWithoutInnerItem + innerItemPath + pathStroker.createStroke(innerItemPath));
             showInnerItemCommand->setText("[-]");
             showInnerItemAction->setText("Hide controls");
+            updateBounds();
         } else {
-            setPath(pathWithoutInnerItem);
             showInnerItemCommand->setText("[+]");
             showInnerItemAction->setText("Show controls");
+            setPath(pathWithoutInnerItem);
         }
     }
+}
+
+void GraphicsClientItem::updateBounds()
+{
+    if (innerItem->isVisible()) {
+        setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-padding, -padding, padding, padding).translated(innerItem->pos())));
+//        QPainterPath innerItemPath = innerItem->shape().translated(innerItem->pos());
+//        setPath(pathWithoutInnerItem + innerItemPath + pathStroker.createStroke(innerItemPath));
+    }
+
 }
 
 void GraphicsClientItem::zoomToInnerItem()
@@ -335,6 +340,7 @@ void GraphicsClientItem::initItem()
     }
     /*bodyItem->*/setBrush(QBrush(Qt::white));
     setPath(combinedPath);
+    pathWithoutInnerItem = combinedPath;
 //    setPen(QPen(Qt::NoPen));
 //    setBrush(QBrush(Qt::NoBrush));
 //    bodyItem->setPen(QPen(Qt::NoPen));

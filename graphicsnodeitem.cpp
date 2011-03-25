@@ -1,6 +1,7 @@
 #include "graphicsnodeitem.h"
 #include <cmath>
 #include <QPen>
+#include <QCursor>
 
 GraphicsNodeItem::GraphicsNodeItem(QGraphicsItem *parent) :
     QGraphicsEllipseItem(parent)
@@ -205,6 +206,7 @@ void GraphicsNodeItem::init()
     horizontalScale = LINEAR;
     verticalScale = LINEAR;
     setAcceptHoverEvents(true);
+    setCursor(Qt::ArrowCursor);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);// | QGraphicsItem::ItemIsSelectable);
 }
 

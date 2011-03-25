@@ -28,6 +28,7 @@ public:
     QGraphicsItem * getInnerItem() const;
 public slots:
     void showInnerItem(bool ensureVisible = false);
+    void updateBounds();
     void zoomToInnerItem();
     void onPortRegistered(QString fullPortName, QString type, int flags);
 

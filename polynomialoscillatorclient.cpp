@@ -61,11 +61,10 @@ PolynomialOscillator * PolynomialOscillatorClient::getIntegralOscillator()
 
 QGraphicsItem * PolynomialOscillatorClient::createGraphicsItem()
 {
-    QRectF rect(0, 0, 600, 420);
     QGraphicsPathItem *pathItem = new QGraphicsPathItem();
     QGraphicsItem *oscillatorItem = OscillatorClient::createGraphicsItem();
+    QRectF rect = QRect(0, 0, 600, 420).translated(oscillatorItem->boundingRect().width(), 0);
     oscillatorItem->setParentItem(pathItem);
-    oscillatorItem->setPos(rect.left() - oscillatorItem->boundingRect().width(), rect.bottom() - oscillatorItem->boundingRect().height());
     (new IntegralOscillatorGraphicsItem(rect, this))->setParentItem(pathItem);
     QPainterPath path;
     path.addRect(rect);

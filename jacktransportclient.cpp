@@ -1,4 +1,5 @@
 #include "jacktransportclient.h"
+#include "graphicsclientitem.h"
 
 JackTransportClient::JackTransportClient(const QString &clientName, size_t ringBufferSize) :
     JackThreadEventProcessorClient(new JackTransportThread(this), clientName, QStringList(), QStringList(), ringBufferSize),
@@ -88,6 +89,9 @@ JackTransportGraphicsItem::JackTransportGraphicsItem(QGraphicsItem *parent) :
 void JackTransportGraphicsItem::changePosition(const QString &pos)
 {
     setText(pos);
+    if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(parentItem())) {
+        clientItem->updateBounds();
+    }
 }
 
 class JackTransportClientFactory : public JackClientFactory
