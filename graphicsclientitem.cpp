@@ -9,7 +9,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 
-GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portType_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
+GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portType_, QFont font_, QGraphicsItem *parent, QGraphicsScene *scene) :
     QGraphicsPathItem(parent, scene),
     client(client_),
     clientName(client->getClientName()),
@@ -23,7 +23,7 @@ GraphicsClientItem::GraphicsClientItem(JackClient *client_, int type_, int portT
     initItem();
     initRest();
 }
-GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
+GraphicsClientItem::GraphicsClientItem(JackClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent, QGraphicsScene *scene) :
     QGraphicsPathItem(parent, scene),
     client(client_),
     clientName(clientName_),
@@ -364,5 +364,14 @@ void GraphicsClientItem::initRest()
     if (isMacro || (clientName == client->getClientName())) {
         contextMenu->addSeparator();
         contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
+    }
+    // if it corresponds to a JackClient object, create the GUI for it also:
+    jack_client_t *client = meta_jack_client_by_name(clientName.toAscii().data());
+    JackClient * jackClient;
+    if (client && (jackClient = JackClientSerializer::getInstance()->getClient(client))) {
+        QGraphicsItem *graphicsItem = jackClient->createGraphicsItem();
+        if (graphicsItem) {
+            setInnerItem(graphicsItem);
+        }
     }
 }

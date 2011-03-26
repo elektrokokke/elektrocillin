@@ -86,7 +86,8 @@ SOURCES += main.cpp\
     graphicsmeteritem.cpp \
     polynomialoscillator.cpp \
     polynomialoscillatorclient.cpp \
-    jacktransportclient.cpp
+    jacktransportclient.cpp \
+    graphicsclientitemsclient.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -168,7 +169,8 @@ HEADERS  += mainwindow.h \
     polynomialoscillatorclient.h \
     metajack/midiport.h \
     metajack/metajackclientserializer.h \
-    jacktransportclient.h
+    jacktransportclient.h \
+    graphicsclientitemsclient.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

@@ -40,8 +40,43 @@ public:
     virtual ~JackClient();
 
     virtual JackClientFactory * getFactory();
+    /**
+      Reimplement this to save the client's state to the given stream.
+
+      Make sure that what is saved here can be loaded again by the
+      corresponding method loadState(QDataStream&).
+
+      The default implementation does nothing.
+      */
     virtual void saveState(QDataStream &stream);
+    /**
+      Reimplement this to load the client's state from the given stream.
+
+      Make sure that what is save by the corresponding method
+      saveState(QDataStream&) can be loaded again here.
+
+      The default implementation does nothing.
+      */
     virtual void loadState(QDataStream &stream);
+
+    /**
+      Switch the use of the process callback on or off.
+      This method only has an effect if called before
+      activate().
+      */
+    void setCallProcess(bool processCallback);
+    /**
+      Switch the port registration and connection signals
+      on or off. This method only has an effect if called
+      before activate().
+      */
+    void setEmitPortSignals(bool portSignals);
+    /**
+      Switch the client registration signals on or off.
+      This method only has an effect if called before
+      activate().
+      */
+    void setEmitClientSignals(bool clientSignals);
 
     jack_client_t * getClient();
 
@@ -177,30 +212,39 @@ signals:
     void portDisconnected(QString sourcePortName, QString destPortName);
     void portRegistered(QString fullPortname, QString type, int flags);
     void portUnregistered(QString fullPortname, QString type, int flags);
+    void clientRegistered(QString clientName);
+    void clientUnregistered(QString clientName);
 
 protected:
     /**
       This is called before the jack client is activated.
       You should register the input and output ports here.
 
+      The default implementation does nothing and returns true.
+
       @return true if the initialization succeeded, false otherwise
       */
-    virtual bool init() = 0;
+    virtual bool init();
     /**
       This is called after the jack client is closed.
       The default implementation does nothing.
       */
     virtual void deinit();
     /**
-      Implement this method to do the actual processing.
+      Reimplement this method to do the actual processing.
       You might first want to get the port buffers and then
       read from and/or write to them here.
+
+      The default method does nothing and returns true.
 
       This method is called in the jack process thread.
       You must not use any locks, e.g., allocate memory, access
       a disk etc., i.e. nothing which is not real-time safe.
+
+      This method will never be called if you switched off
+      processing by calling setUseProcessCallback(false).
       */
-    virtual bool process(jack_nframes_t nframes) = 0;
+    virtual bool process(jack_nframes_t nframes);
     /**
       This function must not be called from outside the process
       thread!
@@ -256,10 +300,12 @@ protected:
 private:
     QString requestedName, actualName;
     jack_client_t *client;
+    bool processCallback, portCallbacks, clientCallback;
 
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
-    static void portRegisterCallback(jack_port_id_t id, int registered, void *arg);
+    static void portRegistrationCallback(jack_port_id_t id, int registered, void *arg);
+    static void clientRegistrationCallback(const char *name, int registered, void *arg);
 };
 
 class JackClientSerializer : public MetaJackClientSerializer

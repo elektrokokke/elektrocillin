@@ -5,7 +5,10 @@
 JackClient::JackClient(const QString &clientName) :
     requestedName(clientName),
     actualName(clientName),
-    client(0)
+    client(0),
+    processCallback(true),
+    portCallbacks(false),
+    clientCallback(false)
 {
 }
 
@@ -24,6 +27,21 @@ void JackClient::saveState(QDataStream &)
 
 void JackClient::loadState(QDataStream &)
 {
+}
+
+void JackClient::setCallProcess(bool processCallback)
+{
+    this->processCallback = processCallback;
+}
+
+void JackClient::setEmitPortSignals(bool portCallbacks)
+{
+    this->portCallbacks = portCallbacks;
+}
+
+void JackClient::setEmitClientSignals(bool clientCallback)
+{
+    this->clientCallback = clientCallback;
 }
 
 jack_client_t * JackClient::getClient()
@@ -47,16 +65,23 @@ bool JackClient::activate()
         // opening client failed:
         return false;
     }
-    // register the process callback:
-    if (jack_set_process_callback(client, process, this)) {
-        // registering process callback failed:
-        jack_client_close(client);
-        client = 0;
-        return false;
+    if (processCallback) {
+        // register the process callback:
+        if (jack_set_process_callback(client, process, this)) {
+            // registering process callback failed:
+            jack_client_close(client);
+            client = 0;
+            return false;
+        }
     }
-    // register the port connect and register callback:
-    jack_set_port_connect_callback(client, portConnectCallback, this);
-    jack_set_port_registration_callback(client, portRegisterCallback, this);
+    if (portCallbacks) {
+        // register the port connect and register callback:
+        jack_set_port_connect_callback(client, portConnectCallback, this);
+        jack_set_port_registration_callback(client, portRegistrationCallback, this);
+    }
+    if (clientCallback) {
+        jack_set_client_registration_callback(client, clientRegistrationCallback, this);
+    }
     // setup input and output ports:
     if (!init()) {
         jack_client_close(client);
@@ -219,8 +244,18 @@ int JackClient::getMaximumPortNameLength()
     return jack_port_name_size();
 }
 
+bool JackClient::init()
+{
+    return true;
+}
+
 void JackClient::deinit()
 {
+}
+
+bool JackClient::process(jack_nframes_t)
+{
+    return true;
 }
 
 int JackClient::process(jack_nframes_t nframes, void *arg)
@@ -264,7 +299,7 @@ void JackClient::portConnectCallback(jack_port_id_t a, jack_port_id_t b, int con
     }
 }
 
-void JackClient::portRegisterCallback(jack_port_id_t id, int registered, void *arg)
+void JackClient::portRegistrationCallback(jack_port_id_t id, int registered, void *arg)
 {
     JackClient *jackClient = reinterpret_cast<JackClient*>(arg);
     // get the port:
@@ -278,6 +313,16 @@ void JackClient::portRegisterCallback(jack_port_id_t id, int registered, void *a
         jackClient->portRegistered(fullPortName, type, flags);
     } else {
         jackClient->portUnregistered(fullPortName, type, flags);
+    }
+}
+
+void JackClient::clientRegistrationCallback(const char *name, int registered, void *arg)
+{
+    JackClient *jackClient = reinterpret_cast<JackClient*>(arg);
+    if (registered) {
+        jackClient->clientRegistered(name);
+    } else {
+        jackClient->clientUnregistered(name);
     }
 }
 

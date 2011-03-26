@@ -3,6 +3,7 @@
 
 #include "jackclient.h"
 #include <QGraphicsPathItem>
+#include <QGraphicsScene>
 #include <QPainterPath>
 #include <QGraphicsSimpleTextItem>
 #include <QCursor>
@@ -13,14 +14,13 @@
 #include <QPainterPathStroker>
 
 class CommandTextItem;
-class JackContextGraphicsScene;
 
 class GraphicsClientItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsClientItem(JackClient *client, int type, int portType, QFont font, QGraphicsItem *parent, JackContextGraphicsScene *scene);
-    GraphicsClientItem(JackClient *client, const QString &clientName, int type, int portType, QFont font, QGraphicsItem *parent, JackContextGraphicsScene *scene);
+    GraphicsClientItem(JackClient *client, int style, int portStyle, QFont font, QGraphicsItem *parent, QGraphicsScene *scene);
+    GraphicsClientItem(JackClient *client, const QString &clientName, int style, int portStyle, QFont font, QGraphicsItem *parent, QGraphicsScene *scene);
     ~GraphicsClientItem();
     const QString & getClientName() const;
     const QRectF & getRect() const;
