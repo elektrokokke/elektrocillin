@@ -40,7 +40,8 @@ MainWindow::~MainWindow()
 void MainWindow::onActionCreateClient()
 {
     if (JackClientFactoryAction *action = qobject_cast<JackClientFactoryAction*>(sender())) {
-        ((JackContextGraphicsScene*)ui->graphicsView->scene())->addClient(action->getFactory()->createClient(action->getFactory()->getName()));
+        (action->getFactory()->createClient(action->getFactory()->getName()))->activate();
+//        ((JackContextGraphicsScene*)ui->graphicsView->scene())->addClient(action->getFactory()->createClient(action->getFactory()->getName()));
     }
 }
 

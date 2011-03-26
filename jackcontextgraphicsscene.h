@@ -3,6 +3,7 @@
 
 #include "graphicsclientitem.h"
 #include "graphicsportconnectionitem.h"
+#include "graphicsclientitemsclient.h"
 #include "jacknullclient.h"
 #include <QGraphicsScene>
 #include <QFont>
@@ -16,11 +17,8 @@ public:
     JackContextGraphicsScene();
     virtual ~JackContextGraphicsScene();
 
-    void setClientStyle(int clientStyle);
-    void setPortStyle(int portStyle);
-
-    GraphicsClientItem * addClient(JackClient *client);
-    GraphicsClientItem * addClient(const QString &clientName);
+//    GraphicsClientItem * addClient(JackClient *client);
+//    GraphicsClientItem * addClient(const QString &clientName);
     void deleteClient(const QString &clientName);
     void saveSession(QDataStream &stream);
     void loadSession(QDataStream &stream);
@@ -35,14 +33,13 @@ public slots:
     void showAllInnerItems(bool visible = true);
 
 protected:
-    void deleteAllClients();
+//    void deleteClients();
 
 private:
-    int clientStyle, portStyle;
-    QFont font;
-    JackNullClient nullClient;
-    QMap<QString, QPair<JackClient*, GraphicsClientItem*> > clientsMap;
+//    JackNullClient nullClient;
+//    QMap<QString, QPair<JackClient*, GraphicsClientItem*> > clientsMap;
     QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > portConnectionItems;
+    GraphicsClientItemsClient graphicsClientItemsClient;
 };
 
 #endif // JACKCONTEXTGRAPHICSSCENE_H

@@ -211,12 +211,20 @@ void GraphicsPortItem::onConnectAction()
 {
     // determine which port is being connected:
     QString otherPort = ((QAction*)sender())->data().toString();
-    client->connectPorts(fullPortName, otherPort);
+    if (isInput) {
+        client->connectPorts(otherPort, fullPortName);
+    } else {
+        client->connectPorts(fullPortName, otherPort);
+    }
 }
 
 void GraphicsPortItem::onDisconnectAction()
 {
     // determine which port is being disconnected:
     QString otherPort = ((QAction*)sender())->data().toString();
-    client->disconnectPorts(fullPortName, otherPort);
+    if (isInput) {
+        client->disconnectPorts(otherPort, fullPortName);
+    } else {
+        client->disconnectPorts(fullPortName, otherPort);
+    }
 }
