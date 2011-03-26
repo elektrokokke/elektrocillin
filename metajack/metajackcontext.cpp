@@ -383,7 +383,7 @@ bool MetaJackContext::connectPorts(const std::string &sourceName, const std::str
         // source port must be an output port:
         return false;
     }
-    if (!(source->getFlags() & JackPortIsInput)) {
+    if (!(dest->getFlags() & JackPortIsInput)) {
         // destination port must be an input port:
         return false;
     }
@@ -427,7 +427,7 @@ bool MetaJackContext::disconnectPorts(const std::string &sourceName, const std::
         // source port must be an output port:
         return false;
     }
-    if (!(source->getFlags() & JackPortIsInput)) {
+    if (!(dest->getFlags() & JackPortIsInput)) {
         // destination port must be an input port:
         return false;
     }
