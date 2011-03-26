@@ -16,7 +16,9 @@ public:
     }
     void invokeCallbacks() {
         for (typename std::map<MetaJackClient*, typename std::pair<T, void*> >::iterator i = this->begin(); i != this->end(); i++) {
-            invokeCallback(i->second.first, i->second.second);
+            if (i->first->isActive()) {
+                invokeCallback(i->second.first, i->second.second);
+            }
         }
     }
 protected:

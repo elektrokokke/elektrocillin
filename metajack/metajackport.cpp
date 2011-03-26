@@ -142,6 +142,11 @@ MetaJackClientBase * MetaJackPortBase::getClient()
     return client;
 }
 
+const std::set<MetaJackPortBase*> & MetaJackPortBase::getConnectedPorts()
+{
+    return connectedPorts;
+}
+
 MetaJackPortProcess::MetaJackPortProcess(jack_port_id_t id, const std::string &shortName, const std::string &type, int flags, jack_nframes_t bufferSize) :
     MetaJackPortBase(id, shortName, type, flags),
     bufferSizeInBytes(0),

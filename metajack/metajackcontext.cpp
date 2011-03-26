@@ -219,6 +219,10 @@ bool MetaJackContext::activateClient(MetaJackClient *client)
     }
     client->setActive(true);
     clientRegistrationCallbackHandler.invokeCallbacksWithArgs(client->getName().c_str(), 1);
+    // invoke port registration callback for each port:
+    for (std::set<MetaJackPortBase*>::iterator i = client->getPorts().begin(); i != client->getPorts().end(); i++) {
+        portRegistrationCallbackHandler.invokeCallbacksWithArgs((*i)->getId(), 1);
+    }
     return true;
 }
 
@@ -247,8 +251,16 @@ bool MetaJackContext::deactivateClient(MetaJackClient *client)
     } else {
         deactivateClient(client->getProcessClient());
     }
-    client->setActive(false);
+    // disconnect all ports:
+    for (std::set<MetaJackPortBase*>::iterator i = client->getPorts().begin(); i != client->getPorts().end(); i++) {
+        port_disconnect((jack_client_t*)client, (jack_port_t*)*i);
+    }
+    // invoke port registration callback for each port:
+    for (std::set<MetaJackPortBase*>::iterator i = client->getPorts().begin(); i != client->getPorts().end(); i++) {
+        portRegistrationCallbackHandler.invokeCallbacksWithArgs((*i)->getId(), 0);
+    }
     clientRegistrationCallbackHandler.invokeCallbacksWithArgs(client->getName().c_str(), 0);
+    client->setActive(false);
     return true;
 }
 
@@ -295,7 +307,9 @@ MetaJackPort * MetaJackContext::registerPort(MetaJackClient *client, const std::
         registerPort(client->getProcessClient(), port->getProcessPort(), port);
     }
     portsById[port->getId()] = portsByName[port->getFullName()] = port;
-    portRegistrationCallbackHandler.invokeCallbacksWithArgs(port->getId(), 1);
+    if (client->isActive()) {
+        portRegistrationCallbackHandler.invokeCallbacksWithArgs(port->getId(), 1);
+    }
     return port;
 }
 
@@ -320,7 +334,9 @@ bool MetaJackContext::unregisterPort(MetaJackPort *port)
         unregisterPort(port->getProcessPort(), port);
     }
     port->disconnect();
-    portRegistrationCallbackHandler.invokeCallbacksWithArgs(port->getId(), 0);
+    if (((MetaJackClient*)port->getClient())->isActive()) {
+        portRegistrationCallbackHandler.invokeCallbacksWithArgs(port->getId(), 0);
+    }
     portsById.erase(port->getId());
     portsByName.erase(port->getFullName());
     delete port;
@@ -1000,6 +1016,15 @@ int MetaJackContext::disconnect (jack_client_t *client, const char *source_port,
 
 int MetaJackContext::port_disconnect (jack_client_t *client, jack_port_t *port)
 {
+    // disconnect all connections of the given port:
+    MetaJackPort *metaJackPort = (MetaJackPort*)port;
+    for (; metaJackPort->getConnectedPorts().size(); ) {
+        if (metaJackPort->isInput()) {
+            disconnectPorts((*metaJackPort->getConnectedPorts().begin())->getFullName(), metaJackPort->getFullName());
+        } else {
+            disconnectPorts(metaJackPort->getFullName(), (*metaJackPort->getConnectedPorts().begin())->getFullName());
+        }
+    }
     return 1;
 }
 

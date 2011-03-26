@@ -30,6 +30,7 @@ public:
     void connect(MetaJackPortBase *port);
     bool belongsTo(const MetaJackClientBase *client) const;
     MetaJackClientBase * getClient();
+    const std::set<MetaJackPortBase*> & getConnectedPorts();
 protected:
     std::set<MetaJackPortBase*> connectedPorts;
 private:
