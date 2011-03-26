@@ -58,14 +58,14 @@ MetaJackContext::~MetaJackContext()
     // (note: no status is set, because there is no one that really fits this situation)
     infoShutdownCallbackHandler.invokeCallbacksWithArgs((jack_status_t)0, "Your MetaJack instance is being deleted");
     shutdownCallbackHandler.invokeCallbacks();
-    // close the wrapper client:
-    wrapperInterface->client_close(wrapperClient);
-    wrapperClient = 0;
     // close all clients:
     for (; clients.size(); ) {
         MetaJackClient *client = clients.begin()->second;
         closeClient(client);
     }
+    // close the wrapper client:
+    wrapperInterface->client_close(wrapperClient);
+    wrapperClient = 0;
 }
 
 jack_port_t * MetaJackContext::createWrapperPort(const std::string &shortName, const std::string &type, unsigned long flags)
