@@ -124,15 +124,12 @@ MetaJackClient * MetaJackContext::openClient(const std::string &name, jack_optio
     }
     MetaJackClient *client = new MetaJackClient(clientName);
     clients[clientName] = client;
-    clientRegistrationCallbackHandler.invokeCallbacksWithArgs(clientName.c_str(), 1);
     return client;
 }
 
 bool MetaJackContext::closeClient(MetaJackClient *client)
 {
     assert(client && client->getProcessClient());
-    // first deactivate the client:
-    deactivateClient(client);
     // remove the client from all callback handlers:
     threadInitCallbackHandler.setCallback(client, 0, 0);
     shutdownCallbackHandler.setCallback(client, 0, 0);
@@ -146,6 +143,8 @@ bool MetaJackContext::closeClient(MetaJackClient *client)
     portRenameCallbackHandler.setCallback(client, 0, 0);
     graphOrderCallbackHandler.setCallback(client, 0, 0);
     xRunCallbackHandler.setCallback(client, 0, 0);
+    // deactivate the client:
+    deactivateClient(client);
     // unregister the client's ports:
     for (; client->getPorts().size(); ) {
         unregisterPort((MetaJackPort*)*client->getPorts().begin());
@@ -159,7 +158,6 @@ bool MetaJackContext::closeClient(MetaJackClient *client)
     } else {
         closeClient(client->getProcessClient());
     }
-    clientRegistrationCallbackHandler.invokeCallbacksWithArgs(client->getName().c_str(), 0);
     clients.erase(client->getName());
     delete client;
     return true;
@@ -220,6 +218,7 @@ bool MetaJackContext::activateClient(MetaJackClient *client)
         activateClient(client->getProcessClient());
     }
     client->setActive(true);
+    clientRegistrationCallbackHandler.invokeCallbacksWithArgs(client->getName().c_str(), 1);
     return true;
 }
 
@@ -249,6 +248,7 @@ bool MetaJackContext::deactivateClient(MetaJackClient *client)
         deactivateClient(client->getProcessClient());
     }
     client->setActive(false);
+    clientRegistrationCallbackHandler.invokeCallbacksWithArgs(client->getName().c_str(), 0);
     return true;
 }
 

@@ -14,13 +14,13 @@
 #include <QPainterPathStroker>
 
 class CommandTextItem;
+class GraphicsClientItemsClient;
 
 class GraphicsClientItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsClientItem(JackClient *client, int style, int portStyle, QFont font, QGraphicsItem *parent, QGraphicsScene *scene);
-    GraphicsClientItem(JackClient *client, const QString &clientName, int style, int portStyle, QFont font, QGraphicsItem *parent, QGraphicsScene *scene);
+    GraphicsClientItem(GraphicsClientItemsClient *client, const QString &clientName, int style, int portStyle, QFont font, QGraphicsItem *parent);
     ~GraphicsClientItem();
     const QString & getClientName() const;
     const QRectF & getRect() const;
@@ -30,7 +30,7 @@ public slots:
     void showInnerItem(bool ensureVisible = false);
     void updateBounds();
     void zoomToInnerItem();
-    void onPortRegistered(QString fullPortName, QString type, int flags);
+    void updatePorts();
 
 protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );
@@ -42,7 +42,8 @@ private slots:
     void onActionRemoveClient();
     void onActionEditMacro();
 private:
-    JackClient *client;
+    GraphicsClientItemsClient *client;
+    bool isJackClient;
     QString clientName;
     int type, portType, padding;
     QFont font;

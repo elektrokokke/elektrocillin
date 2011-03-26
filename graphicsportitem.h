@@ -5,19 +5,17 @@
 #include <QGraphicsPathItem>
 #include <QMenu>
 
-class JackContextGraphicsScene;
+class GraphicsClientItemsClient;
 
 class GraphicsPortItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsPortItem(JackClient *client, const QString &fullPortName, int style, QFont font, int padding, QGraphicsItem *parent, JackContextGraphicsScene *scene);
+    GraphicsPortItem(GraphicsClientItemsClient *client, const QString &fullPortName, int style, QFont font, int padding, QGraphicsItem *parent);
     const QRectF & getRect() const;
     QPointF getConnectionScenePos() const;
 
 public slots:
-    void onPortConnected(QString sourcePortName, QString destPortName);
-    void onPortDisconnected(QString sourcePortName, QString destPortName);
     void onPortRegistered(QString fullPortName, QString type, int flags);
     void onPortUnregistered(QString fullPortName, QString type, int flags);
 
@@ -29,7 +27,7 @@ private slots:
     void onConnectAction();
     void onDisconnectAction();
 private:
-    JackClient *client;
+    GraphicsClientItemsClient *client;
     QString fullPortName, shortPortName, dataType;
     bool isInput;
     int style;
@@ -37,7 +35,6 @@ private:
     QRectF portRect;
     QMenu contextMenu, *connectMenu, *disconnectMenu;
     QMap<QString, QAction*> mapPortNamesToActions;
-    int connections;
 };
 
 #endif // GRAPHICSPORTITEM2_H

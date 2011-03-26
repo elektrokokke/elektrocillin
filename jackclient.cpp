@@ -88,17 +88,18 @@ bool JackClient::activate()
         client = 0;
         return false;
     }
+    // associate the client handle with a pointer to this object:
+    JackClientSerializer::getInstance()->registerClient(client, this);
     // activate the client:
     if (jack_activate(client)) {
         // activating client failed:
         jack_client_close(client);
+        JackClientSerializer::getInstance()->unregisterClient(client);
         client = 0;
         return false;
     }
     // get the actual client name:
     actualName = jack_get_client_name (client);
-    // associate the client handle with a pointer to this object:
-    JackClientSerializer::getInstance()->registerClient(client, this);
     return true;
 }
 

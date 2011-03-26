@@ -1,7 +1,7 @@
 #include "graphicsportitem.h"
 #include "graphicsclientitem.h"
 #include "graphicsportconnectionitem.h"
-#include "jackcontextgraphicsscene.h"
+#include "graphicsclientitemsclient.h"
 #include <QBrush>
 #include <QPen>
 #include <QFont>
@@ -10,16 +10,15 @@
 #include <QSet>
 #include <QGraphicsSceneMouseEvent>
 
-GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortName_, int style_, QFont font_, int padding, QGraphicsItem *parent, JackContextGraphicsScene *scene) :
-    QGraphicsPathItem(parent, scene),
+GraphicsPortItem::GraphicsPortItem(GraphicsClientItemsClient *client_, const QString &fullPortName_, int style_, QFont font_, int padding, QGraphicsItem *parent) :
+    QGraphicsPathItem(parent),
     client(client_),
     fullPortName(fullPortName_),
     shortPortName(fullPortName.split(":")[1]),
     dataType(client->getPortType(fullPortName)),
     isInput(client->getPortFlags(fullPortName) & JackPortIsInput),
     style(style_),
-    font(font_),
-    connections(0)
+    font(font_)
 {
     bool gradient = false;
     QColor captionColor(0xfc, 0xf9, 0xc2);
@@ -48,9 +47,7 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
     }
     setPath(portPath);
 
-    // register the port connection callback at the jack server:
-    QObject::connect(client, SIGNAL(portConnected(QString,QString)), this, SLOT(onPortConnected(QString,QString)));
-    QObject::connect(client, SIGNAL(portDisconnected(QString,QString)), this, SLOT(onPortDisconnected(QString,QString)));
+    // register the port registration callback at the jack server:
     QObject::connect(client, SIGNAL(portRegistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
     QObject::connect(client, SIGNAL(portUnregistered(QString,QString,int)), this, SLOT(onPortUnregistered(QString,QString,int)));
 
@@ -75,9 +72,8 @@ GraphicsPortItem::GraphicsPortItem(JackClient *client_, const QString &fullPortN
         mapPortNamesToActions[connectedPorts[i]] = action;
         connectedPortsSet.insert(connectedPorts[i]);
         // create a graphical representation of the connection:
-        GraphicsPortConnectionItem *connectionItem = scene->getPortConnectionItem(fullPortName, connectedPorts[i], scene);
+        GraphicsPortConnectionItem *connectionItem = client->getPortConnectionItem(fullPortName, connectedPorts[i]);
         connectionItem->setPos(fullPortName, getConnectionScenePos());
-        connections++;
     }
     // get all available ports that can be connected to this:
     QStringList connectablePorts = client->getPorts(0, dataType.toAscii().data(), isInput ? JackPortIsOutput : JackPortIsInput);
@@ -104,55 +100,6 @@ QPointF GraphicsPortItem::getConnectionScenePos() const
 {
     QRectF sceneRect = sceneBoundingRect();
     return (isInput ? QPointF(sceneRect.center().x(), sceneRect.top()) : QPointF(sceneRect.center().x(), sceneRect.bottom()));
-}
-
-void GraphicsPortItem::onPortConnected(QString sourcePortName, QString destPortName)
-{
-    QString otherPort;
-    if (sourcePortName == fullPortName) {
-        otherPort = destPortName;
-    } else if (destPortName == fullPortName) {
-        otherPort = sourcePortName;
-    }
-    if (!otherPort.isNull()) {
-        // remove the corresponding entry from the connect-menu:
-        connectMenu->removeAction(mapPortNamesToActions[otherPort]);
-        // create an entry in the disconnect-menu:
-        QAction *action = disconnectMenu->addAction(otherPort);
-        action->setData(otherPort);
-        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onDisconnectAction()));
-        mapPortNamesToActions[otherPort] = action;
-        disconnectMenu->setEnabled(disconnectMenu->actions().size());
-        connectMenu->setEnabled(connectMenu->actions().size());
-        // create a graphical representation of the connection:
-        GraphicsPortConnectionItem *connectionItem = ((JackContextGraphicsScene*)scene())->getPortConnectionItem(fullPortName, otherPort, scene());
-        connectionItem->setPos(fullPortName, getConnectionScenePos());
-        connections++;
-    }
-}
-
-void GraphicsPortItem::onPortDisconnected(QString sourcePortName, QString destPortName)
-{
-    QString otherPort;
-    if (sourcePortName == fullPortName) {
-        otherPort = destPortName;
-    } else if (destPortName == fullPortName) {
-        otherPort = sourcePortName;
-    }
-    if (!otherPort.isNull()) {
-        // remove the corresponding entry from the disconnect-menu:
-        disconnectMenu->removeAction(mapPortNamesToActions[otherPort]);
-        // create an entry in the connect-menu:
-        QAction *action = connectMenu->addAction(otherPort);
-        action->setData(otherPort);
-        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
-        mapPortNamesToActions[otherPort] = action;
-        disconnectMenu->setEnabled(disconnectMenu->actions().size());
-        connectMenu->setEnabled(connectMenu->actions().size());
-        // delete the graphical representation of the connection:
-        ((JackContextGraphicsScene*)scene())->deletePortConnectionItem(fullPortName, otherPort);
-        connections--;
-    }
 }
 
 void GraphicsPortItem::onPortRegistered(QString fullPortName, QString type, int flags)
@@ -202,7 +149,7 @@ void GraphicsPortItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 QVariant GraphicsPortItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == ItemScenePositionHasChanged) {
-        ((JackContextGraphicsScene*)scene())->setPositions(fullPortName, getConnectionScenePos());
+        client->setPositions(fullPortName, getConnectionScenePos());
     }
     return QGraphicsItem::itemChange(change, value);
 }
