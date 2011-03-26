@@ -251,6 +251,7 @@ bool MetaJackContext::deactivateClient(MetaJackClient *client)
     } else {
         deactivateClient(client->getProcessClient());
     }
+    client->setActive(false);
     // disconnect all ports:
     for (std::set<MetaJackPortBase*>::iterator i = client->getPorts().begin(); i != client->getPorts().end(); i++) {
         port_disconnect((jack_client_t*)client, (jack_port_t*)*i);
@@ -260,7 +261,6 @@ bool MetaJackContext::deactivateClient(MetaJackClient *client)
         portRegistrationCallbackHandler.invokeCallbacksWithArgs((*i)->getId(), 0);
     }
     clientRegistrationCallbackHandler.invokeCallbacksWithArgs(client->getName().c_str(), 0);
-    client->setActive(false);
     return true;
 }
 
