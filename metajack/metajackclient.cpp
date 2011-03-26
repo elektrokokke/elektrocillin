@@ -128,8 +128,8 @@ MetaJackInterfaceClient::MetaJackInterfaceClient(MetaJackContext *context_, Jack
     midiSuffix(1)
 {
     assert((flags & JackPortIsInput) || (flags & JackPortIsOutput));
-    freePorts.insert(context->registerPort(this, createPortName("audio", audioSuffix++), JACK_DEFAULT_AUDIO_TYPE, flags, 0));
-    freePorts.insert(context->registerPort(this, createPortName("midi", midiSuffix++), JACK_DEFAULT_MIDI_TYPE, flags, 0));
+    freePorts.insert(context->registerPort(this, createPortName("audio", !(flags & JackPortIsInput), audioSuffix++), JACK_DEFAULT_AUDIO_TYPE, flags, 0));
+    freePorts.insert(context->registerPort(this, createPortName("midi", !(flags & JackPortIsInput), midiSuffix++), JACK_DEFAULT_MIDI_TYPE, flags, 0));
     context->setProcessCallback(this, process, this);
     context->portConnectCallbackHandler[this] = std::make_pair(portConnectCallback, this);
 }
@@ -210,29 +210,11 @@ void MetaJackInterfaceClient::portConnectCallback(jack_port_id_t a, jack_port_id
     MetaJackPort *portA = me->context->getPortById(a);
     MetaJackPort *portB = me->context->getPortById(b);
     if (connect) {
-        MetaJackPort *freePort = 0;
-        MetaJackPort *otherPort = 0;
         if (me->freePorts.find(portA) != me->freePorts.end()) {
-            freePort = portA;
-            otherPort = portB;
-        } else if (me->freePorts.find(portB) != me->freePorts.end()) {
-            freePort = portB;
-            otherPort = portA;
+            me->createNewPort(portA, portB);
         }
-        // if anything connects to one of the free output ports, put it into the connected ports list and create a new free one:
-        if (freePort) {
-            // one of the unconnected output port has been connected, create a corresponding real jack input port:
-            std::string wrapperPortName = me->createPortName(otherPort->getShortName(), freePort->getType() == JACK_DEFAULT_AUDIO_TYPE ? me->wrapperAudioSuffix++ : me->wrapperMidiSuffix++);
-            jack_port_t *wrapperPort = me->context->createWrapperPort(wrapperPortName, freePort->getType(), freePort->isInput() ? JackPortIsOutput : JackPortIsInput);
-            me->connectedPorts[freePort] = wrapperPort;
-            if (freePort->getType() == JACK_DEFAULT_AUDIO_TYPE) {
-                unsigned int oversampling = me->context->getOversampling();
-                me->downsamplers.insert(std::make_pair(freePort, SincFilter(8, 0.5, oversampling)));
-            }
-            me->freePorts.erase(freePort);
-            // create a new free port:
-            std::string newPortName = freePort->getType() == JACK_DEFAULT_AUDIO_TYPE ? me->createPortName("audio", me->audioSuffix++) : me->createPortName("midi", me->midiSuffix++);
-            me->freePorts.insert(me->context->registerPort(me, newPortName, freePort->getType(), freePort->getFlags(), 0));
+        if (me->freePorts.find(portB) != me->freePorts.end()) {
+            me->createNewPort(portB, portA);
         }
     } else {
         // if a port is freed by disconnecting, we make it the new free port and delete the current free port:
@@ -240,9 +222,26 @@ void MetaJackInterfaceClient::portConnectCallback(jack_port_id_t a, jack_port_id
     }
 }
 
-std::string MetaJackInterfaceClient::createPortName(const std::string &shortName, int suffix)
+std::string MetaJackInterfaceClient::createPortName(const std::string &shortName, bool isInput, int suffix)
 {
     std::stringstream portNameStream;
-    portNameStream << shortName << " " << suffix;
+    portNameStream << shortName << " " << (isInput ? "in" : "out") << " " << suffix;
     return portNameStream.str();
+}
+
+void MetaJackInterfaceClient::createNewPort(MetaJackPort *freePort, MetaJackPort *otherPort)
+{
+    // if anything connects to one of the free output ports, put it into the connected ports list and create a new free one:
+    // one of the unconnected output port has been connected, create a corresponding real jack input port:
+    std::string wrapperPortName = freePort->getShortName();//createPortName(otherPort->getShortName(), !freePort->isInput(), freePort->getType() == JACK_DEFAULT_AUDIO_TYPE ? wrapperAudioSuffix++ : wrapperMidiSuffix++);
+    jack_port_t *wrapperPort = context->createWrapperPort(wrapperPortName, freePort->getType(), freePort->isInput() ? JackPortIsOutput : JackPortIsInput);
+    connectedPorts[freePort] = wrapperPort;
+    if (freePort->getType() == JACK_DEFAULT_AUDIO_TYPE) {
+        unsigned int oversampling = context->getOversampling();
+        downsamplers.insert(std::make_pair(freePort, SincFilter(8, 0.5, oversampling)));
+    }
+    freePorts.erase(freePort);
+    // create a new free port:
+    std::string newPortName = freePort->getType() == JACK_DEFAULT_AUDIO_TYPE ? createPortName("audio", !freePort->isInput(), audioSuffix++) : createPortName("midi", !freePort->isInput(), midiSuffix++);
+    freePorts.insert(context->registerPort(this, newPortName, freePort->getType(), freePort->getFlags(), 0));
 }

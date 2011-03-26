@@ -62,7 +62,8 @@ private:
     int wrapperAudioSuffix, wrapperMidiSuffix, audioSuffix, midiSuffix;
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);
-    std::string createPortName(const std::string &shortName, int suffix);
+    static std::string createPortName(const std::string &shortName, bool isInput, int suffix);
+    void createNewPort(MetaJackPort *freePort, MetaJackPort *otherPort);
 };
 
 #endif // METAJACKCLIENT_H
