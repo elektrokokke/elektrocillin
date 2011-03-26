@@ -117,9 +117,6 @@ void RecursiveJackContext::saveCurrentContext(QDataStream &stream, MetaJackClien
         // save the client name:
         QString clientName = context->get_client_name(client);
         stream << clientName;
-        // save the client's property:
-        QVariant property = clientProperties[client];
-        stream << property;
         // determine if the current client is a wrapper client:
         JackContext *wrapperContext = getContextByClientName(context, clientName.toAscii().data());
         stream << (wrapperContext != 0);
@@ -168,30 +165,18 @@ void RecursiveJackContext::loadCurrentContext(QDataStream &stream, MetaJackClien
         // load the client name:
         QString clientName;
         stream >> clientName;
-        // load the client's property:
-        QVariant property;
-        stream >> property;
         // determine if the client is a wrapper client:
         bool isWrapperClient;
         stream >> isWrapperClient;
         if (isWrapperClient) {
             // create a new context:
-            MetaJackContext *wrapperContext = (MetaJackContext*)pushNewContext(clientName.toAscii().data());
+            pushNewContext(clientName.toAscii().data());
             // load the context:
             loadCurrentContext(stream, clientLoader);
             popContext();
-            jack_client_t *client = wrapperContext->getWrapperClient();
-            clientName = get_client_name(client);
-            setClientProperty(clientName, property);
         } else {
             // let the client loader load the client:
-            jack_client_t *client = clientLoader->load(clientName, stream);
-            if (client) {
-                clientName = get_client_name(client);
-                setClientProperty(clientName, property);
-            } else {
-                setClientProperty(clientName, property);
-            }
+            clientLoader->load(clientName, stream);
         }
     }
     jack_client_t *client = getCurrentContext()->get_clients().back();
@@ -204,46 +189,6 @@ void RecursiveJackContext::loadCurrentContext(QDataStream &stream, MetaJackClien
         QString destPortName = portNames[1];
         getCurrentContext()->connect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data());
     }
-}
-
-void RecursiveJackContext::setClientProperty(const QString &clientName, QVariant property)
-{
-    setClientProperty(interfaceStack.top(), clientName, property);
-}
-
-QVariant RecursiveJackContext::getClientProperty(const QString &clientName)
-{
-    return getClientProperty(interfaceStack.top(), clientName);
-}
-
-void RecursiveJackContext::setClientProperty(JackContext *context, const QString &clientName, QVariant property)
-{
-    // get the client by the client's name in the given context:
-    jack_client_t *client = context->client_by_name(clientName.toAscii().data());
-    if (client) {
-        setClientProperty(client, property);
-    }
-}
-
-QVariant RecursiveJackContext::getClientProperty(JackContext *context, const QString &clientName)
-{
-    // get the client by the client's name in the given context:
-    jack_client_t *client = context->client_by_name(clientName.toAscii().data());
-    if (client) {
-        return getClientProperty(client);
-    } else {
-        return QVariant();
-    }
-}
-
-void RecursiveJackContext::setClientProperty(jack_client_t *client, QVariant property)
-{
-    clientProperties[client] = property;
-}
-
-QVariant RecursiveJackContext::getClientProperty(jack_client_t *client)
-{
-    return clientProperties[client];
 }
 
 JackContext * RecursiveJackContext::getContextByClientName(const std::string &clientName)

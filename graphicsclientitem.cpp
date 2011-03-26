@@ -10,6 +10,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 
+QSettings GraphicsClientItem::settings("settings.ini", QSettings::IniFormat);
+
 GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     client(client_),
@@ -29,6 +31,7 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const
 GraphicsClientItem::~GraphicsClientItem()
 {
     contextMenu->deleteLater();
+    settings.setValue(clientName, pos());
 }
 
 const QString & GraphicsClientItem::getClientName() const
@@ -139,14 +142,6 @@ void GraphicsClientItem::focusOutEvent(QFocusEvent *)
     setZValue(0);
 }
 
-QVariant GraphicsClientItem::itemChange(GraphicsItemChange change, const QVariant &value)
-{
-    if (change == ItemPositionHasChanged) {
-        RecursiveJackContext::getInstance()->setClientProperty(clientName, QVariant::fromValue<QPointF>(pos()));
-    }
-    return QGraphicsItem::itemChange(change, value);
-}
-
 void GraphicsClientItem::onActionRemoveClient()
 {
     // delete the client belonging to this item:
@@ -184,7 +179,11 @@ void GraphicsClientItem::initItem()
     QList<QGraphicsItem*> children = childItems();
     for (int i = 0; i < children.size(); i++) {
         if (children[i] != innerItem) {
-            delete children[i];
+            if (GraphicsPortItem *portItem = qgraphicsitem_cast<GraphicsPortItem*>(children[i])) {
+                portItem->deleteLater();
+            } else {
+                delete children[i];
+            }
         }
     }
 
@@ -318,29 +317,20 @@ void GraphicsClientItem::initItem()
     }
     QPainterPath combinedPath = bodyPath;
 
-//    QGraphicsPathItem *bodyItem = new QGraphicsPathItem(bodyPath, this);
     if (isMacro) {
-        /*bodyItem->*/setPen(QPen(QBrush(QColor("steelblue")), 3));
+        setPen(QPen(QBrush(QColor("steelblue")), 3));
     } else {
-        /*bodyItem->*/setPen(QPen(QBrush(Qt::black), 3));
+        setPen(QPen(QBrush(Qt::black), 3));
     }
-    /*bodyItem->*/setBrush(QBrush(Qt::white));
+    setBrush(QBrush(Qt::white));
     pathWithoutInnerItem = combinedPath;
     if (innerItem && innerItem->isVisible()) {
         setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-this->padding, -this->padding, this->padding, this->padding).translated(innerItem->pos())));
     } else {
         setPath(pathWithoutInnerItem);
     }
-//    setPen(QPen(Qt::NoPen));
-//    setBrush(QBrush(Qt::NoBrush));
-//    bodyItem->setPen(QPen(Qt::NoPen));
-//    bodyItem->setBrush(QBrush(Qt::NoBrush));
 
-    // try to get the position:
-    QVariant clientProperty = RecursiveJackContext::getInstance()->getClientProperty(clientName);
-    if (clientProperty.isValid()) {
-        setPos(clientProperty.toPointF());
-    }
+    setPos(settings.value(clientName).toPointF());
 }
 
 void GraphicsClientItem::initRest()

@@ -12,6 +12,7 @@
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainterPathStroker>
+#include <QSettings>
 
 class CommandTextItem;
 class GraphicsClientItemsClient;
@@ -37,7 +38,6 @@ protected:
     void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
     void focusInEvent(QFocusEvent * event);
     void focusOutEvent(QFocusEvent * event);
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 private slots:
     void onActionRemoveClient();
     void onActionEditMacro();
@@ -55,6 +55,7 @@ private:
     bool isMacro;
     QAction *showInnerItemAction;
     QPainterPathStroker pathStroker;
+    static QSettings settings;
 
     void initItem();
     void initRest();
