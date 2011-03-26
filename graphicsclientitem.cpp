@@ -325,8 +325,12 @@ void GraphicsClientItem::initItem()
         /*bodyItem->*/setPen(QPen(QBrush(Qt::black), 3));
     }
     /*bodyItem->*/setBrush(QBrush(Qt::white));
-    setPath(combinedPath);
     pathWithoutInnerItem = combinedPath;
+    if (innerItem && innerItem->isVisible()) {
+        setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-this->padding, -this->padding, this->padding, this->padding).translated(innerItem->pos())));
+    } else {
+        setPath(pathWithoutInnerItem);
+    }
 //    setPen(QPen(Qt::NoPen));
 //    setBrush(QBrush(Qt::NoBrush));
 //    bodyItem->setPen(QPen(Qt::NoPen));

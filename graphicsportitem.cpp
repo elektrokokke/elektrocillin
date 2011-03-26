@@ -72,7 +72,7 @@ GraphicsPortItem::GraphicsPortItem(GraphicsClientItemsClient *client_, const QSt
         mapPortNamesToActions[connectedPorts[i]] = action;
         connectedPortsSet.insert(connectedPorts[i]);
         // create a graphical representation of the connection:
-        GraphicsPortConnectionItem *connectionItem = client->getPortConnectionItem(fullPortName, connectedPorts[i]);
+        GraphicsPortConnectionItem *connectionItem = (isInput ? client->getPortConnectionItem(connectedPorts[i], fullPortName) : client->getPortConnectionItem(fullPortName, connectedPorts[i]));
         connectionItem->setPos(fullPortName, getConnectionScenePos());
     }
     // get all available ports that can be connected to this:

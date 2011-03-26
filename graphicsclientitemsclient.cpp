@@ -65,6 +65,10 @@ void GraphicsClientItemsClient::clear()
         delete i.value();
     }
     clientItems.clear();
+    // delete all port connection items:
+    for (; portConnectionItems.size(); ) {
+        deletePortConnectionItem(portConnectionItems.begin().key(), portConnectionItems.begin().value().begin().key());
+    }
 }
 
 void GraphicsClientItemsClient::deleteClient(const QString &clientName)
@@ -109,17 +113,17 @@ GraphicsPortConnectionItem * GraphicsClientItemsClient::getPortConnectionItem(co
     return item;
 }
 
-void GraphicsClientItemsClient::deletePortConnectionItem(const QString &port1, const QString &port2)
+void GraphicsClientItemsClient::deletePortConnectionItem(QString port1, QString port2)
 {
     GraphicsPortConnectionItem *item = portConnectionItems.value(port1).value(port2, 0);
     if (item) {
         portConnectionItems[port1].remove(port2);
         portConnectionItems[port2].remove(port1);
         delete item;
-        if (portConnectionItems[port1].size() == 0) {
+        if (portConnectionItems.value(port1).size() == 0) {
             portConnectionItems.remove(port1);
         }
-        if (portConnectionItems[port2].size() == 0) {
+        if (portConnectionItems.value(port2).size() == 0) {
             portConnectionItems.remove(port2);
         }
     }
@@ -127,20 +131,11 @@ void GraphicsClientItemsClient::deletePortConnectionItem(const QString &port1, c
 
 void GraphicsClientItemsClient::setPositions(const QString &port, const  QPointF &point)
 {
-    const QMap<QString, GraphicsPortConnectionItem*> &portItems = portConnectionItems[port];
+    QMap<QString, GraphicsPortConnectionItem*> portItems = portConnectionItems.value(port);
     for (QMap<QString, GraphicsPortConnectionItem*>::const_iterator i = portItems.begin(); i != portItems.end(); i++) {
         i.value()->setPos(port, point);
     }
 }
-
-void GraphicsClientItemsClient::deletePortConnectionItems(const QString &fullPortName)
-{
-    QStringList otherPorts = portConnectionItems.value(fullPortName).keys();
-    for (int i = 0; i < otherPorts.size(); i++) {
-        deletePortConnectionItem(fullPortName, otherPorts[i]);
-    }
-}
-
 
 void GraphicsClientItemsClient::onClientRegistered(const QString &clientName)
 {

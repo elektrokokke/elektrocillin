@@ -27,9 +27,8 @@ public:
     void showAllInnerItems(bool visible = true);
 
     GraphicsPortConnectionItem * getPortConnectionItem(const QString &port1, const QString &port2);
-    void deletePortConnectionItem(const QString &port1, const QString &port2);
+    void deletePortConnectionItem(QString port1, QString port2);
     void setPositions(const QString &port, const  QPointF &point);
-    void deletePortConnectionItems(const QString &fullPortName);
 
 public slots:
     void onClientRegistered(const QString &clientName);
