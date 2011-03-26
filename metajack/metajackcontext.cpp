@@ -379,8 +379,12 @@ bool MetaJackContext::connectPorts(const std::string &sourceName, const std::str
         // ports could not be found by name
         return false;
     }
-    if (source->isInput() == dest->isInput()) {
-        // both ports are inputs or both are outputs
+    if (!(source->getFlags() & JackPortIsOutput)) {
+        // source port must be an output port:
+        return false;
+    }
+    if (!(source->getFlags() & JackPortIsInput)) {
+        // destination port must be an input port:
         return false;
     }
     if ((source->isInput() && source->isIndirectInputOf(dest)) || (dest->isInput() && dest->isIndirectInputOf(source))) {
@@ -417,6 +421,14 @@ bool MetaJackContext::disconnectPorts(const std::string &sourceName, const std::
     MetaJackPort *dest = getPortByName(destinationName);
     if (!source || !dest) {
         // ports could not be found by name
+        return false;
+    }
+    if (!(source->getFlags() & JackPortIsOutput)) {
+        // source port must be an output port:
+        return false;
+    }
+    if (!(source->getFlags() & JackPortIsInput)) {
+        // destination port must be an input port:
         return false;
     }
     if (!source->isConnectedTo(dest)) {
