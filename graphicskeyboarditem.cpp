@@ -2,6 +2,7 @@
 #include "graphicskeyitem.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPen>
+#include <QCursor>
 
 GraphicsKeyboardItem::GraphicsKeyboardItem(unsigned char channel_, QGraphicsItem *parent) :
     QGraphicsRectItem(parent),
@@ -15,6 +16,7 @@ GraphicsKeyboardItem::GraphicsKeyboardItem(unsigned char channel_, QGraphicsItem
     }
     setRect(childrenBoundingRect());
     setBrush(QBrush(Qt::white));
+    setCursor(Qt::ArrowCursor);
 }
 
 unsigned char GraphicsKeyboardItem::getChannel() const
