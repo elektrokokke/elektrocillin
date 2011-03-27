@@ -82,16 +82,13 @@ void JackTransportThread::processDeferred()
 }
 
 JackTransportGraphicsItem::JackTransportGraphicsItem(QGraphicsItem *parent) :
-    QGraphicsSimpleTextItem(parent)
+    GraphicsLabelItem(parent)
 {
 }
 
 void JackTransportGraphicsItem::changePosition(const QString &pos)
 {
     setText(pos);
-    if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(parentItem())) {
-        clientItem->updateBounds();
-    }
 }
 
 class JackTransportClientFactory : public JackClientFactory

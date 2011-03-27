@@ -2,7 +2,7 @@
 #define JACKTRANSPORTCLIENT_H
 
 #include "jackthreadeventprocessorclient.h"
-#include <QGraphicsSimpleTextItem>
+#include "graphicslabelitem.h"
 
 class JackTransportClient : public JackThreadEventProcessorClient
 {
@@ -35,7 +35,7 @@ private:
     JackRingBuffer<jack_position_t> *ringBufferFromClient;
 };
 
-class JackTransportGraphicsItem : public QObject, public QGraphicsSimpleTextItem
+class JackTransportGraphicsItem : public QObject, public GraphicsLabelItem
 {
     Q_OBJECT
 public:

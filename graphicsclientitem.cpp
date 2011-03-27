@@ -19,13 +19,11 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const
     clientName(clientName_),
     type(type_),
     portType(portType_),
-    padding(4),
     font(font_),
     innerItem(0),
     isMacro(RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data()))
 {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
-    pathStroker.setWidth(this->padding * 2);
     setCursor(Qt::ArrowCursor);
     font.setStyleStrategy(QFont::PreferAntialias);
 
@@ -60,7 +58,7 @@ void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
     if (innerItem) {
         innerItem->setVisible(false);
         innerItem->setParentItem(this);
-        innerItem->setPos(getRect().topRight() + QPointF(0, padding));
+        innerItem->setPos(getRect().topRight());
     }
     zoomToInnerItemCommand->setVisible(innerItem);
 }
@@ -90,13 +88,7 @@ void GraphicsClientItem::setInnerItemVisible(bool visible)
     if (innerItem) {
         // show the inner item if requested:
         innerItem->setVisible(visible);
-        if (visible) {
-            showInnerItemCommand->setText("[-]");
-            updateBounds();
-        } else {
-            showInnerItemCommand->setText("[+]");
-            setPath(pathWithoutInnerItem);
-        }
+        showInnerItemCommand->setText(visible ? "[-]" : "[+]");
     }
 }
 
@@ -107,14 +99,6 @@ void GraphicsClientItem::showInnerItem(bool ensureVisible_)
         // show the inner item if requested:
         setInnerItemVisible(ensureVisible_ || !innerItem->isVisible());
     }
-}
-
-void GraphicsClientItem::updateBounds()
-{
-    if (innerItem->isVisible()) {
-        setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-padding, -padding, padding, padding).translated(innerItem->pos())));
-    }
-
 }
 
 void GraphicsClientItem::zoomToInnerItem()
@@ -304,12 +288,7 @@ void GraphicsClientItem::initItem()
         setPen(QPen(QBrush(Qt::black), 3));
     }
     setBrush(QBrush(Qt::white));
-    pathWithoutInnerItem = combinedPath;
-    if (innerItem && innerItem->isVisible()) {
-        setPath(pathWithoutInnerItem + RectanglePath(innerItem->boundingRect().adjusted(-this->padding, -this->padding, this->padding, this->padding).translated(innerItem->pos())));
-    } else {
-        setPath(pathWithoutInnerItem);
-    }
+    setPath(combinedPath);
 }
 
 void GraphicsClientItem::initRest()

@@ -33,7 +33,6 @@ public:
     void setInnerItemVisible(bool visible);
 public slots:
     void showInnerItem(bool ensureVisible = false);
-    void updateBounds();
     void zoomToInnerItem();
     void updatePorts();
 
@@ -45,14 +44,12 @@ private:
     GraphicsClientItemsClient *client;
     bool isJackClient;
     QString clientName;
-    int type, portType, padding;
+    int type, portType;
     QFont font;
     QRectF rect;
     QGraphicsItem *innerItem;
     CommandTextItem *showInnerItemCommand, *zoomToInnerItemCommand;
-    QPainterPath pathWithoutInnerItem;
     bool isMacro;
-    QPainterPathStroker pathStroker;
     QString contextName;
 
     static QSettings settings;

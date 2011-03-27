@@ -12,7 +12,7 @@ GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpo
     logarithmicX(logarithmicX_)
 {
     font.setPointSize(6);
-
+    setBrush(QBrush(Qt::white));
     setRect(rectangle, rectScaled);
 }
 

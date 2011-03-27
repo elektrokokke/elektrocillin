@@ -207,7 +207,7 @@ void GraphicsNodeItem::init()
     verticalScale = LINEAR;
     setAcceptHoverEvents(true);
     setCursor(Qt::ArrowCursor);
-    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);// | QGraphicsItem::ItemIsSelectable);
+    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemIsSelectable);
 }
 
 QPointF GraphicsNodeItem::adjustToBounds(const QPointF &point)

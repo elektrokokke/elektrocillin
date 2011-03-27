@@ -61,15 +61,18 @@ PolynomialOscillator * PolynomialOscillatorClient::getIntegralOscillator()
 
 QGraphicsItem * PolynomialOscillatorClient::createGraphicsItem()
 {
+    int padding = 4;
     QGraphicsPathItem *pathItem = new QGraphicsPathItem();
     QGraphicsItem *oscillatorItem = OscillatorClient::createGraphicsItem();
-    QRectF rect = QRect(0, 0, 600, 420).translated(oscillatorItem->boundingRect().width(), 0);
+    QRectF rect = QRect(0, 0, 600, 420);
+    rect = rect.translated(oscillatorItem->boundingRect().width() + 2 * padding, padding);
+    oscillatorItem->setPos(padding, padding);
     oscillatorItem->setParentItem(pathItem);
-    (new IntegralOscillatorGraphicsItem(rect, this))->setParentItem(pathItem);
+    QGraphicsItem *ourItem = new IntegralOscillatorGraphicsItem(rect, this);
+    ourItem->setParentItem(pathItem);
     QPainterPath path;
-    path.addRect(rect);
-    path.addRect(oscillatorItem->boundingRect().translated(oscillatorItem->pos()));
-    pathItem->setPen(QPen(Qt::NoPen));
+    path.addRect((rect | oscillatorItem->boundingRect().translated(oscillatorItem->pos())).adjusted(-padding, -padding, padding, padding));
+    pathItem->setBrush(QBrush(Qt::white));
     pathItem->setPath(path);
     return pathItem;
 }

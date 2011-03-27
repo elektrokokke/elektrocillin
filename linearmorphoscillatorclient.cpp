@@ -80,15 +80,18 @@ void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int ind
 
 QGraphicsItem * LinearMorphOscillatorClient::createGraphicsItem()
 {
+    int padding = 4;
     QGraphicsPathItem *pathItem = new QGraphicsPathItem();
     QGraphicsItem *oscillatorItem = OscillatorClient::createGraphicsItem();
-    QRectF rect = QRect(0, 0, 600, 420).translated(oscillatorItem->boundingRect().width(), 0);
+    QRectF rect = QRect(0, 0, 600, 420);
+    rect = rect.translated(oscillatorItem->boundingRect().width() + 2 * padding, padding);
+    oscillatorItem->setPos(padding, padding);
     oscillatorItem->setParentItem(pathItem);
-    (new LinearMorphOscillatorGraphicsItem(rect, this))->setParentItem(pathItem);
+    QGraphicsItem *ourItem = new LinearMorphOscillatorGraphicsItem(rect, this);
+    ourItem->setParentItem(pathItem);
     QPainterPath path;
-    path.addRect(rect);
-    path.addRect(oscillatorItem->boundingRect().translated(oscillatorItem->pos()));
-    pathItem->setPen(QPen(Qt::NoPen));
+    path.addRect((rect | oscillatorItem->boundingRect().translated(oscillatorItem->pos())).adjusted(-padding, -padding, padding, padding));
+    pathItem->setBrush(QBrush(Qt::white));
     pathItem->setPath(path);
     return pathItem;
 }
@@ -136,13 +139,14 @@ void LinearMorphOscillatorGraphicsSubItem::changeControlPoint(int index, double 
 LinearMorphOscillatorGraphicsItem::LinearMorphOscillatorGraphicsItem(const QRectF &rect, LinearMorphOscillatorClient *client, QGraphicsItem *parent) :
     QGraphicsRectItem(rect, parent)
 {
+    int padding = 4;
     setPen(QPen(Qt::NoPen));
-    LinearMorphOscillatorGraphicsSubItem *state1 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x(), rect.y(), rect.width() * 0.49, rect.height()), client, 0, this);
-    state1->getGraphItem()->setNodePen(QPen(QBrush(Qt::red), 3));
-    state1->getGraphItem()->setNodeBrush(QBrush(Qt::darkRed));
-    LinearMorphOscillatorGraphicsSubItem *state2 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x() + rect.width() * 0.51, rect.y(), rect.width() * 0.49, rect.height()), client, 1, this);
+    LinearMorphOscillatorGraphicsSubItem *state2 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x() + rect.width() * 0.5 + 0.5 * padding, rect.y(), rect.width() * 0.5 - 0.5 * padding, rect.height()), client, 1, this);
     state2->getGraphItem()->setNodePen(QPen(QBrush(Qt::green), 3));
     state2->getGraphItem()->setNodeBrush(QBrush(Qt::darkGreen));
+    LinearMorphOscillatorGraphicsSubItem *state1 = new LinearMorphOscillatorGraphicsSubItem(QRect(rect.x(), rect.y(), rect.width() * 0.5 - 0.5 * padding, rect.height()), client, 0, this);
+    state1->getGraphItem()->setNodePen(QPen(QBrush(Qt::red), 3));
+    state1->getGraphItem()->setNodeBrush(QBrush(Qt::darkRed));
     state1->setTwin(state2);
     state2->setTwin(state1);
 }

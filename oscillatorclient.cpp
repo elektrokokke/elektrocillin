@@ -68,7 +68,7 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
     QPainterPath path;
     path.addRect(gainItem->boundingRect() | detuneItem->boundingRect() | pitchModItem->boundingRect());
     setPath(path);
-    setPen(QPen(Qt::NoPen));
+    setBrush(QBrush(Qt::white));
 }
 
 void OscillatorClientGraphicsItem::onGainChanged(double value)

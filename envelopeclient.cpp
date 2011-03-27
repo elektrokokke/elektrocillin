@@ -77,6 +77,7 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     client(client_)
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
+    setCursor(Qt::ArrowCursor);
     // create a child that allows selection of the sustain node:
     sustainNodeItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Sustain node", 1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2, 1, GraphicsMeterItem::BOTTOM_HALF, this);
     sustainNodeItem->setBrush(QBrush(Qt::white));
