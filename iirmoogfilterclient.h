@@ -28,6 +28,7 @@ private:
 
 class IirMoogFilterClient : public JackThreadEventProcessorClient
 {
+    Q_OBJECT
 public:
     /**
       Creates a new Moog filter client object with the given name. An associated IirMoogFilterThread will be
@@ -67,7 +68,8 @@ protected:
       that occur through MIDI events.
       */
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
-
+private slots:
+    void onClientChangedFilterParameters(double frequency, double resonance);
 private:
     IirMoogFilter *iirMoogFilterProcess, *iirMoogFilter;
     JackRingBuffer<IirMoogFilter::Parameters> ringBufferToThread;

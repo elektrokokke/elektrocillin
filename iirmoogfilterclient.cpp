@@ -28,6 +28,7 @@ IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilte
     iirMoogFilter = new IirMoogFilter(44100, 1);
     iirMoogFilter->setParameters(&iirMoogFilterProcess->getParameters());
     getMoogFilterThread()->setRingBufferFromClient(&ringBufferToThread);
+    QObject::connect(getMoogFilterThread(), SIGNAL(changedParameters(double, double)), this, SLOT(onClientChangedFilterParameters(double,double)));
 }
 
 IirMoogFilterClient::~IirMoogFilterClient()
@@ -98,6 +99,14 @@ void IirMoogFilterClient::processController(unsigned char channel, unsigned char
     wakeJackThread();
 }
 
+void IirMoogFilterClient::onClientChangedFilterParameters(double frequency, double resonance)
+{
+    IirMoogFilter::Parameters parameters = iirMoogFilter->getParameters();
+    parameters.frequency = frequency;
+    parameters.resonance = resonance;
+    iirMoogFilter->setParameters(&parameters);
+}
+
 IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client_, const QRectF &rect, QGraphicsItem *parent) :
     FrequencyResponseGraphicsItem(rect, 22050.0 / 512.0, 22050, -30, 30, parent),
     client(client_)
@@ -129,12 +138,8 @@ void IirMoogFilterGraphicsItem::onGuiChangedFilterParameters(const QPointF &cuto
 
 void IirMoogFilterGraphicsItem::onClientChangedFilterParameters(double frequency, double resonance)
 {
-    IirMoogFilter::Parameters parameters = client->getMoogFilter()->getParameters();
-    parameters.frequency = frequency;
-    parameters.resonance = resonance;
-    client->getMoogFilter()->setParameters(&parameters);
-    cutoffResonanceNode->setXScaled(parameters.frequency);
-    cutoffResonanceNode->setYScaled(parameters.resonance);
+    cutoffResonanceNode->setXScaled(frequency);
+    cutoffResonanceNode->setYScaled(resonance);
     updateFrequencyResponse(0);
 }
 
