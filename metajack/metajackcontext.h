@@ -125,6 +125,7 @@ private:
     QMutex waitMutex;
     bool shutdown;
     unsigned int oversampling;
+    std::string contextName;
 
     void closeClient(MetaJackClientProcess *client);
     void setProcessCallback(MetaJackClientProcess *client, JackProcessCallback processCallback, void *processCallbackArgument);

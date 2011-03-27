@@ -57,6 +57,8 @@ private:
     bool isMacro;
     QAction *showInnerItemAction;
     QPainterPathStroker pathStroker;
+    QString contextName;
+
     static QSettings settings;
 
     void initItem();

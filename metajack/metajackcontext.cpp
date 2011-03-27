@@ -50,6 +50,9 @@ MetaJackContext::MetaJackContext(JackContext *jackInterface_, const std::string 
             activateClient(dummyOutputClient);
         }
     }
+    std::stringstream nameStream;
+    nameStream << wrapperInterface->get_name() << "/" << wrapperClientName;
+    contextName = nameStream.str();
 }
 
 MetaJackContext::~MetaJackContext()
@@ -712,7 +715,7 @@ std::list<jack_client_t*> MetaJackContext::get_clients()
 
 const char * MetaJackContext::get_name() const
 {
-    return wrapperClientName.c_str();
+    return contextName.c_str();
 }
 
 void MetaJackContext::get_version(int *major_ptr, int *minor_ptr, int *micro_ptr, int *proto_ptr)

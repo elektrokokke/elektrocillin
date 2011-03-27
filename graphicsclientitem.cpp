@@ -31,7 +31,8 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const
 GraphicsClientItem::~GraphicsClientItem()
 {
     contextMenu->deleteLater();
-    settings.setValue(clientName, pos());
+    settings.setValue("position/" + contextName + "/" + clientName, pos().toPoint());
+    settings.setValue("visible/" + contextName + "/" + clientName, innerItem && innerItem->isVisible());
 }
 
 const QString & GraphicsClientItem::getClientName() const
@@ -364,5 +365,7 @@ void GraphicsClientItem::initRest()
         contextMenu->addSeparator();
         contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
     }
-    setPos(settings.value(clientName).toPointF());
+    contextName = RecursiveJackContext::getInstance()->getCurrentContext()->get_name();
+    setPos(settings.value("position/" + contextName + "/" + clientName).toPoint());
+    setInnerItemVisible(settings.value("visible/" + contextName + "/" + clientName).toBool());
 }

@@ -3,7 +3,7 @@
 #include <jack/transport.h>
 
 RealJackContext::RealJackContext() :
-    name("Jack server")
+    name("jack")
 {
 }
 
