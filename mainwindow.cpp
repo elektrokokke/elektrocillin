@@ -6,7 +6,6 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QGLWidget>
-#include <QInputDialog>
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -19,16 +18,18 @@ MainWindow::MainWindow(QWidget *parent) :
     QList<JackClientFactory*> factories = JackClientSerializer::getInstance()->getFactories();
     for (QList<JackClientFactory*>::const_iterator i = factories.begin(); i != factories.end(); i++) {
         JackClientFactory *factory = *i;
-        JackClientFactoryAction *action = new JackClientFactoryAction(factory, ui->menuCreate_client);
-        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onActionCreateClient()));
-        ui->menuNew_module->addAction(action);
+        ui->menuNew_module->addAction(factory->getName(), this, SLOT(onActionCreateClient()));
     }
 
     scene = new JackContextGraphicsScene();
     QObject::connect(ui->actionPlay, SIGNAL(triggered()), scene, SLOT(play()));
     QObject::connect(ui->actionStop, SIGNAL(triggered()), scene, SLOT(stop()));
     QObject::connect(ui->actionRewind, SIGNAL(triggered()), scene, SLOT(rewind()));
+    QObject::connect(ui->actionCreate_macro, SIGNAL(triggered()), scene, SLOT(createNewMacro()));
+    QObject::connect(ui->actionEdit_macro, SIGNAL(triggered()), scene, SLOT(editSelectedMacro()));
+    QObject::connect(ui->actionParent_level, SIGNAL(triggered()), scene, SLOT(exitCurrentMacro()));
     QObject::connect(scene, SIGNAL(selectionChanged()), this, SLOT(onSceneSelectionChanged()));
+    QObject::connect(scene, SIGNAL(contextLevelChanged(int)), this, SLOT(onContextLevelChanged(int)));
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
 //    ui->graphicsView->setViewport(new QGLWidget());
@@ -43,10 +44,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onActionCreateClient()
 {
-    if (JackClientFactoryAction *action = qobject_cast<JackClientFactoryAction*>(sender())) {
-        (action->getFactory()->createClient(action->getFactory()->getName()))->activate();
-//        ((JackContextGraphicsScene*)ui->graphicsView->scene())->addClient(action->getFactory()->createClient(action->getFactory()->getName()));
-    }
+    scene->createNewModule(((QAction*)sender())->text());
 }
 
 void MainWindow::on_actionSave_session_triggered()
@@ -78,60 +76,16 @@ void MainWindow::on_actionReset_triggered()
     ui->graphicsView->resetTransform();
 }
 
-void MainWindow::on_actionParent_level_triggered()
-{
-    // pop the current jack context:
-    RecursiveJackContext::getInstance()->popContext();
-    // change to that context:
-    scene->changeToCurrentContext();
-    ui->actionParent_level->setEnabled(RecursiveJackContext::getInstance()->getContextStackSize() > 1);
-}
-
-void MainWindow::on_actionEdit_macro_triggered()
-{
-    // determine if the item in focus is a macro:
-    QList<QGraphicsItem*> selectedItems = scene->selectedItems();
-    for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
-        if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
-            if (clientItem->isMacroItem()) {
-                // get the macro's wrapper client:
-                JackContext *jackContext = RecursiveJackContext::getInstance()->getContextByClientName(clientItem->getClientName().toAscii().data());
-                if (jackContext) {
-                    // make the macro's wrapper client the new context:
-                    RecursiveJackContext::getInstance()->pushExistingContext(jackContext);
-                    // change to that context:
-                    scene->changeToCurrentContext();
-                    ui->actionParent_level->setEnabled(RecursiveJackContext::getInstance()->getContextStackSize() > 1);
-                }
-                return;
-            }
-        }
-    }
-}
-
-void MainWindow::on_actionCreate_macro_triggered()
-{
-    // ask the user for the macro name:
-    QString macroName = QInputDialog::getText(this, "New macro", "Please enter the macro name:");
-    if (!macroName.isNull()) {
-        // get the oversampling factor:
-        int oversampling = QInputDialog::getInt(this, "Oversampling", "Please enter the oversampling factor", 1, 1, 16);
-        // create a new wrapper client:
-        RecursiveJackContext::getInstance()->pushNewContext(macroName.toAscii().data(), oversampling);
-        // change to that context:
-        scene->changeToCurrentContext();
-        ui->actionParent_level->setEnabled(RecursiveJackContext::getInstance()->getContextStackSize() > 1);
-    }
-}
-
 void MainWindow::on_actionShow_all_controls_triggered()
 {
     ((JackContextGraphicsScene*)ui->graphicsView->scene())->showAllInnerItems();
+    onSceneSelectionChanged();
 }
 
 void MainWindow::on_actionHide_all_controls_triggered()
 {
     ((JackContextGraphicsScene*)ui->graphicsView->scene())->showAllInnerItems(false);
+    onSceneSelectionChanged();
 }
 
 void MainWindow::onSceneSelectionChanged()
@@ -167,7 +121,7 @@ void MainWindow::on_actionDelete_module_triggered()
 {
     bool reallyDelete = true;
     if (ui->actionDelete_module->text() == "Delete modules") {
-        reallyDelete = (QMessageBox::question(this, "Delete multiple modules?", "Do you really want to delete all selected modules?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
+        reallyDelete = (QMessageBox::warning(this, "Delete multiple modules?", "Do you really want to delete all selected modules?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
     }
     if (reallyDelete) {
         // delete the selected modules (not selected macros!):
@@ -186,7 +140,7 @@ void MainWindow::on_actionDelete_macro_triggered()
 {
     bool reallyDelete = true;
     if (ui->actionDelete_macro->text() == "Delete macros") {
-        reallyDelete = (QMessageBox::question(this, "Delete multiple macros?", "Do you really want to delete all selected macros?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
+        reallyDelete = (QMessageBox::warning(this, "Delete multiple macros?", "Do you really want to delete all selected macros?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes);
     }
     if (reallyDelete) {
         // delete the selected macros (not selected modules!):
@@ -247,4 +201,15 @@ void MainWindow::on_actionShow_all_triggered()
         boundingSceneRect |= (*i)->sceneBoundingRect();
     }
     ui->graphicsView->fitInView(boundingSceneRect, Qt::KeepAspectRatio);
+}
+
+void MainWindow::onContextLevelChanged(int level)
+{
+    ui->actionParent_level->setEnabled(level);
+    on_actionShow_all_triggered();
+}
+
+void MainWindow::on_actionNew_module_triggered()
+{
+    ui->menuNew_module->exec(QCursor::pos());
 }

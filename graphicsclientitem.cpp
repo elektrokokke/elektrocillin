@@ -130,6 +130,21 @@ void GraphicsClientItem::updatePorts()
     initItem();
 }
 
+void GraphicsClientItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (isMacroItem()) {
+        if (((JackContextGraphicsScene*)scene())->editMacro(this)) {
+            event->accept();
+            return;
+        }
+    } else if (isModuleItem()) {
+        showInnerItem();
+        event->accept();
+        return;
+    }
+    QGraphicsPathItem::mouseDoubleClickEvent(event);
+}
+
 void GraphicsClientItem::focusInEvent(QFocusEvent *)
 {
     setZValue(1);
@@ -186,7 +201,7 @@ void GraphicsClientItem::initItem()
     int minimumInputPortWidth = 0;
     for (int i = 0; i < inputPorts.size(); i++) {
         inputPortItems.append(new GraphicsPortItem(client, inputPorts[i], 3, font, portPadding, this));
-        if (isMacro) {
+        if (isMacroItem()) {
             QPen pen = inputPortItems.back()->pen();
             pen.setColor(QColor("steelblue"));
             inputPortItems.back()->setPen(pen);
@@ -202,7 +217,7 @@ void GraphicsClientItem::initItem()
     int minimumOutputPortWidth = 0;
     for (int i = 0; i < outputPorts.size(); i++) {
         outputPortItems.append(new GraphicsPortItem(client, outputPorts[i], 3, font, portPadding, this));
-        if (isMacro) {
+        if (isMacroItem()) {
             QPen pen = outputPortItems.back()->pen();
             pen.setColor(QColor("steelblue"));
             outputPortItems.back()->setPen(pen);
@@ -283,7 +298,7 @@ void GraphicsClientItem::initItem()
     }
     QPainterPath combinedPath = bodyPath;
 
-    if (isMacro) {
+    if (isMacroItem()) {
         setPen(QPen(QBrush(QColor("steelblue")), 3));
     } else {
         setPen(QPen(QBrush(Qt::black), 3));
@@ -309,7 +324,7 @@ void GraphicsClientItem::initRest()
             setInnerItem(graphicsItem);
         }
     }
-    setFlag(QGraphicsItem::ItemIsSelectable, isJackClient || isMacro);
+    setFlag(QGraphicsItem::ItemIsSelectable, isJackClient || isMacroItem());
     contextName = RecursiveJackContext::getInstance()->getCurrentContext()->get_name();
     setPos(settings.value("position/" + contextName + "/" + clientName).toPoint());
     setInnerItemVisible(settings.value("visible/" + contextName + "/" + clientName).toBool());

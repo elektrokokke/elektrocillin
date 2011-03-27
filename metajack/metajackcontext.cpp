@@ -42,12 +42,12 @@ MetaJackContext::MetaJackContext(JackContext *jackInterface_, const std::string 
             wrapperClient = 0;
         } else {
             wrapperClientName = wrapperInterface->get_client_name(wrapperClient);
-            MetaJackInterfaceClient *dummyInputClient = new MetaJackInterfaceClient(this, wrapperInterface, JackPortIsOutput);
-            clients[dummyInputClient->getName()] = dummyInputClient;
-            activateClient(dummyInputClient);
-            MetaJackInterfaceClient *dummyOutputClient = new MetaJackInterfaceClient(this, wrapperInterface, JackPortIsInput);
-            clients[dummyOutputClient->getName()] = dummyOutputClient;
-            activateClient(dummyOutputClient);
+            inputInterfaceClient = new MetaJackInterfaceClient(this, wrapperInterface, JackPortIsOutput);
+            clients[inputInterfaceClient->getName()] = inputInterfaceClient;
+            activateClient(inputInterfaceClient);
+            outputInterfaceClient = new MetaJackInterfaceClient(this, wrapperInterface, JackPortIsInput);
+            clients[outputInterfaceClient->getName()] = outputInterfaceClient;
+            activateClient(outputInterfaceClient);
         }
     }
     std::stringstream nameStream;
@@ -84,6 +84,11 @@ jack_client_t * MetaJackContext::getWrapperClient()
 JackContext * MetaJackContext::getWrapperInterface()
 {
     return wrapperInterface;
+}
+
+bool MetaJackContext::hasWrapperPorts() const
+{
+    return inputInterfaceClient->hasWrapperPorts() || outputInterfaceClient->hasWrapperPorts();
 }
 
 unsigned int MetaJackContext::getOversampling() const

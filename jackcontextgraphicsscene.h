@@ -22,11 +22,18 @@ public:
     void changeToCurrentContext();
     void deleteClient(const QString &clientName);
 
+    bool editMacro(GraphicsClientItem *macroItem);
+signals:
+    void contextLevelChanged(int level);
 public slots:
     void showAllInnerItems(bool visible = true);
     void play();
     void stop();
     void rewind();
+    void exitCurrentMacro();
+    void editSelectedMacro();
+    void createNewMacro();
+    void createNewModule(QString factoryName);
 private:
     GraphicsClientItemsClient *graphicsClientItemsClient;
 };

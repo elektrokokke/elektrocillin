@@ -38,8 +38,9 @@ public slots:
     void updatePorts();
 
 protected:
-    void focusInEvent(QFocusEvent * event);
-    void focusOutEvent(QFocusEvent * event);
+    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
+    virtual void focusInEvent(QFocusEvent * event);
+    virtual void focusOutEvent(QFocusEvent * event);
 private:
     GraphicsClientItemsClient *client;
     bool isJackClient;

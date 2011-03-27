@@ -27,9 +27,6 @@ private slots:
     void on_actionSave_session_triggered();
     void on_actionLoad_session_triggered();
     void on_actionReset_triggered();
-    void on_actionParent_level_triggered();
-    void on_actionEdit_macro_triggered();
-    void on_actionCreate_macro_triggered();
     void on_actionShow_all_controls_triggered();
     void on_actionHide_all_controls_triggered();
     void onSceneSelectionChanged();
@@ -37,10 +34,11 @@ private slots:
     void on_actionDelete_macro_triggered();
     void on_actionShow_module_controls_triggered();
     void on_actionHide_module_controls_triggered();
-
     void on_actionZoom_to_triggered();
-
     void on_actionShow_all_triggered();
+    void onContextLevelChanged(int level);
+
+    void on_actionNew_module_triggered();
 
 private:
     Ui::MainWindow *ui;

@@ -134,6 +134,11 @@ MetaJackInterfaceClient::MetaJackInterfaceClient(MetaJackContext *context_, Jack
     context->portConnectCallbackHandler[this] = std::make_pair(portConnectCallback, this);
 }
 
+bool MetaJackInterfaceClient::hasWrapperPorts() const
+{
+    return connectedPorts.size();
+}
+
 int MetaJackInterfaceClient::process(jack_nframes_t nframes, void *arg)
 {
     // the purpose of the dummy input client is to make the wrapper client inputs available to clients inside the wrapper

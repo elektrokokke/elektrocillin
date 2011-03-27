@@ -28,6 +28,7 @@ public:
 
     jack_client_t * getWrapperClient();
     JackContext * getWrapperInterface();
+    bool hasWrapperPorts() const;
     unsigned int getOversampling() const;
 
     bool isActive() const;
@@ -112,6 +113,7 @@ private:
 
     JackContext *wrapperInterface;
     jack_client_t *wrapperClient;
+    MetaJackInterfaceClient *inputInterfaceClient, *outputInterfaceClient;
     std::string wrapperClientName;
     jack_nframes_t bufferSize;
     jack_port_id_t uniquePortId;

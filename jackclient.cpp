@@ -434,14 +434,3 @@ QList<JackClientFactory*> JackClientSerializer::getFactories()
 {
     return factories.values();
 }
-
-JackClientFactoryAction::JackClientFactoryAction(JackClientFactory *factory_, QObject *parent) :
-    QAction(factory_->getName(), parent),
-    factory(factory_)
-{
-}
-
-JackClientFactory * JackClientFactoryAction::getFactory() const
-{
-    return factory;
-}

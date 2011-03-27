@@ -345,14 +345,4 @@ public:
     virtual JackClient * createClient(const QString &clientName) = 0;
 };
 
-class JackClientFactoryAction : public QAction
-{
-    Q_OBJECT
-public:
-    JackClientFactoryAction(JackClientFactory *factory, QObject *parent = 0);
-    JackClientFactory * getFactory() const;
-private:
-    JackClientFactory *factory;
-};
-
 #endif // JACKCLIENT_H

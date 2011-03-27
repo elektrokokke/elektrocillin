@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>731</width>
+    <width>920</width>
     <height>518</height>
    </rect>
   </property>
@@ -55,6 +55,9 @@
    <addaction name="actionSave_session"/>
    <addaction name="actionLoad_session"/>
    <addaction name="separator"/>
+   <addaction name="actionNew_module"/>
+   <addaction name="separator"/>
+   <addaction name="actionCreate_macro"/>
    <addaction name="actionParent_level"/>
    <addaction name="actionEdit_macro"/>
    <addaction name="separator"/>
@@ -72,7 +75,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>731</width>
+     <width>920</width>
      <height>21</height>
     </rect>
    </property>
@@ -238,6 +241,11 @@
   <action name="actionShow_all">
    <property name="text">
     <string>Show all</string>
+   </property>
+  </action>
+  <action name="actionNew_module">
+   <property name="text">
+    <string>New module</string>
    </property>
   </action>
  </widget>

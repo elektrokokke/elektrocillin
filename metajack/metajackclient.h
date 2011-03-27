@@ -53,6 +53,7 @@ class JackContext;
 class MetaJackInterfaceClient : public MetaJackClient {
 public:
     MetaJackInterfaceClient(MetaJackContext *context, JackContext *wrapperInterface, int flags);
+    bool hasWrapperPorts() const;
 private:
     MetaJackContext *context;
     JackContext *wrapperInterface;
