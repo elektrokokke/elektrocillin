@@ -52,6 +52,19 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionSave_session"/>
+   <addaction name="actionLoad_session"/>
+   <addaction name="separator"/>
+   <addaction name="actionParent_level"/>
+   <addaction name="actionEdit_macro"/>
+   <addaction name="separator"/>
+   <addaction name="actionPlay"/>
+   <addaction name="actionStop"/>
+   <addaction name="actionRewind"/>
+   <addaction name="separator"/>
+   <addaction name="actionReset"/>
+   <addaction name="actionShow_all"/>
+   <addaction name="actionZoom_to"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QMenuBar" name="menuBar">
@@ -74,21 +87,52 @@
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionParent_level"/>
-    <addaction name="separator"/>
     <addaction name="actionReset"/>
+    <addaction name="actionShow_all"/>
+    <addaction name="actionZoom_to"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_module_controls"/>
+    <addaction name="actionHide_module_controls"/>
+    <addaction name="separator"/>
     <addaction name="actionShow_all_controls"/>
     <addaction name="actionHide_all_controls"/>
    </widget>
    <widget class="QMenu" name="menuCreate_client">
     <property name="title">
-     <string>Add module</string>
+     <string>Modules</string>
+    </property>
+    <widget class="QMenu" name="menuNew_module">
+     <property name="title">
+      <string>New module</string>
+     </property>
+    </widget>
+    <addaction name="menuNew_module"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete_module"/>
+   </widget>
+   <widget class="QMenu" name="menuMacros">
+    <property name="title">
+     <string>Macros</string>
     </property>
     <addaction name="actionCreate_macro"/>
     <addaction name="separator"/>
+    <addaction name="actionEdit_macro"/>
+    <addaction name="actionParent_level"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete_macro"/>
+   </widget>
+   <widget class="QMenu" name="menuTransport">
+    <property name="title">
+     <string>Transport</string>
+    </property>
+    <addaction name="actionPlay"/>
+    <addaction name="actionStop"/>
+    <addaction name="actionRewind"/>
    </widget>
    <addaction name="menuJACK"/>
    <addaction name="menuCreate_client"/>
+   <addaction name="menuMacros"/>
+   <addaction name="menuTransport"/>
    <addaction name="menuView"/>
   </widget>
   <action name="actionSave_session">
@@ -103,17 +147,20 @@
   </action>
   <action name="actionReset">
    <property name="text">
-    <string>Reset</string>
+    <string>Reset view</string>
    </property>
   </action>
   <action name="actionParent_level">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Exit macro</string>
    </property>
   </action>
   <action name="actionCreate_macro">
    <property name="text">
-    <string>Create macro</string>
+    <string>New macro</string>
    </property>
   </action>
   <action name="actionShow_all_controls">
@@ -124,6 +171,73 @@
   <action name="actionHide_all_controls">
    <property name="text">
     <string>Hide all controls</string>
+   </property>
+  </action>
+  <action name="actionEdit_macro">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Enter macro</string>
+   </property>
+  </action>
+  <action name="actionHello">
+   <property name="text">
+    <string>Hello</string>
+   </property>
+  </action>
+  <action name="actionDelete_module">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Delete module</string>
+   </property>
+  </action>
+  <action name="actionDelete_macro">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Delete macro</string>
+   </property>
+  </action>
+  <action name="actionPlay">
+   <property name="text">
+    <string>Play</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionRewind">
+   <property name="text">
+    <string>Rewind</string>
+   </property>
+  </action>
+  <action name="actionShow_module_controls">
+   <property name="text">
+    <string>Show module controls</string>
+   </property>
+  </action>
+  <action name="actionHide_module_controls">
+   <property name="text">
+    <string>Hide module controls</string>
+   </property>
+  </action>
+  <action name="actionZoom_to">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Zoom to</string>
+   </property>
+  </action>
+  <action name="actionShow_all">
+   <property name="text">
+    <string>Show all</string>
    </property>
   </action>
  </widget>

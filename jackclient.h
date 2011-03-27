@@ -207,6 +207,11 @@ public:
     static QString getFullPortName(const QString &clientName, const QString &shortPortName);
     static int getMaximumPortNameLength();
 
+public slots:
+    void play();
+    void stop();
+    void rewind();
+
 signals:
     void portConnected(QString sourcePortName, QString destPortName);
     void portDisconnected(QString sourcePortName, QString destPortName);

@@ -241,6 +241,24 @@ int JackClient::getMaximumPortNameLength()
     return jack_port_name_size();
 }
 
+void JackClient::play()
+{
+    jack_transport_start(client);
+}
+
+void JackClient::stop()
+{
+    jack_transport_stop(client);
+}
+
+void JackClient::rewind()
+{
+    jack_position_t pos;
+    pos.frame = 0;
+    pos.valid = (jack_position_bits_t)0;
+    jack_transport_reposition(client, &pos);
+}
+
 bool JackClient::init()
 {
     return true;

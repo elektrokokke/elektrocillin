@@ -28,6 +28,8 @@ public:
     void setInnerItem(QGraphicsItem *item);
     QGraphicsItem * getInnerItem() const;
     bool isInnerItemVisible() const;
+    bool isMacroItem() const;
+    bool isModuleItem() const;
     void setInnerItemVisible(bool visible);
 public slots:
     void showInnerItem(bool ensureVisible = false);
@@ -36,13 +38,8 @@ public slots:
     void updatePorts();
 
 protected:
-    void mousePressEvent ( QGraphicsSceneMouseEvent * event );
-    void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event );
     void focusInEvent(QFocusEvent * event);
     void focusOutEvent(QFocusEvent * event);
-private slots:
-    void onActionRemoveClient();
-    void onActionEditMacro();
 private:
     GraphicsClientItemsClient *client;
     bool isJackClient;
@@ -53,9 +50,7 @@ private:
     QGraphicsItem *innerItem;
     CommandTextItem *showInnerItemCommand, *zoomToInnerItemCommand;
     QPainterPath pathWithoutInnerItem;
-    QMenu *contextMenu;
     bool isMacro;
-    QAction *showInnerItemAction;
     QPainterPathStroker pathStroker;
     QString contextName;
 
