@@ -25,6 +25,7 @@ public:
     bool editMacro(GraphicsClientItem *macroItem);
 signals:
     void contextLevelChanged(int level);
+    void messageChanged(QString message);
 public slots:
     void showAllInnerItems(bool visible = true);
     void play();
@@ -34,8 +35,16 @@ public slots:
     void editSelectedMacro();
     void createNewMacro();
     void createNewModule(QString factoryName);
+protected:
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
 private:
     GraphicsClientItemsClient *graphicsClientItemsClient;
+    bool waitForMacroPosition, waitForModulePosition;
+    QString factoryName;
+    static QSettings settings;
+
+    void createNewMacro(QPointF pos);
+    void createNewModule(QString factoryName, QPointF pos);
 };
 
 #endif // JACKCONTEXTGRAPHICSSCENE_H

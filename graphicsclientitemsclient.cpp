@@ -172,6 +172,14 @@ void GraphicsClientItemsClient::setPositions(const QString &port, const  QPointF
     }
 }
 
+void GraphicsClientItemsClient::setClientItemPosition(const QString &clientName, QPointF pos)
+{
+    GraphicsClientItem *clientItem = clientItems.value(clientName);
+    if (clientItem) {
+        clientItem->setPos(pos);
+    }
+}
+
 void GraphicsClientItemsClient::onClientRegistered(const QString &clientName)
 {
     // create a client item with that name:

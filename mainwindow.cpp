@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionParent_level, SIGNAL(triggered()), scene, SLOT(exitCurrentMacro()));
     QObject::connect(scene, SIGNAL(selectionChanged()), this, SLOT(onSceneSelectionChanged()));
     QObject::connect(scene, SIGNAL(contextLevelChanged(int)), this, SLOT(onContextLevelChanged(int)));
+    QObject::connect(scene, SIGNAL(messageChanged(QString)), ui->statusBar, SLOT(showMessage(QString)));
 
     ui->graphicsView->setRenderHints(QPainter::Antialiasing);
 //    ui->graphicsView->setViewport(new QGLWidget());

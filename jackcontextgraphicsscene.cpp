@@ -3,9 +3,14 @@
 #include "metajack/recursivejackcontext.h"
 #include "metajack/metajackcontext.h"
 #include <QMessageBox>
+#include <QApplication>
+
+QSettings JackContextGraphicsScene::settings("settings.ini", QSettings::IniFormat);
 
 JackContextGraphicsScene::JackContextGraphicsScene() :
-    graphicsClientItemsClient(new GraphicsClientItemsClient(this))
+    graphicsClientItemsClient(new GraphicsClientItemsClient(this)),
+    waitForMacroPosition(false),
+    waitForModulePosition(false)
 {
     setBackgroundBrush(QBrush(QColor("lightsteelblue")));
 }
@@ -114,17 +119,62 @@ void JackContextGraphicsScene::editSelectedMacro()
 
 void JackContextGraphicsScene::createNewMacro()
 {
+    waitForMacroPosition = true;
+    // set a special cursor to show the user what we are waiting for:
+    QApplication::setOverrideCursor(QCursor(Qt::CrossCursor));
+    // also send a message for the user to read:
+    messageChanged("Left-click anywhere in the canvas to place the new macro. Click with any other mouse button to abort macro creation.");
+}
+
+void JackContextGraphicsScene::createNewModule(QString factoryName)
+{
+    waitForModulePosition = true;
+    this->factoryName = factoryName;
+    // set a special cursor to show the user what we are waiting for:
+    QApplication::setOverrideCursor(QCursor(Qt::CrossCursor));
+    // also send a message for the user to read:
+    messageChanged("Left-click anywhere in the canvas to place the new module. Click with any other mouse button to abort module creation.");
+}
+
+void JackContextGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
+{
+    if (waitForMacroPosition || waitForModulePosition) {
+        mouseEvent->accept();
+        if (mouseEvent->button() == Qt::LeftButton) {
+            if (waitForMacroPosition) {
+                createNewMacro(mouseEvent->scenePos());
+            } else if (waitForModulePosition) {
+                createNewModule(factoryName, mouseEvent->scenePos());
+            }
+        }
+        waitForMacroPosition = waitForModulePosition = false;
+        // reset cursor and message to normal:
+        QApplication::restoreOverrideCursor();
+        messageChanged(QString());
+    } else {
+        QGraphicsScene::mousePressEvent(mouseEvent);
+    }
+}
+
+void JackContextGraphicsScene::createNewMacro(QPointF pos)
+{
     // create a new wrapper client:
-    RecursiveJackContext::getInstance()->pushNewContext("macro", 1);
+    JackContext *context = RecursiveJackContext::getInstance()->pushNewContext("macro", 1);
+    QString contextName = context->get_name();
+    settings.setValue("position/" + contextName, pos.toPoint());
     // change to that context:
     changeToCurrentContext();
     contextLevelChanged(RecursiveJackContext::getInstance()->getContextStackSize() - 1);
 }
 
-void JackContextGraphicsScene::createNewModule(QString factoryName)
+void JackContextGraphicsScene::createNewModule(QString factoryName, QPointF pos)
 {
     JackClientFactory *factory = JackClientSerializer::getInstance()->getFactoryByName(factoryName);
     if (factory) {
-        factory->createClient(factory->getName())->activate();
+        JackClient *client = factory->createClient(factory->getName());
+        client->activate();
+        QString contextName = RecursiveJackContext::getInstance()->getCurrentContext()->get_name();
+        settings.setValue("position/" + contextName + "/" + client->getClientName(), pos.toPoint());
+        graphicsClientItemsClient->setClientItemPosition(client->getClientName(), pos);
     }
 }
