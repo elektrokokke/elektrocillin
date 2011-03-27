@@ -24,9 +24,6 @@ GraphicsClientItemsClient::GraphicsClientItemsClient(QGraphicsScene *scene_) :
     // the same for ports:
     QObject::connect(this, SIGNAL(portRegistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
     QObject::connect(this, SIGNAL(portUnregistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
-    // the same for port connections:
-    QObject::connect(this, SIGNAL(portConnected(QString,QString)), this, SLOT(onPortConnected(QString,QString)));
-    QObject::connect(this, SIGNAL(portDisconnected(QString,QString)), this, SLOT(onPortDisconnected(QString,QString)));
 }
 
 GraphicsClientItemsClient::~GraphicsClientItemsClient()
@@ -37,6 +34,20 @@ GraphicsClientItemsClient::~GraphicsClientItemsClient()
 
 void GraphicsClientItemsClient::saveState(QDataStream &stream)
 {
+    clientItemPositionMap.clear();
+    clientItemVisibleMap.clear();
+    for (QMap<QString, GraphicsClientItem*>::iterator i = clientItems.begin(); i != clientItems.end(); i++) {
+        GraphicsClientItem *clientItem = i.value();
+        if (clientItem) {
+            clientItemPositionMap[i.key()] = clientItem->pos();
+            clientItemVisibleMap[i.key()] = clientItem->isInnerItemVisible();
+        }
+    }
+    // save client graphics positions:
+    stream << clientItemPositionMap;
+    // save inner items' visibility:
+    stream << clientItemVisibleMap;
+    // save the clients' states:
     RecursiveJackContext::getInstance()->saveCurrentContext(stream, JackClientSerializer::getInstance());
 }
 
@@ -44,7 +55,24 @@ void GraphicsClientItemsClient::loadState(QDataStream &stream)
 {
     // first delete all current clients:
     deleteClients();
+    // read client graphics positions:
+    stream >> clientItemPositionMap;
+    // read inner items' visibility:
+    stream >> clientItemVisibleMap;
+    // read the clients' and their states:
     RecursiveJackContext::getInstance()->loadCurrentContext(stream, JackClientSerializer::getInstance());
+    for (QMap<QString, QPointF>::iterator i = clientItemPositionMap.begin(); i != clientItemPositionMap.end(); i++) {
+        GraphicsClientItem *clientItem = clientItems.value(i.key(), 0);
+        if (clientItem) {
+            clientItem->setPos(i.value());
+        }
+    }
+    for (QMap<QString, bool>::iterator i = clientItemVisibleMap.begin(); i != clientItemVisibleMap.end(); i++) {
+        GraphicsClientItem *clientItem = clientItems.value(i.key(), 0);
+        if (clientItem) {
+            clientItem->setInnerItemVisible(i.value());
+        }
+    }
 }
 
 void GraphicsClientItemsClient::setClientStyle(int clientStyle)
@@ -65,6 +93,8 @@ void GraphicsClientItemsClient::clear()
         delete i.value();
     }
     clientItems.clear();
+    clientItemPositionMap.clear();
+    clientItemVisibleMap.clear();
     // delete all port connection items:
     for (; portConnectionItems.size(); ) {
         deletePortConnectionItem(portConnectionItems.begin().key(), portConnectionItems.begin().value().begin().key());
@@ -90,6 +120,11 @@ void GraphicsClientItemsClient::deleteClients()
         QString clientName = clientNames[i];
         deleteClient(clientName);
     }
+}
+
+QGraphicsScene * GraphicsClientItemsClient::getScene()
+{
+    return scene;
 }
 
 void GraphicsClientItemsClient::showAllInnerItems(bool visible)
@@ -142,7 +177,12 @@ void GraphicsClientItemsClient::onClientRegistered(const QString &clientName)
     // create a client item with that name:
     GraphicsClientItem *clientItem = new GraphicsClientItem(this, clientName, clientStyle, portStyle, font, 0);
     clientItems.insert(clientName, clientItem);
-    scene->addItem(clientItem);
+    if (clientItemPositionMap.contains(clientName)) {
+        clientItem->setPos(clientItemPositionMap[clientName]);
+    }
+    if (clientItemVisibleMap.contains(clientName)) {
+        clientItem->setInnerItemVisible(clientItemVisibleMap[clientName]);
+    }
 }
 
 void GraphicsClientItemsClient::onClientUnregistered(const QString &clientName)
@@ -162,25 +202,3 @@ void GraphicsClientItemsClient::onPortRegistered(QString fullPortName, QString t
     }
 }
 
-void GraphicsClientItemsClient::onPortConnected(QString sourcePortName, QString destPortName)
-{
-    QString clientName1 = sourcePortName.split(":")[0];
-    QString clientName2 = destPortName.split(":")[0];
-    GraphicsClientItem *clientItem = clientItems.value(clientName1, 0);
-    if (clientItem) {
-        clientItem->updatePorts();
-    }
-    if (clientName2 != clientName1) {
-        clientItem = clientItems.value(clientName2, 0);
-        if (clientItem) {
-            clientItem->updatePorts();
-        }
-    }
-}
-
-void GraphicsClientItemsClient::onPortDisconnected(QString sourcePortName, QString destPortName)
-{
-    onPortConnected(sourcePortName, destPortName);
-    // delete the graphical representation of the connection:
-    deletePortConnectionItem(sourcePortName, destPortName);
-}

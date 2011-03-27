@@ -24,6 +24,8 @@ public:
     void deleteClient(const QString &clientName);
     void deleteClients();
 
+    QGraphicsScene * getScene();
+
     void showAllInnerItems(bool visible = true);
 
     GraphicsPortConnectionItem * getPortConnectionItem(const QString &port1, const QString &port2);
@@ -34,12 +36,11 @@ public slots:
     void onClientRegistered(const QString &clientName);
     void onClientUnregistered(const QString &clientName);
     void onPortRegistered(QString fullPortName, QString type, int flags);
-    void onPortConnected(QString sourcePortName, QString destPortName);
-    void onPortDisconnected(QString sourcePortName, QString destPortName);
-
 private:
     QGraphicsScene *scene;
     QMap<QString, GraphicsClientItem*> clientItems;
+    QMap<QString, QPointF> clientItemPositionMap;
+    QMap<QString, bool> clientItemVisibleMap;
     QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > portConnectionItems;
     int clientStyle, portStyle;
     QFont font;

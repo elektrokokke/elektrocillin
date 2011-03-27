@@ -13,7 +13,7 @@
 QSettings GraphicsClientItem::settings("settings.ini", QSettings::IniFormat);
 
 GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
-    QGraphicsPathItem(parent),
+    QGraphicsPathItem(parent, client_->getScene()),
     client(client_),
     isJackClient(false),
     clientName(clientName_),
@@ -73,13 +73,17 @@ QGraphicsItem * GraphicsClientItem::getInnerItem() const
     return innerItem;
 }
 
-void GraphicsClientItem::showInnerItem(bool ensureVisible_)
+bool GraphicsClientItem::isInnerItemVisible() const
+{
+    return innerItem && innerItem->isVisible();
+}
+
+void GraphicsClientItem::setInnerItemVisible(bool visible)
 {
     if (innerItem) {
-        setFocus();
         // show the inner item if requested:
-        innerItem->setVisible(ensureVisible_ || !innerItem->isVisible());
-        if (innerItem->isVisible()) {
+        innerItem->setVisible(visible);
+        if (visible) {
             showInnerItemCommand->setText("[-]");
             showInnerItemAction->setText("Hide controls");
             updateBounds();
@@ -88,6 +92,15 @@ void GraphicsClientItem::showInnerItem(bool ensureVisible_)
             showInnerItemAction->setText("Show controls");
             setPath(pathWithoutInnerItem);
         }
+    }
+}
+
+void GraphicsClientItem::showInnerItem(bool ensureVisible_)
+{
+    if (innerItem) {
+        setFocus();
+        // show the inner item if requested:
+        setInnerItemVisible(ensureVisible_ || !innerItem->isVisible());
     }
 }
 
@@ -329,8 +342,6 @@ void GraphicsClientItem::initItem()
     } else {
         setPath(pathWithoutInnerItem);
     }
-
-    setPos(settings.value(clientName).toPointF());
 }
 
 void GraphicsClientItem::initRest()
@@ -353,4 +364,5 @@ void GraphicsClientItem::initRest()
         contextMenu->addSeparator();
         contextMenu->addAction("Delete client", this, SLOT(onActionRemoveClient()));
     }
+    setPos(settings.value(clientName).toPointF());
 }

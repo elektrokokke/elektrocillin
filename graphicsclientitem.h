@@ -27,6 +27,8 @@ public:
     const QRectF & getRect() const;
     void setInnerItem(QGraphicsItem *item);
     QGraphicsItem * getInnerItem() const;
+    bool isInnerItemVisible() const;
+    void setInnerItemVisible(bool visible);
 public slots:
     void showInnerItem(bool ensureVisible = false);
     void updateBounds();

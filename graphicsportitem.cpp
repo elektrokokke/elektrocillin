@@ -50,6 +50,8 @@ GraphicsPortItem::GraphicsPortItem(GraphicsClientItemsClient *client_, const QSt
     // register the port registration callback at the jack server:
     QObject::connect(client, SIGNAL(portRegistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
     QObject::connect(client, SIGNAL(portUnregistered(QString,QString,int)), this, SLOT(onPortUnregistered(QString,QString,int)));
+    QObject::connect(client, SIGNAL(portConnected(QString,QString)), this, SLOT(onPortConnected(QString,QString)));
+    QObject::connect(client, SIGNAL(portDisconnected(QString,QString)), this, SLOT(onPortDisconnected(QString,QString)));
 
     if (gradient) {
         QLinearGradient gradient(portRect.topLeft(), portRect.bottomRight());
@@ -126,6 +128,46 @@ void GraphicsPortItem::onPortUnregistered(QString fullPortName, QString, int)
         connectMenu->removeAction(action);
         disconnectMenu->removeAction(action);
         mapPortNamesToActions.remove(fullPortName);
+        disconnectMenu->setEnabled(disconnectMenu->actions().size());
+        connectMenu->setEnabled(connectMenu->actions().size());
+    }
+}
+
+void GraphicsPortItem::onPortConnected(QString sourcePortName, QString destPortName)
+{
+    QAction *action = 0;
+    if (isInput && (destPortName == fullPortName)) {
+        client->getPortConnectionItem(sourcePortName, fullPortName)->setPos(fullPortName, getConnectionScenePos());
+        action = mapPortNamesToActions.value(sourcePortName, 0);
+    } else if (!isInput && (sourcePortName == fullPortName)){
+        client->getPortConnectionItem(fullPortName, destPortName)->setPos(fullPortName, getConnectionScenePos());
+        action = mapPortNamesToActions.value(destPortName, 0);
+    }
+    if (action) {
+        QObject::disconnect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
+        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onDisconnectAction()));
+        connectMenu->removeAction(action);
+        disconnectMenu->addAction(action);
+        disconnectMenu->setEnabled(disconnectMenu->actions().size());
+        connectMenu->setEnabled(connectMenu->actions().size());
+    }
+}
+
+void GraphicsPortItem::onPortDisconnected(QString sourcePortName, QString destPortName)
+{
+    QAction *action = 0;
+    if (isInput && (destPortName == fullPortName)) {
+        client->deletePortConnectionItem(sourcePortName, fullPortName);
+        action = mapPortNamesToActions.value(sourcePortName, 0);
+    } else if (!isInput && (sourcePortName == fullPortName)){
+        client->deletePortConnectionItem(fullPortName, destPortName);
+        action = mapPortNamesToActions.value(destPortName, 0);
+    }
+    if (action) {
+        QObject::disconnect(action, SIGNAL(triggered()), this, SLOT(onDisconnectAction()));
+        QObject::connect(action, SIGNAL(triggered()), this, SLOT(onConnectAction()));
+        disconnectMenu->removeAction(action);
+        connectMenu->addAction(action);
         disconnectMenu->setEnabled(disconnectMenu->actions().size());
         connectMenu->setEnabled(connectMenu->actions().size());
     }

@@ -18,6 +18,8 @@ public:
 public slots:
     void onPortRegistered(QString fullPortName, QString type, int flags);
     void onPortUnregistered(QString fullPortName, QString type, int flags);
+    void onPortConnected(QString sourcePortName, QString destPortName);
+    void onPortDisconnected(QString sourcePortName, QString destPortName);
 
 protected:
     void mousePressEvent ( QGraphicsSceneMouseEvent * event );

@@ -1,5 +1,4 @@
 #include "jackclient.h"
-#include <QDebug>
 #include <QSet>
 
 JackClient::JackClient(const QString &clientName) :
@@ -129,17 +128,12 @@ jack_nframes_t JackClient::getEstimatedCurrentTime()
 
 bool JackClient::connectPorts(const QString &sourcePortName, const QString &destPortName)
 {
-    qDebug() << QString("bool JackClient::connectPorts(\"%1\", \"%2\")").arg(sourcePortName).arg(destPortName) << "...";
     int connect = jack_connect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data());
-    if (connect) {
-        qDebug() << QString("bool JackClient::connectPorts(\"%1\", \"%2\")").arg(sourcePortName).arg(destPortName) << "could not connect...";
-    }
     return (connect == 0);// || (connect == EEXIST);
 }
 
 bool JackClient::disconnectPorts(const QString &sourcePortName, const QString &destPortName)
 {
-    qDebug() << QString("bool JackClient::disconnectPorts(\"%1\", \"%2\")").arg(sourcePortName).arg(destPortName) << "...";
     return (jack_disconnect(client, sourcePortName.toAscii().data(), destPortName.toAscii().data()) == 0);
 }
 
