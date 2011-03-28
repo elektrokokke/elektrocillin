@@ -155,7 +155,11 @@ void JackParameterClient::onChangedIntParameter(int parameterId, int value)
     // a parameter has been changed from the process thread, change it in the GUI thread:
     Q_ASSERT(parameterId < parameters.size());
     Q_ASSERT(parameters[parameterId].type == TYPE_INT);
-    parameters[parameterId].intValue = value;
+    // trigger the corresponding signal if the value has been changed:
+    if (parameters[parameterId].intValue != value) {
+        parameters[parameterId].intValue = value;
+        changedIntParameter(parameterId, value);
+    }
 }
 
 void JackParameterClient::onChangedDoubleParameter(int parameterId, double value)
@@ -163,7 +167,11 @@ void JackParameterClient::onChangedDoubleParameter(int parameterId, double value
     // a parameter has been changed from the process thread, change it in the GUI thread:
     Q_ASSERT(parameterId < parameters.size());
     Q_ASSERT(parameters[parameterId].type == TYPE_DOUBLE);
-    parameters[parameterId].doubleValue = value;
+    // trigger the corresponding signal if the value has been changed:
+    if (parameters[parameterId].doubleValue != value) {
+        parameters[parameterId].doubleValue = value;
+        changedIntParameter(parameterId, value);
+    }
 }
 
 void JackParameterClient::synchronizeChangedParametersWithGui()
