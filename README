@@ -33,3 +33,5 @@ Note: be sure to have all necessary tools in your path. On Windows you could pro
 The software depends on Jack. Make sure you have a functioning Jack installation. Start the Jack server before starting the elektrocillin exectuable or make sure that it is
 started automatically when accessing the Jack library. A nice tool for using Jack is qjackctl (http://http://qjackctl.sourceforge.net/), which is also Qt-based.
 Have fun and be advised that this software is currently very experimental!
+
+See the elektrocillin wiki for further information: https://github.com/elektrokokke/elektrocillin/wiki
