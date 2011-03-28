@@ -20,7 +20,7 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const
     type(type_),
     portType(portType_),
     font(font_),
-    innerItem(0),
+    controlsItem(0),
     isMacro(RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data()))
 {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
@@ -34,7 +34,7 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const
 GraphicsClientItem::~GraphicsClientItem()
 {
     settings.setValue("position/" + contextName + "/" + clientName, pos().toPoint());
-    settings.setValue("visible/" + contextName + "/" + clientName, innerItem && innerItem->isVisible());
+    settings.setValue("visible/" + contextName + "/" + clientName, controlsItem && controlsItem->isVisible());
 }
 
 const QString & GraphicsClientItem::getClientName() const
@@ -47,30 +47,23 @@ const QRectF & GraphicsClientItem::getRect() const
     return rect;
 }
 
-void GraphicsClientItem::setInnerItem(QGraphicsItem *item)
+QGraphicsItem * GraphicsClientItem::getControlsItem() const
 {
-    if (innerItem) {
-        delete innerItem;
-    }
-    innerItem = item;
-    showInnerItemCommand->setText("[+]");
-    showInnerItemCommand->setVisible(innerItem);
-    if (innerItem) {
-        innerItem->setVisible(false);
-        innerItem->setParentItem(this);
-        innerItem->setPos(getRect().topRight());
-    }
-    zoomToInnerItemCommand->setVisible(innerItem);
+    return controlsItem;
 }
 
-QGraphicsItem * GraphicsClientItem::getInnerItem() const
+bool GraphicsClientItem::isControlsVisible() const
 {
-    return innerItem;
+    return controlsItem && controlsItem->isVisible();
 }
 
-bool GraphicsClientItem::isInnerItemVisible() const
+void GraphicsClientItem::setControlsVisible(bool visible)
 {
-    return innerItem && innerItem->isVisible();
+    if (controlsItem) {
+        // show the inner item if requested:
+        controlsItem->setVisible(visible);
+        showControlsCommand->setText(visible ? "[-]" : "[+]");
+    }
 }
 
 bool GraphicsClientItem::isMacroItem() const
@@ -83,29 +76,20 @@ bool GraphicsClientItem::isModuleItem() const
     return isJackClient;
 }
 
-void GraphicsClientItem::setInnerItemVisible(bool visible)
+void GraphicsClientItem::toggleControls(bool ensureVisible_)
 {
-    if (innerItem) {
-        // show the inner item if requested:
-        innerItem->setVisible(visible);
-        showInnerItemCommand->setText(visible ? "[-]" : "[+]");
-    }
-}
-
-void GraphicsClientItem::showInnerItem(bool ensureVisible_)
-{
-    if (innerItem) {
+    if (controlsItem) {
         setFocus();
         // show the inner item if requested:
-        setInnerItemVisible(ensureVisible_ || !innerItem->isVisible());
+        setControlsVisible(ensureVisible_ || !controlsItem->isVisible());
     }
 }
 
-void GraphicsClientItem::zoomToInnerItem()
+void GraphicsClientItem::zoomToControls()
 {
-    if (innerItem) {
-        showInnerItem(true);
-        scene()->views().first()->fitInView(innerItem, Qt::KeepAspectRatio);
+    if (controlsItem) {
+        toggleControls(true);
+        scene()->views().first()->fitInView(controlsItem, Qt::KeepAspectRatio);
     }
 }
 
@@ -122,7 +106,7 @@ void GraphicsClientItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
             return;
         }
     } else if (isModuleItem()) {
-        showInnerItem();
+        toggleControls();
         event->accept();
         return;
     }
@@ -147,7 +131,7 @@ void GraphicsClientItem::initItem()
     // delete all children (except the inner item):
     QList<QGraphicsItem*> children = childItems();
     for (int i = 0; i < children.size(); i++) {
-        if (children[i] != innerItem) {
+        if (children[i] != controlsItem) {
             if (GraphicsPortItem *portItem = qgraphicsitem_cast<GraphicsPortItem*>(children[i])) {
                 portItem->deleteLater();
             } else {
@@ -168,16 +152,16 @@ void GraphicsClientItem::initItem()
     textItem->setFont(font);
     textItem->setPos(padding, padding);
     textItem->setZValue(1);
-    showInnerItemCommand = new CommandTextItem(innerItem && innerItem->isVisible() ? "[-]" : "[+]", font, this);
-    showInnerItemCommand->setPos(padding, padding + fontMetrics.lineSpacing());
-    showInnerItemCommand->setVisible(innerItem);
-    showInnerItemCommand->setZValue(1);
-    QObject::connect(showInnerItemCommand, SIGNAL(triggered()), this, SLOT(showInnerItem()));
-    zoomToInnerItemCommand = new CommandTextItem("[Z]", font, this);
-    zoomToInnerItemCommand->setPos(padding + fontMetrics.width("[+]"), padding + fontMetrics.lineSpacing());
-    zoomToInnerItemCommand->setVisible(innerItem);
-    zoomToInnerItemCommand->setZValue(1);
-    QObject::connect(zoomToInnerItemCommand, SIGNAL(triggered()), this, SLOT(zoomToInnerItem()));
+    showControlsCommand = new CommandTextItem(controlsItem && controlsItem->isVisible() ? "[-]" : "[+]", font, this);
+    showControlsCommand->setPos(padding, padding + fontMetrics.lineSpacing());
+    showControlsCommand->setVisible(controlsItem);
+    showControlsCommand->setZValue(1);
+    QObject::connect(showControlsCommand, SIGNAL(triggered()), this, SLOT(toggleControls()));
+    zoomToControlsCommand = new CommandTextItem("[Z]", font, this);
+    zoomToControlsCommand->setPos(padding + fontMetrics.width("[+]"), padding + fontMetrics.lineSpacing());
+    zoomToControlsCommand->setVisible(controlsItem);
+    zoomToControlsCommand->setZValue(1);
+    QObject::connect(zoomToControlsCommand, SIGNAL(triggered()), this, SLOT(zoomToControls()));
 
     QStringList inputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
     QList<GraphicsPortItem*> inputPortItems;
@@ -212,7 +196,7 @@ void GraphicsClientItem::initItem()
         }
     }
 
-    rect = (textItem->boundingRect().translated(textItem->pos()) | showInnerItemCommand->boundingRect().translated(showInnerItemCommand->pos())).adjusted(-padding, -padding, padding, padding);
+    rect = (textItem->boundingRect().translated(textItem->pos()) | showControlsCommand->boundingRect().translated(showControlsCommand->pos())).adjusted(-padding, -padding, padding, padding);
     if (rect.width() < inputPortsWidth + (portPadding - minimumInputPortWidth) * 2) {
         rect.setWidth(inputPortsWidth + (portPadding - minimumInputPortWidth) * 2);
     }
@@ -298,13 +282,18 @@ void GraphicsClientItem::initRest()
     JackClient * jackClient;
     if (client && (jackClient = JackClientSerializer::getInstance()->getClient(client))) {
         isJackClient = true;
-        QGraphicsItem *graphicsItem = jackClient->createGraphicsItem();
-        if (graphicsItem) {
-            setInnerItem(graphicsItem);
+        controlsItem = jackClient->createGraphicsItem();
+        showControlsCommand->setText("[+]");
+        showControlsCommand->setVisible(controlsItem);
+        if (controlsItem) {
+            controlsItem->setVisible(false);
+            controlsItem->setParentItem(this);
+            controlsItem->setPos(getRect().topRight());
         }
+        zoomToControlsCommand->setVisible(controlsItem);
     }
     setFlag(QGraphicsItem::ItemIsSelectable, isJackClient || isMacroItem());
     contextName = RecursiveJackContext::getInstance()->getCurrentContext()->get_name();
     setPos(settings.value("position/" + contextName + "/" + clientName).toPoint());
-    setInnerItemVisible(settings.value("visible/" + contextName + "/" + clientName).toBool());
+    setControlsVisible(settings.value("visible/" + contextName + "/" + clientName).toBool());
 }

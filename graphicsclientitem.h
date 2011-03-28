@@ -25,17 +25,18 @@ public:
     ~GraphicsClientItem();
     const QString & getClientName() const;
     const QRectF & getRect() const;
-    void setInnerItem(QGraphicsItem *item);
-    QGraphicsItem * getInnerItem() const;
-    bool isInnerItemVisible() const;
+
+    QGraphicsItem * getControlsItem() const;
+    bool isControlsVisible() const;
+    void setControlsVisible(bool visible);
+
     bool isMacroItem() const;
     bool isModuleItem() const;
-    void setInnerItemVisible(bool visible);
 public slots:
-    void showInnerItem(bool ensureVisible = false);
-    void zoomToInnerItem();
-    void updatePorts();
+    void toggleControls(bool ensureVisible = false);
+    void zoomToControls();
 
+    void updatePorts();
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
     virtual void focusInEvent(QFocusEvent * event);
@@ -47,8 +48,8 @@ private:
     int type, portType;
     QFont font;
     QRectF rect;
-    QGraphicsItem *innerItem;
-    CommandTextItem *showInnerItemCommand, *zoomToInnerItemCommand;
+    QGraphicsItem *controlsItem;
+    CommandTextItem *showControlsCommand, *zoomToControlsCommand;
     bool isMacro;
     QString contextName;
 

@@ -40,7 +40,7 @@ void GraphicsClientItemsClient::saveState(QDataStream &stream)
         GraphicsClientItem *clientItem = i.value();
         if (clientItem) {
             clientItemPositionMap[i.key()] = clientItem->pos();
-            clientItemVisibleMap[i.key()] = clientItem->isInnerItemVisible();
+            clientItemVisibleMap[i.key()] = clientItem->isControlsVisible();
         }
     }
     // save client graphics positions:
@@ -70,7 +70,7 @@ void GraphicsClientItemsClient::loadState(QDataStream &stream)
     for (QMap<QString, bool>::iterator i = clientItemVisibleMap.begin(); i != clientItemVisibleMap.end(); i++) {
         GraphicsClientItem *clientItem = clientItems.value(i.key(), 0);
         if (clientItem) {
-            clientItem->setInnerItemVisible(i.value());
+            clientItem->setControlsVisible(i.value());
         }
     }
 }
@@ -132,7 +132,7 @@ void GraphicsClientItemsClient::showAllInnerItems(bool visible)
     for (QMap<QString, GraphicsClientItem*>::iterator i = clientItems.begin(); i != clientItems.end(); i++) {
         GraphicsClientItem *clientItem = i.value();
         if (clientItem) {
-            clientItem->showInnerItem(visible);
+            clientItem->toggleControls(visible);
         }
     }
 }
@@ -189,7 +189,7 @@ void GraphicsClientItemsClient::onClientRegistered(const QString &clientName)
         clientItem->setPos(clientItemPositionMap[clientName]);
     }
     if (clientItemVisibleMap.contains(clientName)) {
-        clientItem->setInnerItemVisible(clientItemVisibleMap[clientName]);
+        clientItem->setControlsVisible(clientItemVisibleMap[clientName]);
     }
 }
 

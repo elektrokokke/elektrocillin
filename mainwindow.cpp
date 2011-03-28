@@ -102,7 +102,7 @@ void MainWindow::onSceneSelectionChanged()
                 selectedMacros++;
             } else if (clientItem->isModuleItem()) {
                 selectedModules++;
-                if (clientItem->isInnerItemVisible()) {
+                if (clientItem->isControlsVisible()) {
                     selectedVisibleModules++;
                 }
             }
@@ -162,7 +162,7 @@ void MainWindow::on_actionShow_module_controls_triggered()
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
         if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
             if (clientItem->isModuleItem()) {
-                clientItem->setInnerItemVisible(true);
+                clientItem->setControlsVisible(true);
             }
         }
     }
@@ -176,7 +176,7 @@ void MainWindow::on_actionHide_module_controls_triggered()
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
         if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
             if (clientItem->isModuleItem()) {
-                clientItem->setInnerItemVisible(false);
+                clientItem->setControlsVisible(false);
             }
         }
     }
