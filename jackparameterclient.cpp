@@ -10,6 +10,38 @@ JackParameterClient::JackParameterClient(const QString &clientName, AudioProcess
     QObject::connect(thread, SIGNAL(changedDoubleParameter(int,double)), this, SLOT(onChangedDoubleParameter(int,double)));
 }
 
+void JackParameterClient::saveState(QDataStream &stream)
+{
+    stream << parameters.size();
+    for (int i = 0; i < parameters.size(); i++) {
+        stream << parameters[i].type;
+        if (parameters[i].type == TYPE_INT) {
+            stream << parameters[i].intValue;
+        } else {
+            stream << parameters[i].doubleValue;
+        }
+    }
+}
+
+void JackParameterClient::loadState(QDataStream &stream)
+{
+    int nrOfParameters;
+    stream >> nrOfParameters;
+    if (nrOfParameters > parameters.size()) {
+        parameters.resize(nrOfParameters);
+    }
+    for (int i = 0; i < nrOfParameters; i++) {
+        stream >> parameters[i].type;
+        if (parameters[i].type == TYPE_INT) {
+            stream >> parameters[i].intValue;
+        } else {
+            stream >> parameters[i].doubleValue;
+        }
+    }
+    // synchronize the changes to the process thread:
+    ringBufferFromGuiToProcess.write(parameters.data(), parameters.size());
+}
+
 int JackParameterClient::getIntParameter(int parameterId)
 {
     Q_ASSERT(parameterId < parameters.size());
@@ -155,7 +187,7 @@ void JackParameterClient::onChangedIntParameter(int parameterId, int value)
     // a parameter has been changed from the process thread, change it in the GUI thread:
     Q_ASSERT(parameterId < parameters.size());
     Q_ASSERT(parameters[parameterId].type == TYPE_INT);
-    // trigger the corresponding signal if the value has been changed:
+    // trigger the corresponding signal only if the value has really changed:
     if (parameters[parameterId].intValue != value) {
         parameters[parameterId].intValue = value;
         changedIntParameter(parameterId, value);
@@ -167,7 +199,7 @@ void JackParameterClient::onChangedDoubleParameter(int parameterId, double value
     // a parameter has been changed from the process thread, change it in the GUI thread:
     Q_ASSERT(parameterId < parameters.size());
     Q_ASSERT(parameters[parameterId].type == TYPE_DOUBLE);
-    // trigger the corresponding signal if the value has been changed:
+    // trigger the corresponding signal only if the value has reallychanged:
     if (parameters[parameterId].doubleValue != value) {
         parameters[parameterId].doubleValue = value;
         changedIntParameter(parameterId, value);
@@ -181,9 +213,7 @@ void JackParameterClient::synchronizeChangedParametersWithGui()
       could become out of sync through parameter changes which are sent both ways
       approximately at the same time.
       */
-    for (int i = 0; i < parametersProcess.size(); i++) {
-        ringBufferFromProcessToGui.write(parametersProcess[i]);
-    }
+    ringBufferFromProcessToGui.write(parametersProcess.data(), parametersProcess.size());
     // wake the associated thread:
     thread->wake();
 }

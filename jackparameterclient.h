@@ -53,6 +53,12 @@ public:
     JackParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, unsigned int channelMask = (1 << 16) - 1, size_t ringBufferSize = 1024);
 
     /**
+      These methods save/load the current values of the parameter set.
+      */
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
+
+    /**
       Use these methods to get the current parameter values from
       the GUI thread if you do get their values from the corresponding signals below.
       */
