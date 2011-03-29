@@ -31,9 +31,6 @@ public:
     GraphicsPortConnectionItem * getPortConnectionItem(const QString &port1, const QString &port2);
     void deletePortConnectionItem(QString port1, QString port2);
     void setPositions(const QString &port, const  QPointF &point);
-
-    void setClientItemPosition(const QString &clientName, QPointF pos);
-
 public slots:
     void onClientRegistered(const QString &clientName);
     void onClientUnregistered(const QString &clientName);

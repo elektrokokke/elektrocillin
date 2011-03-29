@@ -61,18 +61,6 @@ void GraphicsClientItemsClient::loadState(QDataStream &stream)
     stream >> clientItemVisibleMap;
     // read the clients' and their states:
     RecursiveJackContext::getInstance()->loadCurrentContext(stream, JackClientSerializer::getInstance());
-    for (QMap<QString, QPointF>::iterator i = clientItemPositionMap.begin(); i != clientItemPositionMap.end(); i++) {
-        GraphicsClientItem *clientItem = clientItems.value(i.key(), 0);
-        if (clientItem) {
-            clientItem->setPos(i.value());
-        }
-    }
-    for (QMap<QString, bool>::iterator i = clientItemVisibleMap.begin(); i != clientItemVisibleMap.end(); i++) {
-        GraphicsClientItem *clientItem = clientItems.value(i.key(), 0);
-        if (clientItem) {
-            clientItem->setControlsVisible(i.value());
-        }
-    }
 }
 
 void GraphicsClientItemsClient::setClientStyle(int clientStyle)
@@ -169,14 +157,6 @@ void GraphicsClientItemsClient::setPositions(const QString &port, const  QPointF
     QMap<QString, GraphicsPortConnectionItem*> portItems = portConnectionItems.value(port);
     for (QMap<QString, GraphicsPortConnectionItem*>::const_iterator i = portItems.begin(); i != portItems.end(); i++) {
         i.value()->setPos(port, point);
-    }
-}
-
-void GraphicsClientItemsClient::setClientItemPosition(const QString &clientName, QPointF pos)
-{
-    GraphicsClientItem *clientItem = clientItems.value(clientName);
-    if (clientItem) {
-        clientItem->setPos(pos);
     }
 }
 
