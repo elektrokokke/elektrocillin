@@ -14,7 +14,8 @@ void JackParameterClient::saveState(QDataStream &stream)
 {
     stream << parameters.size();
     for (int i = 0; i < parameters.size(); i++) {
-        stream << parameters[i].type;
+        int type = parameters[i].type;
+        stream << type;
         if (parameters[i].type == TYPE_INT) {
             stream << parameters[i].intValue;
         } else {
@@ -31,7 +32,9 @@ void JackParameterClient::loadState(QDataStream &stream)
         parameters.resize(nrOfParameters);
     }
     for (int i = 0; i < nrOfParameters; i++) {
-        stream >> parameters[i].type;
+        int type;
+        stream >> type;
+        parameters[i].type = (ParameterType)type;
         if (parameters[i].type == TYPE_INT) {
             stream >> parameters[i].intValue;
         } else {
