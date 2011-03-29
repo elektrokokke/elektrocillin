@@ -16,11 +16,13 @@ EnvelopeClient::~EnvelopeClient()
 
 void EnvelopeClient::saveState(QDataStream &stream)
 {
+    EventProcessorClient::saveState(stream);
     envelope.save(stream);
 }
 
 void EnvelopeClient::loadState(QDataStream &stream)
 {
+    EventProcessorClient::loadState(stream);
     envelopeProcess->load(stream);
     envelope = *envelopeProcess;
 }

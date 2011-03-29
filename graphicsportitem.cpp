@@ -48,10 +48,10 @@ GraphicsPortItem::GraphicsPortItem(GraphicsClientItemsClient *client_, const QSt
     setPath(portPath);
 
     // register the port registration callback at the jack server:
-    QObject::connect(client, SIGNAL(portRegistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
-    QObject::connect(client, SIGNAL(portUnregistered(QString,QString,int)), this, SLOT(onPortUnregistered(QString,QString,int)));
-    QObject::connect(client, SIGNAL(portConnected(QString,QString)), this, SLOT(onPortConnected(QString,QString)));
-    QObject::connect(client, SIGNAL(portDisconnected(QString,QString)), this, SLOT(onPortDisconnected(QString,QString)));
+    QObject::connect(client, SIGNAL(portRegistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)), Qt::QueuedConnection);
+    QObject::connect(client, SIGNAL(portUnregistered(QString,QString,int)), this, SLOT(onPortUnregistered(QString,QString,int)), Qt::QueuedConnection);
+    QObject::connect(client, SIGNAL(portConnected(QString,QString)), this, SLOT(onPortConnected(QString,QString)), Qt::QueuedConnection);
+    QObject::connect(client, SIGNAL(portDisconnected(QString,QString)), this, SLOT(onPortDisconnected(QString,QString)), Qt::QueuedConnection);
 
     if (gradient) {
         QLinearGradient gradient(portRect.topLeft(), portRect.bottomRight());

@@ -41,7 +41,6 @@ private:
     GraphicsClientItemsClient *graphicsClientItemsClient;
     bool waitForMacroPosition, waitForModulePosition;
     QString factoryName;
-    static QSettings settings;
 
     void createNewMacro(QPointF pos);
     void createNewModule(QString factoryName, QPointF pos);

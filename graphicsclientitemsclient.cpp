@@ -2,12 +2,15 @@
 #include "jackcontextgraphicsscene.h"
 #include "metajack/recursivejackcontext.h"
 
+QSettings GraphicsClientItemsClient::settings("settings.ini", QSettings::IniFormat);
+
 GraphicsClientItemsClient::GraphicsClientItemsClient(QGraphicsScene *scene_) :
     JackClient("GraphicsClientItemsClient"),
     scene(scene_),
     clientStyle(3),
     portStyle(3),
-    font("Helvetica", 12)
+    font("Helvetica", 12),
+    contextName(RecursiveJackContext::getInstance()->getCurrentContext()->get_name())
 {
     setCallProcess(false);
     setEmitPortSignals(true);
@@ -28,37 +31,46 @@ GraphicsClientItemsClient::GraphicsClientItemsClient(QGraphicsScene *scene_) :
 
 GraphicsClientItemsClient::~GraphicsClientItemsClient()
 {
-    clear();
+    // save all client item positions which are not JackClient client items to the settings:
+    for (QMap<QString, QPointF>::iterator i = clientItemPositionMap.begin(); i != clientItemPositionMap.end(); i++) {
+        settings.setValue("position/" + contextName + "/" + i.key(), i.value().toPoint());
+    }
+    // delete all client graphics items:
+    for (QMap<QString, GraphicsClientItem*>::iterator i = clientItems.begin(); i != clientItems.end(); i++) {
+        delete i.value();
+    }
+    // delete all port connection items:
+    for (; portConnectionItems.size(); ) {
+        deletePortConnectionItem(portConnectionItems.begin().key(), portConnectionItems.begin().value().begin().key());
+    }
     close();
 }
 
 void GraphicsClientItemsClient::saveState(QDataStream &stream)
 {
-    clientItemPositionMap.clear();
-    clientItemVisibleMap.clear();
-    for (QMap<QString, GraphicsClientItem*>::iterator i = clientItems.begin(); i != clientItems.end(); i++) {
-        GraphicsClientItem *clientItem = i.value();
-        if (clientItem) {
-            clientItemPositionMap[i.key()] = clientItem->pos();
-            clientItemVisibleMap[i.key()] = clientItem->isControlsVisible();
-        }
-    }
     // save client graphics positions:
     stream << clientItemPositionMap;
-    // save inner items' visibility:
-    stream << clientItemVisibleMap;
     // save the clients' states:
     RecursiveJackContext::getInstance()->saveCurrentContext(stream, JackClientSerializer::getInstance());
 }
 
 void GraphicsClientItemsClient::loadState(QDataStream &stream)
 {
-    // first delete all current clients:
-    deleteClients();
+    // delete all clients and the corresponding graphics:
+    QStringList clientNames = clientItems.keys();
+    for (int i = 0; i < clientNames.size(); i++) {
+        QString clientName = clientNames[i];
+        deleteClient(clientName);
+    }
     // read client graphics positions:
     stream >> clientItemPositionMap;
-    // read inner items' visibility:
-    stream >> clientItemVisibleMap;
+    // set the positions of already existing graphics items:
+    for (QMap<QString, QPointF>::iterator i = clientItemPositionMap.begin(); i != clientItemPositionMap.end(); i++) {
+        GraphicsClientItem *clientItem = clientItems.value(i.key(), 0);
+        if (clientItem) {
+            clientItem->setPos(i.value());
+        }
+    }
     // read the clients' and their states:
     RecursiveJackContext::getInstance()->loadCurrentContext(stream, JackClientSerializer::getInstance());
 }
@@ -73,22 +85,6 @@ void GraphicsClientItemsClient::setPortStyle(int portStyle)
     this->portStyle = portStyle;
 }
 
-
-void GraphicsClientItemsClient::clear()
-{
-    // delete all client graphics items:
-    for (QMap<QString, GraphicsClientItem*>::iterator i = clientItems.begin(); i != clientItems.end(); i++) {
-        delete i.value();
-    }
-    clientItems.clear();
-    clientItemPositionMap.clear();
-    clientItemVisibleMap.clear();
-    // delete all port connection items:
-    for (; portConnectionItems.size(); ) {
-        deletePortConnectionItem(portConnectionItems.begin().key(), portConnectionItems.begin().value().begin().key());
-    }
-}
-
 void GraphicsClientItemsClient::deleteClient(const QString &clientName)
 {
     jack_client_t *client = meta_jack_client_by_name(clientName.toAscii().data());
@@ -97,16 +93,6 @@ void GraphicsClientItemsClient::deleteClient(const QString &clientName)
         delete jackClient;
     } else if (JackContext *context = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data())) {
         RecursiveJackContext::getInstance()->deleteContext(context);
-    }
-}
-
-void GraphicsClientItemsClient::deleteClients()
-{
-    // delete all clients:
-    QStringList clientNames = clientItems.keys();
-    for (int i = 0; i < clientNames.size(); i++) {
-        QString clientName = clientNames[i];
-        deleteClient(clientName);
     }
 }
 
@@ -152,6 +138,14 @@ void GraphicsClientItemsClient::deletePortConnectionItem(QString port1, QString 
     }
 }
 
+void GraphicsClientItemsClient::deletePortConnectionItems(QString port)
+{
+    QStringList otherPorts = portConnectionItems.value(port).keys();
+    for (int i = 0; i < otherPorts.size(); i++) {
+        deletePortConnectionItem(port, otherPorts[i]);
+    }
+}
+
 void GraphicsClientItemsClient::setPositions(const QString &port, const  QPointF &point)
 {
     QMap<QString, GraphicsPortConnectionItem*> portItems = portConnectionItems.value(port);
@@ -160,17 +154,32 @@ void GraphicsClientItemsClient::setPositions(const QString &port, const  QPointF
     }
 }
 
+void GraphicsClientItemsClient::setClientItemPositionByName(const QString &clientName, QPointF pos)
+{
+    clientItemPositionMap[clientName] = pos;
+}
+
 void GraphicsClientItemsClient::onClientRegistered(const QString &clientName)
 {
     // create a client item with that name:
-    GraphicsClientItem *clientItem = new GraphicsClientItem(this, clientName, clientStyle, portStyle, font, 0);
+    GraphicsClientItem *clientItem = 0;
+    jack_client_t *client = meta_jack_client_by_name(clientName.toAscii().data());
+    JackClient *jackClient = (client ? JackClientSerializer::getInstance()->getClient(client) : 0);
+    if (jackClient) {
+        clientItem = jackClient->createClientItem(this, clientStyle, portStyle, font);
+    } else {
+        bool isMacro = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data());
+        clientItem = new GraphicsClientItem(this, 0, isMacro, clientName, clientStyle, portStyle, font, 0);
+        QPointF pos;
+        if (clientItemPositionMap.contains(clientName)) {
+            pos = clientItemPositionMap[clientName];
+        } else {
+            pos = settings.value("position/" + contextName + "/" + clientName).toPoint();
+            clientItemPositionMap.insert(clientName, pos);
+        }
+        clientItem->setPos(pos);
+    }
     clientItems.insert(clientName, clientItem);
-    if (clientItemPositionMap.contains(clientName)) {
-        clientItem->setPos(clientItemPositionMap[clientName]);
-    }
-    if (clientItemVisibleMap.contains(clientName)) {
-        clientItem->setControlsVisible(clientItemVisibleMap[clientName]);
-    }
 }
 
 void GraphicsClientItemsClient::onClientUnregistered(const QString &clientName)
@@ -178,6 +187,7 @@ void GraphicsClientItemsClient::onClientUnregistered(const QString &clientName)
     // delete the client item with the given name:
     delete clientItems.value(clientName, 0);
     clientItems.remove(clientName);
+    clientItemPositionMap.remove(clientName);
 }
 
 void GraphicsClientItemsClient::onPortRegistered(QString fullPortName, QString type, int flags)

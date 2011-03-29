@@ -15,11 +15,13 @@ OscillatorClient::~OscillatorClient()
 
 void OscillatorClient::saveState(QDataStream &stream)
 {
+    EventProcessorClient::saveState(stream);
     oscillator.save(stream);
 }
 
 void OscillatorClient::loadState(QDataStream &stream)
 {
+    EventProcessorClient::loadState(stream);
     oscillatorProcess->load(stream);
     oscillator = *oscillatorProcess;
 }

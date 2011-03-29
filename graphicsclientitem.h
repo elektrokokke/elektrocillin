@@ -12,7 +12,7 @@
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainterPathStroker>
-#include <QSettings>
+#include <QPointer>
 
 class CommandTextItem;
 class GraphicsClientItemsClient;
@@ -21,8 +21,7 @@ class GraphicsClientItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsClientItem(GraphicsClientItemsClient *client, const QString &clientName, int style, int portStyle, QFont font, QGraphicsItem *parent);
-    ~GraphicsClientItem();
+    GraphicsClientItem(GraphicsClientItemsClient *clientItemsClient, JackClient *jackClient, bool isMacro, const QString &clientName, int style, int portStyle, QFont font, QGraphicsItem *parent);
     const QString & getClientName() const;
     const QRectF & getRect() const;
 
@@ -38,12 +37,13 @@ public slots:
 
     void updatePorts();
 protected:
+    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
     virtual void focusInEvent(QFocusEvent * event);
     virtual void focusOutEvent(QFocusEvent * event);
 private:
-    GraphicsClientItemsClient *client;
-    bool isJackClient;
+    GraphicsClientItemsClient *clientItemsClient;
+    QPointer<JackClient> jackClient;
     QString clientName;
     int type, portType;
     QFont font;
@@ -51,9 +51,6 @@ private:
     QGraphicsItem *controlsItem;
     CommandTextItem *showControlsCommand, *zoomToControlsCommand;
     bool isMacro;
-    QString contextName;
-
-    static QSettings settings;
 
     void initItem();
     void initRest();

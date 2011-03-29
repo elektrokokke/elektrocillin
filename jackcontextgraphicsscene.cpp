@@ -5,8 +5,6 @@
 #include <QMessageBox>
 #include <QApplication>
 
-QSettings JackContextGraphicsScene::settings("settings.ini", QSettings::IniFormat);
-
 JackContextGraphicsScene::JackContextGraphicsScene() :
     graphicsClientItemsClient(new GraphicsClientItemsClient(this)),
     waitForMacroPosition(false),
@@ -159,9 +157,9 @@ void JackContextGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseE
 void JackContextGraphicsScene::createNewMacro(QPointF pos)
 {
     // create a new wrapper client:
-    JackContext *context = RecursiveJackContext::getInstance()->pushNewContext("macro", 1);
+    MetaJackContext *context = (MetaJackContext*)RecursiveJackContext::getInstance()->pushNewContext("macro", 1);
     QString contextName = context->get_name();
-    settings.setValue("position/" + contextName, pos.toPoint());
+    graphicsClientItemsClient->setClientItemPositionByName(context->getWrapperClientName(), pos);
     // change to that context:
     changeToCurrentContext();
     contextLevelChanged(RecursiveJackContext::getInstance()->getContextStackSize() - 1);
@@ -172,8 +170,7 @@ void JackContextGraphicsScene::createNewModule(QString factoryName, QPointF pos)
     JackClientFactory *factory = JackClientSerializer::getInstance()->getFactoryByName(factoryName);
     if (factory) {
         JackClient *client = factory->createClient(factory->getName());
+        client->setClientItemPosition(pos);
         client->activate();
-        QString contextName = RecursiveJackContext::getInstance()->getCurrentContext()->get_name();
-        settings.setValue("position/" + contextName + "/" + client->getClientName(), pos.toPoint());
     }
 }

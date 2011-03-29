@@ -81,6 +81,11 @@ jack_client_t * MetaJackContext::getWrapperClient()
     return wrapperClient;
 }
 
+const char * MetaJackContext::getWrapperClientName()
+{
+    return wrapperClientName.c_str();
+}
+
 JackContext * MetaJackContext::getWrapperInterface()
 {
     return wrapperInterface;

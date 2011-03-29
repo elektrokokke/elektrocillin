@@ -1,4 +1,5 @@
 #include "jackclient.h"
+#include "graphicsclientitemsclient.h"
 #include <QSet>
 
 JackClient::JackClient(const QString &clientName) :
@@ -7,7 +8,9 @@ JackClient::JackClient(const QString &clientName) :
     client(0),
     processCallback(true),
     portCallbacks(false),
-    clientCallback(false)
+    clientCallback(false),
+    clientItemPosition(0, 0),
+    clientItemVisible(false)
 {
 }
 
@@ -20,12 +23,14 @@ JackClientFactory * JackClient::getFactory()
     return 0;
 }
 
-void JackClient::saveState(QDataStream &)
+void JackClient::saveState(QDataStream &stream)
 {
+    stream << clientItemPosition << clientItemVisible;
 }
 
-void JackClient::loadState(QDataStream &)
+void JackClient::loadState(QDataStream &stream)
 {
+    stream >> clientItemPosition >> clientItemVisible;
 }
 
 void JackClient::setCallProcess(bool processCallback)
@@ -224,6 +229,24 @@ QStringList JackClient::getClients()
 QString JackClient::getPortNameById(jack_port_id_t id)
 {
     return jack_port_name(jack_port_by_id(client, id));
+}
+
+void JackClient::setClientItemPosition(QPointF pos)
+{
+    clientItemPosition = pos;
+}
+
+void JackClient::setClientItemVisible(bool visible)
+{
+    clientItemVisible = visible;
+}
+
+GraphicsClientItem * JackClient::createClientItem(GraphicsClientItemsClient *clientItemsClient, int clientStyle, int portStyle, QFont font)
+{
+    GraphicsClientItem *clientItem = new GraphicsClientItem(clientItemsClient, this, false, getClientName(), clientStyle, portStyle, font, 0);
+    clientItem->setPos(clientItemPosition);
+    clientItem->setControlsVisible(clientItemVisible);
+    return clientItem;
 }
 
 QGraphicsItem * JackClient::createGraphicsItem()

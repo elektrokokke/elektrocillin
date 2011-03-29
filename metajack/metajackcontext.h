@@ -27,6 +27,7 @@ public:
     jack_port_t * createWrapperPort(const std::string &shortName, const std::string &type, unsigned long flags);
 
     jack_client_t * getWrapperClient();
+    const char * getWrapperClientName();
     JackContext * getWrapperInterface();
     bool hasWrapperPorts() const;
     unsigned int getOversampling() const;

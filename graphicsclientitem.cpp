@@ -3,25 +3,22 @@
 #include "jackcontextgraphicsscene.h"
 #include "graphicsportitem.h"
 #include "wheelzoominggraphicsview.h"
-#include "metajack/recursivejackcontext.h"
 #include <QFontMetrics>
 #include <QPen>
 #include <QLinearGradient>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 
-QSettings GraphicsClientItem::settings("settings.ini", QSettings::IniFormat);
-
-GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
-    QGraphicsPathItem(parent, client_->getScene()),
-    client(client_),
-    isJackClient(false),
+GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsClient_, JackClient *jackClient_,bool isMacro_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
+    QGraphicsPathItem(parent, clientItemsClient_->getScene()),
+    clientItemsClient(clientItemsClient_),
+    jackClient(jackClient_),
     clientName(clientName_),
     type(type_),
     portType(portType_),
     font(font_),
-    controlsItem(0),
-    isMacro(RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data()))
+    controlsItem(jackClient ? jackClient->createGraphicsItem() : 0),
+    isMacro(isMacro_)
 {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
     setCursor(Qt::ArrowCursor);
@@ -29,12 +26,6 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *client_, const
 
     initItem();
     initRest();
-}
-
-GraphicsClientItem::~GraphicsClientItem()
-{
-    settings.setValue("position/" + contextName + "/" + clientName, pos().toPoint());
-    settings.setValue("visible/" + contextName + "/" + clientName, controlsItem && controlsItem->isVisible());
 }
 
 const QString & GraphicsClientItem::getClientName() const
@@ -63,6 +54,9 @@ void GraphicsClientItem::setControlsVisible(bool visible)
         // show the inner item if requested:
         controlsItem->setVisible(visible);
         showControlsCommand->setText(visible ? "[-]" : "[+]");
+        if (jackClient) {
+            jackClient->setClientItemVisible(visible);
+        }
     }
 }
 
@@ -73,7 +67,7 @@ bool GraphicsClientItem::isMacroItem() const
 
 bool GraphicsClientItem::isModuleItem() const
 {
-    return isJackClient;
+    return controlsItem;
 }
 
 void GraphicsClientItem::toggleControls(bool ensureVisible_)
@@ -96,6 +90,18 @@ void GraphicsClientItem::zoomToControls()
 void GraphicsClientItem::updatePorts()
 {
     initItem();
+}
+
+QVariant GraphicsClientItem::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+    if (change == QGraphicsItem::ItemPositionChange) {
+        if (jackClient) {
+            jackClient->setClientItemPosition(value.toPointF());
+        } else {
+            clientItemsClient->setClientItemPositionByName(clientName, value.toPointF());
+        }
+    }
+    return QGraphicsItem::itemChange(change, value);
 }
 
 void GraphicsClientItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
@@ -163,12 +169,12 @@ void GraphicsClientItem::initItem()
     zoomToControlsCommand->setZValue(1);
     QObject::connect(zoomToControlsCommand, SIGNAL(triggered()), this, SLOT(zoomToControls()));
 
-    QStringList inputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
+    QStringList inputPorts = clientItemsClient->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
     QList<GraphicsPortItem*> inputPortItems;
     int inputPortsWidth = -portPadding;
     int minimumInputPortWidth = 0;
     for (int i = 0; i < inputPorts.size(); i++) {
-        inputPortItems.append(new GraphicsPortItem(client, inputPorts[i], 3, font, portPadding, this));
+        inputPortItems.append(new GraphicsPortItem(clientItemsClient, inputPorts[i], 3, font, portPadding, this));
         if (isMacroItem()) {
             QPen pen = inputPortItems.back()->pen();
             pen.setColor(QColor("steelblue"));
@@ -179,12 +185,12 @@ void GraphicsClientItem::initItem()
             minimumInputPortWidth = inputPortItems[i]->getRect().width();
         }
     }
-    QStringList outputPorts = client->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsOutput);
+    QStringList outputPorts = clientItemsClient->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsOutput);
     QList<GraphicsPortItem*> outputPortItems;
     int outputPortsWidth = -portPadding;
     int minimumOutputPortWidth = 0;
     for (int i = 0; i < outputPorts.size(); i++) {
-        outputPortItems.append(new GraphicsPortItem(client, outputPorts[i], 3, font, portPadding, this));
+        outputPortItems.append(new GraphicsPortItem(clientItemsClient, outputPorts[i], 3, font, portPadding, this));
         if (isMacroItem()) {
             QPen pen = outputPortItems.back()->pen();
             pen.setColor(QColor("steelblue"));
@@ -278,11 +284,7 @@ void GraphicsClientItem::initItem()
 void GraphicsClientItem::initRest()
 {
     // if it corresponds to a JackClient object, create the GUI for it also:
-    jack_client_t *client = meta_jack_client_by_name(clientName.toAscii().data());
-    JackClient * jackClient;
-    if (client && (jackClient = JackClientSerializer::getInstance()->getClient(client))) {
-        isJackClient = true;
-        controlsItem = jackClient->createGraphicsItem();
+    if (controlsItem) {
         showControlsCommand->setText("[+]");
         showControlsCommand->setVisible(controlsItem);
         if (controlsItem) {
@@ -292,8 +294,5 @@ void GraphicsClientItem::initRest()
         }
         zoomToControlsCommand->setVisible(controlsItem);
     }
-    setFlag(QGraphicsItem::ItemIsSelectable, isJackClient || isMacroItem());
-    contextName = RecursiveJackContext::getInstance()->getCurrentContext()->get_name();
-    setPos(settings.value("position/" + contextName + "/" + clientName).toPoint());
-    setControlsVisible(settings.value("visible/" + contextName + "/" + clientName).toBool());
+    setFlag(QGraphicsItem::ItemIsSelectable, isModuleItem() || isMacroItem());
 }

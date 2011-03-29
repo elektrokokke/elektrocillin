@@ -25,11 +25,13 @@ LinearWaveShapingClient::~LinearWaveShapingClient()
 
 void LinearWaveShapingClient::saveState(QDataStream &stream)
 {
+    EventProcessorClient::saveState(stream);
     interpolator.save(stream);
 }
 
 void LinearWaveShapingClient::loadState(QDataStream &stream)
 {
+    EventProcessorClient::loadState(stream);
     interpolator.load(stream);
     interpolatorProcess = interpolator;
 }

@@ -7,8 +7,11 @@
 #include <QMap>
 #include <QRectF>
 #include <QAction>
+#include <QFont>
 
 class QGraphicsItem;
+class GraphicsClientItem;
+class GraphicsClientItemsClient;
 
 /**
   This is an abstract class which should simplify the creation of arbitrary Jack clients.
@@ -196,6 +199,9 @@ public:
 
     QString getPortNameById(jack_port_id_t id);
 
+    void setClientItemPosition(QPointF pos);
+    void setClientItemVisible(bool visible);
+    virtual GraphicsClientItem * createClientItem(GraphicsClientItemsClient *clientItemsClient, int clientStyle, int portStyle, QFont font);
     /**
       Returns a QGraphicsItem object that serves as the graphical user interface
       for this client. The default implementation returns 0, which means that the
@@ -306,6 +312,8 @@ private:
     QString requestedName, actualName;
     jack_client_t *client;
     bool processCallback, portCallbacks, clientCallback;
+    QPointF clientItemPosition;
+    bool clientItemVisible;
 
     static int process(jack_nframes_t nframes, void *arg);
     static void portConnectCallback(jack_port_id_t a, jack_port_id_t b, int connect, void *arg);

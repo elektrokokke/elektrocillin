@@ -44,6 +44,7 @@ IirMoogFilterClient::~IirMoogFilterClient()
 
 void IirMoogFilterClient::saveState(QDataStream &stream)
 {
+    JackThreadEventProcessorClient::saveState(stream);
     IirMoogFilter::Parameters parameters = iirMoogFilter->getParameters();
     stream << parameters.frequency;
     stream << parameters.frequencyOffsetFactor;
@@ -55,6 +56,7 @@ void IirMoogFilterClient::saveState(QDataStream &stream)
 
 void IirMoogFilterClient::loadState(QDataStream &stream)
 {
+    JackThreadEventProcessorClient::loadState(stream);
     IirMoogFilter::Parameters parameters;
     stream >> parameters.frequency;
     stream >> parameters.frequencyOffsetFactor;
