@@ -19,11 +19,11 @@ GraphicsClientItemsClient::GraphicsClientItemsClient(QGraphicsScene *scene_) :
         onClientRegistered(clientNames[i]);
     }
     // make sure we're notified when clients are registered or unregistered:
-    QObject::connect(this, SIGNAL(clientRegistered(QString)), this, SLOT(onClientRegistered(QString)));
-    QObject::connect(this, SIGNAL(clientUnregistered(QString)), this, SLOT(onClientUnregistered(QString)));
+    QObject::connect(this, SIGNAL(clientRegistered(QString)), this, SLOT(onClientRegistered(QString)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(clientUnregistered(QString)), this, SLOT(onClientUnregistered(QString)), Qt::QueuedConnection);
     // the same for ports:
-    QObject::connect(this, SIGNAL(portRegistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
-    QObject::connect(this, SIGNAL(portUnregistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)));
+    QObject::connect(this, SIGNAL(portRegistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(portUnregistered(QString,QString,int)), this, SLOT(onPortRegistered(QString,QString,int)), Qt::QueuedConnection);
 }
 
 GraphicsClientItemsClient::~GraphicsClientItemsClient()

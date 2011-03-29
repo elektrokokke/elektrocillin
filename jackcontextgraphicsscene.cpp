@@ -175,6 +175,5 @@ void JackContextGraphicsScene::createNewModule(QString factoryName, QPointF pos)
         client->activate();
         QString contextName = RecursiveJackContext::getInstance()->getCurrentContext()->get_name();
         settings.setValue("position/" + contextName + "/" + client->getClientName(), pos.toPoint());
-        graphicsClientItemsClient->setClientItemPosition(client->getClientName(), pos);
     }
 }
