@@ -14,11 +14,17 @@ public:
 
     QGraphicsItem * createGraphicsItem();
 protected:
+    // reimplemented from JackThreadEventProcessorClient:
+    virtual bool init();
     // reimplemented from EventProcessorClient:
     virtual bool process(jack_nframes_t nframes);
-
+    virtual void timebase(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t *pos, int new_pos);
 private:
     JackRingBuffer<jack_position_t> ringBufferToThread;
+    double beatsPerMinute;
+    int beatsPerBar, beatType, ticksPerBeat;
+
+    static void timebase(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t *pos, int new_pos, void *arg);
 };
 
 class JackTransportThread : public JackThread {

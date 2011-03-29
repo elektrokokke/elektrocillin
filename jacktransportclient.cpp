@@ -3,7 +3,11 @@
 
 JackTransportClient::JackTransportClient(const QString &clientName, size_t ringBufferSize) :
     JackThreadEventProcessorClient(new JackTransportThread(this), clientName, QStringList(), QStringList(), ringBufferSize),
-    ringBufferToThread(ringBufferSize)
+    ringBufferToThread(ringBufferSize),
+    beatsPerMinute(120),
+    beatsPerBar(4),
+    beatType(4),
+    ticksPerBeat(1920)
 {
     JackTransportThread *thread = (JackTransportThread*)getJackThread();
     thread->setRingBufferFromClient(&ringBufferToThread);
@@ -26,6 +30,13 @@ QGraphicsItem * JackTransportClient::createGraphicsItem()
     return graphicsItem;
 }
 
+bool JackTransportClient::init()
+{
+    // register a jack timebase callback:
+    jack_set_timebase_callback(getClient(), 0, timebase, this);
+    return JackThreadEventProcessorClient::init();
+}
+
 bool JackTransportClient::process(jack_nframes_t)
 {
     // get the transport state and send it to the associated thread:
@@ -34,6 +45,39 @@ bool JackTransportClient::process(jack_nframes_t)
     ringBufferToThread.write(pos);
     wakeJackThread();
     return true;
+}
+
+void JackTransportClient::timebase(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t *pos, int new_pos)
+{
+    // we provide the JackPositionBBT fields (and the recommended frame offset):
+    pos->valid = (jack_position_bits_t)(JackPositionBBT | JackBBTFrameOffset);
+    pos->beats_per_bar = beatsPerBar;
+    pos->beat_type = beatType;
+    pos->ticks_per_beat = ticksPerBeat;
+    pos->beats_per_minute = beatsPerMinute;
+    // compute current bar, beat and tick from the current frame time, the frame rate and the beats per minute:
+    double timeInMinutes = (double)pos->frame / ((double)pos->frame_rate * 60.0);
+    double beat = timeInMinutes * beatsPerMinute;
+    double tick = beat * (double)ticksPerBeat;
+    double bar = beat / (double)beatsPerBar;
+    // compute what exact frame time the rounded-down bar/beat/tick corresponds to:
+    // tick = ticksPerBeat * beatsPerMinute * frame / (frame_rate * 60);
+    // => frame = tick * frame_rate * 60 / (ticksPerBeat * beatsPerMinute)
+    pos->tick = (int)tick;
+    jack_nframes_t frame = (int)((double)tick * (double)pos->frame_rate * 60.0 / ((double)ticksPerBeat * beatsPerMinute));
+    Q_ASSERT(frame <= pos->frame);
+    // save the difference in the frame offset field:
+    pos->bbt_offset = pos->frame - frame;
+    pos->tick = pos->tick % ticksPerBeat;
+    pos->beat = (int)beat % beatsPerBar + 1;
+    pos->bar = (int)bar + 1;
+    pos->bar_start_tick = (double)(pos->bar - 1) * (double)beatsPerBar * (double)ticksPerBeat;
+}
+
+void JackTransportClient::timebase(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t *pos, int new_pos, void *arg)
+{
+    JackTransportClient *client = (JackTransportClient*)arg;
+    client->timebase(state, nframes, pos, new_pos);
 }
 
 JackTransportThread::JackTransportThread(JackTransportClient *client, QObject *parent) :
