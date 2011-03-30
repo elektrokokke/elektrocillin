@@ -5,6 +5,7 @@ GraphicsDiscreteControlItem::GraphicsDiscreteControlItem(const QString &name, in
     GraphicsContinuousControlItem(name, minValue, maxValue, currentValue_, size, orientation, 'g', -1, 1, parent),
     currentValue(currentValue_)
 {
+    QObject::connect(this, SIGNAL(valueChanged(double)), this, SLOT(onValueChanged(double)));
 }
 
 void GraphicsDiscreteControlItem::onValueChanged(double value)

@@ -186,22 +186,26 @@ void MainWindow::on_actionHide_module_controls_triggered()
 
 void MainWindow::on_actionZoom_to_triggered()
 {
-    QRectF boundingSceneRect;
+    QRectF boundingRect;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
-        boundingSceneRect |= (*i)->sceneBoundingRect();
+        QRectF rect = ((*i)->childrenBoundingRect() | (*i)->boundingRect()).translated((*i)->pos());
+        boundingRect |= rect;
     }
-    ui->graphicsView->fitInView(boundingSceneRect, Qt::KeepAspectRatio);
+    ui->graphicsView->fitInView(boundingRect, Qt::KeepAspectRatio);
 }
 
 void MainWindow::on_actionShow_all_triggered()
 {
-    QRectF boundingSceneRect;
+    QRectF boundingRect;
     QList<QGraphicsItem*> items = scene->items();
     for (QList<QGraphicsItem*>::iterator i = items.begin(); i != items.end(); i++) {
-        boundingSceneRect |= (*i)->sceneBoundingRect();
+        if (qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+            QRectF rect = ((*i)->childrenBoundingRect() | (*i)->boundingRect()).translated((*i)->pos());
+            boundingRect |= rect;
+        }
     }
-    ui->graphicsView->fitInView(boundingSceneRect, Qt::KeepAspectRatio);
+    ui->graphicsView->fitInView(boundingRect, Qt::KeepAspectRatio);
 }
 
 void MainWindow::onContextLevelChanged(int level)

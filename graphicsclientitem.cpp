@@ -68,7 +68,7 @@ bool GraphicsClientItem::isMacroItem() const
 
 bool GraphicsClientItem::isModuleItem() const
 {
-    return controlsItem;
+    return jackClient;
 }
 
 void GraphicsClientItem::toggleControls(bool ensureVisible_)

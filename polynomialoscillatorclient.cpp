@@ -72,6 +72,7 @@ QGraphicsItem * PolynomialOscillatorClient::createGraphicsItem()
     ourItem->setParentItem(pathItem);
     QPainterPath path;
     path.addRect((rect | oscillatorItem->boundingRect().translated(oscillatorItem->pos())).adjusted(-padding, -padding, padding, padding));
+    pathItem->setPen(QPen(QBrush(Qt::black), 1));
     pathItem->setBrush(QBrush(Qt::white));
     pathItem->setPath(path);
     return pathItem;

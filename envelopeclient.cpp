@@ -81,12 +81,9 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
     setCursor(Qt::ArrowCursor);
     // create a child that allows selection of the sustain node:
-    sustainNodeItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Sustain node", 1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2, 1, GraphicsMeterItem::BOTTOM_HALF, this);
-    sustainNodeItem->setBrush(QBrush(Qt::white));
-    sustainNodeItem->setPen(QPen(QBrush(Qt::black), 2));
-    sustainNodeItem->setFlag(QGraphicsItem::ItemIsMovable);
-    sustainNodeItem->setPos(getInnerRectangle().topRight() - QPointF(sustainNodeItem->boundingRect().width(), 0));
-    QObject::connect(sustainNodeItem, SIGNAL(valueChanged(double)), this, SLOT(onSustainNodeChanged(double)));
+    sustainNodeControlItem = new GraphicsDiscreteControlItem("Sustain node", 1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), 100 + (client->getEnvelope()->getInterpolator()->getX().size() - 1) * 10, GraphicsContinuousControlItem::HORIZONTAL, this);
+    sustainNodeControlItem->setPos(getInnerRectangle().topRight() - QPointF(sustainNodeControlItem->rect().width(), 0));
+    QObject::connect(sustainNodeControlItem, SIGNAL(valueChanged(int)), this, SLOT(onSustainNodeChanged(int)));
 }
 
 EnvelopeClient * EnvelopeGraphicsItem::getClient()
@@ -97,13 +94,17 @@ EnvelopeClient * EnvelopeGraphicsItem::getClient()
 void EnvelopeGraphicsItem::increaseControlPoints()
 {
     client->postIncreaseControlPoints();
-    sustainNodeItem->setRange(1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2);
+    sustainNodeControlItem->setValue(client->getEnvelope()->getSustainIndex());
+    sustainNodeControlItem->setMaxValue(client->getEnvelope()->getInterpolator()->getX().size() - 1);
+    sustainNodeControlItem->setSize(100 + (client->getEnvelope()->getInterpolator()->getX().size() - 1) * 10);
 }
 
 void EnvelopeGraphicsItem::decreaseControlPoints()
 {
     client->postDecreaseControlPoints();
-    sustainNodeItem->setRange(1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), client->getEnvelope()->getInterpolator()->getX().size() - 2);
+    sustainNodeControlItem->setValue(client->getEnvelope()->getSustainIndex());
+    sustainNodeControlItem->setMaxValue(client->getEnvelope()->getInterpolator()->getX().size() - 1);
+    sustainNodeControlItem->setSize(100 + (client->getEnvelope()->getInterpolator()->getX().size() - 1) * 10);
 }
 
 void EnvelopeGraphicsItem::changeControlPoint(int index, double x, double y)
@@ -111,9 +112,9 @@ void EnvelopeGraphicsItem::changeControlPoint(int index, double x, double y)
     client->postChangeControlPoint(index, x, y);
 }
 
-void EnvelopeGraphicsItem::onSustainNodeChanged(double value)
+void EnvelopeGraphicsItem::onSustainNodeChanged(int value)
 {
-    client->postChangeSustainIndex(qRound(value));
+    client->postChangeSustainIndex(value);
     interpolatorChanged();
 }
 

@@ -13,7 +13,7 @@ class GraphicsDiscreteControlItem : public GraphicsContinuousControlItem
 {
     Q_OBJECT
 public:
-    GraphicsDiscreteControlItem(const QString &name, int minValue, int maxValue, int currentValue, qreal size, GraphicsContinuousControlItem::Orientation orientation = GraphicsContinuousControlItem::VERTICAL, QGraphicsItem *parent = 0);
+    GraphicsDiscreteControlItem(const QString &name, int minValue, int maxValue, int currentValue, qreal size, GraphicsContinuousControlItem::Orientation orientation = GraphicsContinuousControlItem::HORIZONTAL, QGraphicsItem *parent = 0);
 signals:
     void valueChanged(int value);
 private slots:

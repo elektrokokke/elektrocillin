@@ -86,6 +86,7 @@ qreal FrequencyResponseGraphicsItem::getZeroDecibelY() const
 
 void FrequencyResponseGraphicsItem::initialize()
 {
+    setPen(QPen(QBrush(Qt::black), 1));
     setBrush(QBrush(Qt::white));
     font.setPointSize(6);
 
@@ -144,13 +145,13 @@ void FrequencyResponseGraphicsItem::initialize()
     // create the vertical ticks and dotted vertical lines:
     for (double decibel = 0.0; decibel <= highestDecibel; decibel += 10.0) {
         qreal y = (decibel - lowestDecibel) / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
-        new QGraphicsLineItem(innerLeft - tickSize * 0.5, y, innerLeft, y, this);
-        (new QGraphicsLineItem(innerLeft, y, innerRight, y, this))->setPen(QPen(Qt::DotLine));
+        (new QGraphicsLineItem(innerLeft - tickSize * 0.5, y, innerLeft, y, this))->setPen(QPen(QBrush(Qt::black), 0));
+        (new QGraphicsLineItem(innerLeft, y, innerRight, y, this))->setPen(QPen(QBrush(Qt::black), 0, Qt::DotLine));
     }
     for (double decibel =-10.0; decibel >= lowestDecibel; decibel -= 10.0) {
         qreal y = (decibel - lowestDecibel) / (highestDecibel - lowestDecibel) * (innerTop - innerBottom) + innerBottom;
-        new QGraphicsLineItem(innerLeft - tickSize * 0.5, y, innerLeft, y, this);
-        (new QGraphicsLineItem(innerLeft, y, innerRight, y, this))->setPen(QPen(Qt::DotLine));
+        (new QGraphicsLineItem(innerLeft - tickSize * 0.5, y, innerLeft, y, this))->setPen(QPen(QBrush(Qt::black), 0));
+        (new QGraphicsLineItem(innerLeft, y, innerRight, y, this))->setPen(QPen(QBrush(Qt::black), 0, Qt::DotLine));
     }
     // move the first horizontal label to the right position:
     horizontalLabel->setPos(innerLeft - horizontalLabel->boundingRect().width() * 0.5, innerBottom + tickSize);
@@ -158,8 +159,8 @@ void FrequencyResponseGraphicsItem::initialize()
     // create horizontal ticks and dotted horizontal lines:
     for (double hertz = lowestHertz; hertz <= highestHertz; hertz *= frequencyTickFactor) {
         qreal x = log(hertz / lowestHertz) / log(highestHertz / lowestHertz) * (innerRight - innerLeft) + innerLeft;
-        new QGraphicsLineItem(x, innerBottom, x, innerBottom + tickSize * 0.5, this);
-        (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(Qt::DotLine));
+        (new QGraphicsLineItem(x, innerBottom, x, innerBottom + tickSize * 0.5, this))->setPen(QPen(QBrush(Qt::black), 0));
+        (new QGraphicsLineItem(x, innerTop, x, innerBottom, this))->setPen(QPen(QBrush(Qt::black), 0, Qt::DotLine));
         // create another horizontal label if it fits:
         QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem(QString("%1Hz").arg(hertz, 0, 'g', 5));
         label->setFont(font);

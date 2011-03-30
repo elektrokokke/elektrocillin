@@ -11,6 +11,9 @@ JackContextGraphicsScene::JackContextGraphicsScene() :
     waitForModulePosition(false)
 {
     setBackgroundBrush(QBrush(QColor("lightsteelblue")));
+
+    QGraphicsRectItem *dummy = new QGraphicsRectItem(-5000, -5000, 10000, 10000, 0, this);
+    dummy->setVisible(false);
 }
 
 JackContextGraphicsScene::~JackContextGraphicsScene()
@@ -32,6 +35,8 @@ void JackContextGraphicsScene::changeToCurrentContext()
 {
     delete graphicsClientItemsClient;
     clear();
+    QGraphicsRectItem *dummy = new QGraphicsRectItem(-5000, -5000, 10000, 10000, 0, this);
+    dummy->setVisible(false);
     graphicsClientItemsClient = new GraphicsClientItemsClient(this);
 }
 

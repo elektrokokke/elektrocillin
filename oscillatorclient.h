@@ -44,6 +44,9 @@ class OscillatorClientGraphicsItem : public QObject, public QGraphicsPathItem
     Q_OBJECT
 public:
     OscillatorClientGraphicsItem(OscillatorClient *client, QGraphicsItem *parent = 0);
+protected:
+    virtual void focusInEvent(QFocusEvent * event);
+    virtual void focusOutEvent(QFocusEvent * event);
 private slots:
     void onGainChanged(double value);
     void onDetuneChanged(double value);

@@ -63,23 +63,39 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
     QGraphicsPathItem(parent),
     client(client_)
 {
+    setFlags(QGraphicsItem::ItemIsFocusable);
     GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Gain", 0, 1, client->getOscillator()->getGain(), 10, 10, GraphicsMeterItem::TOP_HALF, this);
     GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 66, 116, 66), "Tune", -100, 100, client->getOscillator()->getTune(), 10, 20, GraphicsMeterItem::BOTTOM_HALF, this);
     GraphicsMeterItem *pitchModItem = new GraphicsMeterItem(QRectF(0, 132, 116, 66), "Pitchmod", 0, 12, client->getOscillator()->getPitchModulationIntensity(), 12, 1, GraphicsMeterItem::TOP_HALF, this);
-    GraphicsContinuousControlItem *controlItem = new GraphicsContinuousControlItem("Test", -10, 10, 0, 200, GraphicsContinuousControlItem::VERTICAL, 'g', -1, 1, this);
+    GraphicsContinuousControlItem *controlItem = new GraphicsContinuousControlItem("Test1", -10, 10, 0, 200, GraphicsContinuousControlItem::VERTICAL, 'g', -1, 1, this);
     controlItem->setPos(0, 198);
-//    GraphicsDiscreteControlItem *controlItem2 = new GraphicsDiscreteControlItem("Test discrete", -10, 10, 0, 200, GraphicsContinuousControlItem::VERTICAL, this);
-    GraphicsContinuousControlItem *controlItem2 = new GraphicsContinuousControlItem("Test discrete", -10, 10, 0, 200, GraphicsContinuousControlItem::VERTICAL, 'g', -1, 1, this);
+    GraphicsContinuousControlItem *controlItem2 = new GraphicsContinuousControlItem("Test2", -10, 10, 0, 200, GraphicsContinuousControlItem::VERTICAL, 'g', -1, 1, this);
     controlItem2->setHorizontalAlignment(GraphicsContinuousControlItem::RIGHT);
-    controlItem2->setPos(116 - controlItem->rect().width(), 198 + controlItem->boundingRect().height());
+    controlItem2->setPos(116 - controlItem2->rect().width(), 198 + controlItem->boundingRect().height());
+    GraphicsContinuousControlItem *controlItem3 = new GraphicsContinuousControlItem("Test3", -10, 10, 0, 200, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 1, this);
+    controlItem3->setPos(0, 198 + 2 * controlItem->boundingRect().height());
+    GraphicsContinuousControlItem *controlItem4 = new GraphicsContinuousControlItem("Test4", -10, 10, 0, 200, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 1, this);
+    controlItem4->setHorizontalAlignment(GraphicsContinuousControlItem::RIGHT);
+    controlItem4->setPos(116 - controlItem4->rect().width(), 198 + 3 * controlItem->boundingRect().height());
     QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
     QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
     QObject::connect(pitchModItem, SIGNAL(valueChanged(double)), this, SLOT(onPitchModulationIntensityChanged(double)));
     QPainterPath path;
-    QRectF pathRect = gainItem->boundingRect() | detuneItem->boundingRect() | pitchModItem->boundingRect() | controlItem->boundingRect().translated(controlItem->pos()) | controlItem2->boundingRect().translated(controlItem2->pos());
+    QRectF pathRect = gainItem->boundingRect() | detuneItem->boundingRect() | pitchModItem->boundingRect() | controlItem->boundingRect().translated(controlItem->pos()) | controlItem2->boundingRect().translated(controlItem2->pos()) | controlItem3->boundingRect().translated(controlItem3->pos()) | controlItem4->boundingRect().translated(controlItem4->pos());
     path.addRect(pathRect);
     setPath(path);
+    setPen(QPen(QBrush(Qt::black), 1));
     setBrush(QBrush(Qt::white));
+}
+
+void OscillatorClientGraphicsItem::focusInEvent(QFocusEvent * event)
+{
+    setZValue(1);
+}
+
+void OscillatorClientGraphicsItem::focusOutEvent(QFocusEvent * event)
+{
+    setZValue(0);
 }
 
 void OscillatorClientGraphicsItem::onGainChanged(double value)

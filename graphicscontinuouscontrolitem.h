@@ -20,13 +20,17 @@ public:
         BOTTOM
     };
 
-    GraphicsContinuousControlItem(const QString &name, double minValue, double maxValue, double currentValue, qreal size, Orientation orientation = VERTICAL, char format = 'g', int precision = -1, double resolution = 0, QGraphicsItem *parent = 0);
+    GraphicsContinuousControlItem(const QString &name, double minValue, double maxValue, double currentValue, qreal size, Orientation orientation = HORIZONTAL, char format = 'g', int precision = -1, double resolution = 0, QGraphicsItem *parent = 0);
 
     void setHorizontalAlignment(HorizontalAlignment horizontalAlignment);
 public slots:
+    void setMinValue(double minValue);
+    void setMaxValue(double maxValue);
+    void setSize(double size);
+    void setValue(double value);
 signals:
     void valueEditingStarted();
-    void valueEditingStopped();
+    void valueEditingStopped(double value);
     void valueChanged(double value);
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant & currentValue);
@@ -46,6 +50,7 @@ private:
     QRectF rectBeforeEdit;
     double valueBeforeEdit;
     bool waitingForMouseReleaseEvent;
+    QGraphicsRectItem *backgroundRect;
     GraphicsLabelItem *minLabel, *maxLabel;
 
 private:

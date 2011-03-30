@@ -1,10 +1,12 @@
 #include "graphicslabelitem.h"
+#include <QPen>
 #include <QBrush>
 
 GraphicsLabelItem::GraphicsLabelItem(QGraphicsItem *parent) :
     QGraphicsRectItem(parent),
     padding(2)
 {
+    setPen(QPen(QBrush(Qt::black), 1));
     setBrush(QBrush(QColor(0xfc, 0xf9, 0xc2)));
     textItem = new QGraphicsSimpleTextItem(this);
     textItem->setPos(padding, padding);
@@ -14,6 +16,7 @@ GraphicsLabelItem::GraphicsLabelItem(const QString &text, QGraphicsItem *parent)
     QGraphicsRectItem(parent),
     padding(2)
 {
+    setPen(QPen(QBrush(Qt::black), 1));
     setBrush(QBrush(QColor(0xfc, 0xf9, 0xc2)));
     textItem = new QGraphicsSimpleTextItem(this);
     textItem->setPos(padding, padding);
