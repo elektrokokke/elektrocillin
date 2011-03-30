@@ -33,12 +33,16 @@ protected:
       - processPitchBend OR
       - processMidi(const MidiEvent &, jack_nframes_t) OR
       - processMidi(jack_nframes_t, jack_nframes_t)
+      - processEvent(const RingBufferEvent*, jack_nframes_t)
       */
     EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16));
 
     // reimplemented from MidiProcessorClient:
     virtual bool process(jack_nframes_t nframes);
-
+    /**
+      Reimplement this method to process events if you did not provide an EventProcessor object
+      at construction, i.e. if you used the second constructor.
+      */
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 
 private:

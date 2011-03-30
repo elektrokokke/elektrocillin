@@ -276,10 +276,7 @@ void JackClient::stop()
 
 void JackClient::rewind()
 {
-    jack_position_t pos;
-    pos.frame = 0;
-    pos.valid = (jack_position_bits_t)0;
-    jack_transport_reposition(client, &pos);
+    jack_transport_locate(client, 0);
 }
 
 bool JackClient::init()

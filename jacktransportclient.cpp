@@ -4,6 +4,8 @@
 JackTransportClient::JackTransportClient(const QString &clientName, size_t ringBufferSize) :
     JackThreadEventProcessorClient(new JackTransportThread(this), clientName, QStringList(), QStringList(), ringBufferSize),
     ringBufferToThread(ringBufferSize),
+    lastFrameTime(0),
+    currentBeatTime(0),
     beatsPerMinute(120),
     beatsPerBar(4),
     beatType(4),
@@ -37,14 +39,56 @@ bool JackTransportClient::init()
     return JackThreadEventProcessorClient::init();
 }
 
-bool JackTransportClient::process(jack_nframes_t)
+bool JackTransportClient::process(jack_nframes_t nframes)
 {
     // get the transport state and send it to the associated thread:
     jack_position_t pos;
     jack_transport_query(getClient(), &pos);
     ringBufferToThread.write(pos);
     wakeJackThread();
-    return true;
+    // do the standard processing:
+    return JackThreadEventProcessorClient::process(nframes);
+}
+
+void JackTransportClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
+{
+    // set the bpm from the midi note number:
+    beatsPerMinute = noteNumber + 60;
+}
+
+void JackTransportClient::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
+{
+}
+
+void JackTransportClient::processAfterTouch(unsigned char channel, unsigned char noteNumber, unsigned char pressure, jack_nframes_t time)
+{
+}
+
+void JackTransportClient::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
+{
+}
+
+void JackTransportClient::processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time)
+{
+}
+
+void JackTransportClient::processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time)
+{
+}
+
+bool JackTransportClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
+{
+    if (const TimebaseEvent *event_ = dynamic_cast<const TimebaseEvent*>(event)) {
+        // only allow changing the beat settings when transport is stopped:
+        if (jack_transport_query(getClient(), 0) == JackTransportStopped) {
+            beatsPerMinute = event_->beatsPerMinute;
+            beatsPerBar = event_->beatsPerBar;
+            beatType = event_->beatType;
+        }
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void JackTransportClient::timebase(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t *pos, int new_pos)
@@ -55,23 +99,31 @@ void JackTransportClient::timebase(jack_transport_state_t state, jack_nframes_t 
     pos->beat_type = beatType;
     pos->ticks_per_beat = ticksPerBeat;
     pos->beats_per_minute = beatsPerMinute;
-    // compute current bar, beat and tick from the current frame time, the frame rate and the beats per minute:
-    double timeInMinutes = (double)pos->frame / ((double)pos->frame_rate * 60.0);
-    double beat = timeInMinutes * beatsPerMinute;
-    double tick = beat * (double)ticksPerBeat;
-    double bar = beat / (double)beatsPerBar;
-    // compute what exact frame time the rounded-down bar/beat/tick corresponds to:
-    // tick = ticksPerBeat * beatsPerMinute * frame / (frame_rate * 60);
-    // => frame = tick * frame_rate * 60 / (ticksPerBeat * beatsPerMinute)
+    if (new_pos) {
+        if (lastFrameTime + nframes != pos->frame) {
+            double frame = (double)pos->frame;
+            double framesPerMinute = (double)pos->frame_rate * 60.0;
+            double timeInMinutes = frame / framesPerMinute;
+            currentBeatTime = timeInMinutes * beatsPerMinute;
+        }
+    }
+    lastFrameTime = pos->frame;
+    double tick = currentBeatTime * (double)ticksPerBeat;
+    double bar = currentBeatTime / (double)beatsPerBar;
     pos->tick = (int)tick;
-    jack_nframes_t frame = (int)((double)tick * (double)pos->frame_rate * 60.0 / ((double)ticksPerBeat * beatsPerMinute));
-    Q_ASSERT(frame <= pos->frame);
-    // save the difference in the frame offset field:
-    pos->bbt_offset = pos->frame - frame;
+    // save the difference between rounded-down tick and floating-point tick in frames in the frame offset field:
+    // 1 tick = 1 minute / beatsPerMinute / ticksPerBeat
+    // 1 frame = 1 minute / 60 / frame_rate => 1 minute = 1 frame * 60 * frame_rate
+    // => 1 tick = 1 frame * 60 * frame_rate / beatsPerMinute / ticksPerBeat
+    double tickDifference = tick - (double)pos->tick;
+    pos->bbt_offset = (jack_nframes_t)(tickDifference * 60.0 * (double)pos->frame_rate / ((double)beatsPerMinute * (double)ticksPerBeat));
     pos->tick = pos->tick % ticksPerBeat;
-    pos->beat = (int)beat % beatsPerBar + 1;
+    pos->beat = (int)currentBeatTime % beatsPerBar + 1;
     pos->bar = (int)bar + 1;
     pos->bar_start_tick = (double)(pos->bar - 1) * (double)beatsPerBar * (double)ticksPerBeat;
+    // compute the next beat time based on the current tempo:
+    double incrementInMinutes = (double)nframes / ((double)pos->frame_rate * 60.0);
+    currentBeatTime += incrementInMinutes * beatsPerMinute;
 }
 
 void JackTransportClient::timebase(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t *pos, int new_pos, void *arg)
