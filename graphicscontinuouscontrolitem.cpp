@@ -12,6 +12,8 @@ GraphicsContinuousControlItem::GraphicsContinuousControlItem(const QString &name
     currentValue(currentValue_),
     size(size_),
     orientation(orientation_),
+    horizontalAlignment(LEFT),
+    verticalAlignment(TOP),
     format(format_),
     precision(precision_),
     resolution(resolution_),
@@ -26,6 +28,11 @@ GraphicsContinuousControlItem::GraphicsContinuousControlItem(const QString &name
     maxLabel->setBrush(QBrush(Qt::red));
     minLabel->setVisible(false);
     maxLabel->setVisible(false);
+}
+
+void GraphicsContinuousControlItem::setHorizontalAlignment(HorizontalAlignment horizontalAlignment)
+{
+    this->horizontalAlignment = horizontalAlignment;
 }
 
 QVariant GraphicsContinuousControlItem::itemChange(GraphicsItemChange change, const QVariant & value)
@@ -74,6 +81,8 @@ QVariant GraphicsContinuousControlItem::itemChange(GraphicsItemChange change, co
             setText(QString("%1: %2").arg(name).arg(currentValue,  0, 'g', precision));
             valueChanged(currentValue);
         }
+        // align then new position:
+        newPos.setX(alignX(rect(), rectBeforeEdit.translated(positionBeforeEdit)));
         return newPos;
     } else {
         return GraphicsLabelItem::itemChange(change, value);
@@ -86,6 +95,7 @@ void GraphicsContinuousControlItem::mousePressEvent(QGraphicsSceneMouseEvent * e
     if (event->isAccepted()) {
         valueEditingStarted();
         positionBeforeEdit = pos();
+        rectBeforeEdit = rect();
         waitingForMouseReleaseEvent = true;
         valueBeforeEdit = currentValue;
         // create label items marking the minimum and maximum value:
@@ -100,8 +110,8 @@ void GraphicsContinuousControlItem::mousePressEvent(QGraphicsSceneMouseEvent * e
             minLabel->setPos(QPointF(minPos, positionBeforeEdit.y()));
             maxLabel->setPos(QPointF(maxPos, positionBeforeEdit.y()));
         } else {
-            minLabel->setPos(QPointF(positionBeforeEdit.x(), -minPos));
-            maxLabel->setPos(QPointF(positionBeforeEdit.x(), -maxPos));
+            minLabel->setPos(QPointF(alignX(minLabel->rect(), rectBeforeEdit.translated(positionBeforeEdit)), -minPos));
+            maxLabel->setPos(QPointF(alignX(maxLabel->rect(), rectBeforeEdit.translated(positionBeforeEdit)), -maxPos));
         }
         setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
     }
@@ -119,7 +129,16 @@ void GraphicsContinuousControlItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *
         minLabel->setVisible(false);
         maxLabel->setVisible(false);
         // change our position back to the original position:
-        setPos(positionBeforeEdit);
+        setPos(alignX(rect(), rectBeforeEdit.translated(positionBeforeEdit)), positionBeforeEdit.y());
         valueEditingStopped();
+    }
+}
+
+qreal GraphicsContinuousControlItem::alignX(QRectF rect, QRectF rectAlign)
+{
+    if (horizontalAlignment == LEFT) {
+        return rectAlign.x();
+    } else {
+        return rectAlign.x() + rectAlign.width() - rect.width();
     }
 }

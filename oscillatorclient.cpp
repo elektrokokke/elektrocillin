@@ -70,7 +70,8 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
     controlItem->setPos(0, 198);
 //    GraphicsDiscreteControlItem *controlItem2 = new GraphicsDiscreteControlItem("Test discrete", -10, 10, 0, 200, GraphicsContinuousControlItem::VERTICAL, this);
     GraphicsContinuousControlItem *controlItem2 = new GraphicsContinuousControlItem("Test discrete", -10, 10, 0, 200, GraphicsContinuousControlItem::VERTICAL, 'g', -1, 1, this);
-    controlItem2->setPos(0, 198 + controlItem->boundingRect().height());
+    controlItem2->setHorizontalAlignment(GraphicsContinuousControlItem::RIGHT);
+    controlItem2->setPos(116 - controlItem->rect().width(), 198 + controlItem->boundingRect().height());
     QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
     QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
     QObject::connect(pitchModItem, SIGNAL(valueChanged(double)), this, SLOT(onPitchModulationIntensityChanged(double)));
