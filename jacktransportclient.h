@@ -36,6 +36,14 @@ protected:
       */
     virtual bool process(jack_nframes_t nframes);
     /**
+      Reimplemented from AudioProcessorClient.
+
+      This compute the position in the current beat (-1: start of beat; 1: end of beat)
+      as well as the position in the curren bar (-1: start of bar; 1: end of bar)
+      and outputs them as signals.
+      */
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
+    /**
       Reimplemented from MidiProcessorClient.
 
       The processNoteOn() method changes the tempo based on the note number.
@@ -78,9 +86,16 @@ protected:
     virtual void timebase(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t *pos, int new_pos);
 private:
     JackRingBuffer<jack_position_t> ringBufferToThread;
-    jack_nframes_t lastFrameTime;
+    jack_nframes_t lastTransportFrameTime;
     double currentBeatTime, beatsPerMinute;
     int beatsPerBar, beatType, ticksPerBeat;
+    jack_position_t currentPos;
+    jack_transport_state_t currentState;
+    jack_nframes_t bbt_offset, lastFrameTime;
+    double framesPerMinute;
+    double ticksPerMinute;
+    double ticksPerFrame;
+    double min, max;
 
     /**
       This is the JackTimebaseCallback which is registered at the Jack server.
