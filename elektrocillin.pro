@@ -89,7 +89,8 @@ SOURCES += main.cpp\
     jacktransportclient.cpp \
     graphicsclientitemsclient.cpp \
     jackparameterclient.cpp \
-    graphicscontinouscontrolitem.cpp
+    graphicsdiscretecontrolitem.cpp \
+    graphicscontinuouscontrolitem.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -174,7 +175,8 @@ HEADERS  += mainwindow.h \
     jacktransportclient.h \
     graphicsclientitemsclient.h \
     jackparameterclient.h \
-    graphicscontinouscontrolitem.h
+    graphicsdiscretecontrolitem.h \
+    graphicscontinuouscontrolitem.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

@@ -3,7 +3,7 @@
 
 #include "graphicslabelitem.h"
 
-class GraphicsContinousControlItem : public GraphicsLabelItem
+class GraphicsContinuousControlItem : public GraphicsLabelItem
 {
     Q_OBJECT
 public:
@@ -12,7 +12,7 @@ public:
         VERTICAL
     };
 
-    GraphicsContinousControlItem(const QString &name, double minValue, double maxValue, double currentValue, qreal size, Orientation orientation = VERTICAL, int precision = -1, double resolution = 0, QGraphicsItem *parent = 0);
+    GraphicsContinuousControlItem(const QString &name, double minValue, double maxValue, double currentValue, qreal size, Orientation orientation = VERTICAL, char format = 'g', int precision = -1, double resolution = 0, QGraphicsItem *parent = 0);
 public slots:
 signals:
     void valueEditingStarted();
@@ -27,11 +27,13 @@ private:
     double minValue, maxValue, currentValue;
     double size;
     Orientation orientation;
+    char format;
     int precision;
     double resolution;
     QPointF positionBeforeEdit;
     double valueBeforeEdit;
     bool waitingForMouseReleaseEvent;
+    GraphicsLabelItem *minLabel, *maxLabel;
 };
 
 #endif // GRAPHICSCONTINOUSCONTROLITEM_H
