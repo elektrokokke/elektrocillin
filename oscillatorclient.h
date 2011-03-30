@@ -3,7 +3,7 @@
 
 #include "eventprocessorclient.h"
 #include "oscillator.h"
-#include "graphicsmeteritem.h"
+#include <QGraphicsRectItem>
 
 class OscillatorClient : public EventProcessorClient
 {
@@ -39,7 +39,7 @@ private:
     Oscillator oscillator, *oscillatorProcess;
 };
 
-class OscillatorClientGraphicsItem : public QObject, public QGraphicsPathItem
+class OscillatorClientGraphicsItem : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:

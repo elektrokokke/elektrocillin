@@ -17,16 +17,19 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsCli
     type(type_),
     portType(portType_),
     font(font_),
-    controlsItem(jackClient ? jackClient->createGraphicsItem() : 0),
+    controlsItem(0),
     isMacro(isMacro_)
 {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
     setFlag(QGraphicsItem::ItemIsSelectable, isModuleItem() || isMacroItem());
     setCursor(Qt::ArrowCursor);
     font.setStyleStrategy(QFont::PreferAntialias);
-
     initItem();
-    initRest();
+    if (jackClient && (controlsItem = jackClient->createGraphicsItem())) {
+        controlsItem->setVisible(false);
+        controlsItem->setParentItem(this);
+        controlsItem->setPos(getRect().topRight());
+    }
 }
 
 const QString & GraphicsClientItem::getClientName() const
@@ -54,7 +57,6 @@ void GraphicsClientItem::setControlsVisible(bool visible)
     if (controlsItem) {
         // show the inner item if requested:
         controlsItem->setVisible(visible);
-        showControlsCommand->setText(visible ? "[-]" : "[+]");
         if (jackClient) {
             jackClient->setClientItemVisible(visible);
         }
@@ -77,14 +79,6 @@ void GraphicsClientItem::toggleControls(bool ensureVisible_)
         setFocus();
         // show the inner item if requested:
         setControlsVisible(ensureVisible_ || !controlsItem->isVisible());
-    }
-}
-
-void GraphicsClientItem::zoomToControls()
-{
-    if (controlsItem) {
-        toggleControls(true);
-        scene()->views().first()->fitInView(controlsItem, Qt::KeepAspectRatio);
     }
 }
 
@@ -158,18 +152,6 @@ void GraphicsClientItem::initItem()
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
     textItem->setFont(font);
     textItem->setPos(padding, padding);
-    textItem->setZValue(1);
-    showControlsCommand = new CommandTextItem(controlsItem && controlsItem->isVisible() ? "[-]" : "[+]", font, this);
-    showControlsCommand->setPos(padding, padding + fontMetrics.lineSpacing());
-    showControlsCommand->setVisible(controlsItem);
-    showControlsCommand->setZValue(1);
-    QObject::connect(showControlsCommand, SIGNAL(triggered()), this, SLOT(toggleControls()));
-    zoomToControlsCommand = new CommandTextItem("[Z]", font, this);
-    zoomToControlsCommand->setPos(padding + fontMetrics.width("[+]"), padding + fontMetrics.lineSpacing());
-    zoomToControlsCommand->setVisible(controlsItem);
-    zoomToControlsCommand->setZValue(1);
-    QObject::connect(zoomToControlsCommand, SIGNAL(triggered()), this, SLOT(zoomToControls()));
-
     QStringList inputPorts = clientItemsClient->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
     QList<GraphicsPortItem*> inputPortItems;
     int inputPortsWidth = -portPadding;
@@ -203,14 +185,19 @@ void GraphicsClientItem::initItem()
         }
     }
 
-    rect = (textItem->boundingRect().translated(textItem->pos()) | showControlsCommand->boundingRect().translated(showControlsCommand->pos())).adjusted(-padding, -padding, padding, padding);
-    if (rect.width() < inputPortsWidth + (portPadding - minimumInputPortWidth) * 2) {
-        rect.setWidth(inputPortsWidth + (portPadding - minimumInputPortWidth) * 2);
+    rect = (textItem->boundingRect().translated(textItem->pos())).adjusted(-padding, -padding, padding, padding);
+//    if (rect.width() < inputPortsWidth + (portPadding - minimumInputPortWidth) * 2) {
+//        rect.setWidth(inputPortsWidth + (portPadding - minimumInputPortWidth) * 2);
+//    }
+//    if (rect.width() < outputPortsWidth + (portPadding - minimumOutputPortWidth) * 2) {
+//        rect.setWidth(outputPortsWidth + (portPadding - minimumOutputPortWidth) * 2);
+//    }
+    if (rect.width() < inputPortsWidth) {
+        rect.setWidth(inputPortsWidth);
     }
-    if (rect.width() < outputPortsWidth + (portPadding - minimumOutputPortWidth) * 2) {
-        rect.setWidth(outputPortsWidth + (portPadding - minimumOutputPortWidth) * 2);
+    if (rect.width() < outputPortsWidth) {
+        rect.setWidth(outputPortsWidth);
     }
-
     if (gradient) {
         QLinearGradient gradient(rect.topLeft(), rect.bottomRight());
         gradient.setColorAt(0, Qt::white);
@@ -280,19 +267,4 @@ void GraphicsClientItem::initItem()
     }
     setBrush(QBrush(Qt::white));
     setPath(combinedPath);
-}
-
-void GraphicsClientItem::initRest()
-{
-    // if it corresponds to a JackClient object, create the GUI for it also:
-    if (controlsItem) {
-        showControlsCommand->setText("[+]");
-        showControlsCommand->setVisible(controlsItem);
-        if (controlsItem) {
-            controlsItem->setVisible(false);
-            controlsItem->setParentItem(this);
-            controlsItem->setPos(getRect().topRight());
-        }
-        zoomToControlsCommand->setVisible(controlsItem);
-    }
 }

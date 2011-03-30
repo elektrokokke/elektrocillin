@@ -33,8 +33,6 @@ public:
     bool isModuleItem() const;
 public slots:
     void toggleControls(bool ensureVisible = false);
-    void zoomToControls();
-
     void updatePorts();
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
@@ -49,43 +47,9 @@ private:
     QFont font;
     QRectF rect;
     QGraphicsItem *controlsItem;
-    CommandTextItem *showControlsCommand, *zoomToControlsCommand;
     bool isMacro;
 
     void initItem();
-    void initRest();
-};
-
-class CommandTextItem : public QObject, public QGraphicsSimpleTextItem
-{
-    Q_OBJECT
-public:
-    CommandTextItem(const QString &commandText, QFont font, QGraphicsItem *parent = 0) :
-        QGraphicsSimpleTextItem(commandText, parent)
-    {
-        font.setStyleStrategy(QFont::PreferAntialias);
-        setFont(font);
-        setBrush(QBrush(Qt::black));
-        setCursor(Qt::PointingHandCursor);
-    }
-signals:
-    void triggered();
-protected:
-    void mousePressEvent ( QGraphicsSceneMouseEvent * event )
-    {
-        QGraphicsSimpleTextItem::mousePressEvent(event);
-        if (!event->isAccepted() && (event->button() == Qt::LeftButton)) {
-            event->accept();
-            setBrush(QBrush(Qt::lightGray));
-        }
-    }
-    void mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
-    {
-        if (contains(event->pos())) {
-            triggered();
-        }
-        setBrush(QBrush(Qt::black));
-    }
 };
 
 class RectanglePath : public QPainterPath

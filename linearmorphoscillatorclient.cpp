@@ -81,20 +81,18 @@ void LinearMorphOscillatorClient::postChangeControlPoint(int stateIndex, int ind
 QGraphicsItem * LinearMorphOscillatorClient::createGraphicsItem()
 {
     int padding = 4;
-    QGraphicsPathItem *pathItem = new QGraphicsPathItem();
+    QGraphicsRectItem *item = new QGraphicsRectItem();
     QGraphicsItem *oscillatorItem = OscillatorClient::createGraphicsItem();
     QRectF rect = QRect(0, 0, 600, 420);
     rect = rect.translated(oscillatorItem->boundingRect().width() + 2 * padding, padding);
     oscillatorItem->setPos(padding, padding);
-    oscillatorItem->setParentItem(pathItem);
+    oscillatorItem->setParentItem(item);
     QGraphicsItem *ourItem = new LinearMorphOscillatorGraphicsItem(rect, this);
-    ourItem->setParentItem(pathItem);
-    QPainterPath path;
-    path.addRect((rect | oscillatorItem->boundingRect().translated(oscillatorItem->pos())).adjusted(-padding, -padding, padding, padding));
-    pathItem->setPen(QPen(QBrush(Qt::black), 1));
-    pathItem->setBrush(QBrush(Qt::white));
-    pathItem->setPath(path);
-    return pathItem;
+    ourItem->setParentItem(item);
+    item->setRect((rect | oscillatorItem->boundingRect().translated(oscillatorItem->pos())).adjusted(-padding, -padding, padding, padding));
+    item->setPen(QPen(QBrush(Qt::black), 1));
+    item->setBrush(QBrush(Qt::white));
+    return item;
 }
 
 LinearMorphOscillatorGraphicsSubItem::LinearMorphOscillatorGraphicsSubItem(const QRectF &rect, LinearMorphOscillatorClient *client_, int state_, QGraphicsItem *parent) :

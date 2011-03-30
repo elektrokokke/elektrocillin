@@ -158,41 +158,66 @@ void MainWindow::on_actionDelete_macro_triggered()
 
 void MainWindow::on_actionShow_module_controls_triggered()
 {
+    int selectedModules = 0;
+    int selectedVisibleModules = 0;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
         if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
             if (clientItem->isModuleItem()) {
                 clientItem->setControlsVisible(true);
+                selectedModules++;
+                if (clientItem->isControlsVisible()) {
+                    selectedVisibleModules++;
+                }
             }
         }
     }
-    ui->actionShow_module_controls->setEnabled(false);
-    ui->actionHide_module_controls->setEnabled(true);
+    ui->actionShow_module_controls->setEnabled(selectedModules > selectedVisibleModules);
+    ui->actionHide_module_controls->setEnabled(selectedVisibleModules);
 }
 
 void MainWindow::on_actionHide_module_controls_triggered()
 {
+    int selectedModules = 0;
+    int selectedVisibleModules = 0;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
         if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
             if (clientItem->isModuleItem()) {
                 clientItem->setControlsVisible(false);
+                selectedModules++;
+                if (clientItem->isControlsVisible()) {
+                    selectedVisibleModules++;
+                }
             }
         }
     }
-    ui->actionShow_module_controls->setEnabled(true);
-    ui->actionHide_module_controls->setEnabled(false);
+    ui->actionShow_module_controls->setEnabled(selectedModules > selectedVisibleModules);
+    ui->actionHide_module_controls->setEnabled(selectedVisibleModules);
 }
 
 void MainWindow::on_actionZoom_to_triggered()
 {
+    int selectedModules = 0;
+    int selectedVisibleModules = 0;
     QRectF boundingRect;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
+        if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+            if (clientItem->isModuleItem()) {
+                clientItem->setControlsVisible(true);
+                selectedModules++;
+                if (clientItem->isControlsVisible()) {
+                    selectedVisibleModules++;
+                }
+            }
+        }
         QRectF rect = ((*i)->childrenBoundingRect() | (*i)->boundingRect()).translated((*i)->pos());
         boundingRect |= rect;
     }
     ui->graphicsView->fitInView(boundingRect, Qt::KeepAspectRatio);
+    ui->actionShow_module_controls->setEnabled(selectedModules > selectedVisibleModules);
+    ui->actionHide_module_controls->setEnabled(selectedVisibleModules);
 }
 
 void MainWindow::on_actionShow_all_triggered()

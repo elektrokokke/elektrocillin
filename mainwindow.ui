@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>518</height>
+    <width>1138</width>
+    <height>511</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -68,6 +68,9 @@
    <addaction name="actionReset"/>
    <addaction name="actionShow_all"/>
    <addaction name="actionZoom_to"/>
+   <addaction name="separator"/>
+   <addaction name="actionShow_module_controls"/>
+   <addaction name="actionHide_module_controls"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QMenuBar" name="menuBar">
@@ -75,7 +78,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>920</width>
+     <width>1138</width>
      <height>21</height>
     </rect>
    </property>
@@ -221,11 +224,17 @@
    </property>
   </action>
   <action name="actionShow_module_controls">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Show module controls</string>
    </property>
   </action>
   <action name="actionHide_module_controls">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Hide module controls</string>
    </property>
