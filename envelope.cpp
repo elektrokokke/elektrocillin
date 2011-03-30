@@ -7,9 +7,9 @@ Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     durationInSeconds(durationInSeconds_),
     currentTime(0),
     previousLevel(0),
-    minimumLevel(0),
     velocity(0),
     sustainIndex(1),
+    startLevel(0),
     interpolator(0.01)
 {
     // initialize the interpolators to represent a simple ASR envelope:
@@ -80,9 +80,9 @@ double Envelope::getDurationInSeconds() const
 void Envelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t)
 {
     double newVelocity = velocity / 127.0;
+    startLevel = previousLevel * this->velocity / newVelocity;
     currentTime = 0.0;
     currentPhase = ATTACK;
-    minimumLevel = qAbs(previousLevel) * this->velocity / newVelocity;
     this->velocity = newVelocity;
     release = false;
 }
@@ -99,13 +99,13 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
         double x = log(currentTime + 1);
         if (x >= interpolator.getX()[sustainIndex]) {
             currentPhase = SUSTAIN;
+        } else if (x < interpolator.getX()[1]) {
+            // this is the first segment of the envelope,
+            // interpolate from startLevel to segment end level instead of from 0 to segment end level:
+            double endLevel = interpolator.getY()[1];
+            level = interpolator.evaluate(x) * (endLevel - startLevel) / endLevel +  startLevel;
         } else {
             level = interpolator.evaluate(x);
-            if (qAbs(level) < minimumLevel) {
-                level = (level < 0.0 ? -minimumLevel : minimumLevel);
-            } else {
-                minimumLevel = 0;
-            }
         }
     }
     if (currentPhase == SUSTAIN) {

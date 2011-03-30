@@ -50,10 +50,11 @@ public:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 private:
     double durationInSeconds;
-    double currentTime, previousLevel, minimumLevel, velocity;
+    double currentTime, previousLevel, velocity;
     int sustainIndex;
     Phase currentPhase;
     bool release;
+    double startLevel;
     //LinearInterpolator interpolator;
     LogarithmicInterpolator interpolator;
 };
