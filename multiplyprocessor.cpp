@@ -50,11 +50,13 @@ MultiplyProcessor * MultiplyClient::getMultiplyProcessor()
 
 void MultiplyClient::saveState(QDataStream &stream)
 {
+    AudioProcessorClient::saveState(stream);
     stream << getMultiplyProcessor()->getGainFactor();
 }
 
 void MultiplyClient::loadState(QDataStream &stream)
 {
+    AudioProcessorClient::loadState(stream);
     double gain;
     stream >> gain;
     getMultiplyProcessor()->setGainFactor(gain);
