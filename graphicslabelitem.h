@@ -5,13 +5,15 @@
 #include <QGraphicsSimpleTextItem>
 #include <QFont>
 
-class GraphicsLabelItem : public QGraphicsRectItem
+class GraphicsLabelItem : public QObject, public QGraphicsRectItem
 {
+    Q_OBJECT
 public:
     GraphicsLabelItem(QGraphicsItem *parent = 0);
     GraphicsLabelItem(const QString &text, QGraphicsItem *parent = 0);
-    void setText(const QString &text);
     void setFont(const QFont &font);
+public slots:
+    void setText(QString text);
 private:
     QGraphicsSimpleTextItem *textItem;
     int padding;
