@@ -1,4 +1,5 @@
 #include "oscillatorclient.h"
+#include "graphicscontinouscontrolitem.h"
 
 OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator_, size_t ringBufferSize) :
     EventProcessorClient(clientName, oscillator_, oscillator_, oscillator_, ringBufferSize),
@@ -64,11 +65,14 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
     GraphicsMeterItem *gainItem = new GraphicsMeterItem(QRectF(0, 0, 116, 66), "Gain", 0, 1, client->getOscillator()->getGain(), 10, 10, GraphicsMeterItem::TOP_HALF, this);
     GraphicsMeterItem *detuneItem = new GraphicsMeterItem(QRectF(0, 66, 116, 66), "Tune", -100, 100, client->getOscillator()->getTune(), 10, 20, GraphicsMeterItem::BOTTOM_HALF, this);
     GraphicsMeterItem *pitchModItem = new GraphicsMeterItem(QRectF(0, 132, 116, 66), "Pitchmod", 0, 12, client->getOscillator()->getPitchModulationIntensity(), 12, 1, GraphicsMeterItem::TOP_HALF, this);
+    GraphicsContinousControlItem *controlItem = new GraphicsContinousControlItem("Test", -1, 1, 0, 200, GraphicsContinousControlItem::HORIZONTAL, -1, 0.1, this);
+    controlItem->setPos(0, 198);
     QObject::connect(gainItem, SIGNAL(valueChanged(double)), this, SLOT(onGainChanged(double)));
     QObject::connect(detuneItem, SIGNAL(valueChanged(double)), this, SLOT(onDetuneChanged(double)));
     QObject::connect(pitchModItem, SIGNAL(valueChanged(double)), this, SLOT(onPitchModulationIntensityChanged(double)));
     QPainterPath path;
-    path.addRect(gainItem->boundingRect() | detuneItem->boundingRect() | pitchModItem->boundingRect());
+    QRectF pathRect = gainItem->boundingRect() | detuneItem->boundingRect() | pitchModItem->boundingRect() | controlItem->boundingRect().translated(controlItem->pos());
+    path.addRect(pathRect);
     setPath(path);
     setBrush(QBrush(Qt::white));
 }

@@ -29,6 +29,7 @@ void GraphicsLabelItem::setFont(const QFont &font)
 void GraphicsLabelItem::setText(QString text)
 {
     textItem->setText(text);
-    setRect(textItem->boundingRect().adjusted(0, 0, padding * 2, padding * 2));
+    QRectF rect = textItem->boundingRect();
+    setRect(rect.adjusted(0, 0, padding * 2, padding * 2));
 }
 

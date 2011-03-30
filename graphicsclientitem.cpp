@@ -21,6 +21,7 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsCli
     isMacro(isMacro_)
 {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
+    setFlag(QGraphicsItem::ItemIsSelectable, isModuleItem() || isMacroItem());
     setCursor(Qt::ArrowCursor);
     font.setStyleStrategy(QFont::PreferAntialias);
 
@@ -94,14 +95,14 @@ void GraphicsClientItem::updatePorts()
 
 QVariant GraphicsClientItem::itemChange(GraphicsItemChange change, const QVariant &value)
 {
-    if (change == QGraphicsItem::ItemPositionChange) {
+    if (change == QGraphicsItem::ItemPositionHasChanged) {
         if (jackClient) {
             jackClient->setClientItemPosition(value.toPointF());
         } else {
             clientItemsClient->setClientItemPositionByName(clientName, value.toPointF());
         }
     }
-    return QGraphicsItem::itemChange(change, value);
+    return QGraphicsPathItem::itemChange(change, value);
 }
 
 void GraphicsClientItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
@@ -294,5 +295,4 @@ void GraphicsClientItem::initRest()
         }
         zoomToControlsCommand->setVisible(controlsItem);
     }
-    setFlag(QGraphicsItem::ItemIsSelectable, isModuleItem() || isMacroItem());
 }

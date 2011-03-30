@@ -105,7 +105,7 @@ private:
     JackRingBuffer<jack_position_t> *ringBufferFromClient;
 };
 
-class JackTransportGraphicsItem : public QObject, public GraphicsLabelItem
+class JackTransportGraphicsItem : public GraphicsLabelItem
 {
     Q_OBJECT
 public:
