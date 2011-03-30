@@ -138,7 +138,6 @@ void GraphicsContinuousControlItem::mousePressEvent(QGraphicsSceneMouseEvent * e
     GraphicsLabelItem::mousePressEvent(event);
     if (event->isAccepted()) {
         valueEditingStarted();
-        setCursor(orientation == HORIZONTAL ? Qt::SizeHorCursor : Qt::SizeVerCursor);
         positionBeforeEdit = pos();
         rectBeforeEdit = rect();
         waitingForMouseReleaseEvent = true;
@@ -178,7 +177,6 @@ void GraphicsContinuousControlItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *
         maxLabel->setVisible(false);
         // change our position back to the original position:
         setPos(alignX(rect(), rectBeforeEdit.translated(positionBeforeEdit)), positionBeforeEdit.y());
-        setCursor(Qt::PointingHandCursor);
         valueEditingStopped(currentValue);
     }
 }

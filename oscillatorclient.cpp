@@ -66,9 +66,9 @@ OscillatorClientGraphicsItem::OscillatorClientGraphicsItem(OscillatorClient *cli
     client(client_)
 {
     setFlags(QGraphicsItem::ItemIsFocusable);
-    GraphicsContinuousControlItem *gainControl = new GraphicsContinuousControlItem("Gain", 0, 1, client->getOscillator()->getGain(), 200, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 0.01, this);
-    GraphicsContinuousControlItem *tuneControl = new GraphicsContinuousControlItem("Tune", -100, 100, client->getOscillator()->getTune(), 400, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 1, this);
-    GraphicsContinuousControlItem *pitchModControl = new GraphicsContinuousControlItem("Pitch mod. intensity", 0, 12, client->getOscillator()->getPitchModulationIntensity(), 120, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 1, this);
+    GraphicsContinuousControlItem *gainControl = new GraphicsContinuousControlItem("Gain", 0, 1, client->getOscillator()->getGain(), 250, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 0.01, this);
+    GraphicsContinuousControlItem *tuneControl = new GraphicsContinuousControlItem("Tune", -100, 100, client->getOscillator()->getTune(), 500, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 1, this);
+    GraphicsContinuousControlItem *pitchModControl = new GraphicsContinuousControlItem("Pitch mod. intensity", 0, 24, client->getOscillator()->getPitchModulationIntensity(), 240, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 1, this);
     gainControl->setPos(4, 4 + (4 + gainControl->boundingRect().height()) * 0);
     tuneControl->setPos(4, 4 + (4 + gainControl->boundingRect().height()) * 1);
     pitchModControl->setPos(4, 4 + (4 + gainControl->boundingRect().height()) * 2);

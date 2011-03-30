@@ -26,6 +26,7 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsCli
     font.setStyleStrategy(QFont::PreferAntialias);
     initItem();
     if (jackClient && (controlsItem = jackClient->createGraphicsItem())) {
+        controlsItem->setZValue(1);
         controlsItem->setVisible(false);
         controlsItem->setParentItem(this);
         controlsItem->setPos(getRect().topRight());

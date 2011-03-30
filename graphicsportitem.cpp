@@ -18,7 +18,8 @@ GraphicsPortItem::GraphicsPortItem(GraphicsClientItemsClient *client_, const QSt
     dataType(client->getPortType(fullPortName)),
     isInput(client->getPortFlags(fullPortName) & JackPortIsInput),
     style(style_),
-    font(font_)
+    font(font_),
+    showMenu(false)
 {
     bool gradient = false;
     QColor captionColor(0xfc, 0xf9, 0xc2);
@@ -176,16 +177,18 @@ void GraphicsPortItem::onPortDisconnected(QString sourcePortName, QString destPo
 void GraphicsPortItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
 {
     QGraphicsPathItem::mousePressEvent(event);
-    if (!event->isAccepted() && (event->button() == Qt::RightButton)) {
+    if (!event->isAccepted()) {
         event->accept();
+        showMenu = true;
     }
 }
 
 void GraphicsPortItem::mouseReleaseEvent ( QGraphicsSceneMouseEvent * event )
 {
-    if (event->button() == Qt::RightButton) {
+    if (showMenu) {
+        showMenu = false;
         // show a menu that allows removing and adding control points:
-        contextMenu.exec(event->screenPos());
+        contextMenu.popup(event->screenPos());
     } else {
         QGraphicsPathItem::mouseReleaseEvent(event);
     }

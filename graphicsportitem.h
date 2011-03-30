@@ -37,6 +37,7 @@ private:
     QRectF portRect;
     QMenu contextMenu, *connectMenu, *disconnectMenu;
     QMap<QString, QAction*> mapPortNamesToActions;
+    bool showMenu;
 };
 
 #endif // GRAPHICSPORTITEM2_H
