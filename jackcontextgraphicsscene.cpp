@@ -122,21 +122,25 @@ void JackContextGraphicsScene::editSelectedMacro()
 
 void JackContextGraphicsScene::createNewMacro()
 {
-    waitForMacroPosition = true;
-    // set a special cursor to show the user what we are waiting for:
-    QApplication::setOverrideCursor(QCursor(Qt::CrossCursor));
-    // also send a message for the user to read:
-    messageChanged("Left-click anywhere in the canvas to place the new macro. Click with any other mouse button to abort macro creation.");
+    if (!waitForMacroPosition) {
+        waitForMacroPosition = true;
+        // set a special cursor to show the user what we are waiting for:
+        QApplication::setOverrideCursor(QCursor(Qt::CrossCursor));
+        // also send a message for the user to read:
+        messageChanged("Left-click anywhere in the canvas to place the new macro. Click with any other mouse button to abort macro creation.");
+    }
 }
 
 void JackContextGraphicsScene::createNewModule(QString factoryName)
 {
-    waitForModulePosition = true;
-    this->factoryName = factoryName;
-    // set a special cursor to show the user what we are waiting for:
-    QApplication::setOverrideCursor(QCursor(Qt::CrossCursor));
-    // also send a message for the user to read:
-    messageChanged("Left-click anywhere in the canvas to place the new module. Click with any other mouse button to abort module creation.");
+    if (!waitForModulePosition) {
+        waitForModulePosition = true;
+        this->factoryName = factoryName;
+        // set a special cursor to show the user what we are waiting for:
+        QApplication::setOverrideCursor(QCursor(Qt::CrossCursor));
+        // also send a message for the user to read:
+        messageChanged("Left-click anywhere in the canvas to place the new module. Click with any other mouse button to abort module creation.");
+    }
 }
 
 void JackContextGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
