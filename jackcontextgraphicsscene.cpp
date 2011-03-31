@@ -178,6 +178,7 @@ void JackContextGraphicsScene::createNewModule(QString factoryName, QPointF pos)
 {
     JackClientFactory *factory = JackClientSerializer::getInstance()->getFactoryByName(factoryName);
     if (factory) {
+        clearSelection();
         JackClient *client = factory->createClient(factory->getName());
         client->setClientItemPosition(pos);
         client->activate();
