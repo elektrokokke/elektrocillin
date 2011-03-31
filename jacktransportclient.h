@@ -3,14 +3,31 @@
 
 #include "jackthreadeventprocessorclient.h"
 #include "graphicslabelitem.h"
+#include <QGraphicsRectItem>
 
 class JackTransportClient : public JackThreadEventProcessorClient
 {
+    Q_OBJECT
 public:
-    class TimebaseEvent : public RingBufferEvent {
+    class BeatsPerMinuteEvent : public RingBufferEvent {
     public:
+        BeatsPerMinuteEvent(double bpm) :
+            beatsPerMinute(bpm)
+        {}
         double beatsPerMinute;
+    };
+    class BeatsPerBarEvent : public RingBufferEvent {
+    public:
+        BeatsPerBarEvent(int beatsPerBar_) :
+            beatsPerBar(beatsPerBar_)
+        {}
         int beatsPerBar;
+    };
+    class BeatTypeEvent : public RingBufferEvent {
+    public:
+        BeatTypeEvent(int beatType_) :
+            beatType(beatType_)
+        {}
         int beatType;
     };
 
@@ -20,6 +37,10 @@ public:
     virtual JackClientFactory * getFactory();
 
     QGraphicsItem * createGraphicsItem();
+public slots:
+    void changeBeatsPerMinute(double bpm);
+    void changeBeatsPerBar(int beatsPerBar);
+    void changeBeatType(int beatType);
 protected:
     /**
       Reimplemented from JackThreadEventProcessorClient.
@@ -120,15 +141,17 @@ private:
     JackRingBuffer<jack_position_t> *ringBufferFromClient;
 };
 
-class JackTransportGraphicsItem : public GraphicsLabelItem
+class JackTransportGraphicsItem : public QObject, public QGraphicsRectItem
 {
     Q_OBJECT
 public:
-    JackTransportGraphicsItem(QGraphicsItem *parent = 0);
+    JackTransportGraphicsItem(JackTransportClient *client, QGraphicsItem *parent = 0);
 public slots:
     void changePosition(const QString &pos);
 private:
-    JackTransportClient *client;
+    GraphicsLabelItem *labelItem;
+    QRectF controlsRect;
+    int padding;
 };
 
 

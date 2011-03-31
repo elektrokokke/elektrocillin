@@ -1,5 +1,6 @@
 #include "jacktransportclient.h"
 #include "graphicsclientitem.h"
+#include "graphicsdiscretecontrolitem.h"
 #include <QDebug>
 
 JackTransportClient::JackTransportClient(const QString &clientName, size_t ringBufferSize) :
@@ -27,10 +28,28 @@ JackTransportClient::~JackTransportClient()
 
 QGraphicsItem * JackTransportClient::createGraphicsItem()
 {
-    JackTransportGraphicsItem *graphicsItem = new JackTransportGraphicsItem();
+    JackTransportGraphicsItem *graphicsItem = new JackTransportGraphicsItem(this);
     JackTransportThread *thread = (JackTransportThread*)getJackThread();
     QObject::connect(thread, SIGNAL(changedPosition(QString)), graphicsItem, SLOT(changePosition(QString)));
     return graphicsItem;
+}
+
+void JackTransportClient::changeBeatsPerMinute(double bpm)
+{
+    BeatsPerMinuteEvent *event = new BeatsPerMinuteEvent(bpm);
+    postEvent(event);
+}
+
+void JackTransportClient::changeBeatsPerBar(int beatsPerBar)
+{
+    BeatsPerBarEvent *event = new BeatsPerBarEvent(beatsPerBar);
+    postEvent(event);
+}
+
+void JackTransportClient::changeBeatType(int beatType)
+{
+    BeatTypeEvent *event = new BeatTypeEvent(beatType);
+    postEvent(event);
 }
 
 bool JackTransportClient::init()
@@ -111,13 +130,14 @@ void JackTransportClient::processChannelPressure(unsigned char channel, unsigned
 
 bool JackTransportClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const TimebaseEvent *event_ = dynamic_cast<const TimebaseEvent*>(event)) {
-        // only allow changing the beat settings when transport is stopped:
-        if (jack_transport_query(getClient(), 0) == JackTransportStopped) {
-            beatsPerMinute = event_->beatsPerMinute;
-            beatsPerBar = event_->beatsPerBar;
-            beatType = event_->beatType;
-        }
+    if (const BeatsPerMinuteEvent *event_ = dynamic_cast<const BeatsPerMinuteEvent*>(event)) {
+        beatsPerMinute = event_->beatsPerMinute;
+        return true;
+    } else if (const BeatsPerBarEvent *event_ = dynamic_cast<const BeatsPerBarEvent*>(event)) {
+        beatsPerBar = event_->beatsPerBar;
+        return true;
+    } else if (const BeatTypeEvent *event_ = dynamic_cast<const BeatTypeEvent*>(event)) {
+        beatType = event_->beatType;
         return true;
     } else {
         return false;
@@ -210,14 +230,31 @@ void JackTransportThread::processDeferred()
     }
 }
 
-JackTransportGraphicsItem::JackTransportGraphicsItem(QGraphicsItem *parent) :
-    GraphicsLabelItem(parent)
+JackTransportGraphicsItem::JackTransportGraphicsItem(JackTransportClient *client, QGraphicsItem *parent) :
+    QGraphicsRectItem(parent),
+    padding(4)
 {
+    setPen(QPen(QBrush(Qt::black), 1));
+    setBrush(Qt::white);
+    labelItem = new GraphicsLabelItem(this);
+    GraphicsContinuousControlItem *beatsPerMinuteControl = new GraphicsContinuousControlItem("Beats per minute", 1, 300, 120, 600, GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, 1, this);
+    GraphicsDiscreteControlItem *beatsPerBarControl = new GraphicsDiscreteControlItem("Beats per bar", 1, 32, 4, 320, GraphicsContinuousControlItem::HORIZONTAL, this);
+    GraphicsDiscreteControlItem *beatTypeControl = new GraphicsDiscreteControlItem("Beat type", 1, 32, 4, 320, GraphicsContinuousControlItem::HORIZONTAL, this);
+    beatsPerMinuteControl->setPos(padding, padding + 0 * (padding + beatsPerMinuteControl->rect().height()));
+    beatsPerBarControl->setPos(padding, padding + 1 * (padding + beatsPerMinuteControl->rect().height()));
+    beatTypeControl->setPos(padding, padding + 2 * (padding + beatsPerMinuteControl->rect().height()));
+    controlsRect = (beatsPerMinuteControl->rect().translated(beatsPerMinuteControl->pos()) | beatsPerBarControl->rect().translated(beatsPerBarControl->pos()) | beatTypeControl->rect().translated(beatTypeControl->pos()));
+    labelItem->setPos(controlsRect.bottomLeft() + QPointF(0, padding));
+    QObject::connect(beatsPerMinuteControl, SIGNAL(valueChanged(double)), client, SLOT(changeBeatsPerMinute(double)));
+    QObject::connect(beatsPerBarControl, SIGNAL(valueChanged(int)), client, SLOT(changeBeatsPerBar(int)));
+    QObject::connect(beatTypeControl, SIGNAL(valueChanged(int)), client, SLOT(changeBeatType(int)));
+    changePosition("");
 }
 
 void JackTransportGraphicsItem::changePosition(const QString &pos)
 {
-    setText(pos);
+    labelItem->setText(pos);
+    setRect((controlsRect | labelItem->rect().translated(labelItem->pos())).adjusted(-padding, -padding, padding, padding));
 }
 
 class JackTransportClientFactory : public JackClientFactory

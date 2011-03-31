@@ -1,5 +1,4 @@
 #include "oscillatorclient.h"
-#include "graphicscontinuouscontrolitem.h"
 #include "graphicsdiscretecontrolitem.h"
 #include <QPen>
 #include <QBrush>
