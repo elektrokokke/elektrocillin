@@ -70,10 +70,8 @@ bool JackTransportClient::process(jack_nframes_t nframes)
     framesPerMinute = 60.0 * currentPos.frame_rate;
     ticksPerMinute = (double)currentPos.ticks_per_beat * (double)currentPos.beats_per_minute;
     ticksPerFrame = ticksPerMinute / framesPerMinute;
-    lastFrameTime = getLastFrameTime();
     // do the standard processing:
     JackThreadEventProcessorClient::process(nframes);
-//    qDebug() << "min" << min << "max" << max;
     return true;
 }
 
@@ -81,7 +79,7 @@ void JackTransportClient::processAudio(const double *, double *outputs, jack_nfr
 {
     if ((currentPos.valid & JackPositionBBT) && (currentState == JackTransportRolling)) {
         // current tick is bbt_offset frames before the first frame
-        double currentTick = (double)(time - lastFrameTime + bbt_offset) * ticksPerFrame + (double)currentPos.tick;
+        double currentTick = (double)(time + bbt_offset) * ticksPerFrame + (double)currentPos.tick;
         // beat position is current tick / ticks per beat:
         double currentBeat = currentTick / (double)currentPos.ticks_per_beat + (double)(currentPos.beat - 1);
         double beatPosition = currentBeat - (int)currentBeat;
@@ -89,17 +87,12 @@ void JackTransportClient::processAudio(const double *, double *outputs, jack_nfr
         double barPosition  = currentBeat / (double)currentPos.beats_per_bar;
         // stretch these value (which lie in [0:1]) to [-1:1]:
         outputs[0] = beatPosition * 2.0 - 1.0;
-        if ((time == 0) || (outputs[0] < min)) {
-            min = outputs[0];
-        }
-        if ((time == 0) || (outputs[0] > max)) {
-            max = outputs[0];
-        }
         outputs[1] = barPosition * 2.0 - 1.0;
     } else {
         outputs[0] = 0;
         outputs[1] = 0;
     }
+    outputs[0] = (double)time / (1024);
 }
 
 void JackTransportClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)

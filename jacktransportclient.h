@@ -112,11 +112,10 @@ private:
     int beatsPerBar, beatType, ticksPerBeat;
     jack_position_t currentPos;
     jack_transport_state_t currentState;
-    jack_nframes_t bbt_offset, lastFrameTime;
+    jack_nframes_t bbt_offset;
     double framesPerMinute;
     double ticksPerMinute;
     double ticksPerFrame;
-    double min, max;
 
     /**
       This is the JackTimebaseCallback which is registered at the Jack server.
