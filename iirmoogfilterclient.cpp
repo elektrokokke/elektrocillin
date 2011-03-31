@@ -16,7 +16,7 @@ void IirMoogFilterThread::processDeferred()
     if (ringBufferFromClient && ringBufferFromClient->readSpace()) {
         ringBufferFromClient->readAdvance(ringBufferFromClient->readSpace() - 1);
         IirMoogFilter::Parameters parameters = ringBufferFromClient->read();
-        changedParameters(parameters.frequency, parameters.resonance);
+        changedParameters(parameters.frequency * parameters.frequencyPitchBendFactor * parameters.frequencyModulationFactor, parameters.resonance);
     }
 }
 
@@ -83,22 +83,33 @@ QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
     return new IirMoogFilterGraphicsItem(this, QRectF(0, 0, 600, 420));
 }
 
+bool IirMoogFilterClient::process(jack_nframes_t nframes)
+{
+    // notify the associated thread once each cycle:
+    ringBufferToThread.write(iirMoogFilterProcess->getParameters());
+    wakeJackThread();
+    // do the normal processing:
+    return JackThreadEventProcessorClient::process(nframes);
+}
+
 void IirMoogFilterClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
 {
     // call base implementation:
     MidiProcessorClient::processNoteOn(channel, noteNumber, velocity, time);
-    // notify the associated thread:
-    ringBufferToThread.write(iirMoogFilterProcess->getParameters());
-    wakeJackThread();
+    // this notification is now done once a cycle in process()
+//    // notify the associated thread:
+//    ringBufferToThread.write(iirMoogFilterProcess->getParameters());
+//    wakeJackThread();
 }
 
 void IirMoogFilterClient::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
     // call base implementation:
     MidiProcessorClient::processController(channel, controller, value, time);
-    // notify the associated thread:
-    ringBufferToThread.write(iirMoogFilterProcess->getParameters());
-    wakeJackThread();
+    // this notification is now done once a cycle in process()
+//    // notify the associated thread:
+//    ringBufferToThread.write(iirMoogFilterProcess->getParameters());
+//    wakeJackThread();
 }
 
 void IirMoogFilterClient::onClientChangedFilterParameters(double frequency, double resonance)
@@ -122,7 +133,7 @@ IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client
     cutoffResonanceNode->setBounds(QRectF(getFrequencyResponseRectangle().topLeft(), QPointF(getFrequencyResponseRectangle().right(), getZeroDecibelY())));
     cutoffResonanceNode->setBoundsScaled(QRectF(QPointF(getLowestHertz(), 1), QPointF(getHighestHertz(), 0)));
     IirMoogFilter::Parameters parameters = client->getMoogFilter()->getParameters();
-    onClientChangedFilterParameters(parameters.frequency, parameters.resonance);
+    onClientChangedFilterParameters(parameters.frequency * parameters.frequencyPitchBendFactor * parameters.frequencyModulationFactor, parameters.resonance);
     QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onGuiChangedFilterParameters(QPointF)));
     QObject::connect(client->getMoogFilterThread(), SIGNAL(changedParameters(double, double)), this, SLOT(onClientChangedFilterParameters(double,double)));
 }
@@ -133,15 +144,15 @@ void IirMoogFilterGraphicsItem::onGuiChangedFilterParameters(const QPointF &cuto
     *parameters = client->getMoogFilter()->getParameters();
     parameters->frequency = cutoffResonance.x();
     parameters->resonance = cutoffResonance.y();
-    client->getMoogFilter()->setParameters(parameters);
     client->postEvent(parameters);
-    updateFrequencyResponse(0);
 }
 
 void IirMoogFilterGraphicsItem::onClientChangedFilterParameters(double frequency, double resonance)
 {
-    cutoffResonanceNode->setXScaled(frequency);
-    cutoffResonanceNode->setYScaled(resonance);
+    if (!cutoffResonanceNode->isMoving()) {
+        cutoffResonanceNode->setXScaled(frequency);
+        cutoffResonanceNode->setYScaled(resonance);
+    }
     updateFrequencyResponse(0);
 }
 

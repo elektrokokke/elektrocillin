@@ -57,6 +57,11 @@ public:
     QGraphicsItem * createGraphicsItem();
 protected:
     /**
+      Reimplemented from EventProcessorClient to send current parameters
+      to the associated thread once each process cycle.
+      */
+    virtual bool process(jack_nframes_t nframes);
+    /**
       This method has been reimplemented from MidiProcessorClient to notify
       the associated IirMoogFilterThread of changes to the filter parameters
       that occur through MIDI events.

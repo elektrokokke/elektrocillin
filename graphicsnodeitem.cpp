@@ -2,6 +2,7 @@
 #include <cmath>
 #include <QPen>
 #include <QCursor>
+#include <QGraphicsSceneMouseEvent>
 
 GraphicsNodeItem::GraphicsNodeItem(QGraphicsItem *parent) :
     QGraphicsEllipseItem(parent)
@@ -66,6 +67,11 @@ void GraphicsNodeItem::resetBoundsScaled()
 {
     boundsScaled = QRectF();
     considerBoundsScaled = false;
+}
+
+bool GraphicsNodeItem::isMoving() const
+{
+    return mouseButtonPressed;
 }
 
 void GraphicsNodeItem::setBoundsLeft(qreal left)
@@ -197,6 +203,21 @@ QVariant GraphicsNodeItem::itemChange(GraphicsItemChange change, const QVariant 
     return QGraphicsItem::itemChange(change, value);
 }
 
+void GraphicsNodeItem::mousePressEvent(QGraphicsSceneMouseEvent * event)
+{
+    QGraphicsEllipseItem::mousePressEvent(event);
+    if (event->isAccepted()) {
+        mouseButtonPressed = true;
+    }
+}
+
+void GraphicsNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
+{
+    QGraphicsEllipseItem::mouseReleaseEvent(event);
+    mouseButtonPressed = false;
+}
+
+
 void GraphicsNodeItem::init()
 {
     considerBounds = false;
@@ -205,6 +226,7 @@ void GraphicsNodeItem::init()
     sendPositionChanges = false;
     horizontalScale = LINEAR;
     verticalScale = LINEAR;
+    mouseButtonPressed = false;
     setAcceptHoverEvents(true);
     setCursor(Qt::ArrowCursor);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemIsSelectable);

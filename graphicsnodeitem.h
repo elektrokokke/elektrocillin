@@ -29,6 +29,8 @@ public:
     void setBoundsScaled(const QRectF &bounds);
     void resetBoundsScaled();
 
+    bool isMoving() const;
+
     void connectLine(GraphicsLineItem *line, GraphicsLineItem::EndPoints endPoint);
     void connectLine(GraphicsLogLineItem *line, GraphicsLineItem::EndPoints endPoint);
 
@@ -52,6 +54,8 @@ protected:
     virtual void hoverEnterEvent( QGraphicsSceneHoverEvent * event );
     virtual void hoverLeaveEvent( QGraphicsSceneHoverEvent * event );
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent * event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
 
 private:
     void init();
@@ -60,6 +64,7 @@ private:
     Scale horizontalScale, verticalScale;
     bool considerBounds, considerBoundsScaled, sendPositionChanges, changingCoordinates;
     QPointF previousPos;
+    bool mouseButtonPressed;
 
     QPointF scale(const QPointF &p);
     qreal scaleX(qreal x);

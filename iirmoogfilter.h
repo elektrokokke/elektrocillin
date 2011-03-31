@@ -43,7 +43,7 @@ public:
 private:
     unsigned char frequencyController, resonanceController;
     Parameters parameters;
-    double lastCutoffModulationInput;
+    double lastCutoffModulationInput, lastResonanceModulationInput;
 };
 
 #endif // IIRMOOGFILTER_H
