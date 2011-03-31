@@ -28,14 +28,14 @@ GraphicsKeyItem::GraphicsKeyItem(unsigned char noteNumber_, const QSizeF &keySiz
         setZValue(1);
     }
     setPen(QPen(Qt::gray));
-    type = (black ? BLACK : WHITE);
+    style = (black ? BLACK : WHITE);
 
     setAcceptHoverEvents(true);
 }
 
 GraphicsKeyItem::Type GraphicsKeyItem::getType() const
 {
-    return type;
+    return style;
 }
 
 void GraphicsKeyItem::pressKey()

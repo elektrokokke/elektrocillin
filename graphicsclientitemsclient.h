@@ -19,7 +19,8 @@ public:
     void loadState(QDataStream &stream);
 
     void setClientStyle(int clientStyle);
-    void setPortStyle(int portStyle);
+    void setAudioPortStyle(int audioPortStyle);
+    void setMidiPortStyle(int midiPortStyle);
 
     void deleteClient(const QString &clientName);
 
@@ -42,7 +43,7 @@ private:
     QMap<QString, GraphicsClientItem*> clientItems;
     QMap<QString, QPointF> clientItemPositionMap;
     QMap<QString, QMap<QString, GraphicsPortConnectionItem*> > portConnectionItems;
-    int clientStyle, portStyle;
+    int clientStyle, audioPortStyle, midiPortStyle;
     QFont font;
     QString contextName;
 

@@ -108,6 +108,16 @@ QPointF GraphicsPortItem::getConnectionScenePos() const
     return (isInput ? QPointF(sceneRect.center().x(), sceneRect.top()) : QPointF(sceneRect.center().x(), sceneRect.bottom()));
 }
 
+const QString & GraphicsPortItem::getDataType() const
+{
+    return dataType;
+}
+
+bool GraphicsPortItem::isAudioType() const
+{
+    return dataType == JACK_DEFAULT_AUDIO_TYPE;
+}
+
 void GraphicsPortItem::onPortRegistered(QString fullPortName, QString type, int flags)
 {
     bool portIsInput = (flags & JackPortIsInput);

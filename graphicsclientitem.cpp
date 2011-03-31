@@ -9,13 +9,14 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 
-GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsClient_, JackClient *jackClient_,bool isMacro_, const QString &clientName_, int type_, int portType_, QFont font_, QGraphicsItem *parent) :
+GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsClient_, JackClient *jackClient_,bool isMacro_, const QString &clientName_, int clientStyle_, int audioPortStyle_, int midiPortStyle_, QFont font_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent, clientItemsClient_->getScene()),
     clientItemsClient(clientItemsClient_),
     jackClient(jackClient_),
     clientName(clientName_),
-    type(type_),
-    portType(portType_),
+    clientStyle(clientStyle_),
+    audioPortStyle(audioPortStyle_),
+    midiPortStyle(midiPortStyle_),
     font(font_),
     controlsItem(0),
     isMacro(isMacro_)
@@ -213,13 +214,13 @@ void GraphicsClientItem::initItem()
     }
 
     QPainterPath bodyPath;
-    if (type == 0) {
+    if (clientStyle == 0) {
         bodyPath = EllipsePath(rect);
-    } else if (type == 1) {
+    } else if (clientStyle == 1) {
         bodyPath = SpeechBubblePath(rect, rect.height() / 4, rect.height() / 4, Qt::AbsoluteSize);
-    } else if (type == 2){
+    } else if (clientStyle == 2){
         bodyPath = RoundedRectanglePath(rect, padding + fontMetrics.height(), padding + fontMetrics.height());
-    } else if (type == 3) {
+    } else if (clientStyle == 3) {
         bodyPath = RectanglePath(rect);
     }
 
@@ -231,13 +232,14 @@ void GraphicsClientItem::initItem()
 
         QPainterPath portPath;
         portPath.addRect(QRectF(portRect.topLeft(), 0.5 * (portRect.topRight() + portRect.bottomRight())));
-        if (portType == 0) {
+        int portStyle = (portItem->isAudioType() ? audioPortStyle : midiPortStyle);
+        if (portStyle == 0) {
             portPath += EllipsePath(portRect);
-        } else if (portType == 1) {
+        } else if (portStyle == 1) {
             portPath += SpeechBubblePath(portRect, 0.7, 0.7);
-        } else if (portType == 2) {
+        } else if (portStyle == 2) {
             portPath += RoundedRectanglePath(portRect, portPadding + fontMetrics.height() / 2, portPadding + fontMetrics.height() / 2);
-        } else if (portType == 3) {
+        } else if (portStyle == 3) {
             portPath += RectanglePath(portRect);
         }
         bodyPath -= portPath;
@@ -252,13 +254,14 @@ void GraphicsClientItem::initItem()
 
         QPainterPath portPath;
         portPath.addRect(QRectF(0.5 * (portRect.topLeft() + portRect.bottomLeft()), portRect.bottomRight()));
-        if (portType == 0) {
+        int portStyle = (portItem->isAudioType() ? audioPortStyle : midiPortStyle);
+        if (portStyle == 0) {
             portPath += EllipsePath(portRect);
-        } else if (portType == 1) {
+        } else if (portStyle == 1) {
             portPath += SpeechBubblePath(portRect, 0.7, 0.7);
-        } else if (portType == 2) {
+        } else if (portStyle == 2) {
             portPath += RoundedRectanglePath(portRect, portPadding + fontMetrics.height() / 2, portPadding + fontMetrics.height() / 2);
-        } else if (portType == 3) {
+        } else if (portStyle == 3) {
             portPath += RectanglePath(portRect);
         }
         bodyPath -= portPath;

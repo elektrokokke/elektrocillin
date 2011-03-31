@@ -23,7 +23,7 @@ private:
     unsigned char noteNumber;
     QSizeF whiteKeySize, blackKeySize;
     QStack<QBrush> oldBrushes;
-    Type type;
+    Type style;
 
     QRectF getBoundingRectangle(unsigned char noteNumber, bool *isBlack = 0);
 };

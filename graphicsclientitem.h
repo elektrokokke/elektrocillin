@@ -21,7 +21,7 @@ class GraphicsClientItem : public QObject, public QGraphicsPathItem
 {
     Q_OBJECT
 public:
-    GraphicsClientItem(GraphicsClientItemsClient *clientItemsClient, JackClient *jackClient, bool isMacro, const QString &clientName, int style, int portStyle, QFont font, QGraphicsItem *parent);
+    GraphicsClientItem(GraphicsClientItemsClient *clientItemsClient, JackClient *jackClient, bool isMacro, const QString &clientName, int style, int audioPortStyle, int midiPortStyle, QFont font, QGraphicsItem *parent);
     const QString & getClientName() const;
     const QRectF & getRect() const;
 
@@ -43,7 +43,7 @@ private:
     GraphicsClientItemsClient *clientItemsClient;
     QPointer<JackClient> jackClient;
     QString clientName;
-    int type, portType;
+    int clientStyle, audioPortStyle, midiPortStyle;
     QFont font;
     QRectF rect;
     QGraphicsItem *controlsItem;

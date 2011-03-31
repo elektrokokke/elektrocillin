@@ -8,7 +8,8 @@ GraphicsClientItemsClient::GraphicsClientItemsClient(QGraphicsScene *scene_) :
     JackClient("GraphicsClientItemsClient"),
     scene(scene_),
     clientStyle(3),
-    portStyle(3),
+    audioPortStyle(1),
+    midiPortStyle(3),
     font("Helvetica", 12),
     contextName(RecursiveJackContext::getInstance()->getCurrentContext()->get_name())
 {
@@ -75,14 +76,19 @@ void GraphicsClientItemsClient::loadState(QDataStream &stream)
     RecursiveJackContext::getInstance()->loadCurrentContext(stream, JackClientSerializer::getInstance());
 }
 
-void GraphicsClientItemsClient::setClientStyle(int clientStyle)
+void GraphicsClientItemsClient::setClientStyle(int style)
 {
-    this->clientStyle = clientStyle;
+    clientStyle = style;
 }
 
-void GraphicsClientItemsClient::setPortStyle(int portStyle)
+void GraphicsClientItemsClient::setAudioPortStyle(int style)
 {
-    this->portStyle = portStyle;
+    audioPortStyle = style;
+}
+
+void GraphicsClientItemsClient::setMidiPortStyle(int style)
+{
+    midiPortStyle = style;
 }
 
 void GraphicsClientItemsClient::deleteClient(const QString &clientName)
@@ -166,11 +172,11 @@ void GraphicsClientItemsClient::onClientRegistered(const QString &clientName)
     jack_client_t *client = meta_jack_client_by_name(clientName.toAscii().data());
     JackClient *jackClient = (client ? JackClientSerializer::getInstance()->getClient(client) : 0);
     if (jackClient) {
-        clientItem = jackClient->createClientItem(this, clientStyle, portStyle, font);
+        clientItem = jackClient->createClientItem(this, clientStyle, audioPortStyle, midiPortStyle, font);
         clientItem->setSelected(true);
     } else {
         bool isMacro = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data());
-        clientItem = new GraphicsClientItem(this, 0, isMacro, clientName, clientStyle, portStyle, font, 0);
+        clientItem = new GraphicsClientItem(this, 0, isMacro, clientName, clientStyle, audioPortStyle, midiPortStyle, font, 0);
         QPointF pos;
         if (clientItemPositionMap.contains(clientName)) {
             pos = clientItemPositionMap[clientName];

@@ -241,9 +241,9 @@ void JackClient::setClientItemVisible(bool visible)
     clientItemVisible = visible;
 }
 
-GraphicsClientItem * JackClient::createClientItem(GraphicsClientItemsClient *clientItemsClient, int clientStyle, int portStyle, QFont font)
+GraphicsClientItem * JackClient::createClientItem(GraphicsClientItemsClient *clientItemsClient, int clientStyle, int audioPortStyle, int midiPortStyle, QFont font)
 {
-    GraphicsClientItem *clientItem = new GraphicsClientItem(clientItemsClient, this, false, getClientName(), clientStyle, portStyle, font, 0);
+    GraphicsClientItem *clientItem = new GraphicsClientItem(clientItemsClient, this, false, getClientName(), clientStyle, audioPortStyle, midiPortStyle, font, 0);
     clientItem->setPos(clientItemPosition);
     clientItem->setControlsVisible(clientItemVisible);
     return clientItem;

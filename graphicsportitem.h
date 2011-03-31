@@ -15,9 +15,12 @@ public:
     const QRectF & getRect() const;
     QPointF getConnectionScenePos() const;
 
+    const QString & getDataType() const;
+    bool isAudioType() const;
+
 public slots:
-    void onPortRegistered(QString fullPortName, QString type, int flags);
-    void onPortUnregistered(QString fullPortName, QString type, int flags);
+    void onPortRegistered(QString fullPortName, QString style, int flags);
+    void onPortUnregistered(QString fullPortName, QString style, int flags);
     void onPortConnected(QString sourcePortName, QString destPortName);
     void onPortDisconnected(QString sourcePortName, QString destPortName);
 

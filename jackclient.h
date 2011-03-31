@@ -201,7 +201,7 @@ public:
 
     void setClientItemPosition(QPointF pos);
     void setClientItemVisible(bool visible);
-    virtual GraphicsClientItem * createClientItem(GraphicsClientItemsClient *clientItemsClient, int clientStyle, int portStyle, QFont font);
+    virtual GraphicsClientItem * createClientItem(GraphicsClientItemsClient *clientItemsClient, int clientStyle, int audioPortStyle, int midiPortStyle, QFont font);
     /**
       Returns a QGraphicsItem object that serves as the graphical user interface
       for this client. The default implementation returns 0, which means that the
