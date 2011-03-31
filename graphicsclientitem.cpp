@@ -24,6 +24,12 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsCli
     setFlag(QGraphicsItem::ItemIsSelectable, isModuleItem() || isMacroItem());
     setCursor(Qt::ArrowCursor);
     font.setStyleStrategy(QFont::PreferAntialias);
+    if (isMacroItem()) {
+        setPen(QPen(QBrush(QColor("steelblue")), 3));
+    } else {
+        setPen(QPen(QBrush(Qt::black), 3));
+    }
+    setBrush(QBrush(Qt::white));
     initItem();
     if (jackClient && (controlsItem = jackClient->createGraphicsItem())) {
         controlsItem->setZValue(1);
@@ -261,11 +267,5 @@ void GraphicsClientItem::initItem()
     }
     QPainterPath combinedPath = bodyPath;
 
-    if (isMacroItem()) {
-        setPen(QPen(QBrush(QColor("steelblue")), 3));
-    } else {
-        setPen(QPen(QBrush(Qt::black), 3));
-    }
-    setBrush(QBrush(Qt::white));
     setPath(combinedPath);
 }
