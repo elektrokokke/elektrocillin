@@ -167,6 +167,7 @@ void GraphicsClientItemsClient::onClientRegistered(const QString &clientName)
     JackClient *jackClient = (client ? JackClientSerializer::getInstance()->getClient(client) : 0);
     if (jackClient) {
         clientItem = jackClient->createClientItem(this, clientStyle, portStyle, font);
+        clientItem->setSelected(true);
     } else {
         bool isMacro = RecursiveJackContext::getInstance()->getContextByClientName(clientName.toAscii().data());
         clientItem = new GraphicsClientItem(this, 0, isMacro, clientName, clientStyle, portStyle, font, 0);
