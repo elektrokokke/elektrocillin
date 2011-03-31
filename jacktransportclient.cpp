@@ -26,6 +26,18 @@ JackTransportClient::~JackTransportClient()
     delete getJackThread();
 }
 
+void JackTransportClient::saveState(QDataStream &stream)
+{
+    JackThreadEventProcessorClient::saveState(stream);
+    stream << beatsPerMinute << beatsPerBar << beatType << ticksPerBeat;
+}
+
+void JackTransportClient::loadState(QDataStream &stream)
+{
+    JackThreadEventProcessorClient::loadState(stream);
+    stream >> beatsPerMinute >> beatsPerBar >> beatType >> ticksPerBeat;
+}
+
 QGraphicsItem * JackTransportClient::createGraphicsItem()
 {
     JackTransportGraphicsItem *graphicsItem = new JackTransportGraphicsItem(this);

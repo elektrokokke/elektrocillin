@@ -34,6 +34,9 @@ public:
     JackTransportClient(const QString &clientName, size_t ringBufferSize = 1024);
     virtual ~JackTransportClient();
 
+    virtual void saveState(QDataStream &stream);
+    virtual void loadState(QDataStream &stream);
+
     virtual JackClientFactory * getFactory();
 
     QGraphicsItem * createGraphicsItem();
