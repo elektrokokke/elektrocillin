@@ -97,7 +97,7 @@ void MainWindow::onSceneSelectionChanged()
     int selectedVisibleModules = 0;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
-        if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+        if (GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(*i)) {
             if (clientItem->isMacroItem()) {
                 selectedMacros++;
             } else if (clientItem->isModuleItem()) {
@@ -128,7 +128,7 @@ void MainWindow::on_actionDelete_module_triggered()
         // delete the selected modules (not selected macros!):
         QList<QGraphicsItem*> selectedItems = scene->selectedItems();
         for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
-            if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+            if (GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(*i)) {
                 if (clientItem->isModuleItem()) {
                     scene->deleteClient(clientItem->getClientName());
                 }
@@ -147,7 +147,7 @@ void MainWindow::on_actionDelete_macro_triggered()
         // delete the selected macros (not selected modules!):
         QList<QGraphicsItem*> selectedItems = scene->selectedItems();
         for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
-            if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+            if (GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(*i)) {
                 if (clientItem->isMacroItem()) {
                     scene->deleteClient(clientItem->getClientName());
                 }
@@ -162,7 +162,7 @@ void MainWindow::on_actionShow_module_controls_triggered()
     int selectedVisibleModules = 0;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
-        if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+        if (GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(*i)) {
             if (clientItem->isModuleItem()) {
                 clientItem->setControlsVisible(true);
                 selectedModules++;
@@ -182,7 +182,7 @@ void MainWindow::on_actionHide_module_controls_triggered()
     int selectedVisibleModules = 0;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
-        if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+        if (GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(*i)) {
             if (clientItem->isModuleItem()) {
                 clientItem->setControlsVisible(false);
                 selectedModules++;
@@ -203,7 +203,7 @@ void MainWindow::on_actionZoom_to_triggered()
     QRectF boundingRect;
     QList<QGraphicsItem*> selectedItems = scene->selectedItems();
     for (QList<QGraphicsItem*>::iterator i = selectedItems.begin(); i != selectedItems.end(); i++) {
-        if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+        if (GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(*i)) {
             if (clientItem->isModuleItem()) {
                 clientItem->setControlsVisible(true);
                 selectedModules++;
@@ -225,7 +225,7 @@ void MainWindow::on_actionShow_all_triggered()
     QRectF boundingRect;
     QList<QGraphicsItem*> items = scene->items();
     for (QList<QGraphicsItem*>::iterator i = items.begin(); i != items.end(); i++) {
-        if (qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+        if (dynamic_cast<GraphicsClientItem*>(*i)) {
             QRectF rect = ((*i)->childrenBoundingRect() | (*i)->boundingRect()).translated((*i)->pos());
             boundingRect |= rect;
         }

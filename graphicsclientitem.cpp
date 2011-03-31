@@ -21,8 +21,7 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsCli
     controlsItem(0),
     isMacro(isMacro_)
 {
-    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable);
-    setFlag(QGraphicsItem::ItemIsSelectable, isModuleItem() || isMacroItem());
+    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemSendsScenePositionChanges | QGraphicsItem::ItemIsFocusable | QGraphicsItem::ItemIsSelectable);
     setCursor(Qt::ArrowCursor);
     font.setStyleStrategy(QFont::PreferAntialias);
     if (isMacroItem()) {
@@ -125,9 +124,6 @@ void GraphicsClientItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 void GraphicsClientItem::focusInEvent(QFocusEvent *)
 {
     setZValue(1);
-    if (!isMacroItem() && !isModuleItem()) {
-        scene()->clearSelection();
-    }
 }
 
 void GraphicsClientItem::focusOutEvent(QFocusEvent *)
@@ -141,7 +137,7 @@ void GraphicsClientItem::initItem()
     QList<QGraphicsItem*> children = childItems();
     for (int i = 0; i < children.size(); i++) {
         if (children[i] != controlsItem) {
-            if (GraphicsPortItem *portItem = qgraphicsitem_cast<GraphicsPortItem*>(children[i])) {
+            if (GraphicsPortItem *portItem = dynamic_cast<GraphicsPortItem*>(children[i])) {
                 portItem->deleteLater();
             } else {
                 delete children[i];

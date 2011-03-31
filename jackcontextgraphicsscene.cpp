@@ -112,7 +112,7 @@ void JackContextGraphicsScene::editSelectedMacro()
     // determine if the item in focus is a macro:
     QList<QGraphicsItem*> items = selectedItems();
     for (QList<QGraphicsItem*>::iterator i = items.begin(); i != items.end(); i++) {
-        if (GraphicsClientItem *clientItem = qgraphicsitem_cast<GraphicsClientItem*>(*i)) {
+        if (GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(*i)) {
             if (editMacro(clientItem)) {
                 return;
             }
