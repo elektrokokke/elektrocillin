@@ -153,11 +153,11 @@ bool JackParameterClient::process(jack_nframes_t nframes)
             // adjust time relative to the beginning of this frame:
             if (parameter.time + nframes < lastFrameTime) {
                 // if time is too early, this is in the buffer for too long, adjust time accordingly:
-                parameter.time = lastFrameTime;
+                parameter.time = 0;
             } else {
-                parameter.time = parameter.time + nframes;
+                parameter.time = parameter.time + nframes - lastFrameTime;
             }
-            if (parameter.time < nframes + lastFrameTime) {
+            if (parameter.time < nframes) {
                 // process everything up to the event's time stamp:
                 processMidi(currentFrame, parameter.time);
                 currentFrame = parameter.time;

@@ -57,11 +57,11 @@ bool EventProcessorClient::process(jack_nframes_t nframes)
             // adjust time relative to the beginning of this frame:
             if (eventTime + nframes < lastFrameTime) {
                 // if time is too early, this is in the buffer for too long, adjust time accordingly:
-                eventTime = lastFrameTime;
+                eventTime = 0;
             } else {
-                eventTime = eventTime + nframes;
+                eventTime = eventTime + nframes - lastFrameTime;
             }
-            if (eventTime < lastFrameTime + nframes) {
+            if (eventTime < nframes) {
                 // process everything up to the event's time stamp:
                 processMidi(currentFrame, eventTime);
                 currentFrame = eventTime;

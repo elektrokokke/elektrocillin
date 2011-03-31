@@ -67,7 +67,6 @@ bool MidiProcessorClient::process(jack_nframes_t nframes)
 
 void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
 {
-    jack_nframes_t lastFrameTime = getLastFrameTime();
     // only process the MIDI events between start and end:
     for (jack_nframes_t currentFrame = start; currentFrame < end; ) {
         // get the next midi event, if there is any:
@@ -83,7 +82,7 @@ void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
                 MidiEvent midiEvent;
                 midiEvent.size = jackMidiEvent.size;
                 memcpy(midiEvent.buffer, jackMidiEvent.buffer, jackMidiEvent.size * sizeof(jack_midi_data_t));
-                processMidi(midiEvent, currentFrame + lastFrameTime);
+                processMidi(midiEvent, currentFrame);
             } else {
                 // produce audio until the end of the buffer:
                 processAudio(currentFrame, end);

@@ -65,12 +65,11 @@ bool AudioProcessorClient::process(jack_nframes_t nframes)
 void AudioProcessorClient::processAudio(jack_nframes_t start, jack_nframes_t end)
 {
     if (inputs.size() || outputs.size()) {
-        jack_nframes_t lastFrameTime = getLastFrameTime();
         for (jack_nframes_t currentFrame = start; currentFrame < end; currentFrame++) {
             for (int i = 0; i < inputs.size(); i++) {
                 inputs[i] = inputBuffers[i][currentFrame];
             }
-            processAudio(inputs.data(), outputs.data(), currentFrame + lastFrameTime);
+            processAudio(inputs.data(), outputs.data(), currentFrame);
             for (int i = 0; i < outputs.size(); i++) {
                 outputBuffers[i][currentFrame] = outputs[i];
             }
