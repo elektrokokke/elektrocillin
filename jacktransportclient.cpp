@@ -92,7 +92,6 @@ void JackTransportClient::processAudio(const double *, double *outputs, jack_nfr
         outputs[0] = 0;
         outputs[1] = 0;
     }
-    outputs[0] = (double)time / (1024);
 }
 
 void JackTransportClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
