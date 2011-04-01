@@ -45,12 +45,18 @@ bool EventProcessorClient::postEvents(const QVector<RingBufferEvent*> &events)
 
 bool EventProcessorClient::process(jack_nframes_t nframes)
 {
-    jack_nframes_t lastFrameTime = getLastFrameTime();
-    // get audio port buffers:
+    // get port buffers:
     getPortBuffers(nframes);
-    // get midi port buffer:
     getMidiPortBuffer(nframes);
-    for (jack_nframes_t currentFrame = 0; currentFrame < nframes; ) {
+    // process all events:
+    processEvents(0, nframes, nframes);
+    return true;
+}
+
+bool EventProcessorClient::processEvents(jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes)
+{
+    jack_nframes_t lastFrameTime = getLastFrameTime();
+    for (jack_nframes_t currentFrame = start; currentFrame < end; ) {
         // get the next event from the ring buffer, if there is any:
         if (ringBuffer.hasEvents()) {
             jack_nframes_t eventTime = ringBuffer.peekEventTime();
@@ -61,7 +67,7 @@ bool EventProcessorClient::process(jack_nframes_t nframes)
             } else {
                 eventTime = eventTime + nframes - lastFrameTime;
             }
-            if (eventTime < nframes) {
+            if (eventTime < end) {
                 // process everything up to the event's time stamp:
                 processMidi(currentFrame, eventTime);
                 currentFrame = eventTime;
@@ -71,12 +77,12 @@ bool EventProcessorClient::process(jack_nframes_t nframes)
                 // have the event deleted in the creator thread:
                 ringBuffer.returnEvent(event);
             } else {
-                processMidi(currentFrame, nframes);
-                currentFrame = nframes;
+                processMidi(currentFrame, end);
+                currentFrame = end;
             }
         } else {
-            processMidi(currentFrame, nframes);
-            currentFrame = nframes;
+            processMidi(currentFrame, end);
+            currentFrame = end;
         }
     }
     return true;

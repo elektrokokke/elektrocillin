@@ -1,71 +1,20 @@
 #include "iirmoogfilterclient.h"
 
-IirMoogFilterThread::IirMoogFilterThread(IirMoogFilterClient *client, QObject *parent) :
-    JackThread(client, parent),
-    ringBufferFromClient(0)
-{
-}
-
-void IirMoogFilterThread::setRingBufferFromClient(JackRingBuffer<IirMoogFilter::Parameters> *ringBufferFromClient)
-{
-    this->ringBufferFromClient = ringBufferFromClient;
-}
-
-void IirMoogFilterThread::processDeferred()
-{
-    if (ringBufferFromClient && ringBufferFromClient->readSpace()) {
-        ringBufferFromClient->readAdvance(ringBufferFromClient->readSpace() - 1);
-        IirMoogFilter::Parameters parameters = ringBufferFromClient->read();
-        changedParameters(parameters.frequency * parameters.frequencyPitchBendFactor * parameters.frequencyModulationFactor, parameters.resonance);
-    }
-}
-
 IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter, size_t ringBufferSize) :
-    JackThreadEventProcessorClient(new IirMoogFilterThread(this), clientName, filter, filter, filter, ringBufferSize),
-    iirMoogFilterProcess(filter),
-    ringBufferToThread(ringBufferSize)
+    JackParameterClient(clientName, filter, filter, 0, filter, ringBufferSize),
+    iirMoogFilterProcess(filter)
 {
-    iirMoogFilter = new IirMoogFilter(44100, 1);
-    iirMoogFilter->setParameters(&iirMoogFilterProcess->getParameters());
-    getMoogFilterThread()->setRingBufferFromClient(&ringBufferToThread);
-    QObject::connect(getMoogFilterThread(), SIGNAL(changedParameters(double, double)), this, SLOT(onClientChangedFilterParameters(double,double)));
+    iirMoogFilter = new IirMoogFilter(*filter);
+    QObject::connect(this, SIGNAL(changedParameterValue(int,double)), this, SLOT(onClientChangedParameter(int,double)));
 }
 
 IirMoogFilterClient::~IirMoogFilterClient()
 {
-    // calling close will stop the Jack client and also stop the associated IirMoogFilterThread:
+    // calling close will stop the Jack client:
     close();
     // deleting the filter is now safe, as it is not used anymore (the Jack process thread is stopped):
     delete iirMoogFilterProcess;
     delete iirMoogFilter;
-    // deleting the associated thread is now safe, as it has been stopped:
-    delete getJackThread();
-}
-
-void IirMoogFilterClient::saveState(QDataStream &stream)
-{
-    JackThreadEventProcessorClient::saveState(stream);
-    IirMoogFilter::Parameters parameters = iirMoogFilter->getParameters();
-    stream << parameters.frequency;
-    stream << parameters.frequencyOffsetFactor;
-    stream << parameters.frequencyPitchBendFactor;
-    stream << parameters.frequencyModulationFactor;
-    stream << parameters.frequencyModulationIntensity;
-    stream << parameters.resonance;
-}
-
-void IirMoogFilterClient::loadState(QDataStream &stream)
-{
-    JackThreadEventProcessorClient::loadState(stream);
-    IirMoogFilter::Parameters parameters;
-    stream >> parameters.frequency;
-    stream >> parameters.frequencyOffsetFactor;
-    stream >> parameters.frequencyPitchBendFactor;
-    stream >> parameters.frequencyModulationFactor;
-    stream >> parameters.frequencyModulationIntensity;
-    stream >> parameters.resonance;
-    iirMoogFilter->setParameters(&parameters);
-    iirMoogFilterProcess->setParameters(&parameters);
 }
 
 IirMoogFilter * IirMoogFilterClient::getMoogFilter()
@@ -73,51 +22,26 @@ IirMoogFilter * IirMoogFilterClient::getMoogFilter()
     return iirMoogFilter;
 }
 
-IirMoogFilterThread * IirMoogFilterClient::getMoogFilterThread()
-{
-    return (IirMoogFilterThread*)getJackThread();
-}
-
 QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
 {
-    return new IirMoogFilterGraphicsItem(this, QRectF(0, 0, 600, 420));
+    int padding = 4;
+    QGraphicsRectItem *item = new QGraphicsRectItem();
+    QGraphicsItem *parameterItem = JackParameterClient::createGraphicsItem();
+    QRectF rect = QRect(0, 0, 600, 420);
+    rect = rect.translated(parameterItem->boundingRect().width() + 2 * padding, padding);
+    parameterItem->setPos(padding, padding);
+    parameterItem->setParentItem(item);
+    QGraphicsItem *ourItem = new IirMoogFilterGraphicsItem(this, rect);
+    ourItem->setParentItem(item);
+    item->setRect((rect | parameterItem->boundingRect().translated(parameterItem->pos())).adjusted(-padding, -padding, padding, padding));
+    item->setPen(QPen(QBrush(Qt::black), 1));
+    item->setBrush(QBrush(Qt::white));
+    return item;
 }
 
-bool IirMoogFilterClient::process(jack_nframes_t nframes)
+void IirMoogFilterClient::onClientChangedParameter(int index, double value)
 {
-    // notify the associated thread once each cycle:
-    ringBufferToThread.write(iirMoogFilterProcess->getParameters());
-    wakeJackThread();
-    // do the normal processing:
-    return JackThreadEventProcessorClient::process(nframes);
-}
-
-void IirMoogFilterClient::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
-{
-    // call base implementation:
-    MidiProcessorClient::processNoteOn(channel, noteNumber, velocity, time);
-    // this notification is now done once a cycle in process()
-//    // notify the associated thread:
-//    ringBufferToThread.write(iirMoogFilterProcess->getParameters());
-//    wakeJackThread();
-}
-
-void IirMoogFilterClient::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
-{
-    // call base implementation:
-    MidiProcessorClient::processController(channel, controller, value, time);
-    // this notification is now done once a cycle in process()
-//    // notify the associated thread:
-//    ringBufferToThread.write(iirMoogFilterProcess->getParameters());
-//    wakeJackThread();
-}
-
-void IirMoogFilterClient::onClientChangedFilterParameters(double frequency, double resonance)
-{
-    IirMoogFilter::Parameters parameters = iirMoogFilter->getParameters();
-    parameters.frequency = frequency;
-    parameters.resonance = resonance;
-    iirMoogFilter->setParameters(&parameters);
+    iirMoogFilter->setParameterValue(index, value);
 }
 
 IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client_, const QRectF &rect, QGraphicsItem *parent) :
@@ -132,28 +56,25 @@ IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client
     cutoffResonanceNode->setZValue(10);
     cutoffResonanceNode->setBounds(QRectF(getFrequencyResponseRectangle().topLeft(), QPointF(getFrequencyResponseRectangle().right(), getZeroDecibelY())));
     cutoffResonanceNode->setBoundsScaled(QRectF(QPointF(getLowestHertz(), 1), QPointF(getHighestHertz(), 0)));
-    IirMoogFilter::Parameters parameters = client->getMoogFilter()->getParameters();
-    onClientChangedFilterParameters(parameters.frequency * parameters.frequencyPitchBendFactor * parameters.frequencyModulationFactor, parameters.resonance);
+    onClientChangedParameters();
     QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onGuiChangedFilterParameters(QPointF)));
-    QObject::connect(client->getMoogFilterThread(), SIGNAL(changedParameters(double, double)), this, SLOT(onClientChangedFilterParameters(double,double)));
+    QObject::connect(client, SIGNAL(changedParameters()), this, SLOT(onClientChangedParameters()));
+}
+
+void IirMoogFilterGraphicsItem::onClientChangedParameters()
+{
+    client->getMoogFilter()->computeCoefficients();
+    updateFrequencyResponse(0);
+    if (!cutoffResonanceNode->isMoving()) {
+        cutoffResonanceNode->setXScaled(client->getMoogFilter()->getBaseCutoffFrequency());
+        cutoffResonanceNode->setYScaled(client->getMoogFilter()->getResonance());
+    }
 }
 
 void IirMoogFilterGraphicsItem::onGuiChangedFilterParameters(const QPointF &cutoffResonance)
 {
-    IirMoogFilter::Parameters *parameters = new IirMoogFilter::Parameters();
-    *parameters = client->getMoogFilter()->getParameters();
-    parameters->frequency = cutoffResonance.x();
-    parameters->resonance = cutoffResonance.y();
-    client->postEvent(parameters);
-}
-
-void IirMoogFilterGraphicsItem::onClientChangedFilterParameters(double frequency, double resonance)
-{
-    if (!cutoffResonanceNode->isMoving()) {
-        cutoffResonanceNode->setXScaled(frequency);
-        cutoffResonanceNode->setYScaled(resonance);
-    }
-    updateFrequencyResponse(0);
+    client->changeParameterValue(0, cutoffResonance.x());
+    client->changeParameterValue(1, cutoffResonance.y());
 }
 
 class IirMoogFilterClientFactory : public JackClientFactory

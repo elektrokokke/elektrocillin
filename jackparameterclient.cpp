@@ -1,227 +1,164 @@
 #include "jackparameterclient.h"
+#include "graphicscontinuouscontrolitem.h"
 
-JackParameterClient::JackParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, unsigned int channelMask, size_t ringBufferSize) :
-    MidiProcessorClient(clientName, audioProcessor, midiProcessor, channelMask),
+JackParameterClient::JackParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor, ParameterProcessor *parameterProcessor_, size_t ringBufferSize) :
+    EventProcessorClient(clientName, audioProcessor, midiProcessor, eventProcessor, ringBufferSize),
+    parameterProcessor(parameterProcessor_),
     ringBufferFromProcessToGui(ringBufferSize),
     ringBufferFromGuiToProcess(ringBufferSize),
     thread(new JackParameterThread(this, &ringBufferFromProcessToGui, &ringBufferFromGuiToProcess))
 {
-    QObject::connect(thread, SIGNAL(changedIntParameter(int,int)), this, SLOT(onChangedIntParameter(int,int)));
-    QObject::connect(thread, SIGNAL(changedDoubleParameter(int,double)), this, SLOT(onChangedDoubleParameter(int,double)));
+    QObject::connect(thread, SIGNAL(changedParameterValue(int,double)), this, SLOT(onChangedParameterValue(int,double)));
+    QObject::connect(thread, SIGNAL(changedParameterValue(int,double)), this, SIGNAL(changedParameterValue(int,double)));
+    QObject::connect(thread, SIGNAL(changedParameters()), this, SIGNAL(changedParameters()));
+    for (int i = 0; i < parameterProcessor->getNrOfParameters(); i++) {
+        parameters.append(parameterProcessor->getParameter(i));
+    }
 }
 
 void JackParameterClient::saveState(QDataStream &stream)
 {
-    stream << parameters.size();
     for (int i = 0; i < parameters.size(); i++) {
-        int type = parameters[i].type;
-        stream << type;
-        if (parameters[i].type == TYPE_INT) {
-            stream << parameters[i].intValue;
-        } else {
-            stream << parameters[i].doubleValue;
-        }
+        stream << parameters[i].name;
+        stream << parameters[i].value;
+        stream << parameters[i].min;
+        stream << parameters[i].max;
+        stream << parameters[i].resolution;
     }
 }
 
 void JackParameterClient::loadState(QDataStream &stream)
 {
-    int nrOfParameters;
-    stream >> nrOfParameters;
-    if (nrOfParameters > parameters.size()) {
-        parameters.resize(nrOfParameters);
+    for (int i = 0; i < parameters.size(); i++) {
+        stream >> parameters[i].name;
+        stream >> parameters[i].value;
+        stream >> parameters[i].min;
+        stream >> parameters[i].max;
+        stream >> parameters[i].resolution;
+        parameterProcessor->setParameterValue(i, parameters[i].value);
     }
-    for (int i = 0; i < nrOfParameters; i++) {
-        int type;
-        stream >> type;
-        parameters[i].type = (ParameterType)type;
-        if (parameters[i].type == TYPE_INT) {
-            stream >> parameters[i].intValue;
-        } else {
-            stream >> parameters[i].doubleValue;
-        }
-    }
-    // synchronize the changes to the process thread:
-    ringBufferFromGuiToProcess.write(parameters.data(), parameters.size());
 }
 
-int JackParameterClient::getIntParameter(int parameterId)
+int JackParameterClient::getNrOfParameters() const
+{
+    return parameters.size();
+}
+
+const ParameterProcessor::Parameter & JackParameterClient::getParameter(int parameterId) const
 {
     Q_ASSERT(parameterId < parameters.size());
-    Q_ASSERT(parameters[parameterId].type == TYPE_INT);
-    return parameters[parameterId].intValue;
+    return parameters[parameterId];
 }
 
-double JackParameterClient::getDoubleParameter(int parameterId)
+double JackParameterClient::getParameterValue(int parameterId)
 {
     Q_ASSERT(parameterId < parameters.size());
-    Q_ASSERT(parameters[parameterId].type == TYPE_DOUBLE);
-    return parameters[parameterId].doubleValue;
+    return parameters[parameterId].value;
 }
 
-void JackParameterClient::changeIntParameter(int parameterId, int value)
+QGraphicsItem * JackParameterClient::createGraphicsItem()
+{
+    return new JackParameterGraphicsItem(this);
+}
+
+void JackParameterClient::changeParameterValue(int parameterId, double value)
 {
     Q_ASSERT(parameterId < parameters.size());
-    Q_ASSERT(parameters[parameterId].type == TYPE_INT);
-    parameters[parameterId].intValue = value;
-    parameters[parameterId].time = getEstimatedCurrentTime();
-    // synchronize the change with the process thread:
-    ringBufferFromGuiToProcess.write(parameters[parameterId]);
-}
-
-void JackParameterClient::changeDoubleParameter(int parameterId, double value)
-{
-    Q_ASSERT(parameterId < parameters.size());
-    Q_ASSERT(parameters[parameterId].type == TYPE_DOUBLE);
-    parameters[parameterId].doubleValue = value;
-    parameters[parameterId].time = getEstimatedCurrentTime();
-    // synchronize the change with the process thread:
-    ringBufferFromGuiToProcess.write(parameters[parameterId]);
-}
-
-int JackParameterClient::registerParameter(ParameterType type)
-{
-    Parameter parameter;
-    parameter.id = parameters.size();
-    parameter.type = type;
-    if (type == TYPE_INT) {
-        parameter.intValue = 0;
-    } else {
-        parameter.doubleValue = 0;
-    }
-    parameter.time = 0;
-    parameters.append(parameter);
-    // synchronize the change with the process thread:
-    ringBufferFromGuiToProcess.write(parameter);
-    // return the new parameter id:
-    return parameter.id;
-}
-
-void JackParameterClient::processChangeIntParameter(int parameterId, int value)
-{
-    Q_ASSERT(parameterId < parametersProcess.size());
-    Q_ASSERT(parametersProcess[parameterId].type == TYPE_INT);
-    parametersProcess[parameterId].intValue = value;
-    // synchronization with the GUI thread is postponed until the end of the process cycle...
-}
-
-void JackParameterClient::processChangeDoubleParameter(int parameterId, double value)
-{
-    Q_ASSERT(parameterId < parametersProcess.size());
-    Q_ASSERT(parametersProcess[parameterId].type == TYPE_DOUBLE);
-    parametersProcess[parameterId].doubleValue = value;
-    // synchronization with the GUI thread is postponed until the end of the process cycle...
-}
-
-int JackParameterClient::processGetIntParameter(int parameterId)
-{
-    Q_ASSERT(parameterId < parametersProcess.size());
-    Q_ASSERT(parametersProcess[parameterId].type == TYPE_INT);
-    return parametersProcess[parameterId].intValue;
-}
-
-double JackParameterClient::processGetDoubleParameter(double parameterId)
-{
-    Q_ASSERT(parameterId < parametersProcess.size());
-    Q_ASSERT(parametersProcess[parameterId].type == TYPE_DOUBLE);
-    return parametersProcess[parameterId].doubleValue;
+    ParameterChange change;
+    change.id = parameterId;
+    change.value = value;
+    change.time = getEstimatedCurrentTime();
+    // send the change with the process thread:
+    ringBufferFromGuiToProcess.write(change);
 }
 
 bool JackParameterClient::init()
 {
     thread->start();
-    return MidiProcessorClient::init();
+    return EventProcessorClient::init();
 }
 
 void JackParameterClient::deinit()
 {
     thread->stop();
-    MidiProcessorClient::deinit();
+    EventProcessorClient::deinit();
 }
 
 bool JackParameterClient::process(jack_nframes_t nframes)
 {
-    jack_nframes_t lastFrameTime = getLastFrameTime();
-    // get audio port buffers:
+    // get port buffers:
     getPortBuffers(nframes);
-    // get midi port buffer:
     getMidiPortBuffer(nframes);
-    for (jack_nframes_t currentFrame = 0; currentFrame < nframes; ) {
-        // get the next parameter change from the ring buffer, if there is any:
-        if (ringBufferFromGuiToProcess.readSpace()) {
-            Parameter parameter = ringBufferFromGuiToProcess.peek();
-            // adjust time relative to the beginning of this frame:
-            if (parameter.time + nframes < lastFrameTime) {
-                // if time is too early, this is in the buffer for too long, adjust time accordingly:
-                parameter.time = 0;
-            } else {
-                parameter.time = parameter.time + nframes - lastFrameTime;
-            }
-            if (parameter.time < nframes) {
-                // process everything up to the event's time stamp:
-                processMidi(currentFrame, parameter.time);
-                currentFrame = parameter.time;
-                // process the parameter change:
-                ringBufferFromGuiToProcess.readAdvance(1);
-                Q_ASSERT(parameter.id <= parametersProcess.size());
-                if (parameter.id == parametersProcess.size()) {
-                    // a new parameter has been registered:
-                    parametersProcess.append(parameter);
-                } else {
-                    // an existing parameter has been changed:
-                    parametersProcess[parameter.id] = parameter;
-                }
-            } else {
-                processMidi(currentFrame, nframes);
-                currentFrame = nframes;
-            }
-        } else {
-            processMidi(currentFrame, nframes);
-            currentFrame = nframes;
-        }
-    }
+    // process all parameter changes:
+    processParameters(0, nframes, nframes);
     // synchronize all changes that have been done during this process cycle to the GUI thread:
     synchronizeChangedParametersWithGui();
     return true;
 }
 
-void JackParameterClient::onChangedIntParameter(int parameterId, int value)
+bool JackParameterClient::processParameters(jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes)
 {
-    // a parameter has been changed from the process thread, change it in the GUI thread:
-    Q_ASSERT(parameterId < parameters.size());
-    Q_ASSERT(parameters[parameterId].type == TYPE_INT);
-    // trigger the corresponding signal only if the value has really changed:
-    if (parameters[parameterId].intValue != value) {
-        parameters[parameterId].intValue = value;
-        changedIntParameter(parameterId, value);
+    Q_ASSERT(parameterProcessor);
+    jack_nframes_t lastFrameTime = getLastFrameTime();
+    for (jack_nframes_t currentFrame = start; currentFrame < end; ) {
+        // get the next parameter change from the ring buffer, if there is any:
+        if (ringBufferFromGuiToProcess.readSpace()) {
+            ParameterChange change = ringBufferFromGuiToProcess.peek();
+            Q_ASSERT(change.id < parameterProcessor->getNrOfParameters());
+            // adjust time relative to the beginning of this frame:
+            if (change.time + nframes < lastFrameTime) {
+                // if time is too early, this is in the buffer for too long, adjust time accordingly:
+                change.time = 0;
+            } else {
+                change.time = change.time + nframes - lastFrameTime;
+            }
+            if (change.time < end) {
+                // process everything up to the event's time stamp:
+                processEvents(currentFrame, change.time, nframes);
+                currentFrame = change.time;
+                // process the parameter change:
+                ringBufferFromGuiToProcess.readAdvance(1);
+                parameterProcessor->setParameterValue(change.id, change.value);
+            } else {
+                processEvents(currentFrame, end, nframes);
+                currentFrame = end;
+            }
+        } else {
+            processEvents(currentFrame, end, nframes);
+            currentFrame = end;
+        }
     }
-}
-
-void JackParameterClient::onChangedDoubleParameter(int parameterId, double value)
-{
-    // a parameter has been changed from the process thread, change it in the GUI thread:
-    Q_ASSERT(parameterId < parameters.size());
-    Q_ASSERT(parameters[parameterId].type == TYPE_DOUBLE);
-    // trigger the corresponding signal only if the value has reallychanged:
-    if (parameters[parameterId].doubleValue != value) {
-        parameters[parameterId].doubleValue = value;
-        changedIntParameter(parameterId, value);
-    }
+    return true;
 }
 
 void JackParameterClient::synchronizeChangedParametersWithGui()
 {
     /*
-      Always synchronize all parameters, otherwise process and GUI thread
+      Always synchronize changed parameters, otherwise process and GUI thread
       could become out of sync through parameter changes which are sent both ways
       approximately at the same time.
       */
-    ringBufferFromProcessToGui.write(parametersProcess.data(), parametersProcess.size());
+    for (int i = 0; i < parameterProcessor->getNrOfParameters(); i++) {
+        if (parameterProcessor->hasParameterChanged(i)) {
+            ParameterChange change;
+            change.id = i;
+            change.value = parameterProcessor->getParameter(i).value;
+            change.time = 0;
+            ringBufferFromProcessToGui.write(change);
+        }
+    }
     // wake the associated thread:
     thread->wake();
 }
 
-JackParameterThread::JackParameterThread(JackParameterClient *client, JackRingBuffer<JackParameterClient::Parameter> *ringBufferFromProcessToGui_, JackRingBuffer<JackParameterClient::Parameter> *ringBufferFromGuiToProcess_) :
+void JackParameterClient::onChangedParameterValue(int parameterId, double value)
+{
+    // a parameter has been changed from the process thread, change it in the GUI thread:
+    Q_ASSERT(parameterId < parameters.size());
+    parameters[parameterId].value = value;
+}
+
+JackParameterThread::JackParameterThread(JackParameterClient *client, JackRingBuffer<JackParameterClient::ParameterChange> *ringBufferFromProcessToGui_, JackRingBuffer<JackParameterClient::ParameterChange> *ringBufferFromGuiToProcess_) :
     JackThread(client, 0),
     ringBufferFromProcessToGui(ringBufferFromProcessToGui_),
     ringBufferFromGuiToProcess(ringBufferFromGuiToProcess_)
@@ -230,12 +167,67 @@ JackParameterThread::JackParameterThread(JackParameterClient *client, JackRingBu
 void JackParameterThread::processDeferred()
 {
     // read from the ring buffer and trigger the corresponding signals:
+    bool changes = ringBufferFromProcessToGui->readSpace();
     for (; ringBufferFromProcessToGui->readSpace(); ) {
-        JackParameterClient::Parameter parameter = ringBufferFromProcessToGui->read();
-        if (parameter.type == JackParameterClient::TYPE_INT) {
-            changedIntParameter(parameter.id, parameter.intValue);
-        } else if (parameter.type == JackParameterClient::TYPE_INT) {
-            changedIntParameter(parameter.id, parameter.doubleValue);
+        JackParameterClient::ParameterChange change = ringBufferFromProcessToGui->read();
+        changedParameterValue(change.id, change.value);
+    }
+    if (changes) {
+        changedParameters();
+    }
+}
+
+JackParameterGraphicsItem::JackParameterGraphicsItem(JackParameterClient *client_, QGraphicsItem *parent) :
+    QGraphicsRectItem(parent),
+    client(client_)
+{
+    setFlags(QGraphicsItem::ItemIsFocusable);
+    QObject::connect(client, SIGNAL(changedParameterValue(int,double)), this, SLOT(onClientChangedParameterValue(int,double)));
+    int padding = 4;
+    QRectF rectControls;
+    qreal y = 0;
+    // create controls for editing the client's parameters:
+    for (int i = 0; i < client->getNrOfParameters(); i++) {
+        const ParameterProcessor::Parameter &parameter = client->getParameter(i);
+        if (parameter.min != parameter.max) {
+            GraphicsContinuousControlItem *control = new GraphicsContinuousControlItem(parameter.name, parameter.min, parameter.max, parameter.value, qMin(800.0, qMax(200.0, qAbs(parameter.max - parameter.min) / qMax(parameter.resolution, 0.01))), GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, parameter.resolution, this);
+            QObject::connect(control, SIGNAL(valueChanged(double)), this, SLOT(onGuiChangedParameterValue(double)));
+            control->setPos(QPointF(0, y));
+            y += control->rect().height() + padding;
+            rectControls |= control->rect().translated(control->pos());
+            controls.append(control);
+            mapSenderToId[control] = i;
+        } else {
+            controls.append(0);
         }
+    }
+    setRect(rectControls.adjusted(-padding, -padding, padding, padding));
+}
+
+void JackParameterGraphicsItem::focusInEvent(QFocusEvent * event)
+{
+    setZValue(1);
+}
+
+void JackParameterGraphicsItem::focusOutEvent(QFocusEvent * event)
+{
+    setZValue(0);
+}
+
+void JackParameterGraphicsItem::onGuiChangedParameterValue(double value)
+{
+    // determine the parameter id and the corresponding control by the sender:
+    int id = mapSenderToId.value(sender(), -1);
+    Q_ASSERT(id != -1);
+    // send the change to the client:
+    client->changeParameterValue(id, value);
+}
+
+void JackParameterGraphicsItem::onClientChangedParameterValue(int parameterId, double value)
+{
+    Q_ASSERT(parameterId < controls.size());
+    if (controls[parameterId]) {
+        // reflect the new value in the appropriate control:
+        controls[parameterId]->setValue(value);
     }
 }

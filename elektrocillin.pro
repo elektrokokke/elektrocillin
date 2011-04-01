@@ -176,7 +176,8 @@ HEADERS  += mainwindow.h \
     graphicsclientitemsclient.h \
     jackparameterclient.h \
     graphicsdiscretecontrolitem.h \
-    graphicscontinuouscontrolitem.h
+    graphicscontinuouscontrolitem.h \
+    parameterprocessor.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

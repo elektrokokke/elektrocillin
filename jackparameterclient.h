@@ -1,8 +1,10 @@
 #ifndef JACKPARAMETERCLIENT_H
 #define JACKPARAMETERCLIENT_H
 
-#include "midiprocessorclient.h"
+#include "eventprocessorclient.h"
+#include "parameterprocessor.h"
 #include "jackthread.h"
+#include <QGraphicsRectItem>
 
 class JackParameterThread;
 
@@ -33,92 +35,72 @@ class JackParameterThread;
 
     Note: make sure to always call the appropriately typed methods for a parameter, according to the parameter's registered type.
   */
-class JackParameterClient : public MidiProcessorClient
+class JackParameterClient : public EventProcessorClient
 {
     Q_OBJECT
 public:
-    enum ParameterType {
-        TYPE_INT,
-        TYPE_DOUBLE
-    };
-    struct Parameter {
+    struct ParameterChange {
         int id;
-        ParameterType type;
-        union {
-            int intValue;
-            double doubleValue;
-        };
+        double value;
         jack_nframes_t time;
     };
-    JackParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, unsigned int channelMask = (1 << 16) - 1, size_t ringBufferSize = 1024);
+
+    JackParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor, ParameterProcessor *parameterProcessor, size_t ringBufferSize = 1024);
 
     /**
       These methods save/load the current values of the parameter set.
       */
     virtual void saveState(QDataStream &stream);
+    /**
+      This method should only be called when the client is not active.
+      */
     virtual void loadState(QDataStream &stream);
 
+    int getNrOfParameters() const;
+    const ParameterProcessor::Parameter & getParameter(int parameterId) const;
     /**
-      Use these methods to get the current parameter values from
-      the GUI thread if you do get their values from the corresponding signals below.
+      Use this method to get the current parameter values from
+      the GUI thread if you don't get their values from the corresponding signal below.
       */
-    int getIntParameter(int parameterId);
-    double getDoubleParameter(int parameterId);
+    double getParameterValue(int parameterId);
+
+    /**
+      Reimplemented from JackClient.
+
+      Returns a graphics item that allows changing the registered parameters
+      from the GUI thread.
+      */
+    virtual QGraphicsItem * createGraphicsItem();
 signals:
     /**
-      These signals will be triggered iff the respective parameter's value
+      This signal will be triggered iff the respective parameter's value
       is changed.
+
+      Connect to this signal in the GUI thread to be notified
+      when a parameter has been changed from either the process
+      or the GUI thread.
+
+      Note: the signal is only triggered once each process cycle
+      with the same parameterId.
       */
-    void changedIntParameter(int parameterId, int value);
-    void changedDoubleParameter(int parameterId, double value);
+    void changedParameterValue(int parameterId, double value);
+    /**
+      This signal will be triggered after all changed parameter
+      signals (see above) have been triggered for the last
+      process cycle.
+      */
+    void changedParameters();
 public slots:
     /**
-      Call these slots to communicate parameter changed to
-      the process thread.
+      Connect to or call this slot to communicate parameter changes
+      from the GUI thread to the process thread.
+
+      getParameterValue() will still return the old value until
+      the change has been sent to the process thread and
+      changedParameterValue() has been triggered.
       */
-    void changeIntParameter(int parameterId, int value);
-    void changeDoubleParameter(int parameterId, double value);
+    void changeParameterValue(int parameterId, double value);
 protected:
-    /**
-      Register a parameter with the given type.
-
-      @return a unique numeric identifier of the parameter, which can be
-        used in the other methods accessing parameters
-      */
-    int registerParameter(ParameterType type);
-    /**
-      Call these methods from one of the other process...() methods in derived classes to
-      change a parameter value.
-
-      The given parameter will be synchronized with the non-process/non-RT thread (i.e., the GUI thread).
-
-      If you want to read the current parameter value from the process thread, use the
-      processGetIntParameter() and processGetDoubleParameter() methods.
-
-      Which method you should use is determined by the type with which the parameter has
-      been registered (using the registerParameter() method).
-
-      @param parameterId the numeric identifier of the parameter whose value should be changed,
-        as returned by the registerParameter() method
-      @param value the new value of the parameter in question
-      @param time the time (relative to the current audio buffer) at which the parameter value should change
-      */
-    void processChangeIntParameter(int parameterId, int value);
-    void processChangeDoubleParameter(int parameterId, double value);
-    /**
-      Use these methods from one of the other process...() methods in derived classes to
-      access the current value of a given parameter.
-
-      The returned values will be up-to-date values synchronized with the GUI thread, if called
-      from the processAudio() method of the client's AudioProcessor and from any of the
-      process...() methods of the client's MidiProcessor.
-
-      When a parameter is changed from the GUI thread, this will be reflected there.
-      Changes from the process thread via the processChange...() methods will also be
-      reflected by these methods.
-      */
-    int processGetIntParameter(int parameterId);
-    double processGetDoubleParameter(double parameterId);
     /**
       Reimplemented from MidiProcessorClient.
 
@@ -134,7 +116,7 @@ protected:
       */
     virtual void deinit();
     /**
-      Reimplemented from MidiProcessorClient.
+      Reimplemented from EventProcessorClient.
 
       Normally you do not need to reimplement this method.
       Reimplementing it might be necessary, if you want to handle
@@ -146,43 +128,57 @@ protected:
       if you reimplement this method.
       */
     virtual bool process(jack_nframes_t nframes);
-private slots:
-    /**
-      These slots are connected to the corresponding signals of JackParameterThread
-      to keep the non-process thread set of parameters in sync with the process thread's.
-      */
-    void onChangedIntParameter(int parameterId, int value);
-    void onChangedDoubleParameter(int parameterId, double value);
-private:
-    QVector<Parameter> parameters, parametersProcess;
-    JackRingBuffer<Parameter> ringBufferFromProcessToGui, ringBufferFromGuiToProcess;
-    JackParameterThread *thread;
+
+    virtual bool processParameters(jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes);
 
     void synchronizeChangedParametersWithGui();
+private slots:
+    /**
+      This slot is connected to the corresponding signal of JackParameterThread
+      to keep the non-process thread set of parameters in sync with the process thread's.
+      */
+    void onChangedParameterValue(int parameterId, double value);
+private:
+    ParameterProcessor *parameterProcessor;
+    QVector<ParameterProcessor::Parameter> parameters;
+    JackRingBuffer<ParameterChange> ringBufferFromProcessToGui, ringBufferFromGuiToProcess;
+    JackParameterThread *thread;
 };
 
 class JackParameterThread : public JackThread {
     Q_OBJECT
 public:
-    JackParameterThread(JackParameterClient *client, JackRingBuffer<JackParameterClient::Parameter> *ringBufferFromProcessToGui, JackRingBuffer<JackParameterClient::Parameter> *ringBufferFromGuiToProcess);
+    JackParameterThread(JackParameterClient *client, JackRingBuffer<JackParameterClient::ParameterChange> *ringBufferFromProcessToGui, JackRingBuffer<JackParameterClient::ParameterChange> *ringBufferFromGuiToProcess);
 signals:
     /**
-      Do not connect to these signals. They will be triggered
-      at the end of every process cycle, regardless of wether
-      the parameter's value has been changed or not.
-
-      This is to avoid the parameter sets from both threads to
-      get out of sync.
-
-      Use the JackParameterClient signals instead to be notified
-      only when the values really changed.
+      You do not need to connect to this signal. Connect
+      to JackParameterClient's signal with the same name instead.
+      It will be triggered correspondingly.
       */
-    void changedIntParameter(int parameterId, int value);
-    void changedDoubleParameter(int parameterId, double value);
+    void changedParameterValue(int parameterId, double value);
+    void changedParameters();
 protected:
     void processDeferred();
 private:
-    JackRingBuffer<JackParameterClient::Parameter> *ringBufferFromProcessToGui, *ringBufferFromGuiToProcess;
+    JackRingBuffer<JackParameterClient::ParameterChange> *ringBufferFromProcessToGui, *ringBufferFromGuiToProcess;
+};
+
+class GraphicsContinuousControlItem;
+
+class JackParameterGraphicsItem : public QObject, public QGraphicsRectItem {
+    Q_OBJECT
+public:
+    JackParameterGraphicsItem(JackParameterClient *client, QGraphicsItem *parent = 0);
+protected:
+    virtual void focusInEvent(QFocusEvent * event);
+    virtual void focusOutEvent(QFocusEvent * event);
+private slots:
+    void onGuiChangedParameterValue(double value);
+    void onClientChangedParameterValue(int parameterId, double value);
+private:
+    JackParameterClient *client;
+    QMap<QObject*, int> mapSenderToId;
+    QVector<GraphicsContinuousControlItem*> controls;
 };
 
 #endif // JACKPARAMETERCLIENT_H

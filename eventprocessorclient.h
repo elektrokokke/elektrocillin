@@ -39,6 +39,8 @@ protected:
 
     // reimplemented from MidiProcessorClient:
     virtual bool process(jack_nframes_t nframes);
+
+    virtual bool processEvents(jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes);
     /**
       Reimplement this method to process events if you did not provide an EventProcessor object
       at construction, i.e. if you used the second constructor.

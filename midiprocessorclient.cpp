@@ -57,7 +57,7 @@ bool MidiProcessorClient::init()
 
 bool MidiProcessorClient::process(jack_nframes_t nframes)
 {
-    // get audio port buffers:
+    // get port buffers:
     getPortBuffers(nframes);
     getMidiPortBuffer(nframes);
     // process all MIDI events:

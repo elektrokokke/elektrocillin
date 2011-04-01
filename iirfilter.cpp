@@ -44,11 +44,6 @@ void IirFilter::processAudio(const double *inputs, double *outputs, jack_nframes
     }
 }
 
-bool IirFilter::processEvent(const RingBufferEvent *event, jack_nframes_t time)
-{
-    return false;
-}
-
 double IirFilter::getSquaredAmplitudeResponse(double hertz)
 {
     std::complex<double> z_inv = 1.0 / std::exp(std::complex<double>(0.0, convertHertzToRadians(hertz)));
