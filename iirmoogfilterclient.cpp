@@ -1,7 +1,7 @@
 #include "iirmoogfilterclient.h"
 
 IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter, size_t ringBufferSize) :
-    JackParameterClient(clientName, filter, filter, 0, filter, ringBufferSize),
+    ParameterClient(clientName, filter, filter, 0, filter, ringBufferSize),
     iirMoogFilterProcess(filter)
 {
     iirMoogFilter = new IirMoogFilter(*filter);
@@ -26,7 +26,7 @@ QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
 {
     int padding = 4;
     QGraphicsRectItem *item = new QGraphicsRectItem();
-    QGraphicsItem *parameterItem = JackParameterClient::createGraphicsItem();
+    QGraphicsItem *parameterItem = ParameterClient::createGraphicsItem();
     QRectF rect = QRect(0, 0, 600, 420);
     rect = rect.translated(parameterItem->boundingRect().width() + 2 * padding, padding);
     parameterItem->setPos(padding, padding);

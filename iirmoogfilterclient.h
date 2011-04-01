@@ -3,14 +3,14 @@
 
 #include "eventprocessorclient.h"
 #include "eventprocessorclient.h"
-#include "jackparameterclient.h"
+#include "parameterclient.h"
 #include "iirmoogfilter.h"
 #include "jackringbuffer.h"
 #include "frequencyresponsegraphicsitem.h"
 #include "graphicsnodeitem.h"
 #include <QObject>
 
-class IirMoogFilterClient : public JackParameterClient
+class IirMoogFilterClient : public ParameterClient
 {
     Q_OBJECT
 public:
