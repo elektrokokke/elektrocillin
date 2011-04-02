@@ -21,6 +21,7 @@
  */
 
 #include <QString>
+#include <QVector>
 
 class ParameterProcessor
 {
@@ -33,9 +34,19 @@ public:
         QString name;
         double value, min, max, resolution;
     };
-    virtual int getNrOfParameters() const = 0;
-    virtual const Parameter & getParameter(int index) const = 0;
-    virtual void setParameterValue(int index, double value) = 0;
+
+    ParameterProcessor();
+    ParameterProcessor(const ParameterProcessor &tocopy);
+
+    virtual int registerParameter(const QString &name, double value, double min, double max, double resolution);
+
+    virtual int getNrOfParameters() const;
+    virtual const Parameter & getParameter(int index) const;
+    /**
+      @return true, if the previous value of the parameter with given index
+        differed from the given value, false otherwise
+      */
+    virtual bool setParameterValue(int index, double value);
     /**
       This function should return wether the value of the parameter with the given
       index has been changed since the last call to this function with the same
@@ -48,7 +59,11 @@ public:
       After call to this method another call with the same parameter should
       return false unless the value was changed again between calls.
       */
-    virtual bool hasParameterChanged(int index) = 0;
+    virtual bool hasParameterChanged(int index);
+
+private:
+    QVector<Parameter> parameters;
+    QVector<bool> parametersChanged;
 };
 
 #endif // PARAMETERPROCESSOR_H

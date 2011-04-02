@@ -44,10 +44,7 @@ public:
     virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     // reimplemented from ParameterProcessor:
-    virtual int getNrOfParameters() const;
-    virtual const ParameterProcessor::Parameter & getParameter(int index) const;
-    virtual void setParameterValue(int index, double value);
-    virtual bool hasParameterChanged(int index);
+    virtual bool setParameterValue(int index, double value);
 
     double getBaseCutoffFrequency() const;
     double getResonance() const;
@@ -66,8 +63,6 @@ public:
     void computeCoefficients();
 private:
     unsigned char frequencyController, resonanceController;
-    QVector<ParameterProcessor::Parameter> parameters;
-    QVector<bool> parametersChanged;
     bool recomputeCoefficients;
 };
 
