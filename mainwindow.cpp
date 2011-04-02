@@ -24,7 +24,6 @@
 
 #include <QDebug>
 #include <QFileDialog>
-#include <QGLWidget>
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :

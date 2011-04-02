@@ -56,7 +56,6 @@ private slots:
     void on_actionZoom_to_triggered();
     void on_actionShow_all_triggered();
     void onContextLevelChanged(int level);
-
     void on_actionNew_module_triggered();
 
 private:

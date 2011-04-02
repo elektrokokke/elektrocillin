@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT      += core gui
-QT      += opengl
 
 TARGET = elektrocillin
 TEMPLATE = app
@@ -186,3 +185,6 @@ win32:LIBS += $$quote(c:\\Program Files\\Jack v1.9.6\\lib\\libjack.a) $$quote(c:
 unix:LIBS += -ljack
 
 OTHER_FILES +=
+
+RESOURCES += \
+    elektrocillin.qrc
