@@ -184,6 +184,11 @@ void GraphicsClientItemsClient::setClientItemPositionByName(const QString &clien
     clientItemPositionMap[clientName] = pos;
 }
 
+QSettings * GraphicsClientItemsClient::getSettings()
+{
+    return &settings;
+}
+
 void GraphicsClientItemsClient::onClientRegistered(const QString &clientName)
 {
     // create a client item with that name:

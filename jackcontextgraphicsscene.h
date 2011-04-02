@@ -37,6 +37,7 @@ public:
 
     void saveSession(QDataStream &stream);
     void loadSession(QDataStream &stream);
+    void loadMacro(const QString &fileName);
 
     void changeToCurrentContext();
     void deleteClient(const QString &clientName);
@@ -59,7 +60,7 @@ protected:
 private:
     GraphicsClientItemsClient *graphicsClientItemsClient;
     bool waitForMacroPosition, waitForModulePosition;
-    QString factoryName;
+    QString factoryName, macroFileName;
 
     void createNewMacro(QPointF pos);
     void createNewModule(QString factoryName, QPointF pos);

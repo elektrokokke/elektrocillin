@@ -57,6 +57,7 @@ private slots:
     void on_actionShow_all_triggered();
     void onContextLevelChanged(int level);
     void on_actionNew_module_triggered();
+    void on_actionLoad_macro_triggered();
 
 private:
     Ui::MainWindow *ui;

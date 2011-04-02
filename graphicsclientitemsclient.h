@@ -53,6 +53,8 @@ public:
     void setPositions(const QString &port, const  QPointF &point);
 
     void setClientItemPositionByName(const QString &clientName, QPointF pos);
+
+    static QSettings * getSettings();
 public slots:
     void onClientRegistered(const QString &clientName);
     void onClientUnregistered(const QString &clientName);

@@ -23,6 +23,7 @@
 #include "metajack/metajackcontext.h"
 #include <QMessageBox>
 #include <QApplication>
+#include <QFile>
 
 JackContextGraphicsScene::JackContextGraphicsScene() :
     graphicsClientItemsClient(new GraphicsClientItemsClient(this)),
@@ -48,6 +49,16 @@ void JackContextGraphicsScene::saveSession(QDataStream &stream)
 void JackContextGraphicsScene::loadSession(QDataStream &stream)
 {
     graphicsClientItemsClient->loadState(stream);
+}
+
+void JackContextGraphicsScene::loadMacro(const QString &fileName)
+{
+    macroFileName = fileName;
+    waitForMacroPosition = true;
+    // set a special cursor to show the user what we are waiting for:
+    QApplication::setOverrideCursor(QCursor(Qt::CrossCursor));
+    // also send a message for the user to read:
+    messageChanged("Left-click anywhere in the canvas to place the macro to load. Click with any other mouse button to abort macro creation.");
 }
 
 void JackContextGraphicsScene::changeToCurrentContext()
@@ -186,11 +197,28 @@ void JackContextGraphicsScene::createNewMacro(QPointF pos)
 {
     // create a new wrapper client:
     MetaJackContext *context = (MetaJackContext*)RecursiveJackContext::getInstance()->pushNewContext("macro", 1);
-    QString contextName = context->get_name();
     graphicsClientItemsClient->setClientItemPositionByName(context->getWrapperClientName(), pos);
-    // change to that context:
-    changeToCurrentContext();
-    contextLevelChanged(RecursiveJackContext::getInstance()->getContextStackSize() - 1);
+    // is there anything to load?
+    if (!macroFileName.isNull()) {
+        // load into the new context:
+        QFile file(macroFileName);
+        file.open(QIODevice::ReadOnly);
+        QDataStream stream(&file);
+        // load system client positions and save them in settings:
+        QString contextName = context->get_name();
+        QMap<QString, QPointF> clientItemPositionMap;
+        stream >> clientItemPositionMap;
+        for (QMap<QString, QPointF>::iterator i = clientItemPositionMap.begin(); i != clientItemPositionMap.end(); i++) {
+            graphicsClientItemsClient->getSettings()->setValue("position/" + contextName + "/" + i.key(), i.value().toPoint());
+        }
+        // load the context clients:
+        RecursiveJackContext::getInstance()->loadCurrentContext(stream, JackClientSerializer::getInstance());
+        RecursiveJackContext::getInstance()->popContext();
+    } else {
+        // change to the new context:
+        changeToCurrentContext();
+        contextLevelChanged(RecursiveJackContext::getInstance()->getContextStackSize() - 1);
+    }
 }
 
 void JackContextGraphicsScene::createNewModule(QString factoryName, QPointF pos)

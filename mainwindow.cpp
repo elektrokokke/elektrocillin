@@ -261,3 +261,11 @@ void MainWindow::on_actionNew_module_triggered()
 {
     ui->menuNew_module->exec(QCursor::pos());
 }
+
+void MainWindow::on_actionLoad_macro_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Load macro", QString(), "Elektrocillin macro files (*.elektrocillin)");
+    if (!fileName.isNull()) {
+        ((JackContextGraphicsScene*)ui->graphicsView->scene())->loadMacro(fileName);
+    }
+}
