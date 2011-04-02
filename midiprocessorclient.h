@@ -42,6 +42,10 @@ public:
     void setChannelMask(unsigned int channelMask = (1 << 16) - 1);
     unsigned int getChannelMask() const;
 
+    /**
+      This may only be called from any of the process...() methods!
+      */
+    void writeMidi(const MidiEvent &event, jack_nframes_t time);
 protected:
     /**
       Constructor for subclasses that do not want to use a MidiProcessor,
@@ -97,11 +101,6 @@ protected:
       Override this in subclasses if you did not provide a MidiProcessor in the constructor.
       */
     virtual void processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time);
-
-    /**
-      This may only be called from any of the process...() methods!
-      */
-    void writeMidi(const MidiEvent &event, jack_nframes_t time);
 
     /**
       If you override process(jack_nframes_t nframes) call this function

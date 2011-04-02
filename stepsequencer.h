@@ -23,6 +23,8 @@
 #include "audioprocessor.h"
 #include "parameterprocessor.h"
 
+class MidiProcessorClient;
+
 class StepSequencer : public AudioProcessor, public ParameterProcessor
 {
 public:
@@ -30,8 +32,13 @@ public:
 
     // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
+
+    // for writing Midi output:
+    void setMidiProcessorClient(MidiProcessorClient *midiProcessorClient);
 private:
-    int nrOfSteps;
+    int nrOfSteps, currentStep;
+    double lastBarInput, lastBeatInput;
+    MidiProcessorClient *midiProcessorClient;
 };
 
 #endif // STEPSEQUENCER_H

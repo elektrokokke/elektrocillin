@@ -19,6 +19,8 @@
 
 #include "parameterclient.h"
 #include "graphicscontinuouscontrolitem.h"
+#include <QPen>
+#include <QBrush>
 
 ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor, ParameterProcessor *parameterProcessor_, size_t ringBufferSize) :
     EventProcessorClient(clientName, audioProcessor, midiProcessor, eventProcessor, ringBufferSize),
@@ -201,6 +203,8 @@ ParameterGraphicsItem::ParameterGraphicsItem(ParameterClient *client_, QGraphics
     client(client_)
 {
     setFlags(QGraphicsItem::ItemIsFocusable);
+    setPen(QPen(QBrush(Qt::black), 1));
+    setBrush(QBrush(Qt::white));
     QObject::connect(client, SIGNAL(changedParameterValue(int,double)), this, SLOT(onClientChangedParameterValue(int,double)));
     int padding = 4;
     QRectF rectControls;
@@ -209,9 +213,9 @@ ParameterGraphicsItem::ParameterGraphicsItem(ParameterClient *client_, QGraphics
     for (int i = 0; i < client->getNrOfParameters(); i++) {
         const ParameterProcessor::Parameter &parameter = client->getParameter(i);
         if (parameter.min != parameter.max) {
-            GraphicsContinuousControlItem *control = new GraphicsContinuousControlItem(parameter.name, parameter.min, parameter.max, parameter.value, qMin(800.0, qMax(200.0, qAbs(parameter.max - parameter.min) / qMax(parameter.resolution, 0.01))), GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, parameter.resolution, this);
+            GraphicsContinuousControlItem *control = new GraphicsContinuousControlItem(parameter.name, parameter.min, parameter.max, parameter.value, qMin(800.0, qMax(100.0, qAbs(parameter.max - parameter.min) / qMax(parameter.resolution, 0.01))), GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, parameter.resolution, this);
             QObject::connect(control, SIGNAL(valueChanged(double)), this, SLOT(onGuiChangedParameterValue(double)));
-            control->setPos(QPointF(0, y));
+            control->setPos(QPointF(padding, padding + y));
             y += control->rect().height() + padding;
             rectControls |= control->rect().translated(control->pos());
             controls.append(control);

@@ -22,6 +22,32 @@
 StepSequencerClient::StepSequencerClient(const QString &clientName, StepSequencer *stepSequencer, size_t ringBufferSize) :
     ParameterClient(clientName, stepSequencer, 0, 0, stepSequencer, ringBufferSize)
 {
+    stepSequencer->setMidiProcessorClient(this);
     activateMidiInput(false);
     activateMidiOutput(true);
+}
+
+class StepSequencerClientFactory : public JackClientFactory
+{
+public:
+    StepSequencerClientFactory()
+    {
+        JackClientSerializer::getInstance()->registerFactory(this);
+    }
+    QString getName()
+    {
+        return "Step sequencer";
+    }
+    JackClient * createClient(const QString &clientName)
+    {
+        return new StepSequencerClient(clientName, new StepSequencer(16));
+    }
+    static StepSequencerClientFactory factory;
+};
+
+StepSequencerClientFactory StepSequencerClientFactory::factory;
+
+JackClientFactory * StepSequencerClient::getFactory()
+{
+    return &StepSequencerClientFactory::factory;
 }
