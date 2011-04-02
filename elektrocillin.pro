@@ -88,7 +88,10 @@ SOURCES += main.cpp\
     graphicsclientitemsclient.cpp \
     graphicsdiscretecontrolitem.cpp \
     graphicscontinuouscontrolitem.cpp \
-    parameterclient.cpp
+    parameterclient.cpp \
+    stepsequencerclient.cpp \
+    stepsequencer.cpp \
+    parameterprocessor.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -174,7 +177,9 @@ HEADERS  += mainwindow.h \
     graphicsdiscretecontrolitem.h \
     graphicscontinuouscontrolitem.h \
     parameterprocessor.h \
-    parameterclient.h
+    parameterclient.h \
+    stepsequencerclient.h \
+    stepsequencer.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui
