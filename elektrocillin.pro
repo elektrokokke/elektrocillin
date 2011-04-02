@@ -69,7 +69,6 @@ SOURCES += main.cpp\
     eventprocessorclient.cpp \
     envelope.cpp \
     envelopeclient.cpp \
-    graphicsclientnameitem.cpp \
     graphicsportconnectionitem.cpp \
     metajack/realjackcontext.cpp \
     metajack/recursivejackcontext.cpp \
@@ -151,7 +150,6 @@ HEADERS  += mainwindow.h \
     oscillatorclient.h \
     envelope.h \
     envelopeclient.h \
-    graphicsclientnameitem.h \
     graphicsportconnectionitem.h \
     metajack/realjackcontext.h \
     metajack/metajack.h \
