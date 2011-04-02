@@ -200,16 +200,8 @@ void MidiProcessorClient::processChannelPressure(unsigned char channel, unsigned
 void MidiProcessorClient::writeMidi(const MidiEvent &event, jack_nframes_t time)
 {
     Q_ASSERT(midiOutput);
-    jack_nframes_t lastFrameTime = getLastFrameTime();
-    // adjust time relative to the beginning of this frame:
-    if (time + nframes < lastFrameTime) {
-        // if time is too early, this is in the buffer for too long, adjust time accordingly:
-        time = 0;
-    } else if (time >= lastFrameTime)  {
-        time = nframes - 1;
-    } else {
-        time = time + nframes - lastFrameTime;
-    }
+    Q_ASSERT(time >= 0);
+    Q_ASSERT(time < nframes);
     // write the event to the jack midi output buffer:
     jack_midi_event_write(midiOutputBuffer, time, event.buffer, event.size * sizeof(jack_midi_data_t));
 }
