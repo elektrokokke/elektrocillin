@@ -111,7 +111,7 @@ protected:
 private:
     JackRingBuffer<jack_position_t> ringBufferToThread;
     jack_nframes_t lastTransportFrameTime;
-    double currentBeatTime, beatsPerMinute;
+    double currentBarTime, beatsPerMinute;
     int beatsPerBar, beatType, ticksPerBeat;
     jack_position_t currentPos;
     jack_transport_state_t currentState;

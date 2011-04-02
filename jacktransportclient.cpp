@@ -7,7 +7,7 @@ JackTransportClient::JackTransportClient(const QString &clientName, size_t ringB
     JackThreadEventProcessorClient(new JackTransportThread(this), clientName, QStringList(), QStringList("Beat") + QStringList("Bar"), ringBufferSize),
     ringBufferToThread(ringBufferSize),
     lastTransportFrameTime(0),
-    currentBeatTime(0),
+    currentBarTime(0),
     beatsPerMinute(120),
     beatsPerBar(4),
     beatType(4),
@@ -156,14 +156,15 @@ void JackTransportClient::timebase(jack_transport_state_t state, jack_nframes_t 
     pos->beat_type = beatType;
     pos->ticks_per_beat = ticksPerBeat;
     pos->beats_per_minute = beatsPerMinute;
-    if (new_pos) {
-        if (lastTransportFrameTime + nframes != pos->frame) {
-            double frame = (double)pos->frame;
-            double framesPerMinute = (double)pos->frame_rate * 60.0;
-            double timeInMinutes = frame / framesPerMinute;
-            currentBeatTime = timeInMinutes * beatsPerMinute;
-        }
+
+    if (pos->frame != 0) {
+        // compute the current beat time based on the previous beat time and the current tempo:
+        double incrementInMinutes = ((double)pos->frame - lastTransportFrameTime) / ((double)pos->frame_rate * 60.0);
+        currentBarTime += incrementInMinutes * beatsPerMinute / beatsPerBar;
+    } else {
+        currentBarTime = 0;
     }
+    double currentBeatTime = currentBarTime * beatsPerBar;
     lastTransportFrameTime = pos->frame;
     double tick = currentBeatTime * (double)ticksPerBeat;
     double bar = currentBeatTime / (double)beatsPerBar;
@@ -178,9 +179,6 @@ void JackTransportClient::timebase(jack_transport_state_t state, jack_nframes_t 
     pos->beat = (int)currentBeatTime % beatsPerBar + 1;
     pos->bar = (int)bar + 1;
     pos->bar_start_tick = (double)(pos->bar - 1) * (double)beatsPerBar * (double)ticksPerBeat;
-    // compute the next beat time based on the current tempo:
-    double incrementInMinutes = (double)nframes / ((double)pos->frame_rate * 60.0);
-    currentBeatTime += incrementInMinutes * beatsPerMinute;
 }
 
 void JackTransportClient::timebase(jack_transport_state_t state, jack_nframes_t nframes, jack_position_t *pos, int new_pos, void *arg)
