@@ -41,6 +41,7 @@ void StepSequencer::processAudio(const double *inputs, double *, jack_nframes_t 
 {
     if ((state != JackTransportRolling) && noteActive) {
         midiProcessorClient->writeNoteOff(channel, noteNumber, velocity, time);
+        noteActive = false;
     }
     if (state == JackTransportRolling) {
         // determine wether a new beat has started:
@@ -50,6 +51,7 @@ void StepSequencer::processAudio(const double *inputs, double *, jack_nframes_t 
             // deactivate any active note:
             if (noteActive) {
                 midiProcessorClient->writeNoteOff(channel, noteNumber, velocity, time);
+                noteActive = false;
             }
             if ((step < nrOfSteps) && getParameter(step).value) {
                 // activate the new note:
