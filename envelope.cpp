@@ -96,7 +96,7 @@ double Envelope::getDurationInSeconds() const
     return durationInSeconds;
 }
 
-void Envelope::processNoteOn(unsigned char, unsigned char, unsigned char velocity, jack_nframes_t)
+void Envelope::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char velocity, jack_nframes_t)
 {
     double newVelocity = velocity / 127.0;
     startLevel = previousLevel * this->velocity / newVelocity;
@@ -104,11 +104,14 @@ void Envelope::processNoteOn(unsigned char, unsigned char, unsigned char velocit
     currentPhase = ATTACK;
     this->velocity = newVelocity;
     release = false;
+    this->noteNumber = noteNumber;
 }
 
-void Envelope::processNoteOff(unsigned char, unsigned char, unsigned char, jack_nframes_t)
+void Envelope::processNoteOff(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
-    release = true;
+    if (noteNumber == this->noteNumber) {
+        release = true;
+    }
 }
 
 void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)

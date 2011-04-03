@@ -74,6 +74,7 @@ private:
     Phase currentPhase;
     bool release;
     double startLevel;
+    unsigned char noteNumber;
     //LinearInterpolator interpolator;
     LogarithmicInterpolator interpolator;
 };
