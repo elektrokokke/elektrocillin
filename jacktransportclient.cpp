@@ -116,6 +116,7 @@ void JackTransportClient::processAudio(const double *, double *outputs, jack_nfr
         double beatPosition = currentBeat - (int)currentBeat;
         // bar position is current beat / beats per bar:
         double barPosition  = currentBeat / (double)currentPos.beats_per_bar;
+        barPosition = barPosition - (int)barPosition;
         // stretch these value (which lie in [0:1]) to [-1:1]:
         outputs[0] = beatPosition * 2.0 - 1.0;
         outputs[1] = barPosition * 2.0 - 1.0;
