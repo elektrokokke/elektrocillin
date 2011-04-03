@@ -36,6 +36,7 @@ public:
     // for writing Midi output:
     void setMidiProcessorClient(MidiProcessorClient *midiProcessorClient);
 private:
+    int beatsPerBar;
     int nrOfSteps, currentStep;
     double lastBarInput, lastBeatInput;
     MidiProcessorClient *midiProcessorClient;
