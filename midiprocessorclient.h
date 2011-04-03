@@ -46,6 +46,9 @@ public:
       This may only be called from any of the process...() methods!
       */
     void writeMidi(const MidiEvent &event, jack_nframes_t time);
+    void writeNoteOff(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time);
+    void writeNoteOn(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time);
+
 protected:
     /**
       Constructor for subclasses that do not want to use a MidiProcessor,

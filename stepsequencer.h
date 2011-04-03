@@ -35,11 +35,15 @@ public:
 
     // for writing Midi output:
     void setMidiProcessorClient(MidiProcessorClient *midiProcessorClient);
+
+    void setTransportPosition(jack_transport_state_t state, jack_position_t &position);
 private:
-    int beatsPerBar;
-    int nrOfSteps, currentStep;
-    double lastBarInput, lastBeatInput;
     MidiProcessorClient *midiProcessorClient;
+    int nrOfSteps, stepsPerBeat, lastStep;
+    jack_transport_state_t state;
+    jack_position_t position;
+    bool noteActive;
+    unsigned char channel, noteNumber, velocity;
 };
 
 #endif // STEPSEQUENCER_H

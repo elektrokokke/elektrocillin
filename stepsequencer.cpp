@@ -21,52 +21,53 @@
 #include "midiprocessorclient.h"
 
 StepSequencer::StepSequencer(int nrOfSteps_) :
-    AudioProcessor(QStringList("Bar") + QStringList("Beat"), QStringList()),
+    AudioProcessor(QStringList("Bar"), QStringList()),
+    midiProcessorClient(0),
     nrOfSteps(nrOfSteps_),
-    currentStep(0),
-    lastBarInput(-1),
-    lastBeatInput(-1)
+    stepsPerBeat(4),
+    lastStep(-1),
+    state(JackTransportStopped),
+    noteActive(false),
+    channel(1),
+    noteNumber(50),
+    velocity(127)
 {
     for (int i = 0; i < nrOfSteps; i++) {
         registerParameter(QString("Active %1?").arg(i), 0, 0, 1, 1);
     }
 }
 
-void StepSequencer::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
+void StepSequencer::processAudio(const double *inputs, double *, jack_nframes_t time)
 {
-//    // monitor bar input to see wether to reset current step:
-//    if (lastBarInput > inputs[0]) {
-//        // new bar...
-//        currentStep = 0;
-//    }
-//    lastBarInput = inputs[0];
-    // monitor beat input to see wether to increase the current step:
-    if (lastBeatInput > inputs[1]) {
-        MidiProcessorClient::MidiEvent event;
-        unsigned char channel = 1;
-        unsigned char note = 50;
-        unsigned char velocity = 127;
-
-        // send note off:
-        event.size = 3;
-        event.buffer[0] = 0x80 + channel;
-        event.buffer[1] = note;
-        event.buffer[2] = velocity;
-        midiProcessorClient->writeMidi(event, time);
-
-        // send note on:
-        event.size = 3;
-        event.buffer[0] = 0x90 + channel;
-        event.buffer[1] = note;
-        event.buffer[2] = velocity;
-        midiProcessorClient->writeMidi(event, time);
-
-        currentStep++;
+    if ((state != JackTransportRolling) && noteActive) {
+        midiProcessorClient->writeNoteOff(channel, noteNumber, velocity, time);
     }
-    lastBeatInput = inputs[1];
+    if (state == JackTransportRolling) {
+        // determine wether a new beat has started:
+        double beat = 0.5 * (inputs[0] + 1.0) * position.beats_per_bar;
+        int step = (int)(beat * stepsPerBeat);
+        if (step != lastStep) {
+            // deactivate any active note:
+            if (noteActive) {
+                midiProcessorClient->writeNoteOff(channel, noteNumber, velocity, time);
+            }
+            if ((step < nrOfSteps) && getParameter(step).value) {
+                // activate the new note:
+                midiProcessorClient->writeNoteOn(channel, noteNumber, velocity, time);
+                noteActive = true;
+            }
+        }
+        lastStep = step;
+    }
 }
 
 void StepSequencer::setMidiProcessorClient(MidiProcessorClient *midiProcessorClient)
 {
     this->midiProcessorClient = midiProcessorClient;
+}
+
+void StepSequencer::setTransportPosition(jack_transport_state_t state, jack_position_t &position)
+{
+    this->state = state;
+    this->position = position;
 }

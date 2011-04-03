@@ -39,6 +39,7 @@ ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audi
 
 void ParameterClient::saveState(QDataStream &stream)
 {
+    EventProcessorClient::saveState(stream);
     for (int i = 0; i < parameters.size(); i++) {
         stream << parameters[i].name;
         stream << parameters[i].value;
@@ -50,6 +51,7 @@ void ParameterClient::saveState(QDataStream &stream)
 
 void ParameterClient::loadState(QDataStream &stream)
 {
+    EventProcessorClient::loadState(stream);
     for (int i = 0; i < parameters.size(); i++) {
         stream >> parameters[i].name;
         stream >> parameters[i].value;
@@ -227,12 +229,12 @@ ParameterGraphicsItem::ParameterGraphicsItem(ParameterClient *client_, QGraphics
     setRect(rectControls.adjusted(-padding, -padding, padding, padding));
 }
 
-void ParameterGraphicsItem::focusInEvent(QFocusEvent * event)
+void ParameterGraphicsItem::focusInEvent(QFocusEvent *)
 {
     setZValue(1);
 }
 
-void ParameterGraphicsItem::focusOutEvent(QFocusEvent * event)
+void ParameterGraphicsItem::focusOutEvent(QFocusEvent *)
 {
     setZValue(0);
 }

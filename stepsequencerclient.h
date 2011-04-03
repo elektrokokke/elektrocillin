@@ -30,6 +30,11 @@ public:
 
     // reimplemented from JackClient:
     virtual JackClientFactory * getFactory();
+
+protected:
+    virtual bool process(jack_nframes_t nframes);
+private:
+    StepSequencer *stepSequencer;
 };
 
 #endif // STEPSEQUENCERCLIENT_H

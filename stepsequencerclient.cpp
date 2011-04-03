@@ -19,12 +19,22 @@
 
 #include "stepsequencerclient.h"
 
-StepSequencerClient::StepSequencerClient(const QString &clientName, StepSequencer *stepSequencer, size_t ringBufferSize) :
-    ParameterClient(clientName, stepSequencer, 0, 0, stepSequencer, ringBufferSize)
+StepSequencerClient::StepSequencerClient(const QString &clientName, StepSequencer *stepSequencer_, size_t ringBufferSize) :
+    ParameterClient(clientName, stepSequencer_, 0, 0, stepSequencer_, ringBufferSize),
+    stepSequencer(stepSequencer_)
 {
     stepSequencer->setMidiProcessorClient(this);
     activateMidiInput(false);
     activateMidiOutput(true);
+}
+
+bool StepSequencerClient::process(jack_nframes_t nframes)
+{
+    // get the current transport state and send it to the associated thread:
+    jack_position_t position;
+    jack_transport_state_t state = jack_transport_query(getClient(), &position);
+    stepSequencer->setTransportPosition(state, position);
+    return ParameterClient::process(nframes);
 }
 
 class StepSequencerClientFactory : public JackClientFactory

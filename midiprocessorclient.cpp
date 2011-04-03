@@ -206,6 +206,28 @@ void MidiProcessorClient::writeMidi(const MidiEvent &event, jack_nframes_t time)
     jack_midi_event_write(midiOutputBuffer, time, event.buffer, event.size * sizeof(jack_midi_data_t));
 }
 
+void MidiProcessorClient::writeNoteOff(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
+{
+    // create the midi message:
+    MidiProcessorClient::MidiEvent event;
+    event.size = 3;
+    event.buffer[0] = 0x80 + channel;
+    event.buffer[1] = note;
+    event.buffer[2] = velocity;
+    writeMidi(event, time);
+}
+
+void MidiProcessorClient::writeNoteOn(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
+{
+    // create the midi message:
+    MidiProcessorClient::MidiEvent event;
+    event.size = 3;
+    event.buffer[0] = 0x90 + channel;
+    event.buffer[1] = note;
+    event.buffer[2] = velocity;
+    writeMidi(event, time);
+}
+
 void MidiProcessorClient::getMidiPortBuffer(jack_nframes_t nframes)
 {
     if (midiInput) {
