@@ -28,16 +28,7 @@
 #include "linearinterpolator.h"
 #include "logarithmicinterpolator.h"
 
-class EnvelopeInterpolator : public LogarithmicInterpolator
-{
-public:
-    EnvelopeInterpolator();
-    // change the behaviour when adding and removing control points:
-    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
-    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
-};
-
-class Envelope : public AudioProcessor, public MidiProcessor, public EventProcessor, public InterpolatorProcessor, public ParameterProcessor
+class Envelope : public AudioProcessor, public MidiProcessor, public EventProcessor, public ParameterProcessor, public LogarithmicInterpolator
 {
 public:
     enum Phase {
@@ -62,9 +53,6 @@ public:
     void save(QDataStream &stream) const;
     void load(QDataStream &stream);
 
-    Interpolator * getInterpolator();
-    void copyInterpolatorFrom(const Envelope *envelope);
-
     int getSustainIndex() const;
     void setSustainIndex(int sustainIndex);
 
@@ -79,6 +67,12 @@ public:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimpemented from ParameterProcessor:
     virtual bool setParameterValue(int index, double value);
+    // reimplemented from Interpolator:
+    // change the behaviour when changing control points:
+    virtual void changeControlPoint(int index, double x, double y);
+    // change the behaviour when adding and removing control points:
+    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
+    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
 private:
     double durationInSeconds;
     double currentTime, previousLevel, velocity;
@@ -87,7 +81,6 @@ private:
     bool release;
     double startLevel;
     unsigned char noteNumber;
-    EnvelopeInterpolator interpolator;
 };
 
 #endif // ENVELOPE_H
