@@ -2,7 +2,7 @@
 #define LINEARMORPHOSCILLATORCLIENT_H
 
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -27,7 +27,7 @@
 class LinearMorphOscillatorClient : public OscillatorClient
 {
 public:
-    LinearMorphOscillatorClient(const QString &clientName, double frequencyModulationIntensity = 2.0/12.0, size_t ringBufferSize = 1024);
+    LinearMorphOscillatorClient(const QString &clientName, LinearMorphOscillator *oscillator, size_t ringBufferSize = 1024);
     virtual ~LinearMorphOscillatorClient();
 
     virtual JackClientFactory * getFactory();

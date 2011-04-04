@@ -2,7 +2,7 @@
 #define INTEGRALOSCILLATORCLIENT_H
 
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -28,7 +28,7 @@
 class PolynomialOscillatorClient : public OscillatorClient
 {
 public:
-    PolynomialOscillatorClient(const QString &clientName, size_t ringBufferSize = 1024);
+    PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *oscillator, size_t ringBufferSize = 1024);
     virtual ~PolynomialOscillatorClient();
 
     virtual JackClientFactory * getFactory();

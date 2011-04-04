@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -57,7 +57,7 @@ bool PolynomialOscillator::processEvent(const RingBufferEvent *event, jack_nfram
         computeIntegrals();
         return true;
     } else {
-        return Oscillator::processEvent(event, time);
+        return false;
     }
 }
 

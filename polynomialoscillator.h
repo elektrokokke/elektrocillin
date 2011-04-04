@@ -2,7 +2,7 @@
 #define INTEGRALOSCILLATOR_H
 
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -25,7 +25,7 @@
 #include "polynomialinterpolator.h"
 #include <QQueue>
 
-class PolynomialOscillator : public Oscillator, public InterpolatorProcessor
+class PolynomialOscillator : public Oscillator, public EventProcessor, public InterpolatorProcessor
 {
 public:
     PolynomialOscillator(int nrOfIntegrations, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
@@ -33,7 +33,7 @@ public:
     PolynomialInterpolator * getPolynomialInterpolator();
     void setPolynomialInterpolator(const PolynomialInterpolator &interpolator);
 
-    // Reimplemented from Oscillator:
+    // Reimplemented from EventProcessor:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 protected:
     double valueAtPhase(double normalizedPhase);

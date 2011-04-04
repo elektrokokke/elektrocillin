@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -22,12 +22,18 @@
 #include <QtGlobal>
 
 Oscillator::Oscillator(double sampleRate, const QStringList &additionalInputPortNames) :
-    AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
-    tuneController(3),
-    gain(1),
-    tuneInCents(0),
-    frequencyModulationIntensity(2)
+    AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate)
 {
+    registerParameter("Gain", 1, 0, 1, 0.01);
+    registerParameter("Octave", 0, -3, 3, 1);
+    registerParameter("Tune (cents)", 0, -100, 100, 1);
+    registerParameter("Pitch mod. intensity", 12, 0, 24, 1);
+    // maximum frequency modulation by pitch bend input in semitones (default is two semitones)
+    registerParameter("Pitch bend modulation intensity", 2, 0, 12, 1);
+    registerParameter("MIDI tune controller", 3, 0, 127, 1);
+    // uneditable parameters for cutoff modulation from audio, pitch bend and controller, and for resonance modulation from audio and controller:
+    registerParameter("Pitch bend", 0, 0, 0, 0);
+    registerParameter("Frequency modulation", 0, 0, 0, 0);
     init();
 }
 
@@ -38,32 +44,9 @@ Oscillator::~Oscillator()
 Oscillator & Oscillator::operator=(const Oscillator &oscillator)
 {
     // copy all relevant attributes of the given oscillator:
-    tuneController = oscillator.tuneController;
-    gain = oscillator.gain;
-    tuneInCents = oscillator.tuneInCents;
-    frequencyModulationIntensity = oscillator.frequencyModulationIntensity;
+    ParameterProcessor::operator =(oscillator);
     init();
     return *this;
-}
-
-void Oscillator::save(QDataStream &stream) const
-{
-    stream << tuneController << gain << frequency << tuneInCents << frequencyModulationIntensity << normalizedFrequency;
-}
-
-void Oscillator::load(QDataStream &stream){
-    stream >> tuneController >> gain >> frequency >> tuneInCents >> frequencyModulationIntensity >> normalizedFrequency;
-    init();
-}
-
-void Oscillator::setDetuneController(unsigned char controller)
-{
-    tuneController = controller;
-}
-
-unsigned char Oscillator::getDetuneController() const
-{
-    return tuneController;
 }
 
 void Oscillator::setSampleRate(double sampleRate)
@@ -78,13 +61,14 @@ void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned
 
 void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
 {
-    frequencyPitchBendFactor = computePitchBendFactorFromMidiPitch(frequencyModulationFactorBase, value);
+    int pitchCentered = (int)value - 0x2000;
+    setParameterValue(6, (double)pitchCentered / 8192.0);
 }
 
 void Oscillator::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
-    if (controller == tuneController) {
-        setTune(((double)value - 64.0) / 128.0 * 200.0);
+    if (controller == qRound(getParameter(5).value)) {
+        setParameterValue(2, ((double)value - 64.0) / 128.0 * 200.0);
     } else {
         MidiProcessor::processController(channel, controller, value, time);
     }
@@ -93,63 +77,15 @@ void Oscillator::processController(unsigned char channel, unsigned char controll
 void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     // consider frequency modulation input:
-    frequencyModulationFactor = pow(frequencyModulationFactorBase, inputs[0]);
+    setParameterValue(7, inputs[0]);
     computeNormalizedFrequency();
     double phase2 = phase + normalizedFrequency;
     if (phase2 >= 1) {
         phase2 -= 1;
     }
     // compute the oscillator output:
-    //outputs[0] = valueAtPhase(0.5 * (phase + phase2));
-    outputs[0] = gain * valueAtPhase(phase);
+    outputs[0] = getParameter(0).value * valueAtPhase(phase);
     phase = phase2;
-}
-
-bool Oscillator::processEvent(const RingBufferEvent *event, jack_nframes_t)
-{
-    if (const ChangeGainEvent *event_ = dynamic_cast<const ChangeGainEvent*>(event)) {
-        setGain(event_->gain);
-        return true;
-    } else if (const ChangeTuneEvent *event_ = dynamic_cast<const ChangeTuneEvent*>(event)) {
-        setTune(event_->tune);
-        return true;
-    } else if (const ChangePitchModulationIntensityEvent *event_ = dynamic_cast<const ChangePitchModulationIntensityEvent*>(event)) {
-        setPitchModulationIntensity(event_->halfTones);
-        return true;
-    }
-    return false;
-}
-
-void Oscillator::setGain(double gain)
-{
-    this->gain = gain;
-}
-
-double Oscillator::getGain() const
-{
-    return gain;
-}
-
-double Oscillator::getPitchModulationIntensity() const
-{
-    return frequencyModulationIntensity;
-}
-
-void Oscillator::setPitchModulationIntensity(double halfTones)
-{
-    frequencyModulationIntensity = halfTones;
-    frequencyModulationFactorBase = pow(2.0, frequencyModulationIntensity / 12.0);
-}
-
-void Oscillator::setTune(double cents)
-{
-    tuneInCents = cents;
-    frequencyDetuneFactor = pow(2.0, cents / 1200.0);
-}
-
-double Oscillator::getTune() const
-{
-    return tuneInCents;
 }
 
 double Oscillator::getNormalizedFrequency() const
@@ -164,7 +100,13 @@ double Oscillator::valueAtPhase(double phase)
 
 void Oscillator::computeNormalizedFrequency()
 {
-    normalizedFrequency = frequency * frequencyDetuneFactor * frequencyPitchBendFactor * frequencyModulationFactor / getSampleRate();
+    double octave = getParameter(1).value;
+    double tune = getParameter(2).value;
+    double pitchModulationIntensity = getParameter(3).value;
+    double pitchBendIntensity = getParameter(4).value;
+    double pitchBend = getParameter(6).value;
+    double pitchModulation = getParameter(7).value;
+    normalizedFrequency = frequency * pow(2.0, octave + pitchModulation * pitchModulationIntensity / 12.0 + tune / 1200.0 + pitchBend * pitchBendIntensity / 12.0) / getSampleRate();
     if (normalizedFrequency < 0.0) {
         normalizedFrequency = 0;
     } else if (normalizedFrequency > 0.5) {
@@ -174,14 +116,8 @@ void Oscillator::computeNormalizedFrequency()
 
 void Oscillator::init()
 {
-    setDetuneController(tuneController);
-    setGain(gain);
-    setTune(tuneInCents);
-    setPitchModulationIntensity(frequencyModulationIntensity);
     // set derived attributes:
     phase = 0;
     frequency = 440;
-    frequencyModulationFactor = 1;
-    frequencyPitchBendFactor = 1;
     computeNormalizedFrequency();
 }

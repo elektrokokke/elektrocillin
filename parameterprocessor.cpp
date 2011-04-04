@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -26,7 +26,14 @@ ParameterProcessor::ParameterProcessor()
 ParameterProcessor::ParameterProcessor(const ParameterProcessor &tocopy) :
     parameters(tocopy.parameters),
     parametersChanged(tocopy.parametersChanged)
- {
+{
+}
+
+ParameterProcessor & ParameterProcessor::operator=(const ParameterProcessor &parameterProcessor)
+{
+    parameters = parameterProcessor.parameters;
+    parametersChanged = parameterProcessor.parametersChanged;
+    return *this;
 }
 
 int ParameterProcessor::registerParameter(const QString &name, double value, double min, double max, double resolution)

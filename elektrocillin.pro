@@ -91,7 +91,10 @@ SOURCES += main.cpp\
     parameterclient.cpp \
     stepsequencerclient.cpp \
     stepsequencer.cpp \
-    parameterprocessor.cpp
+    parameterprocessor.cpp \
+    reverb.cc \
+    zitareverbclient.cpp \
+    pareq.cc
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -179,7 +182,10 @@ HEADERS  += mainwindow.h \
     parameterprocessor.h \
     parameterclient.h \
     stepsequencerclient.h \
-    stepsequencer.h
+    stepsequencer.h \
+    reverb.h \
+    zitareverbclient.h \
+    pareq.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

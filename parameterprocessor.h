@@ -2,7 +2,7 @@
 #define PARAMETERPROCESSOR_H
 
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -37,6 +37,8 @@ public:
 
     ParameterProcessor();
     ParameterProcessor(const ParameterProcessor &tocopy);
+
+    ParameterProcessor & operator=(const ParameterProcessor &parameterProcessor);
 
     virtual int registerParameter(const QString &name, double value, double min, double max, double resolution);
 

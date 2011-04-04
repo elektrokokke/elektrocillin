@@ -2,7 +2,7 @@
 #define FREQUENCYRESPONSEGRAPHICSITEM_H
 
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 

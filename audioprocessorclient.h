@@ -2,7 +2,7 @@
 #define SAMPLEDCLIENT_H
 
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -156,7 +156,9 @@ private:
     AudioProcessor *audioProcessor;
     QStringList inputPortNames, outputPortNames;
     QVector<jack_port_t*> inputPorts, outputPorts;
+protected:
     QVector<jack_default_audio_sample_t*> inputBuffers, outputBuffers;
+private:
     QVector<double> inputs, outputs;
 };
 

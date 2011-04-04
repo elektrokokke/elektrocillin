@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -21,8 +21,8 @@
 #include <cmath>
 #include <QPen>
 
-LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientName, double frequencyModulationIntensity, size_t ringBufferSize) :
-    OscillatorClient(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator(), frequencyModulationIntensity), ringBufferSize)
+LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientName, LinearMorphOscillator *oscillator, size_t ringBufferSize) :
+    OscillatorClient(clientName, oscillator, oscillator, ringBufferSize)
 {
     QVector<double> xx, yy;
     xx.append(0);
@@ -182,7 +182,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new LinearMorphOscillatorClient(clientName);
+        return new LinearMorphOscillatorClient(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator()));
     }
     static LinearMorphOscillatorClientFactory factory;
 };

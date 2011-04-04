@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -35,7 +35,7 @@ IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
     // maximum frequency modulation in semitones (default is one octave)
     registerParameter("Frequency modulation intensity", 12, 1, 36, 1);
     // maximum frequency modulation by pitch bend input in semitones (default is two semitones)
-    registerParameter("Pitch bend modulation intensity", 2, 1, 12, 1);
+    registerParameter("Pitch bend modulation intensity", 2, 0, 12, 1);
     // maximum frequency modulation by Midi controller in semitones (default is one octave)
     registerParameter("Midi controller modulation intensity", 12, 1, 36, 1);
     // uneditable parameters for cutoff modulation from audio, pitch bend and controller, and for resonance modulation from audio and controller:

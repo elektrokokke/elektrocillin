@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -149,7 +149,6 @@ void GraphicsClientItem::focusInEvent(QFocusEvent *)
         topSibling = scene()->items().first()->topLevelItem();
     }
     Q_ASSERT(topSibling->parentItem() == parentItem());
-    GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(topSibling);
     setZValue(topSibling->zValue() + 1);
 }
 

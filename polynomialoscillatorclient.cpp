@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Arne Jacobs
+    Copyright 2011 Arne Jacobs <jarne@jarne.de>
 
     This file is part of elektrocillin.
 
@@ -19,8 +19,8 @@
 
 #include "polynomialoscillatorclient.h"
 
-PolynomialOscillatorClient::PolynomialOscillatorClient(const QString &clientName, size_t ringBufferSize) :
-    OscillatorClient(clientName, new PolynomialOscillator(3), ringBufferSize),
+PolynomialOscillatorClient::PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *oscillator, size_t ringBufferSize) :
+    OscillatorClient(clientName, oscillator, oscillator, ringBufferSize),
     oscillator(3)
 {
 }
@@ -133,7 +133,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new PolynomialOscillatorClient(clientName);
+        return new PolynomialOscillatorClient(clientName, new PolynomialOscillator(3));
     }
     static IntegralOscillatorClientFactory factory;
 };
