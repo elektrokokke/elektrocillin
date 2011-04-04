@@ -51,6 +51,7 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsCli
     setBrush(QBrush(Qt::white));
     initItem();
     if (jackClient && (controlsItem = jackClient->createGraphicsItem())) {
+        controlsItem->setFlag(QGraphicsItem::ItemIsFocusable, true);
         controlsItem->setZValue(1);
         controlsItem->setVisible(false);
         controlsItem->setParentItem(this);
