@@ -32,12 +32,12 @@ public:
 
       This object takes ownership of the given Oscillator object, i.e., it will be deleted at destruction time.
       */
-    OscillatorClient(const QString &clientName, Oscillator *oscillator, EventProcessor *eventProcessor, size_t ringBufferSize = 1024);
+    OscillatorClient(const QString &clientName, Oscillator *processOscillator, Oscillator *guiOscillator, EventProcessor *eventProcessor, size_t ringBufferSize = 1024);
     virtual ~OscillatorClient();
 
     virtual JackClientFactory * getFactory();
 private:
-    Oscillator *oscillatorProcess;
+    Oscillator *processOscillator, *guiOscillator;
 };
 
 #endif // OSCILLATORCLIENT_H

@@ -43,6 +43,7 @@ public:
     virtual int registerParameter(const QString &name, double value, double min, double max, double resolution);
 
     virtual int getNrOfParameters() const;
+    virtual Parameter & getParameter(int index);
     virtual const Parameter & getParameter(int index) const;
     /**
       @return true, if the previous value of the parameter with given index

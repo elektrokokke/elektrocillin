@@ -19,11 +19,11 @@
 
 #include "iirmoogfilterclient.h"
 
-IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter, size_t ringBufferSize) :
-    ParameterClient(clientName, filter, filter, 0, filter, ringBufferSize),
-    iirMoogFilterProcess(filter)
+IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilter *processFilter_, IirMoogFilter *guiFilter_, size_t ringBufferSize) :
+    ParameterClient(clientName, processFilter_, processFilter_, 0, processFilter_, guiFilter_, ringBufferSize),
+    processFilter(processFilter_),
+    guiFilter(guiFilter_)
 {
-    iirMoogFilter = new IirMoogFilter(*filter);
     QObject::connect(this, SIGNAL(changedParameterValue(int,double)), this, SLOT(onClientChangedParameter(int,double)));
 }
 
@@ -32,13 +32,13 @@ IirMoogFilterClient::~IirMoogFilterClient()
     // calling close will stop the Jack client:
     close();
     // deleting the filter is now safe, as it is not used anymore (the Jack process thread is stopped):
-    delete iirMoogFilterProcess;
-    delete iirMoogFilter;
+    delete processFilter;
+    delete guiFilter;
 }
 
 IirMoogFilter * IirMoogFilterClient::getMoogFilter()
 {
-    return iirMoogFilter;
+    return guiFilter;
 }
 
 QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
@@ -60,7 +60,7 @@ QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
 
 void IirMoogFilterClient::onClientChangedParameter(int index, double value)
 {
-    iirMoogFilter->setParameterValue(index, value);
+    guiFilter->setParameterValue(index, value);
 }
 
 IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client_, const QRectF &rect, QGraphicsItem *parent) :
@@ -109,7 +109,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new IirMoogFilterClient(clientName, new IirMoogFilter(44100, 1));
+        return new IirMoogFilterClient(clientName, new IirMoogFilter(44100, 1), new IirMoogFilter(44100, 1));
     }
     static IirMoogFilterClientFactory factory;
 };

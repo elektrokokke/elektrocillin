@@ -21,8 +21,8 @@
 #include <cmath>
 #include <QPen>
 
-LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientName, LinearMorphOscillator *oscillator, size_t ringBufferSize) :
-    OscillatorClient(clientName, oscillator, oscillator, ringBufferSize)
+LinearMorphOscillatorClient::LinearMorphOscillatorClient(const QString &clientName, LinearMorphOscillator *processOscillator, LinearMorphOscillator *guiOscillator, size_t ringBufferSize) :
+    OscillatorClient(clientName, processOscillator, guiOscillator, processOscillator, ringBufferSize)
 {
     QVector<double> xx, yy;
     xx.append(0);
@@ -182,7 +182,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new LinearMorphOscillatorClient(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator()));
+        return new LinearMorphOscillatorClient(clientName, new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator()), new LinearMorphOscillator(LinearInterpolator(), LinearInterpolator()));
     }
     static LinearMorphOscillatorClientFactory factory;
 };

@@ -64,7 +64,7 @@ public:
         jack_nframes_t time;
     };
 
-    ParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor, ParameterProcessor *parameterProcessor, size_t ringBufferSize = 1024);
+    ParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor, ParameterProcessor *processParameterProcessor, ParameterProcessor *guiParameterProcessor, size_t ringBufferSize = 1024);
 
     /**
       These methods save/load the current values of the parameter set.
@@ -76,12 +76,11 @@ public:
     virtual void loadState(QDataStream &stream);
 
     int getNrOfParameters() const;
-    const ParameterProcessor::Parameter & getParameter(int parameterId) const;
     /**
       Use this method to get the current parameter values from
       the GUI thread if you don't get their values from the corresponding signal below.
       */
-    double getParameterValue(int parameterId);
+    const ParameterProcessor::Parameter & getParameter(int parameterId) const;
 
     /**
       Reimplemented from JackClient.
@@ -158,8 +157,7 @@ private slots:
       */
     void onChangedParameterValue(int parameterId, double value);
 private:
-    ParameterProcessor *parameterProcessor;
-    QVector<ParameterProcessor::Parameter> parameters;
+    ParameterProcessor *processParameterProcessor, *guiParameterProcessor;
     JackRingBuffer<ParameterChange> ringBufferFromProcessToGui, ringBufferFromGuiToProcess;
     ParameterThread *thread;
 };

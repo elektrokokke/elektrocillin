@@ -27,7 +27,7 @@
 class LinearMorphOscillatorClient : public OscillatorClient
 {
 public:
-    LinearMorphOscillatorClient(const QString &clientName, LinearMorphOscillator *oscillator, size_t ringBufferSize = 1024);
+    LinearMorphOscillatorClient(const QString &clientName, LinearMorphOscillator *processOscillator, LinearMorphOscillator *guiOscillator, size_t ringBufferSize = 1024);
     virtual ~LinearMorphOscillatorClient();
 
     virtual JackClientFactory * getFactory();

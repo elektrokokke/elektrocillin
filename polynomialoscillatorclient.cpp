@@ -19,8 +19,8 @@
 
 #include "polynomialoscillatorclient.h"
 
-PolynomialOscillatorClient::PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *oscillator, size_t ringBufferSize) :
-    OscillatorClient(clientName, oscillator, oscillator, ringBufferSize),
+PolynomialOscillatorClient::PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *processOscillator, PolynomialOscillator *guiOscillator, size_t ringBufferSize) :
+    OscillatorClient(clientName, processOscillator, guiOscillator, processOscillator, ringBufferSize),
     oscillator(3)
 {
 }
@@ -133,7 +133,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new PolynomialOscillatorClient(clientName, new PolynomialOscillator(3));
+        return new PolynomialOscillatorClient(clientName, new PolynomialOscillator(3), new PolynomialOscillator(3));
     }
     static IntegralOscillatorClientFactory factory;
 };

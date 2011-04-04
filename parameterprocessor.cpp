@@ -49,6 +49,12 @@ int ParameterProcessor::getNrOfParameters() const
     return parameters.size();
 }
 
+ParameterProcessor::Parameter & ParameterProcessor::getParameter(int index)
+{
+    Q_ASSERT(index < parameters.size());
+    return parameters[index];
+}
+
 const ParameterProcessor::Parameter & ParameterProcessor::getParameter(int index) const
 {
     Q_ASSERT(index < parameters.size());

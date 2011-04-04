@@ -22,9 +22,10 @@
 #include <QPen>
 #include <QBrush>
 
-ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor, ParameterProcessor *parameterProcessor_, size_t ringBufferSize) :
+ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, EventProcessor *eventProcessor, ParameterProcessor *processParameterProcessor_, ParameterProcessor *guiParameterProcessor_, size_t ringBufferSize) :
     EventProcessorClient(clientName, audioProcessor, midiProcessor, eventProcessor, ringBufferSize),
-    parameterProcessor(parameterProcessor_),
+    processParameterProcessor(processParameterProcessor_),
+    guiParameterProcessor(guiParameterProcessor_),
     ringBufferFromProcessToGui(ringBufferSize),
     ringBufferFromGuiToProcess(ringBufferSize),
     thread(new ParameterThread(this, &ringBufferFromProcessToGui, &ringBufferFromGuiToProcess))
@@ -32,51 +33,43 @@ ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audi
     QObject::connect(thread, SIGNAL(changedParameterValue(int,double)), this, SLOT(onChangedParameterValue(int,double)));
     QObject::connect(thread, SIGNAL(changedParameterValue(int,double)), this, SIGNAL(changedParameterValue(int,double)));
     QObject::connect(thread, SIGNAL(changedParameters()), this, SIGNAL(changedParameters()));
-    for (int i = 0; i < parameterProcessor->getNrOfParameters(); i++) {
-        parameters.append(parameterProcessor->getParameter(i));
-    }
 }
 
 void ParameterClient::saveState(QDataStream &stream)
 {
     EventProcessorClient::saveState(stream);
-    for (int i = 0; i < parameters.size(); i++) {
-        stream << parameters[i].name;
-        stream << parameters[i].value;
-        stream << parameters[i].min;
-        stream << parameters[i].max;
-        stream << parameters[i].resolution;
+    for (int i = 0; i < guiParameterProcessor->getNrOfParameters(); i++) {
+        const ParameterProcessor::Parameter &parameter = guiParameterProcessor->getParameter(i);
+        stream << parameter.name;
+        stream << parameter.value;
+        stream << parameter.min;
+        stream << parameter.max;
+        stream << parameter.resolution;
     }
 }
 
 void ParameterClient::loadState(QDataStream &stream)
 {
     EventProcessorClient::loadState(stream);
-    for (int i = 0; i < parameters.size(); i++) {
-        stream >> parameters[i].name;
-        stream >> parameters[i].value;
-        stream >> parameters[i].min;
-        stream >> parameters[i].max;
-        stream >> parameters[i].resolution;
-        parameterProcessor->setParameterValue(i, parameters[i].value);
+    for (int i = 0; i < guiParameterProcessor->getNrOfParameters(); i++) {
+        ParameterProcessor::Parameter &parameter = guiParameterProcessor->getParameter(i);
+        stream >> parameter.name;
+        stream >> parameter.value;
+        stream >> parameter.min;
+        stream >> parameter.max;
+        stream >> parameter.resolution;
     }
+    *processParameterProcessor = *guiParameterProcessor;
 }
 
 int ParameterClient::getNrOfParameters() const
 {
-    return parameters.size();
+    return guiParameterProcessor->getNrOfParameters();
 }
 
 const ParameterProcessor::Parameter & ParameterClient::getParameter(int parameterId) const
 {
-    Q_ASSERT(parameterId < parameters.size());
-    return parameters[parameterId];
-}
-
-double ParameterClient::getParameterValue(int parameterId)
-{
-    Q_ASSERT(parameterId < parameters.size());
-    return parameters[parameterId].value;
+    return guiParameterProcessor->getParameter(parameterId);
 }
 
 QGraphicsItem * ParameterClient::createGraphicsItem()
@@ -121,13 +114,13 @@ bool ParameterClient::process(jack_nframes_t nframes)
 
 bool ParameterClient::processParameters(jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes)
 {
-    Q_ASSERT(parameterProcessor);
+    Q_ASSERT(processParameterProcessor);
     jack_nframes_t lastFrameTime = getLastFrameTime();
     for (jack_nframes_t currentFrame = start; currentFrame < end; ) {
         // get the next parameter change from the ring buffer, if there is any:
         if (ringBufferFromGuiToProcess.readSpace()) {
             ParameterChange change = ringBufferFromGuiToProcess.peek();
-            Q_ASSERT(change.id < parameterProcessor->getNrOfParameters());
+            Q_ASSERT(change.id < processParameterProcessor->getNrOfParameters());
             // adjust time relative to the beginning of this frame:
             if (change.time + nframes < lastFrameTime) {
                 // if time is too early, this is in the buffer for too long, adjust time accordingly:
@@ -141,7 +134,7 @@ bool ParameterClient::processParameters(jack_nframes_t start, jack_nframes_t end
                 currentFrame = change.time;
                 // process the parameter change:
                 ringBufferFromGuiToProcess.readAdvance(1);
-                parameterProcessor->setParameterValue(change.id, change.value);
+                processParameterProcessor->setParameterValue(change.id, change.value);
             } else {
                 processEvents(currentFrame, end, nframes);
                 currentFrame = end;
@@ -161,11 +154,11 @@ void ParameterClient::synchronizeChangedParametersWithGui()
       could become out of sync through parameter changes which are sent both ways
       approximately at the same time.
       */
-    for (int i = 0; i < parameterProcessor->getNrOfParameters(); i++) {
-        if (parameterProcessor->hasParameterChanged(i)) {
+    for (int i = 0; i < processParameterProcessor->getNrOfParameters(); i++) {
+        if (processParameterProcessor->hasParameterChanged(i)) {
             ParameterChange change;
             change.id = i;
-            change.value = parameterProcessor->getParameter(i).value;
+            change.value = processParameterProcessor->getParameter(i).value;
             change.time = 0;
             ringBufferFromProcessToGui.write(change);
         }
@@ -177,8 +170,7 @@ void ParameterClient::synchronizeChangedParametersWithGui()
 void ParameterClient::onChangedParameterValue(int parameterId, double value)
 {
     // a parameter has been changed from the process thread, change it in the GUI thread:
-    Q_ASSERT(parameterId < parameters.size());
-    parameters[parameterId].value = value;
+    guiParameterProcessor->setParameterValue(parameterId, value);
 }
 
 ParameterThread::ParameterThread(ParameterClient *client, JackRingBuffer<ParameterClient::ParameterChange> *ringBufferFromProcessToGui_, JackRingBuffer<ParameterClient::ParameterChange> *ringBufferFromGuiToProcess_) :

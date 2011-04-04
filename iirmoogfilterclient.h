@@ -39,7 +39,7 @@ public:
 
       This object takes ownership of the given IirMoogFilter object, i.e., it will be deleted at destruction time.
       */
-    IirMoogFilterClient(const QString &clientName, IirMoogFilter *filter, size_t ringBufferSize = 1024);
+    IirMoogFilterClient(const QString &clientName, IirMoogFilter *processFilter, IirMoogFilter *guiFilter, size_t ringBufferSize = 1024);
     virtual ~IirMoogFilterClient();
 
     IirMoogFilter * getMoogFilter();
@@ -48,7 +48,7 @@ public:
 private slots:
     void onClientChangedParameter(int index, double value);
 private:
-    IirMoogFilter *iirMoogFilterProcess, *iirMoogFilter;
+    IirMoogFilter *processFilter, *guiFilter;
 };
 
 class IirMoogFilterGraphicsItem : public QObject, public FrequencyResponseGraphicsItem

@@ -28,7 +28,7 @@
 class PolynomialOscillatorClient : public OscillatorClient
 {
 public:
-    PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *oscillator, size_t ringBufferSize = 1024);
+    PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *processOscillator, PolynomialOscillator *guiOscillator, size_t ringBufferSize = 1024);
     virtual ~PolynomialOscillatorClient();
 
     virtual JackClientFactory * getFactory();

@@ -22,16 +22,18 @@
 #include <QPen>
 #include <QBrush>
 
-OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *oscillator, EventProcessor *eventProcessor, size_t ringBufferSize) :
-    ParameterClient(clientName, oscillator, oscillator, eventProcessor, oscillator, ringBufferSize),
-    oscillatorProcess(oscillator)
+OscillatorClient::OscillatorClient(const QString &clientName, Oscillator *processOscillator_, Oscillator *guiOscillator_, EventProcessor *eventProcessor, size_t ringBufferSize) :
+    ParameterClient(clientName, processOscillator_, processOscillator_, eventProcessor, processOscillator_, guiOscillator_, ringBufferSize),
+    processOscillator(processOscillator_),
+    guiOscillator(guiOscillator_)
 {
 }
 
 OscillatorClient::~OscillatorClient()
 {
     close();
-    delete oscillatorProcess;
+    delete processOscillator;
+    delete guiOscillator;
 }
 
 class OscillatorClientFactory : public JackClientFactory
@@ -47,7 +49,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new OscillatorClient(clientName, new Oscillator(), 0);
+        return new OscillatorClient(clientName, new Oscillator(), new Oscillator(), 0);
     }
     static OscillatorClientFactory factory;
 };

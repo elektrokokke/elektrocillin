@@ -26,7 +26,7 @@
 class StepSequencerClient : public ParameterClient
 {
 public:
-    StepSequencerClient(const QString &clientName, StepSequencer *stepSequencer, size_t ringBufferSize = 1024);
+    StepSequencerClient(const QString &clientName, StepSequencer *processStepSequencer, StepSequencer *guiStepSequencer, size_t ringBufferSize = 1024);
 
     // reimplemented from JackClient:
     virtual JackClientFactory * getFactory();
@@ -34,7 +34,7 @@ public:
 protected:
     virtual bool process(jack_nframes_t nframes);
 private:
-    StepSequencer *stepSequencer;
+    StepSequencer *processStepSequencer, *guiStepSequencer;
 };
 
 #endif // STEPSEQUENCERCLIENT_H
