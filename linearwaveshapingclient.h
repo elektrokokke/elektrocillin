@@ -22,13 +22,25 @@
 
 #include "interpolatorprocessor.h"
 #include "linearinterpolator.h"
-#include "eventprocessorclient.h"
+#include "parameterclient.h"
 #include "graphicsinterpolatoredititem.h"
 
-class LinearWaveShapingClient : public EventProcessorClient, public InterpolatorProcessor
+class LinearWaveShaper : public AudioProcessor, public EventProcessor, public ParameterProcessor, public LinearInterpolator
 {
 public:
-    LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize = 1024);
+    LinearWaveShaper();
+    // reimplemented from Interpolator; change the behaviour when changing control points:
+    virtual void changeControlPoint(int index, double x, double y);
+    // reimplemented from AudioProcessor:
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
+    // reimplemented from EventProcessor:
+    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
+};
+
+class LinearWaveShapingClient : public ParameterClient
+{
+public:
+    LinearWaveShapingClient(const QString &clientName, LinearWaveShaper *processWaveShaper, LinearWaveShaper * guiWaveShaper, size_t ringBufferSize = 1024);
     virtual ~LinearWaveShapingClient();
 
     virtual JackClientFactory * getFactory();
@@ -44,20 +56,15 @@ public:
       */
     virtual void loadState(QDataStream &stream);
 
-    LinearInterpolator * getLinearInterpolator();
+    LinearWaveShaper * getWaveShaper();
 
     void postIncreaseControlPoints();
     void postDecreaseControlPoints();
     void postChangeControlPoint(int index, double x, double y);
 
     QGraphicsItem * createGraphicsItem();
-
-protected:
-    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
-    virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
-
 private:
-    LinearInterpolator interpolator, interpolatorProcess;
+    LinearWaveShaper *processWaveShaper, *guiWaveShaper;
 };
 
 class LinearWaveShapingGraphicsItem : public GraphicsInterpolatorEditItem

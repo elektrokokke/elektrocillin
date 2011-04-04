@@ -22,8 +22,8 @@
 #include <QPen>
 #include <QtGlobal>
 
-LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size_t ringBufferSize) :
-    EventProcessorClient(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize)
+LinearWaveShaper::LinearWaveShaper() :
+    AudioProcessor(QStringList("Audio in"), QStringList("Audio out"))
 {
     QVector<double> xx, yy;
     int nrOfControlPoints = 5;
@@ -32,46 +32,92 @@ LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, size
         xx.append(value);
         yy.append(value);
     }
-    interpolator.changeControlPoints(xx, yy);
-    interpolatorProcess.changeControlPoints(xx, yy);
+    changeControlPoints(xx, yy);
+    // register numeric parameters:
+    registerParameter("X steps", 0, 0, 32, 1);
+    registerParameter("Y steps", 0, 0, 12, 1);
+}
+
+void LinearWaveShaper::changeControlPoint(int index, double x, double y)
+{
+    double xSteps = getParameter(0).value;
+    double ySteps = getParameter(1).value;
+    if (xSteps) {
+        // discretize the X coordinate:
+        x = qRound(x * xSteps) / xSteps;
+    }
+    if (ySteps) {
+        // discretize the Y coordinate:
+        y = qRound(y * ySteps) / ySteps;
+    }
+    LinearInterpolator::changeControlPoint(index, x, y);
+}
+
+void LinearWaveShaper::processAudio(const double *inputs, double *outputs, jack_nframes_t)
+{
+    outputs[0] = evaluate(inputs[0]);
+}
+
+bool LinearWaveShaper::processEvent(const RingBufferEvent *event, jack_nframes_t)
+{
+    if (const InterpolatorProcessor::ChangeControlPointEvent *event_ = dynamic_cast<const InterpolatorProcessor::ChangeControlPointEvent*>(event)) {
+        changeControlPoint(event_->index, event_->x, event_->y);
+        return true;
+    } else if (const InterpolatorProcessor::AddControlPointsEvent *event_ = dynamic_cast<const InterpolatorProcessor::AddControlPointsEvent*>(event)) {
+        addControlPoints(event_->scaleX, event_->scaleY, event_->addAtStart, event_->addAtEnd);
+        return true;
+    } else if (const InterpolatorProcessor::DeleteControlPointsEvent *event_ = dynamic_cast<const InterpolatorProcessor::DeleteControlPointsEvent*>(event)) {
+        deleteControlPoints(event_->scaleX, event_->scaleY, event_->deleteAtStart, event_->deleteAtEnd);
+        return true;
+    }
+    return false;
+}
+
+LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, LinearWaveShaper *processWaveShaper_, LinearWaveShaper * guiWaveShaper_, size_t ringBufferSize) :
+    ParameterClient(clientName, processWaveShaper_, 0, processWaveShaper_, processWaveShaper_, guiWaveShaper_, ringBufferSize),
+    processWaveShaper(processWaveShaper_),
+    guiWaveShaper(guiWaveShaper_)
+{
     activateMidiInput(false);
 }
 
 LinearWaveShapingClient::~LinearWaveShapingClient()
 {
     close();
+    delete processWaveShaper;
+    delete guiWaveShaper;
 }
 
 void LinearWaveShapingClient::saveState(QDataStream &stream)
 {
     EventProcessorClient::saveState(stream);
-    interpolator.save(stream);
+    guiWaveShaper->save(stream);
 }
 
 void LinearWaveShapingClient::loadState(QDataStream &stream)
 {
     EventProcessorClient::loadState(stream);
-    interpolator.load(stream);
-    interpolatorProcess = interpolator;
+    guiWaveShaper->load(stream);
+    processWaveShaper->changeControlPoints(guiWaveShaper->getX(), guiWaveShaper->getY());
 }
 
-LinearInterpolator * LinearWaveShapingClient::getLinearInterpolator()
+LinearWaveShaper * LinearWaveShapingClient::getWaveShaper()
 {
-    return &interpolator;
+    return guiWaveShaper;
 }
 
 void LinearWaveShapingClient::postIncreaseControlPoints()
 {
     InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, true, true, true);
-    InterpolatorProcessor::addControlPoints(&interpolator, event);
+    guiWaveShaper->processEvent(event, 0);
     postEvent(event);
 }
 
 void LinearWaveShapingClient::postDecreaseControlPoints()
 {
-    if (interpolator.getX().size() > 3) {
+    if (guiWaveShaper->getX().size() > 3) {
         InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, true, true, true);
-        InterpolatorProcessor::deleteControlPoints(&interpolator, event);
+        guiWaveShaper->processEvent(event, 0);
         postEvent(event);
     }
 }
@@ -79,31 +125,29 @@ void LinearWaveShapingClient::postDecreaseControlPoints()
 void LinearWaveShapingClient::postChangeControlPoint(int index, double x, double y)
 {
     InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
-    InterpolatorProcessor::changeControlPoint(&interpolator, event);
+    guiWaveShaper->processEvent(event, 0);
     postEvent(event);
 }
 
 QGraphicsItem * LinearWaveShapingClient::createGraphicsItem()
 {
-    return new LinearWaveShapingGraphicsItem(QRectF(0, 0, 600, 420), this);
-}
-
-void LinearWaveShapingClient::processAudio(const double *inputs, double *outputs, jack_nframes_t)
-{
-    outputs[0] = interpolatorProcess.evaluate(inputs[0]);
-}
-
-bool LinearWaveShapingClient::processEvent(const RingBufferEvent *event, jack_nframes_t)
-{
-    if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
-        InterpolatorProcessor::processInterpolatorEvent(&interpolatorProcess, event_);
-        return true;
-    }
-    return false;
+    int padding = 4;
+    QGraphicsRectItem *item = new QGraphicsRectItem();
+    QGraphicsItem *parameterItem = ParameterClient::createGraphicsItem();
+    QRectF rect = QRect(0, 0, 420, 420);
+    rect = rect.translated(parameterItem->boundingRect().width() + 2 * padding, padding);
+    parameterItem->setPos(padding, padding);
+    parameterItem->setParentItem(item);
+    QGraphicsItem *ourItem = new LinearWaveShapingGraphicsItem(rect, this);
+    ourItem->setParentItem(item);
+    item->setRect((rect | parameterItem->boundingRect().translated(parameterItem->pos())).adjusted(-padding, -padding, padding, padding));
+    item->setPen(QPen(QBrush(Qt::black), 1));
+    item->setBrush(QBrush(Qt::white));
+    return item;
 }
 
 LinearWaveShapingGraphicsItem::LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client_, QGraphicsItem *parent) :
-    GraphicsInterpolatorEditItem(client_->getLinearInterpolator(), rect, QRectF(-1, 1, 2, -2), parent),
+    GraphicsInterpolatorEditItem(client_->getWaveShaper(), rect, QRectF(-1, 1, 2, -2), parent),
     client(client_)
 {
 }
@@ -133,7 +177,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new LinearWaveShapingClient(clientName);
+        return new LinearWaveShapingClient(clientName, new LinearWaveShaper(), new LinearWaveShaper());
     }
     static LinearWaveShapingClientFactory factory;
 };
