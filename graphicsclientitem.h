@@ -57,7 +57,6 @@ protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
     virtual void focusInEvent(QFocusEvent * event);
-    virtual void focusOutEvent(QFocusEvent * event);
 private:
     GraphicsClientItemsClient *clientItemsClient;
     QPointer<JackClient> jackClient;

@@ -142,12 +142,15 @@ void GraphicsClientItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 
 void GraphicsClientItem::focusInEvent(QFocusEvent *)
 {
-    setZValue(1);
-}
-
-void GraphicsClientItem::focusOutEvent(QFocusEvent *)
-{
-    setZValue(0);
+    QGraphicsItem *topSibling = 0;
+    if (parentItem()) {
+        topSibling = parentItem()->childItems().first();
+    } else {
+        topSibling = scene()->items().first()->topLevelItem();
+    }
+    Q_ASSERT(topSibling->parentItem() == parentItem());
+    GraphicsClientItem *clientItem = dynamic_cast<GraphicsClientItem*>(topSibling);
+    setZValue(topSibling->zValue() + 1);
 }
 
 void GraphicsClientItem::initItem()
