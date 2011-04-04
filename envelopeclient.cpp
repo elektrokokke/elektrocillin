@@ -20,49 +20,50 @@
 #include "envelopeclient.h"
 #include <cmath>
 
-EnvelopeClient::EnvelopeClient(const QString &clientName, Envelope *envelope_, size_t ringBufferSize) :
-    EventProcessorClient(clientName, envelope_, envelope_, envelope_, ringBufferSize),
-    envelopeProcess(envelope_)
+EnvelopeClient::EnvelopeClient(const QString &clientName, Envelope *processEnvelope_, Envelope *guiEnvelope_, size_t ringBufferSize) :
+    ParameterClient(clientName, processEnvelope_, processEnvelope_, processEnvelope_, processEnvelope_, guiEnvelope_, ringBufferSize),
+    processEnvelope(processEnvelope_),
+    guiEnvelope(guiEnvelope_)
 {
-    envelope = *envelopeProcess;
 }
 
 EnvelopeClient::~EnvelopeClient()
 {
     close();
-    delete envelopeProcess;
+    delete processEnvelope;
+    delete guiEnvelope;
 }
 
 void EnvelopeClient::saveState(QDataStream &stream)
 {
     EventProcessorClient::saveState(stream);
-    envelope.save(stream);
+    guiEnvelope->save(stream);
 }
 
 void EnvelopeClient::loadState(QDataStream &stream)
 {
     EventProcessorClient::loadState(stream);
-    envelopeProcess->load(stream);
-    envelope = *envelopeProcess;
+    guiEnvelope->load(stream);
+    *processEnvelope = *guiEnvelope;
 }
 
 Envelope * EnvelopeClient::getEnvelope()
 {
-    return &envelope;
+    return guiEnvelope;
 }
 
 void EnvelopeClient::postIncreaseControlPoints()
 {
     InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, false, false, true);
-    envelope.processEvent(event, 0);
+    guiEnvelope->processEvent(event, 0);
     postEvent(event);
 }
 
 void EnvelopeClient::postDecreaseControlPoints()
 {
-    if (envelope.getInterpolator()->getX().size() > 2) {
+    if (guiEnvelope->getInterpolator()->getX().size() > 3) {
         InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, false, false, true);
-        envelope.processEvent(event, 0);
+        guiEnvelope->processEvent(event, 0);
         postEvent(event);
     }
 }
@@ -70,20 +71,32 @@ void EnvelopeClient::postDecreaseControlPoints()
 void EnvelopeClient::postChangeControlPoint(int index, double x, double y)
 {
     InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
-    envelope.processEvent(event, 0);
+    guiEnvelope->processEvent(event, 0);
     postEvent(event);
 }
 
 void EnvelopeClient::postChangeSustainIndex(int sustainIndex)
 {
     Envelope::ChangeSustainPositionEvent *event = new Envelope::ChangeSustainPositionEvent(sustainIndex);
-    envelope.processEvent(event, 0);
+    guiEnvelope->processEvent(event, 0);
     postEvent(event);
 }
 
 QGraphicsItem * EnvelopeClient::createGraphicsItem()
 {
-    return new EnvelopeGraphicsItem(QRectF(0, 0, 1200, 420), this);
+    int padding = 4;
+    QGraphicsRectItem *item = new QGraphicsRectItem();
+    QGraphicsItem *parameterItem = ParameterClient::createGraphicsItem();
+    QRectF rect = QRect(0, 0, 1200, 420);
+    rect = rect.translated(parameterItem->boundingRect().width() + 2 * padding, padding);
+    parameterItem->setPos(padding, padding);
+    parameterItem->setParentItem(item);
+    QGraphicsItem *ourItem = new EnvelopeGraphicsItem(rect, this);
+    ourItem->setParentItem(item);
+    item->setRect((rect | parameterItem->boundingRect().translated(parameterItem->pos())).adjusted(-padding, -padding, padding, padding));
+    item->setPen(QPen(QBrush(Qt::black), 1));
+    item->setBrush(QBrush(Qt::white));
+    return item;
 }
 
 EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client_, QGraphicsItem *parent_) :
@@ -103,6 +116,7 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     sustainNodeControlItem = new GraphicsDiscreteControlItem("Sustain node", 1, client->getEnvelope()->getInterpolator()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), 100 + (client->getEnvelope()->getInterpolator()->getX().size() - 1) * 10, GraphicsContinuousControlItem::HORIZONTAL, this);
     sustainNodeControlItem->setPos(getInnerRectangle().topRight() - QPointF(sustainNodeControlItem->rect().width(), 0));
     QObject::connect(sustainNodeControlItem, SIGNAL(valueChanged(int)), this, SLOT(onSustainNodeChanged(int)));
+    QObject::connect(client, SIGNAL(changedParameters()), this, SLOT(updateInterpolator()));
 }
 
 EnvelopeClient * EnvelopeGraphicsItem::getClient()
@@ -137,6 +151,11 @@ void EnvelopeGraphicsItem::onSustainNodeChanged(int value)
     interpolatorChanged();
 }
 
+void EnvelopeGraphicsItem::updateInterpolator()
+{
+    interpolatorChanged();
+}
+
 class EnvelopeClientFactory : public JackClientFactory
 {
 public:
@@ -150,7 +169,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new EnvelopeClient(clientName, new Envelope());
+        return new EnvelopeClient(clientName, new Envelope(), new Envelope());
     }
     static EnvelopeClientFactory factory;
 };

@@ -45,6 +45,11 @@ void LogarithmicInterpolator::load(QDataStream &stream)
     stream >> base;
 }
 
+void LogarithmicInterpolator::setBase(double base)
+{
+    this->base = base;
+}
+
 double LogarithmicInterpolator::interpolate(int j, double x)
 {
     Q_ASSERT(xx.size() >= 2);

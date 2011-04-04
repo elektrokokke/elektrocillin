@@ -29,7 +29,9 @@ public:
       @param size determines the number of filter coefficients. Actual filter size
         will be size * 2 + 1.
       */
-    SincFilter(int size, double frequency, double sampleRate);
+    SincFilter(int size, double frequency);
+
+    virtual void setSampleRate(double sampleRate);
 
     void feed(double input);
     double process();
@@ -39,7 +41,8 @@ public:
       */
     void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 private:
-    int index;
+    int index, size;
+    double frequency;
     QVector<double> coefficients, previousInputs;
 };
 

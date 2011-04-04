@@ -22,8 +22,8 @@
 #include <cmath>
 #include <QDebug>
 
-ZPlaneFilter::ZPlaneFilter(double sampleRate) :
-    AudioProcessor(QStringList("audio_in"), QStringList("filtered_out"), sampleRate),
+ZPlaneFilter::ZPlaneFilter() :
+    AudioProcessor(QStringList("audio_in"), QStringList("filtered_out")),
     tx(0),
     ty(0)
 {

@@ -21,15 +21,49 @@
 #include <QtGlobal>
 #include <cmath>
 
-Envelope::Envelope(double durationInSeconds_, double sampleRate) :
-    AudioProcessor(QStringList(), QStringList("Envelope out"), sampleRate),
+EnvelopeInterpolator::EnvelopeInterpolator() :
+    LogarithmicInterpolator(0.01)
+{
+}
+
+void EnvelopeInterpolator::addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd)
+{
+    // allow only adding at the end:
+    Q_ASSERT(addAtEnd && !addAtStart);
+    // insert a control point between the last and the one before that:
+    Q_ASSERT(xx.size() > 1);
+    double x = xx.last();
+    double y = yy.last();
+    xx.last() = 0.5 * (xx[xx.size() - 2] + xx.last());
+    // add one at the end:
+    xx.append(x);
+    yy.append(y);
+}
+
+void EnvelopeInterpolator::deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd)
+{
+    // allow only adding at the end:
+    Q_ASSERT(deleteAtEnd && !deleteAtStart);
+    if (xx.size() > 3) {
+        // remove the control point before the last:
+        double x = xx.last();
+        double y = yy.last();
+        // remove one point at the end:
+        xx.remove(xx.size() - 1);
+        yy.remove(yy.size() - 1);
+        xx.last() = x;
+        yy.last() = y;
+    }
+}
+
+Envelope::Envelope(double durationInSeconds_) :
+    AudioProcessor(QStringList(), QStringList("Envelope out")),
     durationInSeconds(durationInSeconds_),
     currentTime(0),
     previousLevel(0),
     velocity(0),
     sustainIndex(1),
-    startLevel(0),
-    interpolator(0.01)
+    startLevel(0)
 {
     // initialize the interpolators to represent a simple ASR envelope:
     QVector<double> xx, yy;
@@ -42,6 +76,8 @@ Envelope::Envelope(double durationInSeconds_, double sampleRate) :
     interpolator.changeControlPoints(xx, yy);
     interpolator.setControlPointName(sustainIndex, "Sustain");
     interpolator.setEndPointConstraints(false, true);
+    // register numeric parameters:
+    registerParameter("Base", 0.01, 0.001, 1, 0.001);
 }
 
 Envelope & Envelope::operator=(const Envelope &envelope)
@@ -164,4 +200,12 @@ bool Envelope::processEvent(const RingBufferEvent *event, jack_nframes_t)
         return true;
     }
     return false;
+}
+
+bool Envelope::setParameterValue(int index, double value)
+{
+    if (index == 0) {
+        interpolator.setBase(value);
+    }
+    return ParameterProcessor::setParameterValue(index, value);
 }

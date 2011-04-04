@@ -19,8 +19,8 @@
 
 #include "polynomialoscillator.h"
 
-PolynomialOscillator::PolynomialOscillator(int nrOfIntegrations_, double sampleRate, const QStringList &additionalInputPortNames) :
-    Oscillator(sampleRate, additionalInputPortNames),
+PolynomialOscillator::PolynomialOscillator(int nrOfIntegrations_, const QStringList &additionalInputPortNames) :
+    Oscillator(additionalInputPortNames),
     nrOfIntegrations(nrOfIntegrations_),
     integrals(nrOfIntegrations + 1),
     previousIntegralValues(nrOfIntegrations, 0)

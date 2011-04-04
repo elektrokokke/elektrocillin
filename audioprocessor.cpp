@@ -20,8 +20,8 @@
 #include "audioprocessor.h"
 #include <cmath>
 
-AudioProcessor::AudioProcessor(const QStringList &inputPortNames_, const QStringList &outputPortNames_, double sampleRate_) :
-    sampleRate(sampleRate_),
+AudioProcessor::AudioProcessor(const QStringList &inputPortNames_, const QStringList &outputPortNames_) :
+    sampleRate(44100.0),
     sampleDuration(1.0 / sampleRate),
     inputPortNames(inputPortNames_),
     outputPortNames(outputPortNames_),

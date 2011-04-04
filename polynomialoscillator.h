@@ -28,7 +28,7 @@
 class PolynomialOscillator : public Oscillator, public EventProcessor, public InterpolatorProcessor
 {
 public:
-    PolynomialOscillator(int nrOfIntegrations, double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
+    PolynomialOscillator(int nrOfIntegrations, const QStringList &additionalInputPortNames = QStringList());
 
     PolynomialInterpolator * getPolynomialInterpolator();
     void setPolynomialInterpolator(const PolynomialInterpolator &interpolator);

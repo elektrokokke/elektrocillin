@@ -19,8 +19,8 @@
 
 #include "linearmorphoscillator.h"
 
-LinearMorphOscillator::LinearMorphOscillator(const LinearInterpolator &state1, const LinearInterpolator &state2, double sampleRate) :
-    PolynomialOscillator(3, sampleRate, QStringList("Morph modulation")),
+LinearMorphOscillator::LinearMorphOscillator(const LinearInterpolator &state1, const LinearInterpolator &state2) :
+    PolynomialOscillator(3, QStringList("Morph modulation")),
     morphAudio(0),
     morphMidi(0)
 {

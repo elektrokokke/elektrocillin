@@ -24,10 +24,20 @@
 #include "midiprocessor.h"
 #include "eventprocessor.h"
 #include "interpolatorprocessor.h"
+#include "parameterprocessor.h"
 #include "linearinterpolator.h"
 #include "logarithmicinterpolator.h"
 
-class Envelope : public AudioProcessor, public MidiProcessor, public EventProcessor, public InterpolatorProcessor
+class EnvelopeInterpolator : public LogarithmicInterpolator
+{
+public:
+    EnvelopeInterpolator();
+    // change the behaviour when adding and removing control points:
+    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
+    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
+};
+
+class Envelope : public AudioProcessor, public MidiProcessor, public EventProcessor, public InterpolatorProcessor, public ParameterProcessor
 {
 public:
     enum Phase {
@@ -45,7 +55,7 @@ public:
         int sustainIndex;
     };
 
-    Envelope(double durationInSeconds = 20, double sampleRate = 44100);
+    Envelope(double durationInSeconds = 20);
 
     Envelope & operator=(const Envelope &envelope);
 
@@ -67,6 +77,8 @@ public:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplemented from EventProcessor:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
+    // reimpemented from ParameterProcessor:
+    virtual bool setParameterValue(int index, double value);
 private:
     double durationInSeconds;
     double currentTime, previousLevel, velocity;
@@ -75,8 +87,7 @@ private:
     bool release;
     double startLevel;
     unsigned char noteNumber;
-    //LinearInterpolator interpolator;
-    LogarithmicInterpolator interpolator;
+    EnvelopeInterpolator interpolator;
 };
 
 #endif // ENVELOPE_H

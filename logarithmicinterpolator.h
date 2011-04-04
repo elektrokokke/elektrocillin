@@ -31,6 +31,8 @@ public:
     virtual void save(QDataStream &stream) const;
     virtual void load(QDataStream &stream);
 
+    void setBase(double base);
+
     virtual double interpolate(int jlo, double x);
 private:
     double base;

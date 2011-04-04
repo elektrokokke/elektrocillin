@@ -79,7 +79,7 @@ QGraphicsItem * ParameterClient::createGraphicsItem()
 
 void ParameterClient::changeParameterValue(int parameterId, double value)
 {
-    Q_ASSERT(parameterId < parameters.size());
+    Q_ASSERT(parameterId < guiParameterProcessor->getNrOfParameters());
     ParameterChange change;
     change.id = parameterId;
     change.value = value;

@@ -30,7 +30,7 @@
 class IirFilter : public AudioProcessor, public FrequencyResponse
 {
 public:
-    IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames = QStringList(), double sampleRate = 44100);
+    IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames = QStringList());
     IirFilter(const IirFilter &tocopy);
 
     // reimplemented from AudioProcessor:

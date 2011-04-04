@@ -28,7 +28,7 @@
 class Oscillator : public AudioProcessor, public MidiProcessor, public ParameterProcessor
 {
 public:
-    Oscillator(double sampleRate = 44100, const QStringList &additionalInputPortNames = QStringList());
+    Oscillator(const QStringList &additionalInputPortNames = QStringList());
     virtual ~Oscillator();
 
     Oscillator & operator=(const Oscillator &oscillator);

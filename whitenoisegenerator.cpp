@@ -20,8 +20,8 @@
 #include "whitenoisegenerator.h"
 #include <cstdlib>
 
-WhiteNoiseGenerator::WhiteNoiseGenerator(double sampleRate) :
-    AudioProcessor(QStringList(), QStringList("Noise out"), sampleRate)
+WhiteNoiseGenerator::WhiteNoiseGenerator() :
+    AudioProcessor(QStringList(), QStringList("Noise out"))
 {
 }
 
@@ -32,7 +32,7 @@ void WhiteNoiseGenerator::processAudio(const double *, double *outputs, jack_nfr
 }
 
 WhiteNoiseGeneratorClient::WhiteNoiseGeneratorClient(const QString &clientName) :
-    AudioProcessorClient(clientName, new WhiteNoiseGenerator(44100))
+    AudioProcessorClient(clientName, new WhiteNoiseGenerator())
 {
 }
 

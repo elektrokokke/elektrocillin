@@ -109,7 +109,7 @@ public:
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new IirMoogFilterClient(clientName, new IirMoogFilter(44100, 1), new IirMoogFilter(44100, 1));
+        return new IirMoogFilterClient(clientName, new IirMoogFilter(1), new IirMoogFilter(1));
     }
     static IirMoogFilterClientFactory factory;
 };

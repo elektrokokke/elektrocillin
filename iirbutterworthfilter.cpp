@@ -20,8 +20,8 @@
 #include "iirbutterworthfilter.h"
 #include <cmath>
 
-IirButterworthFilter::IirButterworthFilter(double cutoffFrequencyInHertz, Type type_, double sampleRate) :
-    IirFilter(3, 2, QStringList(), sampleRate),
+IirButterworthFilter::IirButterworthFilter(double cutoffFrequencyInHertz, Type type_) :
+    IirFilter(3, 2, QStringList()),
     type(type_)
 {
     setCutoffFrequency(cutoffFrequencyInHertz);

@@ -19,14 +19,14 @@
 
 #include "multiplyprocessor.h"
 
-MultiplyProcessor::MultiplyProcessor(double gain_, double sampleRate) :
-    AudioProcessor(QStringList("Factor 1") + QStringList("Factor 2"), QStringList("Product out"), sampleRate),
+MultiplyProcessor::MultiplyProcessor(double gain_) :
+    AudioProcessor(QStringList("Factor 1") + QStringList("Factor 2"), QStringList("Product out")),
     gain(gain_)
 {
 }
 
-MultiplyProcessor::MultiplyProcessor(const QStringList &inputPortNames, double gain_, double sampleRate) :
-    AudioProcessor(inputPortNames, QStringList("Product"), sampleRate),
+MultiplyProcessor::MultiplyProcessor(const QStringList &inputPortNames, double gain_) :
+    AudioProcessor(inputPortNames, QStringList("Product")),
     gain(gain_)
 {
 }

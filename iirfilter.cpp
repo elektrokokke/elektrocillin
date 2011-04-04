@@ -20,8 +20,8 @@
 #include "iirfilter.h"
 #include <QDebug>
 
-IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames, double sampleRate) :
-    AudioProcessor(QStringList("Audio in") + additionalInputPortNames, QStringList("Audio out"), sampleRate),
+IirFilter::IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames) :
+    AudioProcessor(QStringList("Audio in") + additionalInputPortNames, QStringList("Audio out")),
     feedForward(feedForwardCoefficients),
     feedBack(feedBackCoefficients),
     x(feedForwardCoefficients),

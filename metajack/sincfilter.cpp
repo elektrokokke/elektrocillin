@@ -20,12 +20,19 @@
 #include "sincfilter.h"
 #include <math.h>
 
-SincFilter::SincFilter(int size, double frequency, double sampleRate) :
-    AudioProcessor(QStringList("Audio in"), QStringList("Filtered out"), sampleRate),
+SincFilter::SincFilter(int size_, double frequency_) :
+    AudioProcessor(QStringList("Audio in"), QStringList("Filtered out")),
     index(0),
+    size(size_),
+    frequency(frequency_),
     coefficients(size * 2 + 1),
     previousInputs(size * 2 + 1, 0)
 {
+}
+
+void SincFilter::setSampleRate(double sampleRate)
+{
+    AudioProcessor::setSampleRate(sampleRate);
     // compute the filter coefficients:
     double sum = 1;
     coefficients[size] = 1;

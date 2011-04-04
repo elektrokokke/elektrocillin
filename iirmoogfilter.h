@@ -29,8 +29,10 @@
 class IirMoogFilter : public IirFilter, public MidiProcessor, public ParameterProcessor
 {
 public:
-    IirMoogFilter(double sampleRate = 44100, int zeros = 0);
+    IirMoogFilter(int zeros = 0);
     IirMoogFilter(const IirMoogFilter &tocopy);
+
+    virtual void setSampleRate(double sampleRate);
 
     void setFrequencyController(unsigned char controller);
     unsigned char getFrequencyController() const;
@@ -57,8 +59,6 @@ public:
     double getCutoffPitchBendModulation() const;
     double getResonanceAudioModulation() const;
     double getResonanceControllerModulation() const;
-
-    void setSampleRate(double sampleRate);
 
     void computeCoefficients();
 private:

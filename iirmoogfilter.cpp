@@ -20,14 +20,14 @@
 #include "iirmoogfilter.h"
 #include <cmath>
 
-IirMoogFilter::IirMoogFilter(double sampleRate, int zeros) :
-    IirFilter(1 + zeros, 4, QStringList("Cutoff mod.") + QStringList("Resonance mod."), sampleRate),
+IirMoogFilter::IirMoogFilter(int zeros) :
+    IirFilter(1 + zeros, 4, QStringList("Cutoff mod.") + QStringList("Resonance mod.")),
     frequencyController(1),
     resonanceController(2),
     recomputeCoefficients(false)
 {
     // cutoff frequency in Hertz (default is a quarter the sample rate)
-    registerParameter("Base cutoff frequency", sampleRate * 0.25, 0, sampleRate * 0.25, 0);
+    registerParameter("Base cutoff frequency", 440, 0, 0, 0);
     // resonance [0:1] (default is zero)
     registerParameter("Resonance", 0, 0, 1, 0);
     // offset between Midi note frequency and resulting cutoff frequency in semitones (default is zero)
@@ -54,6 +54,14 @@ IirMoogFilter::IirMoogFilter(const IirMoogFilter &tocopy) :
     frequencyController(tocopy.frequencyController),
     resonanceController(tocopy.resonanceController)
 {
+}
+
+void IirMoogFilter::setSampleRate(double sampleRate)
+{
+    IirFilter::setSampleRate(sampleRate);
+    recomputeCoefficients = true;
+    // adapt the maximum cutoff frequency:
+    getParameter(0).max = 0.5 * sampleRate;
 }
 
 void IirMoogFilter::setFrequencyController(unsigned char controller)
@@ -177,13 +185,6 @@ double IirMoogFilter::getResonanceAudioModulation() const
 double IirMoogFilter::getResonanceControllerModulation() const
 {
     return getParameter(10).value;
-}
-
-
-void IirMoogFilter::setSampleRate(double sampleRate)
-{
-    IirFilter::setSampleRate(sampleRate);
-    recomputeCoefficients = true;
 }
 
 void IirMoogFilter::computeCoefficients()

@@ -21,8 +21,8 @@
 #include <cmath>
 #include <QtGlobal>
 
-Oscillator::Oscillator(double sampleRate, const QStringList &additionalInputPortNames) :
-    AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"), sampleRate)
+Oscillator::Oscillator(const QStringList &additionalInputPortNames) :
+    AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"))
 {
     registerParameter("Gain", 1, 0, 1, 0.01);
     registerParameter("Octave", 0, -3, 3, 1);

@@ -28,7 +28,7 @@
 class AudioProcessor
 {
 public:
-    AudioProcessor(const QStringList &inputPortNames, const QStringList &outputPortNames, double sampleRate = 44100);
+    AudioProcessor(const QStringList &inputPortNames, const QStringList &outputPortNames);
     AudioProcessor(const AudioProcessor &tocopy);
     virtual ~AudioProcessor();
 

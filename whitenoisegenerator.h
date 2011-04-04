@@ -25,7 +25,7 @@
 class WhiteNoiseGenerator : public AudioProcessor
 {
 public:
-    WhiteNoiseGenerator(double sampleRate = 44100);
+    WhiteNoiseGenerator();
 
     void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 };

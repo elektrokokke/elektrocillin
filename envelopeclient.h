@@ -21,7 +21,7 @@
  */
 
 #include "envelope.h"
-#include "eventprocessorclient.h"
+#include "parameterclient.h"
 #include "graphicsinterpolatoredititem.h"
 #include "graphicsdiscretecontrolitem.h"
 #include <QGraphicsRectItem>
@@ -29,7 +29,7 @@
 #include <QBrush>
 #include <QFont>
 
-class EnvelopeClient : public EventProcessorClient
+class EnvelopeClient : public ParameterClient
 {
 public:
     /**
@@ -38,7 +38,7 @@ public:
       This object takes ownership of the given envelope object, i.e., it
       is deleted at destruction time.
       */
-    EnvelopeClient(const QString &clientName, Envelope *envelope, size_t ringBufferSize = (2 << 16));
+    EnvelopeClient(const QString &clientName, Envelope *processEnvelope, Envelope *guiEnvelope, size_t ringBufferSize = (2 << 16));
     virtual ~EnvelopeClient();
 
     virtual JackClientFactory * getFactory();
@@ -55,7 +55,7 @@ public:
     QGraphicsItem * createGraphicsItem();
 
 private:
-    Envelope envelope, *envelopeProcess;
+    Envelope *processEnvelope, *guiEnvelope;
 };
 
 class EnvelopeGraphicsItem : public QObject, public GraphicsInterpolatorEditItem
@@ -70,6 +70,7 @@ protected:
     virtual void changeControlPoint(int index, double x, double y);
 private slots:
     void onSustainNodeChanged(int value);
+    void updateInterpolator();
 private:
     EnvelopeClient *client;
     GraphicsDiscreteControlItem *sustainNodeControlItem;
