@@ -21,12 +21,9 @@
  */
 
 #include "audioprocessor.h"
-#include "midiprocessor.h"
-#include "parameterprocessor.h"
+#include "midiparameterprocessor.h"
 
-class MidiProcessorClient;
-
-class StepSequencer : public AudioProcessor, public MidiProcessor, public ParameterProcessor
+class StepSequencer : public AudioProcessor, public MidiParameterProcessor
 {
 public:
     StepSequencer(int nrOfSteps);
@@ -41,6 +38,7 @@ private:
     jack_position_t position;
     bool noteActive;
     unsigned char channel, noteNumber, velocity;
+    int firstParameterIndex;
 };
 
 #endif // STEPSEQUENCER_H

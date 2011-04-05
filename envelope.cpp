@@ -49,6 +49,8 @@ Envelope::Envelope(double durationInSeconds_) :
 
 Envelope & Envelope::operator=(const Envelope &envelope)
 {
+    // copy ParameterProcessor attributes
+    ParameterProcessor::operator =(envelope);
     // copy all attributes of the given envelope:
     Interpolator::changeControlPoints(envelope.xx, envelope.yy);
     durationInSeconds = envelope.durationInSeconds;

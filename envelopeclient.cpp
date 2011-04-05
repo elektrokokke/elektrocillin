@@ -25,6 +25,7 @@ EnvelopeClient::EnvelopeClient(const QString &clientName, Envelope *processEnvel
     processEnvelope(processEnvelope_),
     guiEnvelope(guiEnvelope_)
 {
+    activateMidiOutput(false);
 }
 
 EnvelopeClient::~EnvelopeClient()
@@ -36,13 +37,13 @@ EnvelopeClient::~EnvelopeClient()
 
 void EnvelopeClient::saveState(QDataStream &stream)
 {
-    EventProcessorClient::saveState(stream);
+    ParameterClient::saveState(stream);
     guiEnvelope->save(stream);
 }
 
 void EnvelopeClient::loadState(QDataStream &stream)
 {
-    EventProcessorClient::loadState(stream);
+    ParameterClient::loadState(stream);
     guiEnvelope->load(stream);
     *processEnvelope = *guiEnvelope;
 }

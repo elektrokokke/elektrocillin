@@ -18,7 +18,6 @@
  */
 
 #include "stepsequencer.h"
-#include "midiprocessorclient.h"
 
 StepSequencer::StepSequencer(int nrOfSteps_) :
     AudioProcessor(QStringList("Bar"), QStringList()),
@@ -31,6 +30,7 @@ StepSequencer::StepSequencer(int nrOfSteps_) :
     noteNumber(50),
     velocity(127)
 {
+    firstParameterIndex = getNrOfParameters();
     for (int i = 0; i < nrOfSteps; i++) {
         registerParameter(QString("Active %1?").arg(i), 0, 0, 1, 1);
     }
@@ -52,7 +52,7 @@ void StepSequencer::processAudio(const double *inputs, double *, jack_nframes_t 
                 writeNoteOff(channel, noteNumber, velocity, time);
                 noteActive = false;
             }
-            if ((step < nrOfSteps) && getParameter(step).value) {
+            if ((step < nrOfSteps) && getParameter(firstParameterIndex + step).value) {
                 // activate the new note:
                 writeNoteOn(channel, noteNumber, velocity, time);
                 noteActive = true;

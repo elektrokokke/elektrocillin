@@ -24,9 +24,6 @@ StepSequencerClient::StepSequencerClient(const QString &clientName, StepSequence
     processStepSequencer(processStepSequencer_),
     guiStepSequencer(guiStepSequencer_)
 {
-    processStepSequencer->setMidiWriter(this);
-    activateMidiInput(false);
-    activateMidiOutput(true);
 }
 
 bool StepSequencerClient::process(jack_nframes_t nframes)
