@@ -59,25 +59,25 @@ void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned
     frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
 }
 
-void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
+void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t time)
 {
     int pitchCentered = (int)value - 0x2000;
-    setParameterValue(6, (double)pitchCentered / 8192.0);
+    setParameterValue(6, (double)pitchCentered / 8192.0, time);
 }
 
 void Oscillator::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
     if (controller == qRound(getParameter(5).value)) {
-        setParameterValue(2, ((double)value - 64.0) / 128.0 * 200.0);
+        setParameterValue(2, ((double)value - 64.0) / 128.0 * 200.0, time);
     } else {
         MidiProcessor::processController(channel, controller, value, time);
     }
 }
 
-void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframes_t)
+void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
 {
     // consider frequency modulation input:
-    setParameterValue(7, inputs[0]);
+    setParameterValue(7, inputs[0], time);
     computeNormalizedFrequency();
     double phase2 = phase + normalizedFrequency;
     if (phase2 >= 1) {

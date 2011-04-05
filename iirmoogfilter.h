@@ -46,7 +46,7 @@ public:
     virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     // reimplemented from ParameterProcessor:
-    virtual bool setParameterValue(int index, double value);
+    virtual bool setParameterValue(int index, double value, jack_nframes_t time);
 
     double getBaseCutoffFrequency() const;
     double getResonance() const;

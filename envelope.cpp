@@ -162,12 +162,12 @@ bool Envelope::processEvent(const RingBufferEvent *event, jack_nframes_t)
     return false;
 }
 
-bool Envelope::setParameterValue(int index, double value)
+bool Envelope::setParameterValue(int index, double value, jack_nframes_t time)
 {
     if (index == 0) {
         LogarithmicInterpolator::setBase(value);
     }
-    return ParameterProcessor::setParameterValue(index, value);
+    return ParameterProcessor::setParameterValue(index, value, time);
 }
 
 void Envelope::changeControlPoint(int index, double x, double y)

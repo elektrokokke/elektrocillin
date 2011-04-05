@@ -22,18 +22,10 @@
 
 #include "audioprocessorclient.h"
 #include "midiprocessor.h"
-#include "metajack/midiport.h"
-#include "jackringbuffer.h"
 
-class MidiProcessorClient : public AudioProcessorClient
+class MidiProcessorClient : public AudioProcessorClient, public MidiProcessor::MidiWriter
 {
 public:
-    class MidiEvent : public RingBufferEvent {
-    public:
-        size_t size;
-        jack_midi_data_t buffer[3];
-    };
-
     MidiProcessorClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, unsigned int channelMask = (1 << 16) - 1);
     virtual ~MidiProcessorClient();
 
@@ -45,9 +37,7 @@ public:
     /**
       This may only be called from any of the process...() methods!
       */
-    void writeMidi(const MidiEvent &event, jack_nframes_t time);
-    void writeNoteOff(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time);
-    void writeNoteOn(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time);
+    virtual void writeMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t time);
 
 protected:
     /**
@@ -78,7 +68,7 @@ protected:
     virtual bool process(jack_nframes_t nframes);
 
     virtual void processMidi(jack_nframes_t start, jack_nframes_t end);
-    virtual void processMidi(const MidiEvent &event, jack_nframes_t time);
+    virtual void processMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t time);
 
     /**
       Override this in subclasses if you did not provide a MidiProcessor in the constructor.

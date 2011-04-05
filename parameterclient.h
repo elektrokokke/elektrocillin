@@ -101,7 +101,7 @@ signals:
       Note: the signal is only triggered once each process cycle
       with the same parameterId.
       */
-    void changedParameterValue(int parameterId, double value);
+    void changedParameterValue(int parameterId, double value, unsigned int  time);
     /**
       This signal will be triggered after all changed parameter
       signals (see above) have been triggered for the last
@@ -150,12 +150,12 @@ protected:
     virtual bool processParameters(jack_nframes_t start, jack_nframes_t end, jack_nframes_t nframes);
 
     void synchronizeChangedParametersWithGui();
-private slots:
+protected slots:
     /**
       This slot is connected to the corresponding signal of ParameterThread
       to keep the non-process thread set of parameters in sync with the process thread's.
       */
-    void onChangedParameterValue(int parameterId, double value);
+    virtual void onChangedParameterValue(int parameterId, double value, unsigned int time);
 private:
     ParameterProcessor *processParameterProcessor, *guiParameterProcessor;
     JackRingBuffer<ParameterChange> ringBufferFromProcessToGui, ringBufferFromGuiToProcess;
@@ -172,7 +172,7 @@ signals:
       to ParameterClient's signal with the same name instead.
       It will be triggered correspondingly.
       */
-    void changedParameterValue(int parameterId, double value);
+    void changedParameterValue(int parameterId, double value, jack_nframes_t time);
     void changedParameters();
 protected:
     void processDeferred();
@@ -191,7 +191,7 @@ protected:
     virtual void focusOutEvent(QFocusEvent * event);
 private slots:
     void onGuiChangedParameterValue(double value);
-    void onClientChangedParameterValue(int parameterId, double value);
+    void onClientChangedParameterValue(int parameterId, double value, unsigned int time);
 private:
     ParameterClient *client;
     QMap<QObject*, int> mapSenderToId;

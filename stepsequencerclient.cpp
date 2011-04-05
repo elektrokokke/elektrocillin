@@ -20,11 +20,11 @@
 #include "stepsequencerclient.h"
 
 StepSequencerClient::StepSequencerClient(const QString &clientName, StepSequencer *processStepSequencer_, StepSequencer *guiStepSequencer_, size_t ringBufferSize) :
-    ParameterClient(clientName, processStepSequencer_, 0, 0, processStepSequencer_, guiStepSequencer_, ringBufferSize),
+    ParameterClient(clientName, processStepSequencer_, processStepSequencer_, 0, processStepSequencer_, guiStepSequencer_, ringBufferSize),
     processStepSequencer(processStepSequencer_),
     guiStepSequencer(guiStepSequencer_)
 {
-    processStepSequencer->setMidiProcessorClient(this);
+    processStepSequencer->setMidiWriter(this);
     activateMidiInput(false);
     activateMidiOutput(true);
 }

@@ -66,7 +66,7 @@ public:
     // reimplemented from EventProcessor:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimpemented from ParameterProcessor:
-    virtual bool setParameterValue(int index, double value);
+    virtual bool setParameterValue(int index, double value, jack_nframes_t time);
     // reimplemented from Interpolator:
     // change the behaviour when changing control points:
     virtual void changeControlPoint(int index, double x, double y);

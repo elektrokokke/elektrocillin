@@ -21,11 +21,12 @@
  */
 
 #include "audioprocessor.h"
+#include "midiprocessor.h"
 #include "parameterprocessor.h"
 
 class MidiProcessorClient;
 
-class StepSequencer : public AudioProcessor, public ParameterProcessor
+class StepSequencer : public AudioProcessor, public MidiProcessor, public ParameterProcessor
 {
 public:
     StepSequencer(int nrOfSteps);
@@ -33,12 +34,8 @@ public:
     // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
-    // for writing Midi output:
-    void setMidiProcessorClient(MidiProcessorClient *midiProcessorClient);
-
     void setTransportPosition(jack_transport_state_t state, jack_position_t &position);
 private:
-    MidiProcessorClient *midiProcessorClient;
     int nrOfSteps, stepsPerBeat, lastStep;
     jack_transport_state_t state;
     jack_position_t position;

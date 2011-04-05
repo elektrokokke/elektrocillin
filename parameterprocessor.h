@@ -49,7 +49,7 @@ public:
       @return true, if the previous value of the parameter with given index
         differed from the given value, false otherwise
       */
-    virtual bool setParameterValue(int index, double value);
+    virtual bool setParameterValue(int index, double value, unsigned int time);
     /**
       This function should return wether the value of the parameter with the given
       index has been changed since the last call to this function with the same

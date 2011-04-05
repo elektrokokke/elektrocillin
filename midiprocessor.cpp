@@ -20,8 +20,64 @@
 #include "midiprocessor.h"
 #include <cmath>
 
+MidiProcessor::MidiProcessor(MidiWriter *midiWriter_) :
+    midiWriter(midiWriter_)
+{
+}
+
 MidiProcessor::~MidiProcessor()
 {
+}
+
+void MidiProcessor::writeMidi(const MidiEvent &event, jack_nframes_t time)
+{
+    if (midiWriter) {
+        midiWriter->writeMidi(event, time);
+    }
+}
+
+void MidiProcessor::writeNoteOff(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
+{
+    if (midiWriter) {
+        // create the midi message:
+        MidiEvent event;
+        event.size = 3;
+        event.buffer[0] = 0x80 + channel;
+        event.buffer[1] = note;
+        event.buffer[2] = velocity;
+        midiWriter->writeMidi(event, time);
+    }
+}
+
+void MidiProcessor::writeNoteOn(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
+{
+    if (midiWriter) {
+        // create the midi message:
+        MidiEvent event;
+        event.size = 3;
+        event.buffer[0] = 0x90 + channel;
+        event.buffer[1] = note;
+        event.buffer[2] = velocity;
+        midiWriter->writeMidi(event, time);
+    }
+}
+
+void MidiProcessor::writeControlChange(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
+{
+    if (midiWriter) {
+        // create the midi message:
+        MidiEvent event;
+        event.size = 3;
+        event.buffer[0] = 0xB0 + channel;
+        event.buffer[1] = controller;
+        event.buffer[2] = value;
+        midiWriter->writeMidi(event, time);
+    }
+}
+
+void MidiProcessor::setMidiWriter(MidiWriter *midiWriter)
+{
+    this->midiWriter = midiWriter;
 }
 
 double MidiProcessor::computeFrequencyFromMidiNoteNumber(unsigned char midiNoteNumber)
@@ -39,6 +95,10 @@ double MidiProcessor::computePitchBendFactorFromMidiPitch(double base, unsigned 
     // -8192 means minus two half tones => -49152 is one octave => factor 2^(-1)
     // +8192 means plus two half tones => +49152 is one octave => factor 2^1
     return pow(base, (double)pitchCentered / 49152.0);
+}
+
+void MidiProcessor::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
+{
 }
 
 void MidiProcessor::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)

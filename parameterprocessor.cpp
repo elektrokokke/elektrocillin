@@ -61,7 +61,7 @@ const ParameterProcessor::Parameter & ParameterProcessor::getParameter(int index
     return parameters[index];
 }
 
-bool ParameterProcessor::setParameterValue(int index, double value)
+bool ParameterProcessor::setParameterValue(int index, double value, unsigned int time)
 {
     Q_ASSERT(index < parameters.size());
     Q_ASSERT(index < parametersChanged.size());

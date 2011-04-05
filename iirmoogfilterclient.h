@@ -45,8 +45,6 @@ public:
     IirMoogFilter * getMoogFilter();
     virtual QGraphicsItem * createGraphicsItem();
     virtual JackClientFactory * getFactory();
-private slots:
-    void onClientChangedParameter(int index, double value);
 private:
     IirMoogFilter *processFilter, *guiFilter;
 };

@@ -30,7 +30,7 @@ MidiSignalClient * MidiSignalThread::getMidiSignalClient()
     return (MidiSignalClient*)getClient();
 }
 
-void MidiSignalThread::setRingBufferFromClient(JackRingBuffer<MidiProcessorClient::MidiEvent> *ringBufferFromClient)
+void MidiSignalThread::setRingBufferFromClient(JackRingBuffer<MidiProcessor::MidiEvent> *ringBufferFromClient)
 {
     this->ringBufferFromClient = ringBufferFromClient;
 }
@@ -38,7 +38,7 @@ void MidiSignalThread::setRingBufferFromClient(JackRingBuffer<MidiProcessorClien
 void MidiSignalThread::processDeferred()
 {
     for (; ringBufferFromClient->readSpace(); ) {
-        MidiProcessorClient::MidiEvent event = ringBufferFromClient->read();
+        MidiProcessor::MidiEvent event = ringBufferFromClient->read();
         // interpret the MIDI event:
         unsigned char statusByte = event.buffer[0];
         unsigned char highNibble = statusByte >> 4;
@@ -95,7 +95,7 @@ void MidiSignalThread::sendNoteOff(unsigned char channel, unsigned char note, un
 {
     if (getMidiSignalClient()->isActive()) {
         // create the midi message:
-        MidiProcessorClient::MidiEvent *event = new MidiProcessorClient::MidiEvent();
+        MidiProcessor::MidiEvent *event = new MidiProcessor::MidiEvent();
         event->size = 3;
         event->buffer[0] = 0x80 + channel;
         event->buffer[1] = note;
@@ -108,7 +108,7 @@ void MidiSignalThread::sendNoteOn(unsigned char channel, unsigned char note, uns
 {
     if (getMidiSignalClient()->isActive()) {
         // create the midi message:
-        MidiProcessorClient::MidiEvent *event = new MidiProcessorClient::MidiEvent();
+        MidiProcessor::MidiEvent *event = new MidiProcessor::MidiEvent();
         event->size = 3;
         event->buffer[0] = 0x90 + channel;
         event->buffer[1] = note;
@@ -121,7 +121,7 @@ void MidiSignalThread::sendAfterTouch(unsigned char channel, unsigned char note,
 {
     if (getMidiSignalClient()->isActive()) {
         // create the midi message:
-        MidiProcessorClient::MidiEvent *event = new MidiProcessorClient::MidiEvent();
+        MidiProcessor::MidiEvent *event = new MidiProcessor::MidiEvent();
         event->size = 3;
         event->buffer[0] = 0xA0 + channel;
         event->buffer[1] = note;
@@ -134,7 +134,7 @@ void MidiSignalThread::sendControlChange(unsigned char channel, unsigned char co
 {
     if (getMidiSignalClient()->isActive()) {
         // create the midi message:
-        MidiProcessorClient::MidiEvent *event = new MidiProcessorClient::MidiEvent();
+        MidiProcessor::MidiEvent *event = new MidiProcessor::MidiEvent();
         event->size = 3;
         event->buffer[0] = 0xB0 + channel;
         event->buffer[1] = controller;
@@ -147,7 +147,7 @@ void MidiSignalThread::sendProgramChange(unsigned char channel, unsigned char pr
 {
     if (getMidiSignalClient()->isActive()) {
         // create the midi message:
-        MidiProcessorClient::MidiEvent *event = new MidiProcessorClient::MidiEvent();
+        MidiProcessor::MidiEvent *event = new MidiProcessor::MidiEvent();
         event->size = 2;
         event->buffer[0] = 0xC0 + channel;
         event->buffer[1] = program;
@@ -160,7 +160,7 @@ void MidiSignalThread::sendChannelPressure(unsigned char channel, unsigned char 
 {
     if (getMidiSignalClient()->isActive()) {
         // create the midi message:
-        MidiProcessorClient::MidiEvent *event = new MidiProcessorClient::MidiEvent();
+        MidiProcessor::MidiEvent *event = new MidiProcessor::MidiEvent();
         event->size = 2;
         event->buffer[0] = 0xD0 + channel;
         event->buffer[1] = pressure;
@@ -173,7 +173,7 @@ void MidiSignalThread::sendPitchWheel(unsigned char channel, unsigned int pitch)
 {
     if (getMidiSignalClient()->isActive()) {
         // create the midi message:
-        MidiProcessorClient::MidiEvent *event = new MidiProcessorClient::MidiEvent();
+        MidiProcessor::MidiEvent *event = new MidiProcessor::MidiEvent();
         event->size = 3;
         event->buffer[0] = 0xE0 + channel;
         event->buffer[1] = pitch & 0x0F;
@@ -208,7 +208,7 @@ QGraphicsItem * MidiSignalClient::createGraphicsItem()
 
 bool MidiSignalClient::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const MidiProcessorClient::MidiEvent *midiEvent = dynamic_cast<const MidiProcessorClient::MidiEvent*>(event)) {
+    if (const MidiProcessor::MidiEvent *midiEvent = dynamic_cast<const MidiProcessor::MidiEvent*>(event)) {
         // write this event to the MIDI output buffer:
         writeMidi(*midiEvent, time);
         return true;
@@ -216,7 +216,7 @@ bool MidiSignalClient::processEvent(const RingBufferEvent *event, jack_nframes_t
     return false;
 }
 
-void MidiSignalClient::processMidi(const MidiProcessorClient::MidiEvent &event, jack_nframes_t)
+void MidiSignalClient::processMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t)
 {
     // notify the associated thread:
     ringBufferToThread.write(event);

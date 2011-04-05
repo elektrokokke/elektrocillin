@@ -30,8 +30,8 @@ ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audi
     ringBufferFromGuiToProcess(ringBufferSize),
     thread(new ParameterThread(this, &ringBufferFromProcessToGui, &ringBufferFromGuiToProcess))
 {
-    QObject::connect(thread, SIGNAL(changedParameterValue(int,double)), this, SLOT(onChangedParameterValue(int,double)));
-    QObject::connect(thread, SIGNAL(changedParameterValue(int,double)), this, SIGNAL(changedParameterValue(int,double)));
+    QObject::connect(thread, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SLOT(onChangedParameterValue(int,double,unsigned int)));
+    QObject::connect(thread, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SIGNAL(changedParameterValue(int,double,unsigned int)));
     QObject::connect(thread, SIGNAL(changedParameters()), this, SIGNAL(changedParameters()));
 }
 
@@ -134,7 +134,7 @@ bool ParameterClient::processParameters(jack_nframes_t start, jack_nframes_t end
                 currentFrame = change.time;
                 // process the parameter change:
                 ringBufferFromGuiToProcess.readAdvance(1);
-                processParameterProcessor->setParameterValue(change.id, change.value);
+                processParameterProcessor->setParameterValue(change.id, change.value, change.time);
             } else {
                 processEvents(currentFrame, end, nframes);
                 currentFrame = end;
@@ -167,10 +167,10 @@ void ParameterClient::synchronizeChangedParametersWithGui()
     thread->wake();
 }
 
-void ParameterClient::onChangedParameterValue(int parameterId, double value)
+void ParameterClient::onChangedParameterValue(int parameterId, double value, unsigned int time)
 {
     // a parameter has been changed from the process thread, change it in the GUI thread:
-    guiParameterProcessor->setParameterValue(parameterId, value);
+    guiParameterProcessor->setParameterValue(parameterId, value, time);
 }
 
 ParameterThread::ParameterThread(ParameterClient *client, JackRingBuffer<ParameterClient::ParameterChange> *ringBufferFromProcessToGui_, JackRingBuffer<ParameterClient::ParameterChange> *ringBufferFromGuiToProcess_) :
@@ -185,7 +185,7 @@ void ParameterThread::processDeferred()
     bool changes = ringBufferFromProcessToGui->readSpace();
     for (; ringBufferFromProcessToGui->readSpace(); ) {
         ParameterClient::ParameterChange change = ringBufferFromProcessToGui->read();
-        changedParameterValue(change.id, change.value);
+        changedParameterValue(change.id, change.value, 0);
     }
     if (changes) {
         changedParameters();
@@ -199,7 +199,7 @@ ParameterGraphicsItem::ParameterGraphicsItem(ParameterClient *client_, QGraphics
     setFlags(QGraphicsItem::ItemIsFocusable);
     setPen(QPen(QBrush(Qt::black), 1));
     setBrush(QBrush(Qt::white));
-    QObject::connect(client, SIGNAL(changedParameterValue(int,double)), this, SLOT(onClientChangedParameterValue(int,double)));
+    QObject::connect(client, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SLOT(onClientChangedParameterValue(int,double,unsigned int)));
     int padding = 4;
     QRectF rectControls;
     qreal y = 0;
@@ -240,7 +240,7 @@ void ParameterGraphicsItem::onGuiChangedParameterValue(double value)
     client->changeParameterValue(id, value);
 }
 
-void ParameterGraphicsItem::onClientChangedParameterValue(int parameterId, double value)
+void ParameterGraphicsItem::onClientChangedParameterValue(int parameterId, double value, unsigned int time)
 {
     Q_ASSERT(parameterId < controls.size());
     if (controls[parameterId]) {

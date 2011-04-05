@@ -24,7 +24,6 @@ IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilte
     processFilter(processFilter_),
     guiFilter(guiFilter_)
 {
-    QObject::connect(this, SIGNAL(changedParameterValue(int,double)), this, SLOT(onClientChangedParameter(int,double)));
 }
 
 IirMoogFilterClient::~IirMoogFilterClient()
@@ -56,11 +55,6 @@ QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
     item->setPen(QPen(QBrush(Qt::black), 1));
     item->setBrush(QBrush(Qt::white));
     return item;
-}
-
-void IirMoogFilterClient::onClientChangedParameter(int index, double value)
-{
-    guiFilter->setParameterValue(index, value);
 }
 
 IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client_, const QRectF &rect, QGraphicsItem *parent) :

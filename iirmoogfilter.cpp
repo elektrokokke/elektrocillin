@@ -87,9 +87,9 @@ unsigned char IirMoogFilter::getResonanceController() const
 void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
 {
     // cutoff modulation through audio input 2:
-    setParameterValue(6, inputs[1]);
+    setParameterValue(6, inputs[1], time);
     // resonance modulation through audio input 3:
-    setParameterValue(9, inputs[2]);
+    setParameterValue(9, inputs[2], time);
     // compute coefficients if necessary:
     if (recomputeCoefficients) {
         computeCoefficients();
@@ -98,33 +98,33 @@ void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nfr
     IirFilter::processAudio(inputs, outputs, time);
 }
 
-void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
+void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t time)
 {
     // set base cutoff frequency from note number:
-    setParameterValue(0, computeFrequencyFromMidiNoteNumber(noteNumber) * pow(2.0, getCutoffMidiNoteOffset() / 12.0));
+    setParameterValue(0, computeFrequencyFromMidiNoteNumber(noteNumber) * pow(2.0, getCutoffMidiNoteOffset() / 12.0), time);
 }
 
-void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nframes_t)
+void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nframes_t time)
 {
     // cutoff modulation through pitch bend wheel:
     int pitchCentered = (int)value - 0x2000;
-    setParameterValue(8, (double)pitchCentered / 8192.0);
+    setParameterValue(8, (double)pitchCentered / 8192.0, time);
 }
 
-void IirMoogFilter::processController(unsigned char, unsigned char controller, unsigned char value, jack_nframes_t)
+void IirMoogFilter::processController(unsigned char, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
     if (controller == resonanceController) {
         // resonance modulation through Midi controller:
-        setParameterValue(10, (double)value / 127.0);
+        setParameterValue(10, (double)value / 127.0, time);
     } else if (controller == frequencyController) {
         // cutoff modulation through Midi controller:
-        setParameterValue(7, (double)value / 127.0);
+        setParameterValue(7, (double)value / 127.0, time);
     }
 }
 
-bool IirMoogFilter::setParameterValue(int index, double value)
+bool IirMoogFilter::setParameterValue(int index, double value, jack_nframes_t time)
 {
-    if (ParameterProcessor::setParameterValue(index, value)) {
+    if (ParameterProcessor::setParameterValue(index, value, time)) {
         recomputeCoefficients = true;
         return true;
     } else {

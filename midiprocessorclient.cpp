@@ -98,7 +98,7 @@ void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
                 currentFrame = jackMidiEvent.time;
                 currentMidiEventIndex++;
                 // copy the midi event to our own structure:
-                MidiEvent midiEvent;
+                MidiProcessor::MidiEvent midiEvent;
                 midiEvent.size = jackMidiEvent.size;
                 memcpy(midiEvent.buffer, jackMidiEvent.buffer, jackMidiEvent.size * sizeof(jack_midi_data_t));
                 processMidi(midiEvent, currentFrame);
@@ -115,7 +115,7 @@ void MidiProcessorClient::processMidi(jack_nframes_t start, jack_nframes_t end)
     }
 }
 
-void MidiProcessorClient::processMidi(const MidiProcessorClient::MidiEvent &midiEvent, jack_nframes_t time)
+void MidiProcessorClient::processMidi(const MidiProcessor::MidiEvent &midiEvent, jack_nframes_t time)
 {
     // interpret the midi event:
     unsigned char statusByte = midiEvent.buffer[0];
@@ -197,35 +197,13 @@ void MidiProcessorClient::processChannelPressure(unsigned char channel, unsigned
     midiProcessor->processChannelPressure(channel, pressure, time);
 }
 
-void MidiProcessorClient::writeMidi(const MidiEvent &event, jack_nframes_t time)
+void MidiProcessorClient::writeMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t time)
 {
     Q_ASSERT(midiOutput);
     Q_ASSERT(time >= 0);
     Q_ASSERT(time < nframes);
     // write the event to the jack midi output buffer:
     jack_midi_event_write(midiOutputBuffer, time, event.buffer, event.size * sizeof(jack_midi_data_t));
-}
-
-void MidiProcessorClient::writeNoteOff(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
-{
-    // create the midi message:
-    MidiProcessorClient::MidiEvent event;
-    event.size = 3;
-    event.buffer[0] = 0x80 + channel;
-    event.buffer[1] = note;
-    event.buffer[2] = velocity;
-    writeMidi(event, time);
-}
-
-void MidiProcessorClient::writeNoteOn(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
-{
-    // create the midi message:
-    MidiProcessorClient::MidiEvent event;
-    event.size = 3;
-    event.buffer[0] = 0x90 + channel;
-    event.buffer[1] = note;
-    event.buffer[2] = velocity;
-    writeMidi(event, time);
 }
 
 void MidiProcessorClient::getMidiPortBuffer(jack_nframes_t nframes)

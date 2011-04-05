@@ -33,7 +33,7 @@ public:
 
     MidiSignalClient *getMidiSignalClient();
 
-    void setRingBufferFromClient(JackRingBuffer<MidiProcessorClient::MidiEvent> *ringBufferFromClient);
+    void setRingBufferFromClient(JackRingBuffer<MidiProcessor::MidiEvent> *ringBufferFromClient);
 signals:
     void receivedNoteOff(unsigned char channel, unsigned char note, unsigned char velocity);
     void receivedNoteOn(unsigned char channel, unsigned char note, unsigned char velocity);
@@ -54,7 +54,7 @@ protected:
     void processDeferred();
 private:
     // This is still the template class because the other class involves new and delete, which should not be in the Jack process thread (which is the sending thread here)
-    JackRingBuffer<MidiProcessorClient::MidiEvent> *ringBufferFromClient;
+    JackRingBuffer<MidiProcessor::MidiEvent> *ringBufferFromClient;
 };
 
 class MidiSignalClient : public JackThreadEventProcessorClient {
@@ -72,11 +72,11 @@ protected:
     // reimplemented from EventProcessorClient2:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimplemented from MidiProcessor:
-    virtual void processMidi(const MidiProcessorClient::MidiEvent &event, jack_nframes_t time);
+    virtual void processMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t time);
 
 private:
     // This is still the template class because the other class involves new and delete, which should not be in the Jack process thread (which is the sending thread here)
-    JackRingBuffer<MidiProcessorClient::MidiEvent> ringBufferToThread;
+    JackRingBuffer<MidiProcessor::MidiEvent> ringBufferToThread;
 };
 
 class MidiSignalGraphicsItem : public GraphicsKeyboardItem
@@ -88,7 +88,7 @@ public:
 
 struct MidiEventWithTimeStamp {
     jack_nframes_t time;
-    MidiProcessorClient::MidiEvent event;
+    MidiProcessor::MidiEvent event;
 };
 
 #endif // MIDICLIENT_H
