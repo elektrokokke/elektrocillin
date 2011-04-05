@@ -24,6 +24,7 @@ IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilte
     processFilter(processFilter_),
     guiFilter(guiFilter_)
 {
+    activateMidiOutput(true);
 }
 
 IirMoogFilterClient::~IirMoogFilterClient()
@@ -57,6 +58,17 @@ QGraphicsItem * IirMoogFilterClient::createGraphicsItem()
     return item;
 }
 
+bool IirMoogFilterClient::init()
+{
+    if (ParameterClient::init()) {
+        // adjust the guiFilter's samplerate to that of the processFilter:
+        guiFilter->setSampleRate(processFilter->getSampleRate());
+        return true;
+    } else {
+        return false;
+    }
+}
+
 IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client_, const QRectF &rect, QGraphicsItem *parent) :
     FrequencyResponseGraphicsItem(rect, 22050.0 / 512.0, 22050, -30, 30, parent),
     client(client_)
@@ -86,8 +98,8 @@ void IirMoogFilterGraphicsItem::onClientChangedParameters()
 
 void IirMoogFilterGraphicsItem::onGuiChangedFilterParameters(const QPointF &cutoffResonance)
 {
-    client->changeParameterValue(0, cutoffResonance.x());
-    client->changeParameterValue(1, cutoffResonance.y());
+    client->changeParameterValue(1, cutoffResonance.x());
+    client->changeParameterValue(2, cutoffResonance.y());
 }
 
 class IirMoogFilterClientFactory : public JackClientFactory

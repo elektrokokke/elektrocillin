@@ -27,7 +27,7 @@ StepSequencer::StepSequencer(int nrOfSteps_) :
     lastStep(-1),
     state(JackTransportStopped),
     noteActive(false),
-    channel(1),
+    channel(0),
     noteNumber(50),
     velocity(127)
 {

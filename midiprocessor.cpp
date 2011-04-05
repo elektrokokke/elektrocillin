@@ -62,7 +62,7 @@ void MidiProcessor::writeNoteOn(unsigned char channel, unsigned char note, unsig
     }
 }
 
-void MidiProcessor::writeControlChange(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
+void MidiProcessor::writeControlller(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
     if (midiWriter) {
         // create the midi message:

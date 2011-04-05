@@ -19,13 +19,15 @@
 
 #include "parameterprocessor.h"
 
-ParameterProcessor::ParameterProcessor()
+ParameterProcessor::ParameterProcessor() :
+    anyParameterChanged(false)
 {
 }
 
 ParameterProcessor::ParameterProcessor(const ParameterProcessor &tocopy) :
     parameters(tocopy.parameters),
-    parametersChanged(tocopy.parametersChanged)
+    parametersChanged(tocopy.parametersChanged),
+    anyParameterChanged(tocopy.anyParameterChanged)
 {
 }
 
@@ -33,6 +35,7 @@ ParameterProcessor & ParameterProcessor::operator=(const ParameterProcessor &par
 {
     parameters = parameterProcessor.parameters;
     parametersChanged = parameterProcessor.parametersChanged;
+    anyParameterChanged = parameterProcessor.anyParameterChanged;
     return *this;
 }
 
@@ -68,19 +71,28 @@ bool ParameterProcessor::setParameterValue(int index, double value, unsigned int
     if (parameters[index].value != value) {
         parameters[index].value = value;
         parametersChanged[index] = true;
+        anyParameterChanged = true;
         return true;
     } else {
         return false;
     }
 }
 
-bool ParameterProcessor::hasParameterChanged(int index)
+bool ParameterProcessor::hasParameterChanged(int index) const
 {
     Q_ASSERT(index < parametersChanged.size());
-    if (parametersChanged[index]) {
-        parametersChanged[index] = false;
-        return true;
-    } else {
-        return false;
+    return parametersChanged[index];
+}
+
+bool ParameterProcessor::hasAnyParameterChanged() const
+{
+    return anyParameterChanged;
+}
+
+void ParameterProcessor::resetParameterChanged()
+{
+    for (int i = 0; i < parameters.size(); i++) {
+        parametersChanged[i] = false;
     }
+    anyParameterChanged = false;
 }

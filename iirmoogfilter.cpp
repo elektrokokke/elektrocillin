@@ -22,8 +22,6 @@
 
 IirMoogFilter::IirMoogFilter(int zeros) :
     IirFilter(1 + zeros, 4, QStringList("Cutoff mod.") + QStringList("Resonance mod.")),
-    frequencyController(1),
-    resonanceController(2),
     recomputeCoefficients(false)
 {
     // cutoff frequency in Hertz (default is a quarter the sample rate)
@@ -38,21 +36,18 @@ IirMoogFilter::IirMoogFilter(int zeros) :
     registerParameter("Pitch bend modulation intensity", 2, 0, 12, 1);
     // maximum frequency modulation by Midi controller in semitones (default is one octave)
     registerParameter("Midi controller modulation intensity", 12, 1, 36, 1);
+    registerParameter("Cutoff controller", 0, -1, 1, 0);
     // uneditable parameters for cutoff modulation from audio, pitch bend and controller, and for resonance modulation from audio and controller:
     registerParameter("Frequency modulation", 0, 0, 0, 0);
-    registerParameter("Cutoff controller", 0, 0, 0, 0);
-    registerParameter("Pitch bend", 0, 0, 0, 0);
     registerParameter("Resonance modulation", 0, 0, 0, 0);
-    registerParameter("Resonance controller", 0, 0, 0, 0);
+    registerParameter("Pitch bend", 0, 0, 0, 0);
 
     computeCoefficients();
 }
 
 IirMoogFilter::IirMoogFilter(const IirMoogFilter &tocopy) :
     IirFilter(tocopy),
-    ParameterProcessor(tocopy),
-    frequencyController(tocopy.frequencyController),
-    resonanceController(tocopy.resonanceController)
+    MidiParameterProcessor(tocopy)
 {
 }
 
@@ -61,33 +56,13 @@ void IirMoogFilter::setSampleRate(double sampleRate)
     IirFilter::setSampleRate(sampleRate);
     recomputeCoefficients = true;
     // adapt the maximum cutoff frequency:
-    getParameter(0).max = 0.5 * sampleRate;
-}
-
-void IirMoogFilter::setFrequencyController(unsigned char controller)
-{
-    frequencyController = controller;
-}
-
-unsigned char IirMoogFilter::getFrequencyController() const
-{
-    return frequencyController;
-}
-
-void IirMoogFilter::setResonanceController(unsigned char controller)
-{
-    resonanceController = controller;
-}
-
-unsigned char IirMoogFilter::getResonanceController() const
-{
-    return resonanceController;
+    getParameter(1).max = 0.5 * sampleRate;
 }
 
 void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
 {
     // cutoff modulation through audio input 2:
-    setParameterValue(6, inputs[1], time);
+    setParameterValue(8, inputs[1], time);
     // resonance modulation through audio input 3:
     setParameterValue(9, inputs[2], time);
     // compute coefficients if necessary:
@@ -101,30 +76,19 @@ void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nfr
 void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t time)
 {
     // set base cutoff frequency from note number:
-    setParameterValue(0, computeFrequencyFromMidiNoteNumber(noteNumber) * pow(2.0, getCutoffMidiNoteOffset() / 12.0), time);
+    setParameterValue(1, computeFrequencyFromMidiNoteNumber(noteNumber) * pow(2.0, getCutoffMidiNoteOffset() / 12.0), time);
 }
 
 void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nframes_t time)
 {
     // cutoff modulation through pitch bend wheel:
     int pitchCentered = (int)value - 0x2000;
-    setParameterValue(8, (double)pitchCentered / 8192.0, time);
-}
-
-void IirMoogFilter::processController(unsigned char, unsigned char controller, unsigned char value, jack_nframes_t time)
-{
-    if (controller == resonanceController) {
-        // resonance modulation through Midi controller:
-        setParameterValue(10, (double)value / 127.0, time);
-    } else if (controller == frequencyController) {
-        // cutoff modulation through Midi controller:
-        setParameterValue(7, (double)value / 127.0, time);
-    }
+    setParameterValue(10, (double)pitchCentered / 8192.0, time);
 }
 
 bool IirMoogFilter::setParameterValue(int index, double value, jack_nframes_t time)
 {
-    if (ParameterProcessor::setParameterValue(index, value, time)) {
+    if (MidiParameterProcessor::setParameterValue(index, value, time)) {
         recomputeCoefficients = true;
         return true;
     } else {
@@ -134,35 +98,30 @@ bool IirMoogFilter::setParameterValue(int index, double value, jack_nframes_t ti
 
 double IirMoogFilter::getBaseCutoffFrequency() const
 {
-    return getParameter(0).value;
+    return getParameter(1).value;
 }
 
 double IirMoogFilter::getResonance() const
 {
-    return getParameter(1).value;
+    return getParameter(2).value;
 }
 
 double IirMoogFilter::getCutoffMidiNoteOffset() const
 {
-    return getParameter(2).value;
+    return getParameter(3).value;
 }
 
 double IirMoogFilter::getCutoffAudioModulationIntensity() const
 {
-    return getParameter(3).value;
+    return getParameter(4).value;
 }
 
 double IirMoogFilter::getCutoffPitchBendModulationIntensity() const
 {
-    return getParameter(4).value;
-}
-
-double IirMoogFilter::getCutoffControllerModulationIntensity() const
-{
     return getParameter(5).value;
 }
 
-double IirMoogFilter::getCutoffAudioModulation() const
+double IirMoogFilter::getCutoffControllerModulationIntensity() const
 {
     return getParameter(6).value;
 }
@@ -172,7 +131,7 @@ double IirMoogFilter::getCutoffControllerModulation() const
     return getParameter(7).value;
 }
 
-double IirMoogFilter::getCutoffPitchBendModulation() const
+double IirMoogFilter::getCutoffAudioModulation() const
 {
     return getParameter(8).value;
 }
@@ -182,18 +141,15 @@ double IirMoogFilter::getResonanceAudioModulation() const
     return getParameter(9).value;
 }
 
-double IirMoogFilter::getResonanceControllerModulation() const
+double IirMoogFilter::getCutoffPitchBendModulation() const
 {
     return getParameter(10).value;
 }
 
 void IirMoogFilter::computeCoefficients()
 {
-    double cutoffPitchBendModulationFactor = pow(2.0, getCutoffPitchBendModulationIntensity() * getCutoffPitchBendModulation() / 12.0);
-    double cutoffControllerModulationFactor = pow(2.0, getCutoffControllerModulationIntensity() * getCutoffControllerModulation() / 12.0);
-    double cutoffAudioModulationFactor = pow(2.0, getCutoffAudioModulationIntensity() * getCutoffAudioModulation() / 12.0);
-    double cutoffFrequencyInHertz = getBaseCutoffFrequency() * cutoffPitchBendModulationFactor * cutoffControllerModulationFactor * cutoffAudioModulationFactor;
-    double resonance = getResonance() + getResonanceAudioModulation() + getResonanceControllerModulation();
+    double cutoffFrequencyInHertz = getBaseCutoffFrequency() * pow(2.0, (getCutoffPitchBendModulationIntensity() * getCutoffPitchBendModulation() +  getCutoffControllerModulationIntensity() * getCutoffControllerModulation() + getCutoffAudioModulationIntensity() * getCutoffAudioModulation()) / 12.0);
+    double resonance = getResonance() + getResonanceAudioModulation();
     if (resonance < -1.0) {
         resonance += 2.0;
     } else if (resonance < 0.0) {

@@ -172,7 +172,7 @@ signals:
       to ParameterClient's signal with the same name instead.
       It will be triggered correspondingly.
       */
-    void changedParameterValue(int parameterId, double value, jack_nframes_t time);
+    void changedParameterValue(int parameterId, double value, unsigned int time);
     void changedParameters();
 protected:
     void processDeferred();

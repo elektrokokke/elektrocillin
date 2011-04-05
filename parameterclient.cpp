@@ -30,6 +30,9 @@ ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audi
     ringBufferFromGuiToProcess(ringBufferSize),
     thread(new ParameterThread(this, &ringBufferFromProcessToGui, &ringBufferFromGuiToProcess))
 {
+    activateMidiInput(true);
+    activateMidiOutput(true);
+    midiProcessor->setMidiWriter(this);
     QObject::connect(thread, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SLOT(onChangedParameterValue(int,double,unsigned int)));
     QObject::connect(thread, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SIGNAL(changedParameterValue(int,double,unsigned int)));
     QObject::connect(thread, SIGNAL(changedParameters()), this, SIGNAL(changedParameters()));
@@ -163,6 +166,7 @@ void ParameterClient::synchronizeChangedParametersWithGui()
             ringBufferFromProcessToGui.write(change);
         }
     }
+    processParameterProcessor->resetParameterChanged();
     // wake the associated thread:
     thread->wake();
 }
@@ -185,7 +189,7 @@ void ParameterThread::processDeferred()
     bool changes = ringBufferFromProcessToGui->readSpace();
     for (; ringBufferFromProcessToGui->readSpace(); ) {
         ParameterClient::ParameterChange change = ringBufferFromProcessToGui->read();
-        changedParameterValue(change.id, change.value, 0);
+        changedParameterValue(change.id, change.value, change.time);
     }
     if (changes) {
         changedParameters();
@@ -245,6 +249,6 @@ void ParameterGraphicsItem::onClientChangedParameterValue(int parameterId, doubl
     Q_ASSERT(parameterId < controls.size());
     if (controls[parameterId]) {
         // reflect the new value in the appropriate control:
-        controls[parameterId]->setValue(value);
+        controls[parameterId]->setValue(value, false);
     }
 }

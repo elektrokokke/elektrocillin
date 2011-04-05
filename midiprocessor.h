@@ -53,7 +53,7 @@ public:
     void writeMidi(const MidiEvent &event, jack_nframes_t time);
     void writeNoteOff(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time);
     void writeNoteOn(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time);
-    void writeControlChange(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
+    void writeControlller(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     // you may call this as an alternative to providing a MidiWriter in the constructor, before calling any of the above methods:
     void setMidiWriter(MidiWriter *midiWriter);
 

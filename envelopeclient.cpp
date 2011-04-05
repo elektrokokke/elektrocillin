@@ -127,7 +127,7 @@ EnvelopeClient * EnvelopeGraphicsItem::getClient()
 void EnvelopeGraphicsItem::increaseControlPoints()
 {
     client->postIncreaseControlPoints();
-    sustainNodeControlItem->setValue(client->getEnvelope()->getSustainIndex());
+    sustainNodeControlItem->setValue(client->getEnvelope()->getSustainIndex(), false);
     sustainNodeControlItem->setMaxValue(client->getEnvelope()->getX().size() - 1);
     sustainNodeControlItem->setSize(100 + (client->getEnvelope()->getX().size() - 1) * 10);
 }
@@ -135,7 +135,7 @@ void EnvelopeGraphicsItem::increaseControlPoints()
 void EnvelopeGraphicsItem::decreaseControlPoints()
 {
     client->postDecreaseControlPoints();
-    sustainNodeControlItem->setValue(client->getEnvelope()->getSustainIndex());
+    sustainNodeControlItem->setValue(client->getEnvelope()->getSustainIndex(), false);
     sustainNodeControlItem->setMaxValue(client->getEnvelope()->getX().size() - 1);
     sustainNodeControlItem->setSize(100 + (client->getEnvelope()->getX().size() - 1) * 10);
 }

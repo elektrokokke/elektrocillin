@@ -46,7 +46,7 @@ public slots:
     void setMinValue(double minValue);
     void setMaxValue(double maxValue);
     void setSize(double size);
-    void setValue(double value);
+    void setValue(double value, bool emitSignal = true);
 signals:
     void valueEditingStarted();
     void valueEditingStopped(double value);

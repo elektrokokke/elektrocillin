@@ -50,23 +50,15 @@ public:
         differed from the given value, false otherwise
       */
     virtual bool setParameterValue(int index, double value, unsigned int time);
-    /**
-      This function should return wether the value of the parameter with the given
-      index has been changed since the last call to this function with the same
-      parameter.
 
-      If the functions has not been called yet since object construction,
-      this function should return true if and only if the parameter value
-      has been changed at all.
-
-      After call to this method another call with the same parameter should
-      return false unless the value was changed again between calls.
-      */
-    virtual bool hasParameterChanged(int index);
+    bool hasParameterChanged(int index) const;
+    bool hasAnyParameterChanged() const;
+    void resetParameterChanged();
 
 private:
     QVector<Parameter> parameters;
     QVector<bool> parametersChanged;
+    bool anyParameterChanged;
 };
 
 #endif // PARAMETERPROCESSOR_H

@@ -45,6 +45,9 @@ public:
     IirMoogFilter * getMoogFilter();
     virtual QGraphicsItem * createGraphicsItem();
     virtual JackClientFactory * getFactory();
+protected:
+    // reimplemented from ParameterClient:
+    virtual bool init();
 private:
     IirMoogFilter *processFilter, *guiFilter;
 };

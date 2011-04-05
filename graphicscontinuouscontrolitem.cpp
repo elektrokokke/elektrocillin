@@ -82,7 +82,7 @@ void GraphicsContinuousControlItem::setSize(double size)
     this->size = size;
 }
 
-void GraphicsContinuousControlItem::setValue(double value)
+void GraphicsContinuousControlItem::setValue(double value, bool emitSignal)
 {
     if (resolution) {
         value = (double)qRound(value / resolution) * resolution;
@@ -92,7 +92,9 @@ void GraphicsContinuousControlItem::setValue(double value)
         currentValue = value;
         // change the text accordingly:
         setText(QString("%1: %2").arg(name).arg(currentValue,  0, 'g', precision));
-        valueChanged(currentValue);
+        if (emitSignal) {
+            valueChanged(currentValue);
+        }
         // align the new position:
         setPos(alignX(rect(), previousRect), pos().y());
     }

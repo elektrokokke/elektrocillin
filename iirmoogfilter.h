@@ -21,12 +21,11 @@
  */
 
 #include "iirfilter.h"
-#include "midiprocessor.h"
 #include "eventprocessor.h"
-#include "parameterprocessor.h"
+#include "midiparameterprocessor.h"
 #include <QVector>
 
-class IirMoogFilter : public IirFilter, public MidiProcessor, public ParameterProcessor
+class IirMoogFilter : public IirFilter, public MidiParameterProcessor
 {
 public:
     IirMoogFilter(int zeros = 0);
@@ -34,18 +33,12 @@ public:
 
     virtual void setSampleRate(double sampleRate);
 
-    void setFrequencyController(unsigned char controller);
-    unsigned char getFrequencyController() const;
-    void setResonanceController(unsigned char controller);
-    unsigned char getResonanceController() const;
-
     // reimplemented from IirFilter (originally from AudioProcessor):
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplemented from MidiProcessor:
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
-    virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
-    // reimplemented from ParameterProcessor:
+    // reimplemented from MidiParameterProcessor:
     virtual bool setParameterValue(int index, double value, jack_nframes_t time);
 
     double getBaseCutoffFrequency() const;
@@ -58,11 +51,9 @@ public:
     double getCutoffControllerModulation() const;
     double getCutoffPitchBendModulation() const;
     double getResonanceAudioModulation() const;
-    double getResonanceControllerModulation() const;
 
     void computeCoefficients();
 private:
-    unsigned char frequencyController, resonanceController;
     bool recomputeCoefficients;
 };
 
