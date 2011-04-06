@@ -25,7 +25,7 @@
 #include "graphicsinterpolatoredititem.h"
 #include <QPen>
 
-class PolynomialOscillatorClient : public OscillatorClient
+class PolynomialOscillatorClient : public OscillatorClient, public AbstractInterpolator
 {
 public:
     PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *processOscillator, PolynomialOscillator *guiOscillator, size_t ringBufferSize = 1024);
@@ -42,18 +42,18 @@ public:
       post...() methods.
       */
     virtual void loadState(QDataStream &stream);
-
-    PolynomialInterpolator * getPolynomialInterpolator();
-
-    void postIncreaseControlPoints();
-    void postDecreaseControlPoints();
-    void postChangeControlPoint(int index, double x, double y);
-
     QGraphicsItem * createGraphicsItem();
-protected:
-    PolynomialOscillator * getIntegralOscillator();
+
+    // Implemented from AbstractInterpolator:
+    virtual double evaluate(double x, int *index = 0);
+    virtual int getNrOfControlPoints();
+    virtual QPointF getControlPoint(int index);
+    virtual void changeControlPoint(int index, double x, double y);
+    virtual void addControlPoint(double x, double y);
+    virtual void deleteControlPoint(int index);
+    virtual QString getControlPointName(int index) const;
 private:
-    PolynomialOscillator oscillator;
+    PolynomialOscillator *processOscillator, *guiOscillator;
 };
 
 class IntegralOscillatorGraphicsItem : public GraphicsInterpolatorEditItem

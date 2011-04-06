@@ -19,9 +19,10 @@
 
 #include "polynomialoscillatorclient.h"
 
-PolynomialOscillatorClient::PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *processOscillator, PolynomialOscillator *guiOscillator, size_t ringBufferSize) :
-    OscillatorClient(clientName, processOscillator, guiOscillator, processOscillator, ringBufferSize),
-    oscillator(3)
+PolynomialOscillatorClient::PolynomialOscillatorClient(const QString &clientName, PolynomialOscillator *processOscillator_, PolynomialOscillator *guiOscillator_, size_t ringBufferSize) :
+    OscillatorClient(clientName, processOscillator_, guiOscillator_, processOscillator_, ringBufferSize),
+    processOscillator(processOscillator_),
+    guiOscillator(guiOscillator_)
 {
 }
 
@@ -33,49 +34,14 @@ PolynomialOscillatorClient::~PolynomialOscillatorClient()
 void PolynomialOscillatorClient::saveState(QDataStream &stream)
 {
     OscillatorClient::saveState(stream);
-    oscillator.getPolynomialInterpolator()->save(stream);
+    guiOscillator->getPolynomialInterpolator()->save(stream);
 }
 
 void PolynomialOscillatorClient::loadState(QDataStream &stream)
 {
     OscillatorClient::loadState(stream);
-    PolynomialInterpolator interpolator;
-    interpolator.load(stream);
-    oscillator.setPolynomialInterpolator(interpolator);
-    getIntegralOscillator()->setPolynomialInterpolator(interpolator);
-}
-
-PolynomialInterpolator * PolynomialOscillatorClient::getPolynomialInterpolator()
-{
-    return oscillator.getPolynomialInterpolator();
-}
-
-void PolynomialOscillatorClient::postIncreaseControlPoints()
-{
-    InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, false, false, true);
-    oscillator.processEvent(event, 0);
-    postEvent(event);
-}
-
-void PolynomialOscillatorClient::postDecreaseControlPoints()
-{
-    if (oscillator.getPolynomialInterpolator()->getX().size() > 2) {
-        InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, false, false, true);
-        oscillator.processEvent(event, 0);
-        postEvent(event);
-    }
-}
-
-void PolynomialOscillatorClient::postChangeControlPoint(int index, double x, double y)
-{
-    InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
-    oscillator.processEvent(event, 0);
-    postEvent(event);
-}
-
-PolynomialOscillator * PolynomialOscillatorClient::getIntegralOscillator()
-{
-    return (PolynomialOscillator*)getAudioProcessor();
+    guiOscillator->getPolynomialInterpolator()->load(stream);
+    processOscillator->setPolynomialInterpolator(*guiOscillator->getPolynomialInterpolator());
 }
 
 QGraphicsItem * PolynomialOscillatorClient::createGraphicsItem()
@@ -83,41 +49,56 @@ QGraphicsItem * PolynomialOscillatorClient::createGraphicsItem()
     int padding = 4;
     QGraphicsRectItem *item = new QGraphicsRectItem();
     QGraphicsItem *oscillatorItem = OscillatorClient::createGraphicsItem();
-    QRectF rect = QRect(0, 0, 600, 420);
+    QRectF rect = QRect(0, 0, 420, 420);
     rect = rect.translated(oscillatorItem->boundingRect().width() + 2 * padding, padding);
     oscillatorItem->setPos(padding, padding);
     oscillatorItem->setParentItem(item);
-    QGraphicsItem *ourItem = new IntegralOscillatorGraphicsItem(rect, this);
-    ourItem->setParentItem(item);
+    new GraphicsInterpolatorEditItem(this, rect, QRectF(-1, 1, 2, -2), item);
     item->setRect((rect | oscillatorItem->boundingRect().translated(oscillatorItem->pos())).adjusted(-padding, -padding, padding, padding));
     item->setPen(QPen(QBrush(Qt::black), 1));
     item->setBrush(QBrush(Qt::white));
     return item;
 }
 
-IntegralOscillatorGraphicsItem::IntegralOscillatorGraphicsItem(const QRectF &rect, PolynomialOscillatorClient *client_, QGraphicsItem *parent) :
-    GraphicsInterpolatorEditItem(
-        client_->getPolynomialInterpolator(),
-        rect,
-        QRectF(client_->getPolynomialInterpolator()->getX().first(), 1, client_->getPolynomialInterpolator()->getX().last() - client_->getPolynomialInterpolator()->getX().first(), -2),
-        parent
-        ),
-    client(client_)
-{}
-
-void IntegralOscillatorGraphicsItem::increaseControlPoints()
+double PolynomialOscillatorClient::evaluate(double x, int *index)
 {
-    client->postIncreaseControlPoints();
+    return guiOscillator->getPolynomialInterpolator()->evaluate(x, index);
 }
 
-void IntegralOscillatorGraphicsItem::decreaseControlPoints()
+int PolynomialOscillatorClient::getNrOfControlPoints()
 {
-    client->postDecreaseControlPoints();
+    return guiOscillator->getPolynomialInterpolator()->getNrOfControlPoints();
 }
 
-void IntegralOscillatorGraphicsItem::changeControlPoint(int index, double x, double y)
+QPointF PolynomialOscillatorClient::getControlPoint(int index)
 {
-    client->postChangeControlPoint(index, x, y);
+    return guiOscillator->getPolynomialInterpolator()->getControlPoint(index);
+}
+
+void PolynomialOscillatorClient::changeControlPoint(int index, double x, double y)
+{
+    guiOscillator->getPolynomialInterpolator()->changeControlPoint(index, x, y);
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
+    postEvent(event);
+}
+
+void PolynomialOscillatorClient::addControlPoint(double x, double y)
+{
+    guiOscillator->getPolynomialInterpolator()->addControlPoint(x, y);
+    Interpolator::AddControlPointEvent *event = new Interpolator::AddControlPointEvent(x, y);
+    postEvent(event);
+}
+
+void PolynomialOscillatorClient::deleteControlPoint(int index)
+{
+    guiOscillator->getPolynomialInterpolator()->deleteControlPoint(index);
+    Interpolator::DeleteControlPointEvent *event = new Interpolator::DeleteControlPointEvent(index);
+    postEvent(event);
+}
+
+QString PolynomialOscillatorClient::getControlPointName(int index) const
+{
+    return guiOscillator->getPolynomialInterpolator()->getControlPointName(index);
 }
 
 class IntegralOscillatorClientFactory : public JackClientFactory

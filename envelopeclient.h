@@ -29,7 +29,7 @@
 #include <QBrush>
 #include <QFont>
 
-class EnvelopeClient : public ParameterClient
+class EnvelopeClient : public ParameterClient, public AbstractInterpolator
 {
 public:
     /**
@@ -44,16 +44,17 @@ public:
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
     virtual void loadState(QDataStream &stream);
-
-    Envelope * getEnvelope();
-
-    void postIncreaseControlPoints();
-    void postDecreaseControlPoints();
-    void postChangeControlPoint(int index, double x, double y);
-    void postChangeSustainIndex(int sustainIndex);
-
     QGraphicsItem * createGraphicsItem();
 
+    void postChangeSustainIndex(int sustainIndex);
+    // Implemented from AbstractInterpolator:
+    virtual double evaluate(double x, int *index = 0);
+    virtual int getNrOfControlPoints();
+    virtual QPointF getControlPoint(int index);
+    virtual void changeControlPoint(int index, double x, double y);
+    virtual void addControlPoint(double x, double y);
+    virtual void deleteControlPoint(int index);
+    virtual QString getControlPointName(int index) const;
 private:
     Envelope *processEnvelope, *guiEnvelope;
 };
@@ -63,17 +64,10 @@ class EnvelopeGraphicsItem : public QObject, public GraphicsInterpolatorEditItem
     Q_OBJECT
 public:
     EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client, QGraphicsItem *parent = 0);
-    EnvelopeClient * getClient();
-protected:
-    virtual void increaseControlPoints();
-    virtual void decreaseControlPoints();
-    virtual void changeControlPoint(int index, double x, double y);
 private slots:
-    void onSustainNodeChanged(int value);
     void updateInterpolator();
 private:
     EnvelopeClient *client;
-    GraphicsDiscreteControlItem *sustainNodeControlItem;
 };
 
 #endif // ENVELOPECLIENT_H

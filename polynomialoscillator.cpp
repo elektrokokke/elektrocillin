@@ -26,7 +26,7 @@ PolynomialOscillator::PolynomialOscillator(int nrOfIntegrations_, const QStringL
     previousIntegralValues(nrOfIntegrations, 0)
 {
     QVector<double> xx, yy;
-    xx.append(0);
+    xx.append(-1);
     yy.append(-1);
     xx.append(1);
     yy.append(1);
@@ -52,8 +52,8 @@ void PolynomialOscillator::setPolynomialInterpolator(const PolynomialInterpolato
 
 bool PolynomialOscillator::processEvent(const RingBufferEvent *event, jack_nframes_t time)
 {
-    if (const InterpolatorProcessor::InterpolatorEvent *event_ = dynamic_cast<const InterpolatorProcessor::InterpolatorEvent*>(event)) {
-        InterpolatorProcessor::processInterpolatorEvent(&integrals.first(), event_);
+    if (const Interpolator::InterpolatorEvent *event_ = dynamic_cast<const Interpolator::InterpolatorEvent*>(event)) {
+        integrals.first().processInterpolatorEvent(event_);
         computeIntegrals();
         return true;
     } else {

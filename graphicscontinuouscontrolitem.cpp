@@ -68,12 +68,14 @@ void GraphicsContinuousControlItem::setHorizontalAlignment(HorizontalAlignment h
 void GraphicsContinuousControlItem::setMinValue(double minValue)
 {
     this->minValue = minValue;
+    setValue(currentValue, false);
     minLabel->setText(QString("%1: %2").arg(name).arg(minValue, 0, format, precision));
 }
 
 void GraphicsContinuousControlItem::setMaxValue(double maxValue)
 {
     this->maxValue = maxValue;
+    setValue(currentValue, false);
     maxLabel->setText(QString("%1: %2").arg(name).arg(maxValue, 0, format, precision));
 }
 
@@ -85,7 +87,7 @@ void GraphicsContinuousControlItem::setSize(double size)
 void GraphicsContinuousControlItem::setValue(double value, bool emitSignal)
 {
     if (resolution) {
-        value = (double)qRound(value / resolution) * resolution;
+        value = qBound(minValue, (double)qRound(value / resolution) * resolution, maxValue);
     }
     if (value != currentValue) {
         QRectF previousRect = rect().translated(pos());
@@ -156,31 +158,33 @@ QVariant GraphicsContinuousControlItem::itemChange(GraphicsItemChange change, co
 
 void GraphicsContinuousControlItem::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
-    GraphicsLabelItem::mousePressEvent(event);
-    if (event->isAccepted()) {
-        valueEditingStarted();
-        positionBeforeEdit = pos();
-        rectBeforeEdit = rect();
-        waitingForMouseReleaseEvent = true;
-        valueBeforeEdit = currentValue;
-        // create label items marking the minimum and maximum value:
-        setZValue(zValue() + 2);
-        double absolutePositionBeforeEdit = (orientation == HORIZONTAL ? positionBeforeEdit.x() : -positionBeforeEdit.y());
-        double relativePositionBeforeEdit = size * (valueBeforeEdit - minValue) / (maxValue - minValue);
-        double minPos = absolutePositionBeforeEdit - relativePositionBeforeEdit;
-        double maxPos = minPos + size;
-        backgroundRect->setVisible(true);
-        minLabel->setVisible(true);
-        maxLabel->setVisible(true);
-        if (orientation == HORIZONTAL) {
-            minLabel->setPos(QPointF(minPos, positionBeforeEdit.y()));
-            maxLabel->setPos(QPointF(maxPos, positionBeforeEdit.y()));
-        } else {
-            minLabel->setPos(QPointF(alignX(minLabel->rect(), rectBeforeEdit.translated(positionBeforeEdit)), -minPos));
-            maxLabel->setPos(QPointF(alignX(maxLabel->rect(), rectBeforeEdit.translated(positionBeforeEdit)), -maxPos));
+    if (minValue != maxValue) {
+        GraphicsLabelItem::mousePressEvent(event);
+        if (event->isAccepted()) {
+            valueEditingStarted();
+            positionBeforeEdit = pos();
+            rectBeforeEdit = rect();
+            waitingForMouseReleaseEvent = true;
+            valueBeforeEdit = currentValue;
+            // create label items marking the minimum and maximum value:
+            setZValue(zValue() + 2);
+            double absolutePositionBeforeEdit = (orientation == HORIZONTAL ? positionBeforeEdit.x() : -positionBeforeEdit.y());
+            double relativePositionBeforeEdit = size * (valueBeforeEdit - minValue) / (maxValue - minValue);
+            double minPos = absolutePositionBeforeEdit - relativePositionBeforeEdit;
+            double maxPos = minPos + size;
+            backgroundRect->setVisible(true);
+            minLabel->setVisible(true);
+            maxLabel->setVisible(true);
+            if (orientation == HORIZONTAL) {
+                minLabel->setPos(QPointF(minPos, positionBeforeEdit.y()));
+                maxLabel->setPos(QPointF(maxPos, positionBeforeEdit.y()));
+            } else {
+                minLabel->setPos(QPointF(alignX(minLabel->rect(), rectBeforeEdit.translated(positionBeforeEdit)), -minPos));
+                maxLabel->setPos(QPointF(alignX(maxLabel->rect(), rectBeforeEdit.translated(positionBeforeEdit)), -maxPos));
+            }
+            backgroundRect->setRect((minLabel->rect().translated(minLabel->pos()) | maxLabel->rect().translated(maxLabel->pos())));//.adjusted(-1, -1, 1, 1));
+            setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
         }
-        backgroundRect->setRect((minLabel->rect().translated(minLabel->pos()) | maxLabel->rect().translated(maxLabel->pos())));//.adjusted(-1, -1, 1, 1));
-        setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
     }
 }
 

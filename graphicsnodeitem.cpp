@@ -224,7 +224,11 @@ QVariant GraphicsNodeItem::itemChange(GraphicsItemChange change, const QVariant 
 
 void GraphicsNodeItem::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
-    QGraphicsEllipseItem::mousePressEvent(event);
+    if (event->button() == Qt::RightButton) {
+        event->accept();
+    } else {
+        QGraphicsEllipseItem::mousePressEvent(event);
+    }
     if (event->isAccepted()) {
         mouseButtonPressed = true;
     }
@@ -232,7 +236,11 @@ void GraphicsNodeItem::mousePressEvent(QGraphicsSceneMouseEvent * event)
 
 void GraphicsNodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
-    QGraphicsEllipseItem::mouseReleaseEvent(event);
+    if (event->button() == Qt::RightButton) {
+        rightMouseButtonClicked(event->screenPos());
+    } else {
+        QGraphicsEllipseItem::mouseReleaseEvent(event);
+    }
     mouseButtonPressed = false;
 }
 

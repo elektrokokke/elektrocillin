@@ -20,7 +20,6 @@
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "interpolatorprocessor.h"
 #include "linearinterpolator.h"
 #include "parameterclient.h"
 #include "graphicsinterpolatoredititem.h"
@@ -37,7 +36,7 @@ public:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
 };
 
-class LinearWaveShapingClient : public ParameterClient
+class LinearWaveShapingClient : public ParameterClient, public AbstractInterpolator
 {
 public:
     LinearWaveShapingClient(const QString &clientName, LinearWaveShaper *processWaveShaper, LinearWaveShaper * guiWaveShaper, size_t ringBufferSize = 1024);
@@ -55,30 +54,18 @@ public:
       or any of the other post...() methods.
       */
     virtual void loadState(QDataStream &stream);
-
-    LinearWaveShaper * getWaveShaper();
-
-    void postIncreaseControlPoints();
-    void postDecreaseControlPoints();
-    void postChangeControlPoint(int index, double x, double y);
-
     QGraphicsItem * createGraphicsItem();
+
+    // Implemented from AbstractInterpolator:
+    virtual double evaluate(double x, int *index = 0);
+    virtual int getNrOfControlPoints();
+    virtual QPointF getControlPoint(int index);
+    virtual void changeControlPoint(int index, double x, double y);
+    virtual void addControlPoint(double x, double y);
+    virtual void deleteControlPoint(int index);
+    virtual QString getControlPointName(int index) const;
 private:
     LinearWaveShaper *processWaveShaper, *guiWaveShaper;
-};
-
-class LinearWaveShapingGraphicsItem : public GraphicsInterpolatorEditItem
-{
-public:
-    LinearWaveShapingGraphicsItem(const QRectF &rect, LinearWaveShapingClient *client, QGraphicsItem *parent = 0);
-
-protected:
-    virtual void increaseControlPoints();
-    virtual void decreaseControlPoints();
-    virtual void changeControlPoint(int index, double x, double y);
-
-private:
-    LinearWaveShapingClient *client;
 };
 
 #endif // LINEARWAVESHAPINGCLIENT_H

@@ -84,6 +84,18 @@ void Interpolator::changeControlPoints(const QVector<double> &xx, const QVector<
     // (e.g., the monotonicity constraints)
     this->xx = xx;
     this->yy = yy;
+    controlPointsChanged();
+}
+
+int Interpolator::getNrOfControlPoints()
+{
+    return xx.size();
+}
+
+QPointF Interpolator::getControlPoint(int index)
+{
+    Q_ASSERT((index >= 0) && (index < getNrOfControlPoints()));
+    return QPointF(xx[index], yy[index]);
 }
 
 void Interpolator::changeControlPoint(int index, double x, double y)
@@ -106,7 +118,7 @@ void Interpolator::changeControlPoint(int index, double x, double y)
         }
     }
     if (index == xx.size() - 1) {
-        // fix the end points if desired:
+        // fix the end point if desired:
         if (xIsStatic.second) {
             x = xx.last();
         }
@@ -125,126 +137,72 @@ void Interpolator::changeControlPoint(int index, double x, double y)
     y = qMax(qMin(y, yMax), yMin);
     xx[index] = x;
     yy[index] = y;
+    controlPointsChanged();
 }
 
-void Interpolator::addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd)
+void Interpolator::addControlPoint(double x, double y)
 {
-    Q_ASSERT(addAtStart || addAtEnd);
-    int origin = xx.size() / 2;
-    if (!addAtEnd) {
-        origin = xx.size() - 1;
-    } else if (!addAtStart) {
-        origin = 0;
-    }
-    if (addAtEnd) {
-        int pointsAfterOrigin = xx.size() - origin - 1;
-        double x = xx.last();
-        double y = yy.last();
-        // scale the points after the origin:
-        double scaleFactor = (double)pointsAfterOrigin / (double)(pointsAfterOrigin + 1);
-        for (int i = origin + 1; i < xx.size(); i++) {
-            if (scaleX) {
-                xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
+    int index;
+    evaluate(x, &index);
+    // make sure the point lies after the first and before the last:
+    if ((index >= 0) && (index < xx.size() - 1)) {
+        // make sure the monotonicity constraints are met:
+        if (isStrictlyMonotonic) {
+            if ((x <= xx[index]) || ((index < xx.size()) && (x >= xx[index + 1]))) {
+                return;
             }
-            if (scaleY) {
-                yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
-            }
+        } else if (x < xx[index]) {
+            x = xx[index];
+        } else if ((index < xx.size()) && (x > xx[index + 1])) {
+            x = xx[index + 1];
         }
-        // add one at the end:
-        xx.append(x);
-        yy.append(y);
-    }
-    if (addAtStart) {
-        int pointsBeforeOrigin = origin;
-        double x = xx.first();
-        double y = yy.first();
-        // scale the points before the origin:
-        double scaleFactor = (double)pointsBeforeOrigin / (double)(pointsBeforeOrigin + 1);
-        for (int i = 0; i < origin; i++) {
-            if (scaleX) {
-                xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
-            }
-            if (scaleY) {
-                yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
-            }
-        }
-        // add one at the start:
-        xx.insert(0, x);
-        yy.insert(0, y);
+        // enforce the y range constraints:
+        y = qMax(qMin(y, yMax), yMin);
+        // insert a new control point:
+        xx.insert(index + 1, x);
+        yy.insert(index + 1, y);
+        controlPointsChanged();
     }
 }
 
-void Interpolator::deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd)
+void Interpolator::deleteControlPoint(int index)
 {
-    Q_ASSERT(deleteAtStart || deleteAtEnd);
-    int origin = xx.size() / 2;
-    if (!deleteAtEnd) {
-        origin = xx.size() - 1;
-    } else if (!deleteAtStart) {
-        origin = 0;
-    }
-    if (deleteAtEnd) {
-        int pointsAfterOrigin = xx.size() - origin - 1;
-        // only remove a point if there are enough:
-        if (pointsAfterOrigin > 1) {
-            double x = xx.last();
-            double y = yy.last();
-            // remove one point at the end:
-            xx.remove(xx.size() - 1);
-            yy.remove(yy.size() - 1);
-            // scale the remaining ones after the origin:
-            double scaleFactor = (double)pointsAfterOrigin / (double)(pointsAfterOrigin - 1);
-            for (int i = origin + 1; i < xx.size(); i++) {
-                if (scaleX) {
-                    xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
-                }
-                if (scaleY) {
-                    yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
-                    // enforce the y range constraint:
-                    yy[i] = qMax(qMin(yy[i], yMax), yMin);
-                }
-            }
-            // enforce the end point constraints:
-            if (xIsStatic.second) {
-                xx.last() = x;
-            }
-            if (yIsStatic.second) {
-                yy.last() = y;
-            }
-        }
-    }
-    if (deleteAtStart) {
-        int pointsBeforeOrigin = origin;
-        // only remove a point if there are enough:
-        if (pointsBeforeOrigin > 1) {
-            double x = xx.first();
-            double y = yy.first();
-            // remove one point at the start:
-            xx.remove(0);
-            yy.remove(0);
-            origin--;
-            // scale the remaining ones before the origin:
-            double scaleFactor = (double)pointsBeforeOrigin / (double)(pointsBeforeOrigin - 1);
-            for (int i = 0; i < origin; i++) {
-                if (scaleX) {
-                    xx[i] = (xx[i] - xx[origin]) * scaleFactor + xx[origin];
-                }
-                if (scaleY) {
-                    yy[i] = (yy[i] - yy[origin]) * scaleFactor + yy[origin];
-                    // enforce the y range constraint:
-                    yy[i] = qMax(qMin(yy[i], yMax), yMin);
-                }
-            }
-            // enforce the start point constraints:
+    if ((index >= 0) && (index < xx.size()) && (xx.size() > 2)) {
+        if (index == 0) {
+            // fix the start point if desired:
             if (xIsStatic.first) {
-                xx.first() = x;
+                xx[1] = xx.first();
             }
             if (yIsStatic.first) {
-                yy.first() = y;
+                yy[1] = yy.first();
+            }
+        } else if (index == xx.size() - 1) {
+            // fix the end point if desired:
+            if (xIsStatic.second) {
+                xx[xx.size() - 2] = xx.last();
+            }
+            if (yIsStatic.second) {
+                yy[yy.size() - 2] = yy.last();
             }
         }
+        // delete the control point in question:
+        xx.remove(index);
+        yy.remove(index);
+        controlPointsChanged();
     }
 }
+
+void Interpolator::processInterpolatorEvent(const InterpolatorEvent *event)
+{
+    if (const ChangeControlPointEvent *event_ = dynamic_cast<const ChangeControlPointEvent*>(event)) {
+        changeControlPoint(event_->index, event_->x, event_->y);
+    } else if (const AddControlPointEvent *event_ = dynamic_cast<const AddControlPointEvent*>(event)) {
+        addControlPoint(event_->x, event_->y);
+    } else if (const DeleteControlPointEvent *event_ = dynamic_cast<const DeleteControlPointEvent*>(event)) {
+        deleteControlPoint(event_->index);
+    }
+}
+
 
 void Interpolator::setMonotonicity(bool isStrictlyMonotonic)
 {
@@ -283,6 +241,10 @@ Interpolator::Interpolator(const QVector<double> &xx_, const QVector<double> &yy
 {
     dj = std::max(1, (int)pow((double)xx.size(), 0.25));
     previousN = xx.size();
+}
+
+void Interpolator::controlPointsChanged()
+{
 }
 
 /**

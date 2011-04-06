@@ -21,11 +21,10 @@
  */
 
 #include "oscillator.h"
-#include "interpolatorprocessor.h"
 #include "polynomialinterpolator.h"
 #include <QQueue>
 
-class PolynomialOscillator : public Oscillator, public EventProcessor, public InterpolatorProcessor
+class PolynomialOscillator : public Oscillator, public EventProcessor
 {
 public:
     PolynomialOscillator(int nrOfIntegrations, const QStringList &additionalInputPortNames = QStringList());

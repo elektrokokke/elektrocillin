@@ -48,32 +48,22 @@ void EnvelopeClient::loadState(QDataStream &stream)
     *processEnvelope = *guiEnvelope;
 }
 
-Envelope * EnvelopeClient::getEnvelope()
+QGraphicsItem * EnvelopeClient::createGraphicsItem()
 {
-    return guiEnvelope;
-}
-
-void EnvelopeClient::postIncreaseControlPoints()
-{
-    InterpolatorProcessor::AddControlPointsEvent *event = new InterpolatorProcessor::AddControlPointsEvent(true, false, false, true);
-    guiEnvelope->processEvent(event, 0);
-    postEvent(event);
-}
-
-void EnvelopeClient::postDecreaseControlPoints()
-{
-    if (guiEnvelope->getX().size() > 3) {
-        InterpolatorProcessor::DeleteControlPointsEvent *event = new InterpolatorProcessor::DeleteControlPointsEvent(true, false, false, true);
-        guiEnvelope->processEvent(event, 0);
-        postEvent(event);
-    }
-}
-
-void EnvelopeClient::postChangeControlPoint(int index, double x, double y)
-{
-    InterpolatorProcessor::ChangeControlPointEvent *event = new InterpolatorProcessor::ChangeControlPointEvent(index, x, y);
-    guiEnvelope->processEvent(event, 0);
-    postEvent(event);
+    int padding = 4;
+    QGraphicsRectItem *item = new QGraphicsRectItem();
+    ParameterGraphicsItem *parameterItem = new ParameterGraphicsItem(this);
+    QRectF rect = QRect(0, 0, 1200, 420);
+    rect = rect.translated(parameterItem->boundingRect().width() + 2 * padding, padding);
+    parameterItem->setPos(padding, padding);
+    parameterItem->setParentItem(item);
+    EnvelopeGraphicsItem *ourItem = new EnvelopeGraphicsItem(rect, this);
+    ourItem->setParentItem(item);
+    item->setRect((rect | parameterItem->boundingRect().translated(parameterItem->pos())).adjusted(-padding, -padding, padding, padding));
+    item->setPen(QPen(QBrush(Qt::black), 1));
+    item->setBrush(QBrush(Qt::white));
+    QObject::connect(ourItem->getGraphItem(), SIGNAL(changedNrOfControlPoints()), parameterItem, SLOT(changedParameterBounds()));
+    return item;
 }
 
 void EnvelopeClient::postChangeSustainIndex(int sustainIndex)
@@ -83,27 +73,52 @@ void EnvelopeClient::postChangeSustainIndex(int sustainIndex)
     postEvent(event);
 }
 
-QGraphicsItem * EnvelopeClient::createGraphicsItem()
+double EnvelopeClient::evaluate(double x, int *index)
 {
-    int padding = 4;
-    QGraphicsRectItem *item = new QGraphicsRectItem();
-    QGraphicsItem *parameterItem = ParameterClient::createGraphicsItem();
-    QRectF rect = QRect(0, 0, 1200, 420);
-    rect = rect.translated(parameterItem->boundingRect().width() + 2 * padding, padding);
-    parameterItem->setPos(padding, padding);
-    parameterItem->setParentItem(item);
-    QGraphicsItem *ourItem = new EnvelopeGraphicsItem(rect, this);
-    ourItem->setParentItem(item);
-    item->setRect((rect | parameterItem->boundingRect().translated(parameterItem->pos())).adjusted(-padding, -padding, padding, padding));
-    item->setPen(QPen(QBrush(Qt::black), 1));
-    item->setBrush(QBrush(Qt::white));
-    return item;
+    return guiEnvelope->evaluate(x, index);
+}
+
+int EnvelopeClient::getNrOfControlPoints()
+{
+    return guiEnvelope->getNrOfControlPoints();
+}
+
+QPointF EnvelopeClient::getControlPoint(int index)
+{
+    return guiEnvelope->getControlPoint(index);
+}
+
+void EnvelopeClient::changeControlPoint(int index, double x, double y)
+{
+    guiEnvelope->changeControlPoint(index, x, y);
+    Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
+    postEvent(event);
+}
+
+void EnvelopeClient::addControlPoint(double x, double y)
+{
+    guiEnvelope->addControlPoint(x, y);
+    Interpolator::AddControlPointEvent *event = new Interpolator::AddControlPointEvent(x, y);
+    postEvent(event);
+}
+
+void EnvelopeClient::deleteControlPoint(int index)
+{
+    guiEnvelope->deleteControlPoint(index);
+    Interpolator::DeleteControlPointEvent *event = new Interpolator::DeleteControlPointEvent(index);
+    postEvent(event);
+}
+
+QString EnvelopeClient::getControlPointName(int index) const
+{
+    return guiEnvelope->getControlPointName(index);
 }
 
 EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client_, QGraphicsItem *parent_) :
-    GraphicsInterpolatorEditItem(client_->getEnvelope(),
+    GraphicsInterpolatorEditItem(
+        client_,
         rect,
-        QRectF(0, 1, log(client_->getEnvelope()->getDurationInSeconds() + 1), -2),
+        QRectF(0, 1, client_->getControlPoint(client_->getNrOfControlPoints() - 1).x(), -2),
         parent_,
         4,
         8,
@@ -113,43 +128,7 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
     setCursor(Qt::ArrowCursor);
-    // create a child that allows selection of the sustain node:
-    sustainNodeControlItem = new GraphicsDiscreteControlItem("Sustain node", 1, client->getEnvelope()->getX().size() - 1, client->getEnvelope()->getSustainIndex(), 100 + (client->getEnvelope()->getX().size() - 1) * 10, GraphicsContinuousControlItem::HORIZONTAL, this);
-    sustainNodeControlItem->setPos(getInnerRectangle().topRight() - QPointF(sustainNodeControlItem->rect().width(), 0));
-    QObject::connect(sustainNodeControlItem, SIGNAL(valueChanged(int)), this, SLOT(onSustainNodeChanged(int)));
     QObject::connect(client, SIGNAL(changedParameters()), this, SLOT(updateInterpolator()));
-}
-
-EnvelopeClient * EnvelopeGraphicsItem::getClient()
-{
-    return client;
-}
-
-void EnvelopeGraphicsItem::increaseControlPoints()
-{
-    client->postIncreaseControlPoints();
-    sustainNodeControlItem->setValue(client->getEnvelope()->getSustainIndex(), false);
-    sustainNodeControlItem->setMaxValue(client->getEnvelope()->getX().size() - 1);
-    sustainNodeControlItem->setSize(100 + (client->getEnvelope()->getX().size() - 1) * 10);
-}
-
-void EnvelopeGraphicsItem::decreaseControlPoints()
-{
-    client->postDecreaseControlPoints();
-    sustainNodeControlItem->setValue(client->getEnvelope()->getSustainIndex(), false);
-    sustainNodeControlItem->setMaxValue(client->getEnvelope()->getX().size() - 1);
-    sustainNodeControlItem->setSize(100 + (client->getEnvelope()->getX().size() - 1) * 10);
-}
-
-void EnvelopeGraphicsItem::changeControlPoint(int index, double x, double y)
-{
-    client->postChangeControlPoint(index, x, y);
-}
-
-void EnvelopeGraphicsItem::onSustainNodeChanged(int value)
-{
-    client->postChangeSustainIndex(value);
-    interpolatorChanged();
 }
 
 void EnvelopeGraphicsItem::updateInterpolator()

@@ -45,11 +45,8 @@ public:
     const QVector<double> & getY2() const;
 
     double interpolate(int jlo, double x);
-
-    virtual void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
-    virtual void changeControlPoint(int index, double x, double y);
-    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
-    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
+protected:
+    virtual void controlPointsChanged();
 private:
     QVector<double> y2;
 

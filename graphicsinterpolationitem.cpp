@@ -21,7 +21,7 @@
 #include "linearinterpolator.h"
 #include <QPainterPath>
 
-GraphicsInterpolationItem::GraphicsInterpolationItem(Interpolator *interpolator_, double samplingInterval_, QGraphicsItem *parent) :
+GraphicsInterpolationItem::GraphicsInterpolationItem(AbstractInterpolator *interpolator_, double samplingInterval_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     interpolator(interpolator_),
     samplingInterval(samplingInterval_),
@@ -31,7 +31,7 @@ GraphicsInterpolationItem::GraphicsInterpolationItem(Interpolator *interpolator_
     updatePath();
 }
 
-GraphicsInterpolationItem::GraphicsInterpolationItem(Interpolator *interpolator_, double samplingInterval_, double xscale_, double yscale_, QGraphicsItem *parent) :
+GraphicsInterpolationItem::GraphicsInterpolationItem(AbstractInterpolator *interpolator_, double samplingInterval_, double xscale_, double yscale_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     interpolator(interpolator_),
     samplingInterval(samplingInterval_),
@@ -41,76 +41,66 @@ GraphicsInterpolationItem::GraphicsInterpolationItem(Interpolator *interpolator_
     updatePath();
 }
 
-GraphicsInterpolationItem::GraphicsInterpolationItem(Interpolator *interpolator_, double samplingInterval_, double ymin, double ymax, double xscale_, double yscale_, QGraphicsItem *parent) :
+GraphicsInterpolationItem::GraphicsInterpolationItem(AbstractInterpolator *interpolator_, double samplingInterval_, double ymin, double ymax, double xscale_, double yscale_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent),
     interpolator(interpolator_),
     samplingInterval(samplingInterval_),
     xscale(xscale_),
     yscale(yscale_),
-    bounds(QRectF(QPointF(interpolator->getX()[0], ymax), QPointF(interpolator->getX().back(), ymin)))
+    bounds(QRectF(QPointF(interpolator->getControlPoint(0).x(), ymax), QPointF(interpolator->getControlPoint(interpolator->getNrOfControlPoints() - 1).x(), ymin)))
 {
     updatePath();
 }
 
-Interpolator * GraphicsInterpolationItem::getInterpolator()
+AbstractInterpolator * GraphicsInterpolationItem::getInterpolator()
 {
     return interpolator;
 }
 
 void GraphicsInterpolationItem::updatePath()
 {
+    // set the path according to the given interpolator:
+    int nrOfControlPoints = interpolator->getNrOfControlPoints();
     QPainterPath path;
-    if (LinearInterpolator *linearInterpolator = dynamic_cast<LinearInterpolator*>(interpolator)) {
-        for (int i = 0; i < linearInterpolator->getX().size(); i++) {
-            double x = linearInterpolator->getX()[i];
-            double y = linearInterpolator->getY()[i];
-            if (i == 0) {
-                path.moveTo(x * xscale, y * yscale);
-            } else {
-                path.lineTo(x * xscale, y * yscale);
-            }
+    QPointF firstControlPoint = interpolator->getControlPoint(0);
+    QPointF lastControlPoint = interpolator->getControlPoint(nrOfControlPoints - 1);
+    double x = firstControlPoint.x();
+    double y = firstControlPoint.y();
+    int previousIndex = 0;
+    path.moveTo(QPointF(x * xscale, y * yscale));
+    for (; x < lastControlPoint.x(); ) {
+        x += samplingInterval;
+        if (x > lastControlPoint.x()) {
+            x = lastControlPoint.x();
         }
-    } else {
-        // we are traversing the interpolator from start to end, reset it to make this most efficient:
-        interpolator->reset();
-        // set the path according to the given interpolator:
-        double x = interpolator->getX()[0];
-        double y = interpolator->evaluate(x);
+        int index;
+        y = interpolator->evaluate(x, &index);
         if (!bounds.isNull()) {
             y = std::max(std::min(y, bounds.top()), bounds.bottom());
         }
-        int previousIndex = 0;
-        path.moveTo(QPointF(x * xscale, y * yscale));
-        for (; x < interpolator->getX().back(); ) {
-            x += samplingInterval;
-            if (x > interpolator->getX().back()) {
-                x = interpolator->getX().back();
-            }
-            int index;
-            y = interpolator->evaluate(x, &index);
-            if (!bounds.isNull()) {
-                y = std::max(std::min(y, bounds.top()), bounds.bottom());
-            }
-            // make sure to not miss a control point:
-            if (index != previousIndex) {
-                for (; previousIndex < index; ) {
-                    previousIndex++;
-                    double yIndex = interpolator->interpolate(previousIndex, interpolator->getX()[previousIndex]);
-                    if (!bounds.isNull()) {
-                        yIndex = std::max(std::min(yIndex, bounds.top()), bounds.bottom());
-                    }
-                    path.lineTo(interpolator->getX()[previousIndex] * xscale, yIndex * yscale);
+        // make sure to not miss a control point:
+        if (index != previousIndex) {
+            for (; previousIndex < index; ) {
+                previousIndex++;
+                QPointF controlPoint = interpolator->getControlPoint(previousIndex);
+                double xIndex = controlPoint.x();
+                double yIndex = controlPoint.y();
+                if (!bounds.isNull()) {
+                    yIndex = std::max(std::min(yIndex, bounds.top()), bounds.bottom());
                 }
+                path.lineTo(xIndex * xscale, yIndex * yscale);
             }
-            path.lineTo(x * xscale, y * yscale);
-            if (x == interpolator->getX().back()) {
-                for (int i = index + 1; i < interpolator->getX().size(); i++) {
-                    double yIndex = interpolator->interpolate(i, x);
-                    if (!bounds.isNull()) {
-                        yIndex = std::max(std::min(yIndex, bounds.top()), bounds.bottom());
-                    }
-                    path.lineTo(x * xscale, yIndex * yscale);
+        }
+        path.lineTo(x * xscale, y * yscale);
+        if (x == lastControlPoint.x()) {
+            for (int i = index + 1; i < nrOfControlPoints; i++) {
+                QPointF controlPoint = interpolator->getControlPoint(i);
+                double xIndex = controlPoint.x();
+                double yIndex = controlPoint.y();
+                if (!bounds.isNull()) {
+                    yIndex = std::max(std::min(yIndex, bounds.top()), bounds.bottom());
                 }
+                path.lineTo(xIndex * xscale, yIndex * yscale);
             }
         }
     }

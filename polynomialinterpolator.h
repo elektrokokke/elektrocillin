@@ -48,19 +48,10 @@ public:
       */
     void smoothen();
 
+    // Implemented from Interpolator:
     virtual double interpolate(int jlo, double x);
-
-    virtual void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
-    /**
-      Calling this sets both polynomials around the given index
-      to line segments, regardless of their previous degree.
-      */
-    virtual void changeControlPoint(int index, double x, double y);
-    /**
-      Calling these sets all polynomials to line segments, regardless of their previous degree.
-      */
-    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
-    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
+protected:
+    virtual void controlPointsChanged();
 private:
     QVector<Polynomial<double> > polynomials;
 

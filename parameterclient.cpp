@@ -32,7 +32,9 @@ ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audi
 {
     activateMidiInput(true);
     activateMidiOutput(true);
-    midiProcessor->setMidiWriter(this);
+    if (midiProcessor) {
+        midiProcessor->setMidiWriter(this);
+    }
     QObject::connect(thread, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SLOT(onChangedParameterValue(int,double,unsigned int)));
     QObject::connect(thread, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SIGNAL(changedParameterValue(int,double,unsigned int)));
     QObject::connect(thread, SIGNAL(changedParameters()), this, SIGNAL(changedParameters()));
@@ -223,6 +225,17 @@ ParameterGraphicsItem::ParameterGraphicsItem(ParameterClient *client_, QGraphics
         }
     }
     setRect(rectControls.adjusted(-padding, -padding, padding, padding));
+}
+
+void ParameterGraphicsItem::changedParameterBounds()
+{
+    for (int i = 0; i < controls.size(); i++) {
+        const ParameterProcessor::Parameter &parameter = client->getParameter(i);
+        if (controls[i]) {
+            controls[i]->setMinValue(parameter.min);
+            controls[i]->setMaxValue(parameter.max);
+        }
+    }
 }
 
 void ParameterGraphicsItem::focusInEvent(QFocusEvent *)

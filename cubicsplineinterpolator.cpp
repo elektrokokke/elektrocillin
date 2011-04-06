@@ -88,31 +88,8 @@ double CubicSplineInterpolator::interpolate(int jl, double x)
     return y;
 }
 
-void CubicSplineInterpolator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
+void CubicSplineInterpolator::controlPointsChanged()
 {
-    Interpolator::changeControlPoints(xx, yy);
-    // recompute coefficients:
-    sety2NaturalSpline(xx, yy);
-}
-
-void CubicSplineInterpolator::changeControlPoint(int index, double x, double y)
-{
-    Interpolator::changeControlPoint(index, x, y);
-    // recompute coefficients:
-    sety2NaturalSpline(xx, yy);
-}
-
-void CubicSplineInterpolator::addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd)
-{
-    Interpolator::addControlPoints(scaleX, scaleY, addAtStart, addAtEnd);
-    // recompute coefficients:
-    sety2NaturalSpline(xx, yy);
-}
-
-void CubicSplineInterpolator::deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd)
-{
-    Interpolator::deleteControlPoints(scaleX, scaleY, deleteAtStart, deleteAtEnd);
-    // recompute coefficients:
     sety2NaturalSpline(xx, yy);
 }
 

@@ -28,9 +28,12 @@ Envelope::Envelope(double durationInSeconds_) :
     currentTime(0),
     previousLevel(0),
     velocity(0),
-    sustainIndex(1),
     startLevel(0)
 {
+    // register numeric parameters:
+    registerParameter("Base", 0.01, 0.001, 1, 0.001);
+    registerParameter("Sustain index", 1, 1, getNrOfControlPoints() - 1, 1);
+    registerParameter("Y steps", 0, 0, 12, 1);
     // initialize the interpolators to represent a simple ASR envelope:
     QVector<double> xx, yy;
     xx.append(0);
@@ -40,11 +43,9 @@ Envelope::Envelope(double durationInSeconds_) :
     xx.append(log(durationInSeconds + 1));
     yy.append(0);
     LogarithmicInterpolator::changeControlPoints(xx, yy);
-    LogarithmicInterpolator::setControlPointName(sustainIndex, "Sustain");
+    LogarithmicInterpolator::setControlPointName(getSustainIndex(), "Sustain");
     LogarithmicInterpolator::setEndPointConstraints(false, true);
-    // register numeric parameters:
-    registerParameter("Base", 0.01, 0.001, 1, 0.001);
-    registerParameter("Y steps", 0, 0, 12, 1);
+    sustainIndex = getSustainIndex();
 }
 
 Envelope & Envelope::operator=(const Envelope &envelope)
@@ -54,41 +55,24 @@ Envelope & Envelope::operator=(const Envelope &envelope)
     // copy all attributes of the given envelope:
     Interpolator::changeControlPoints(envelope.xx, envelope.yy);
     durationInSeconds = envelope.durationInSeconds;
-    sustainIndex = envelope.sustainIndex;
+    setSustainIndex(qRound(getParameter(1).value));
     return *this;
 }
 
 void Envelope::save(QDataStream &stream) const
 {
     LogarithmicInterpolator::save(stream);
-    stream << sustainIndex;
 }
 
 void Envelope::load(QDataStream &stream)
 {
     LogarithmicInterpolator::load(stream);
-    int sustainIndex_;
-    stream >> sustainIndex_;
-    setSustainIndex(sustainIndex_);
+    setSustainIndex(qRound(getParameter(1).value));
 }
 
 int Envelope::getSustainIndex() const
 {
-    return sustainIndex;
-}
-
-void Envelope::setSustainIndex(int sustainIndex)
-{
-    if ((sustainIndex > 0) && (sustainIndex < LogarithmicInterpolator::getX().size()) && (sustainIndex != this->sustainIndex)) {
-        LogarithmicInterpolator::setControlPointName(this->sustainIndex, QString());
-        this->sustainIndex = sustainIndex;
-        LogarithmicInterpolator::setControlPointName(this->sustainIndex, "Sustain");
-    }
-}
-
-double Envelope::getDurationInSeconds() const
-{
-    return durationInSeconds;
+    return qRound(getParameter(1).value);
 }
 
 void Envelope::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char velocity, jack_nframes_t)
@@ -148,33 +132,31 @@ void Envelope::processAudio(const double *, double *outputs, jack_nframes_t)
 
 bool Envelope::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
-    if (const InterpolatorProcessor::ChangeControlPointEvent *event_ = dynamic_cast<const InterpolatorProcessor::ChangeControlPointEvent*>(event)) {
-        changeControlPoint(event_->index, event_->x, event_->y);
+    if (const Interpolator::InterpolatorEvent *event_ = dynamic_cast<const Interpolator::InterpolatorEvent*>(event)) {
+        processInterpolatorEvent(event_);
         return true;
-    } else if (const InterpolatorProcessor::AddControlPointsEvent *event_ = dynamic_cast<const InterpolatorProcessor::AddControlPointsEvent*>(event)) {
-        addControlPoints(event_->scaleX, event_->scaleY, event_->addAtStart, event_->addAtEnd);
-        return true;
-    } else if (const InterpolatorProcessor::DeleteControlPointsEvent *event_ = dynamic_cast<const InterpolatorProcessor::DeleteControlPointsEvent*>(event)) {
-        deleteControlPoints(event_->scaleX, event_->scaleY, event_->deleteAtStart, event_->deleteAtEnd);
-        return true;
-    } else if (const ChangeSustainPositionEvent *event_ = dynamic_cast<const ChangeSustainPositionEvent*>(event)) {
-        setSustainIndex(event_->sustainIndex);
-        return true;
+    } else {
+        return false;
     }
-    return false;
 }
 
 bool Envelope::setParameterValue(int index, double value, jack_nframes_t time)
 {
-    if (index == 0) {
-        LogarithmicInterpolator::setBase(value);
+    if (ParameterProcessor::setParameterValue(index, value, time)) {
+        if (index == 0) {
+            LogarithmicInterpolator::setBase(value);
+        } else if (index == 1) {
+            setSustainIndex(qRound(value));
+        }
+        return true;
+    } else {
+        return false;
     }
-    return ParameterProcessor::setParameterValue(index, value, time);
 }
 
 void Envelope::changeControlPoint(int index, double x, double y)
 {
-    double ySteps = getParameter(1).value;
+    double ySteps = getParameter(2).value;
     if (ySteps) {
         // discretize the Y coordinate:
         y = qRound(y * ySteps) / ySteps;
@@ -182,36 +164,38 @@ void Envelope::changeControlPoint(int index, double x, double y)
     LogarithmicInterpolator::changeControlPoint(index, x, y);
 }
 
-void Envelope::addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd)
+void Envelope::deleteControlPoint(int index)
 {
-    // allow only adding at the end:
-    Q_ASSERT(addAtEnd && !addAtStart);
-    // insert a control point between the last and the one before that:
-    Q_ASSERT(xx.size() > 1);
-    double x = xx.last();
-    double y = yy.last();
-    xx.last() = 0.5 * (xx[xx.size() - 2] + xx.last());
-    // add one at the end:
-    xx.append(x);
-    yy.append(y);
-}
-
-void Envelope::deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd)
-{
-    // allow only adding at the end:
-    Q_ASSERT(deleteAtEnd && !deleteAtStart);
-    if (xx.size() > 3) {
-        // remove the control point before the last:
-        double x = xx.last();
-        double y = yy.last();
-        // remove one point at the end:
-        xx.remove(xx.size() - 1);
-        yy.remove(yy.size() - 1);
-        xx.last() = x;
-        yy.last() = y;
-        if (sustainIndex >= LogarithmicInterpolator::getX().size()) {
-            setSustainIndex(LogarithmicInterpolator::getX().size() - 1);
-        }
+    if (getNrOfControlPoints() > 3) {
+        LogarithmicInterpolator::deleteControlPoint(index);
     }
 }
 
+void Envelope::addControlPoint(double x, double y)
+{
+    double ySteps = getParameter(2).value;
+    if (ySteps) {
+        // discretize the Y coordinate:
+        y = qRound(y * ySteps) / ySteps;
+    }
+    LogarithmicInterpolator::addControlPoint(x, y);
+}
+
+void Envelope::controlPointsChanged()
+{
+    if (sustainIndex >= getNrOfControlPoints()) {
+        setSustainIndex(getNrOfControlPoints() - 1);
+    }
+    // adjust the bounds of the sustain parameter:
+    ParameterProcessor::Parameter &parameter = getParameter(1);
+    parameter.max = getNrOfControlPoints() - 1;
+}
+
+void Envelope::setSustainIndex(int sustainIndex)
+{
+    if ((sustainIndex > 0) && (sustainIndex < getNrOfControlPoints())) {
+        LogarithmicInterpolator::setControlPointName(this->sustainIndex, QString());
+        LogarithmicInterpolator::setControlPointName(sustainIndex, "Sustain");
+        this->sustainIndex = sustainIndex;
+    }
+}

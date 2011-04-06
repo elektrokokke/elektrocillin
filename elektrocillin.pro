@@ -52,7 +52,6 @@ SOURCES += main.cpp\
     linearwaveshapingclient.cpp \
     cubicsplinewaveshapingclient.cpp \
     linearintegralinterpolator.cpp \
-    linearmorphoscillator.cpp \
     multiplyprocessor.cpp \
     metajack/midiport.cpp \
     metajack/metajackclient.cpp \
@@ -62,7 +61,6 @@ SOURCES += main.cpp\
     whitenoisegenerator.cpp \
     graphicsinterpolatoredititem.cpp \
     cisi.cpp \
-    linearmorphoscillatorclient.cpp \
     jackringbuffer.cpp \
     oscillatorclient.cpp \
     eventprocessorclient.cpp \
@@ -80,7 +78,6 @@ SOURCES += main.cpp\
     logarithmicinterpolator.cpp \
     graphicslabelitem.cpp \
     eventprocessor.cpp \
-    interpolatorprocessor.cpp \
     graphicsmeteritem.cpp \
     polynomialoscillator.cpp \
     polynomialoscillatorclient.cpp \
@@ -143,7 +140,6 @@ HEADERS  += mainwindow.h \
     linearwaveshapingclient.h \
     cubicsplinewaveshapingclient.h \
     linearintegralinterpolator.h \
-    linearmorphoscillator.h \
     multiplyprocessor.h \
     metajack/metajackclient.h \
     metajack/metajackport.h \
@@ -152,7 +148,6 @@ HEADERS  += mainwindow.h \
     whitenoisegenerator.h \
     graphicsinterpolatoredititem.h \
     cisi.h \
-    linearmorphoscillatorclient.h \
     oscillatorclient.h \
     envelope.h \
     envelopeclient.h \
@@ -170,7 +165,6 @@ HEADERS  += mainwindow.h \
     logarithmicinterpolator.h \
     graphicslabelitem.h \
     eventprocessor.h \
-    interpolatorprocessor.h \
     graphicsmeteritem.h \
     polynomialoscillator.h \
     polynomialoscillatorclient.h \

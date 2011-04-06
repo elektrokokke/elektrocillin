@@ -60,6 +60,7 @@ signals:
     void positionChangedScaled(QPointF position);
     void xChangedScaled(qreal x);
     void yChangedScaled(qreal y);
+    void rightMouseButtonClicked(QPoint screenPos);
 
 public slots:
     void setX(qreal x);

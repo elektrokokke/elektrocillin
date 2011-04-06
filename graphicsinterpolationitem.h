@@ -26,16 +26,16 @@
 class GraphicsInterpolationItem : public QGraphicsPathItem
 {
 public:
-    GraphicsInterpolationItem(Interpolator *interpolator, double samplingInterval, QGraphicsItem *parent = 0);
-    GraphicsInterpolationItem(Interpolator *interpolator, double samplingInterval, double xscale, double yscale, QGraphicsItem *parent = 0);
-    GraphicsInterpolationItem(Interpolator *interpolator, double samplingInterval, double ymin, double ymax, double xscale, double yscale, QGraphicsItem *parent = 0);
+    GraphicsInterpolationItem(AbstractInterpolator *interpolator, double samplingInterval, QGraphicsItem *parent = 0);
+    GraphicsInterpolationItem(AbstractInterpolator *interpolator, double samplingInterval, double xscale, double yscale, QGraphicsItem *parent = 0);
+    GraphicsInterpolationItem(AbstractInterpolator *interpolator, double samplingInterval, double ymin, double ymax, double xscale, double yscale, QGraphicsItem *parent = 0);
 
-    Interpolator * getInterpolator();
+    AbstractInterpolator * getInterpolator();
 
     void updatePath();
 
 private:
-    Interpolator *interpolator;
+    AbstractInterpolator *interpolator;
     double samplingInterval, xscale, yscale;
     QRectF bounds;
 };

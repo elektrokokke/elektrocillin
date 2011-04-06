@@ -22,7 +22,7 @@
 #include <QtGlobal>
 #include <cmath>
 
-GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalSlices_, int horizontalSlices_, bool logarithmicX_) :
+GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(AbstractInterpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled, QGraphicsItem *parent, int verticalSlices_, int horizontalSlices_, bool logarithmicX_) :
     QGraphicsRectItem(parent),
     interpolator(interpolator_),
     child(0),
@@ -33,6 +33,7 @@ GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(Interpolator *interpo
     font.setPointSize(6);
     setPen(QPen(QBrush(Qt::black), 1));
     setBrush(QBrush(Qt::white));
+    setCursor(Qt::ArrowCursor);
     setRect(rectangle, rectScaled);
 }
 
@@ -145,7 +146,7 @@ void GraphicsInterpolatorEditItem::interpolatorChanged()
     child->interpolatorChanged();
 }
 
-Interpolator * GraphicsInterpolatorEditItem::getInterpolator()
+AbstractInterpolator * GraphicsInterpolatorEditItem::getInterpolator()
 {
     return child->getInterpolator();
 }
@@ -160,7 +161,7 @@ GraphicsInterpolatorGraphItem * GraphicsInterpolatorEditItem::getGraphItem()
     return child;
 }
 
-GraphicsInterpolatorGraphItem::GraphicsInterpolatorGraphItem(Interpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, bool logarithmicX_) :
+GraphicsInterpolatorGraphItem::GraphicsInterpolatorGraphItem(AbstractInterpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, bool logarithmicX_) :
     QGraphicsRectItem(rectangle, parent_),
     rectScaled(rectScaled_),
     parent(parent_),
@@ -182,8 +183,8 @@ GraphicsInterpolatorGraphItem::GraphicsInterpolatorGraphItem(Interpolator *inter
     interpolatorChanged();
 
     // create the context menu:
-    contextMenu.addAction(tr("Increase nr. of control points"), this, SLOT(onIncreaseControlPoints()));
-    contextMenu.addAction(tr("Decrease nr. of control points"), this, SLOT(onDecreaseControlPoints()));
+    contextMenu.addAction(tr("Add control point"), this, SLOT(onAddControlPoint()));
+    contextMenu.addAction(tr("Delete control point"), this, SLOT(onDeleteControlPoint()));
 }
 
 void GraphicsInterpolatorGraphItem::setRect(const QRectF &rect_, const QRectF &scaled_)
@@ -198,8 +199,8 @@ void GraphicsInterpolatorGraphItem::setRect(const QRectF &rect_, const QRectF &s
     for (int i = 0; i < nodes.size(); i++) {
         nodes[i]->setBounds(rect());
         nodes[i]->setBoundsScaled(rectScaled);
-        nodes[i]->setXScaled(interpolator->getX()[i]);
-        nodes[i]->setYScaled(interpolator->interpolate(i, interpolator->getX()[i]));
+        nodes[i]->setXScaled(interpolator->getControlPoint(i).x());
+        nodes[i]->setYScaled(interpolator->getControlPoint(i).y());
     }
 }
 
@@ -220,7 +221,7 @@ void GraphicsInterpolatorGraphItem::interpolatorChanged()
         nodes.first()->setVisible(true);
         nodes.back()->setVisible(true);
     }
-    for (; nodes.size() > interpolator->getX().size(); ) {
+    for (; nodes.size() > interpolator->getNrOfControlPoints(); ) {
         delete nodes.back();
         nodes.remove(nodes.size() - 1);
         delete nodeLabels.back();
@@ -228,8 +229,8 @@ void GraphicsInterpolatorGraphItem::interpolatorChanged()
     }
     mapSenderToControlPointIndex.clear();
     for (int i = 0; i < nodes.size(); i++) {
-        double x = interpolator->getX()[i];
-        double y = interpolator->interpolate(i, x);
+        double x = interpolator->getControlPoint(i).x();
+        double y = interpolator->getControlPoint(i).y();
         nodes[i]->setXScaled(x);
         nodes[i]->setYScaled(y);
         QString labelPrefix = interpolator->getControlPointName(i);
@@ -250,10 +251,10 @@ void GraphicsInterpolatorGraphItem::interpolatorChanged()
         label->setPos(nodes[i]->pos() + QPointF(5, 5));
         mapSenderToControlPointIndex[nodes[i]] = i;
     }
-    for (int i = nodes.size(); i < interpolator->getX().size(); i++) {
+    for (int i = nodes.size(); i < interpolator->getNrOfControlPoints(); i++) {
         // add a new node:
-        double x = interpolator->getX()[i];
-        double y = interpolator->interpolate(i, x);
+        double x = interpolator->getControlPoint(i).x();
+        double y = interpolator->getControlPoint(i).y();
         nodes.append(createNode(x, y, rectScaled));
         QString labelPrefix = interpolator->getControlPointName(i);
         if (labelPrefix.isNull()) {
@@ -279,7 +280,7 @@ void GraphicsInterpolatorGraphItem::interpolatorChanged()
     nodes.back()->setVisible(visible[GraphicsInterpolatorEditItem::LAST]);
 }
 
-Interpolator * GraphicsInterpolatorGraphItem::getInterpolator()
+AbstractInterpolator * GraphicsInterpolatorGraphItem::getInterpolator()
 {
     return interpolator;
 }
@@ -312,27 +313,41 @@ const QBrush & GraphicsInterpolatorGraphItem::getNodeBrush() const
     return nodeBrush;
 }
 
-void GraphicsInterpolatorGraphItem::mousePressEvent ( QGraphicsSceneMouseEvent * event )
+void GraphicsInterpolatorGraphItem::mousePressEvent (QGraphicsSceneMouseEvent * event)
 {
-    QGraphicsRectItem::mousePressEvent(event);
-    if (!event->isAccepted() && (event->button() == Qt::RightButton)) {
+    if (event->button() == Qt::RightButton) {
         event->accept();
-        // show a menu that allows removing and adding control points:
+    } else {
+        QGraphicsRectItem::mousePressEvent(event);
+    }
+}
+
+void GraphicsInterpolatorGraphItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->button() == Qt::RightButton) {
+        contextMenuPos = event->pos();
+        // show a menu that allows adding a control point:
+        contextMenu.actions().first()->setVisible(true);
+        contextMenu.actions().last()->setVisible(false);
         contextMenu.exec(event->screenPos());
     }
 }
 
-void GraphicsInterpolatorGraphItem::onIncreaseControlPoints()
+void GraphicsInterpolatorGraphItem::onAddControlPoint()
 {
-    // signal the control point increase event and update our interpolator graphic item:
-    parent->increaseControlPoints();
+    // compute interpolator coordinates from the item coordinates:
+    double x = (contextMenuPos.x() - rect().x()) * rectScaled.width() / rect().width() + rectScaled.x();
+    double y = (contextMenuPos.y() - rect().y()) * rectScaled.height() / rect().height() + rectScaled.y();
+    // add a control point:
+    interpolator->addControlPoint(x, y);
+    changedNrOfControlPoints();
     interpolatorChanged();
 }
 
-void GraphicsInterpolatorGraphItem::onDecreaseControlPoints()
+void GraphicsInterpolatorGraphItem::onDeleteControlPoint()
 {
-    // signal the control point decrease event and update our interpolator graphic item:
-    parent->decreaseControlPoints();
+    interpolator->deleteControlPoint(contextMenuNode);
+    changedNrOfControlPoints();
     interpolatorChanged();
 }
 
@@ -341,8 +356,18 @@ void GraphicsInterpolatorGraphItem::onNodePositionChangedScaled(QPointF position
     // get the control point index:
     int index = mapSenderToControlPointIndex[sender()];
     // signal the control point change event and update our interpolator graphic item:
-    parent->changeControlPoint(index, position.x(), position.y());
+    interpolator->changeControlPoint(index, position.x(), position.y());
     interpolatorChanged();
+}
+
+void GraphicsInterpolatorGraphItem::onNodeRightMouseButtonClicked(QPoint screenPos)
+{
+    // get the control point index:
+    contextMenuNode = mapSenderToControlPointIndex[sender()];
+    // show a menu that allows deleting that control point:
+    contextMenu.actions().first()->setVisible(false);
+    contextMenu.actions().last()->setVisible(true);
+    contextMenu.exec(screenPos);
 }
 
 GraphicsNodeItem * GraphicsInterpolatorGraphItem::createNode(qreal x, qreal y, const QRectF &rectScaled)
@@ -356,5 +381,6 @@ GraphicsNodeItem * GraphicsInterpolatorGraphItem::createNode(qreal x, qreal y, c
     nodeItem->setXScaled(x);
     nodeItem->setYScaled(y);
     QObject::connect(nodeItem, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onNodePositionChangedScaled(QPointF)));
+    QObject::connect(nodeItem, SIGNAL(rightMouseButtonClicked(QPoint)), this, SLOT(onNodeRightMouseButtonClicked(QPoint)));
     return nodeItem;
 }

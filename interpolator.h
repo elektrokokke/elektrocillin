@@ -23,47 +23,102 @@
 #include <QVector>
 #include <QMap>
 #include <QPair>
+#include <QPointF>
+#include "eventprocessor.h"
 
-class Interpolator
+class AbstractInterpolator
 {
 public:
+    virtual double evaluate(double x, int *index = 0) = 0;
+    virtual int getNrOfControlPoints() = 0;
+    virtual QPointF getControlPoint(int index) = 0;
+    virtual void changeControlPoint(int index, double x, double y) = 0;
+    virtual void addControlPoint(double x, double y) = 0;
+    virtual void deleteControlPoint(int index) = 0;
+    virtual QString getControlPointName(int index) const = 0;
+};
+
+class Interpolator : public AbstractInterpolator
+{
+public:
+    class InterpolatorEvent : public RingBufferEvent
+    {
+    public:
+        virtual ~InterpolatorEvent() {}
+    };
+    class ChangeControlPointEvent : public InterpolatorEvent
+    {
+    public:
+        ChangeControlPointEvent(int index_, double x_, double y_) :
+            index(index_), x(x_), y(y_)
+        {}
+        int index;
+        double x, y;
+    };
+    class AddControlPointEvent : public InterpolatorEvent
+    {
+    public:
+        AddControlPointEvent(double x_, double y_) :
+            x(x_), y(y_)
+        {}
+        bool x, y;
+    };
+    class DeleteControlPointEvent : public InterpolatorEvent
+    {
+    public:
+        DeleteControlPointEvent(int index_) :
+            index(index_)
+        {}
+        int index;
+    };
+
     virtual ~Interpolator();
 
-    void setControlPointName(int controlPointIndex, const QString &name);
-    QString getControlPointName(int controlPointIndex) const;
-
+    // AbstractInterpolator interface:
     /**
       @param index pointer to a variable where the current
         index should be written to, if non-zero
       */
     double evaluate(double x, int *index = 0);
+    virtual int getNrOfControlPoints();
+    virtual QPointF getControlPoint(int index);
+    virtual void changeControlPoint(int index, double x, double y);
+    virtual void addControlPoint(double x, double y);
+    virtual void deleteControlPoint(int index);
+    virtual QString getControlPointName(int index) const;
 
+    /**
+      Reimplement this method in your interpolator class.
+      */
+    virtual double interpolate(int jlo, double x) = 0;
+
+    // additional methods:
+    void setControlPointName(int controlPointIndex, const QString &name);
+    void setMonotonicity(bool isStrictlyMonotonic);
+    void setStartPointConstraints(bool xIsStatic, bool yIsStatic);
+    void setEndPointConstraints(bool xIsStatic, bool yIsStatic);
+    void setYRange(double yMin, double yMax);
     /**
       Resets the interpolator in a way that traversing it from
       start to end becomes more efficient.
       */
     void reset();
-
     const QVector<double> & getX() const;
     const QVector<double> & getY() const;
     int getM() const;
 
     virtual void save(QDataStream &stream) const;
     virtual void load(QDataStream &stream);
-
-    virtual double interpolate(int jlo, double x) = 0;
-
     virtual void changeControlPoints(const QVector<double> &xx, const QVector<double> &yy);
-    virtual void changeControlPoint(int index, double x, double y);
-    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
-    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
-
-    void setMonotonicity(bool isStrictlyMonotonic);
-    void setStartPointConstraints(bool xIsStatic, bool yIsStatic);
-    void setEndPointConstraints(bool xIsStatic, bool yIsStatic);
-    void setYRange(double yMin, double yMax);
+    virtual void processInterpolatorEvent(const InterpolatorEvent *event);
 protected:
     Interpolator(const QVector<double> &xx, const QVector<double> &yy, int m);
+
+    /**
+      Reimplement this method if you have to recompute something
+      internally when one or more control points change.
+      */
+    virtual void controlPointsChanged();
 
     int locate(double x);
     int hunt(double x);

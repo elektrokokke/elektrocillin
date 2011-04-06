@@ -107,32 +107,8 @@ double PolynomialInterpolator::interpolate(int j, double x)
     return polynomials[j].evaluate(x);
 }
 
-void PolynomialInterpolator::changeControlPoints(const QVector<double> &xx, const QVector<double> &yy)
+void PolynomialInterpolator::controlPointsChanged()
 {
-    Interpolator::changeControlPoints(xx, yy);
-    initialize(xx, yy);
-}
-
-void PolynomialInterpolator::changeControlPoint(int index, double x, double y)
-{
-    Interpolator::changeControlPoint(index, x, y);
-    if (index > 0) {
-        initializePolynomial(index - 1, xx[index - 1], yy[index - 1], xx[index], yy[index]);
-    }
-    if (index < xx.size() - 1) {
-        initializePolynomial(index, xx[index], yy[index], xx[index + 1], yy[index + 1]);
-    }
-}
-
-void PolynomialInterpolator::addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd)
-{
-    Interpolator::addControlPoints(scaleX, scaleY, addAtStart, addAtEnd);
-    initialize(getX(), getY());
-}
-
-void PolynomialInterpolator::deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd)
-{
-    Interpolator::deleteControlPoints(scaleX, scaleY, deleteAtStart, deleteAtEnd);
     initialize(getX(), getY());
 }
 

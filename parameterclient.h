@@ -186,6 +186,8 @@ class ParameterGraphicsItem : public QObject, public QGraphicsRectItem {
     Q_OBJECT
 public:
     ParameterGraphicsItem(ParameterClient *client, QGraphicsItem *parent = 0);
+public slots:
+    void changedParameterBounds();
 protected:
     virtual void focusInEvent(QFocusEvent * event);
     virtual void focusOutEvent(QFocusEvent * event);

@@ -23,7 +23,6 @@
 #include "audioprocessor.h"
 #include "midiprocessor.h"
 #include "eventprocessor.h"
-#include "interpolatorprocessor.h"
 #include "parameterprocessor.h"
 #include "linearinterpolator.h"
 #include "logarithmicinterpolator.h"
@@ -54,9 +53,6 @@ public:
     void load(QDataStream &stream);
 
     int getSustainIndex() const;
-    void setSustainIndex(int sustainIndex);
-
-    double getDurationInSeconds() const;
 
     // reimplemented from MidiProcessor:
     virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
@@ -70,13 +66,15 @@ public:
     // reimplemented from Interpolator:
     // change the behaviour when changing control points:
     virtual void changeControlPoint(int index, double x, double y);
-    // change the behaviour when adding and removing control points:
-    virtual void addControlPoints(bool scaleX, bool scaleY, bool addAtStart, bool addAtEnd);
-    virtual void deleteControlPoints(bool scaleX, bool scaleY, bool deleteAtStart, bool deleteAtEnd);
+    virtual void deleteControlPoint(int index);
+    virtual void addControlPoint(double x, double y);
+protected:
+    virtual void controlPointsChanged();
+    void setSustainIndex(int sustainIndex);
 private:
+    int sustainIndex;
     double durationInSeconds;
     double currentTime, previousLevel, velocity;
-    int sustainIndex;
     Phase currentPhase;
     bool release;
     double startLevel;
