@@ -54,7 +54,7 @@ protected:
       - processMidi(jack_nframes_t, jack_nframes_t)
       - processEvent(const RingBufferEvent*, jack_nframes_t)
       */
-    EventProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, size_t ringBufferSize = (2 << 16));
+    EventProcessorClient(const QString &clientName, const QStringList &audioInputPortNames, const QStringList &audioOutputPortNames, const QStringList &midiInputPortNames, const QStringList &midiOutputPortNames, size_t ringBufferSize = (2 << 16));
 
     // reimplemented from MidiProcessorClient:
     virtual bool process(jack_nframes_t nframes);

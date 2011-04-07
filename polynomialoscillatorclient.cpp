@@ -53,7 +53,7 @@ QGraphicsItem * PolynomialOscillatorClient::createGraphicsItem()
     rect = rect.translated(oscillatorItem->boundingRect().width() + 2 * padding, padding);
     oscillatorItem->setPos(padding, padding);
     oscillatorItem->setParentItem(item);
-    new GraphicsInterpolatorEditItem(this, rect, QRectF(-1, 1, 2, -2), item);
+    new GraphicsInterpolatorEditItem(this, rect, QRectF(0, 1, 1, -2), item);
     item->setRect((rect | oscillatorItem->boundingRect().translated(oscillatorItem->pos())).adjusted(-padding, -padding, padding, padding));
     item->setPen(QPen(QBrush(Qt::black), 1));
     item->setBrush(QBrush(Qt::white));

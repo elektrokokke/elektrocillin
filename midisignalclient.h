@@ -72,7 +72,7 @@ protected:
     // reimplemented from EventProcessorClient2:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
     // reimplemented from MidiProcessor:
-    virtual void processMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t time);
+    virtual void processMidi(int inputIndex, const MidiProcessor::MidiEvent &event, jack_nframes_t time);
 
 private:
     // This is still the template class because the other class involves new and delete, which should not be in the Jack process thread (which is the sending thread here)

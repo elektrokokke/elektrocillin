@@ -23,6 +23,7 @@
 
 Envelope::Envelope(double durationInSeconds_) :
     AudioProcessor(QStringList(), QStringList("Envelope out")),
+    MidiProcessor(QStringList("Midi trigger in"), QStringList()),
     LogarithmicInterpolator(0.01),
     durationInSeconds(durationInSeconds_),
     currentTime(0),
@@ -75,7 +76,7 @@ int Envelope::getSustainIndex() const
     return qRound(getParameter(1).value);
 }
 
-void Envelope::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char velocity, jack_nframes_t)
+void Envelope::processNoteOn(int inputIndex, unsigned char, unsigned char noteNumber, unsigned char velocity, jack_nframes_t)
 {
     double newVelocity = velocity / 127.0;
     startLevel = previousLevel * this->velocity / newVelocity;
@@ -86,7 +87,7 @@ void Envelope::processNoteOn(unsigned char, unsigned char noteNumber, unsigned c
     this->noteNumber = noteNumber;
 }
 
-void Envelope::processNoteOff(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
+void Envelope::processNoteOff(int inputIndex, unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
     if (noteNumber == this->noteNumber) {
         release = true;

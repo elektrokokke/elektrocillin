@@ -26,7 +26,7 @@ class MultiplyProcessor : public AudioProcessor
 {
 public:
     MultiplyProcessor(double gain = 1.0);
-    MultiplyProcessor(const QStringList &inputPortNames, double gain = 1.0);
+    MultiplyProcessor(const QStringList &audioInputPortNames, double gain = 1.0);
 
     void setGainFactor(double gain);
     double getGainFactor() const;

@@ -21,6 +21,7 @@
 
 StepSequencer::StepSequencer(int nrOfSteps_) :
     AudioProcessor(QStringList("Bar"), QStringList()),
+    MidiParameterProcessor(QStringList(), QStringList("Midi note out")),
     nrOfSteps(nrOfSteps_),
     stepsPerBeat(4),
     lastStep(-1),
@@ -39,7 +40,7 @@ StepSequencer::StepSequencer(int nrOfSteps_) :
 void StepSequencer::processAudio(const double *inputs, double *, jack_nframes_t time)
 {
     if ((state != JackTransportRolling) && noteActive) {
-        writeNoteOff(channel, noteNumber, velocity, time);
+        writeNoteOff(1, channel, noteNumber, velocity, time);
         noteActive = false;
     }
     if (state == JackTransportRolling) {
@@ -49,12 +50,12 @@ void StepSequencer::processAudio(const double *inputs, double *, jack_nframes_t 
         if (step != lastStep) {
             // deactivate any active note:
             if (noteActive) {
-                writeNoteOff(channel, noteNumber, velocity, time);
+                writeNoteOff(1, channel, noteNumber, velocity, time);
                 noteActive = false;
             }
             if ((step < nrOfSteps) && getParameter(firstParameterIndex + step).value) {
                 // activate the new note:
-                writeNoteOn(channel, noteNumber, velocity, time);
+                writeNoteOn(1, channel, noteNumber, velocity, time);
                 noteActive = true;
             }
         }

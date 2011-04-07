@@ -22,7 +22,8 @@
 #include <QtGlobal>
 
 Oscillator::Oscillator(const QStringList &additionalInputPortNames) :
-    AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out"))
+    AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out")),
+    MidiProcessor(QStringList("Midi note in"), QStringList())
 {
     registerParameter("Gain", 1, 0, 1, 0.01);
     registerParameter("Octave", 0, -3, 3, 1);
@@ -54,23 +55,21 @@ void Oscillator::setSampleRate(double sampleRate)
     AudioProcessor::setSampleRate(sampleRate);
 }
 
-void Oscillator::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
+void Oscillator::processNoteOn(int inputIndex, unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
     frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
 }
 
-void Oscillator::processPitchBend(unsigned char, unsigned int value, jack_nframes_t time)
+void Oscillator::processPitchBend(int inputIndex, unsigned char, unsigned int value, jack_nframes_t time)
 {
     int pitchCentered = (int)value - 0x2000;
     setParameterValue(6, (double)pitchCentered / 8192.0, time);
 }
 
-void Oscillator::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
+void Oscillator::processController(int inputIndex, unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
     if (controller == qRound(getParameter(5).value)) {
         setParameterValue(2, ((double)value - 64.0) / 128.0 * 200.0, time);
-    } else {
-        MidiProcessor::processController(channel, controller, value, time);
     }
 }
 

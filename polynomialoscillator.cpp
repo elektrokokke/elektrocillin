@@ -26,7 +26,7 @@ PolynomialOscillator::PolynomialOscillator(int nrOfIntegrations_, const QStringL
     previousIntegralValues(nrOfIntegrations, 0)
 {
     QVector<double> xx, yy;
-    xx.append(-1);
+    xx.append(0);
     yy.append(-1);
     xx.append(1);
     yy.append(1);

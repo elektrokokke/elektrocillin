@@ -23,7 +23,7 @@
 #include <QDebug>
 
 JackTransportClient::JackTransportClient(const QString &clientName, size_t ringBufferSize) :
-    JackThreadEventProcessorClient(new JackTransportThread(this), clientName, QStringList(), QStringList("Beat") + QStringList("Bar"), ringBufferSize),
+    JackThreadEventProcessorClient(new JackTransportThread(this), clientName, QStringList(), QStringList("Beat") + QStringList("Bar"), QStringList(), QStringList(), ringBufferSize),
     ringBufferToThread(ringBufferSize),
     lastTransportFrameTime(0),
     currentBarTime(0),

@@ -45,7 +45,7 @@ void MultiplyProcessor::processAudio(const double *inputs, double *outputs, jack
 {
     // multiply all inputs:
     double product = gain;
-    for (int i = 0; i < getNrOfInputs(); i++) {
+    for (int i = 0; i < getNrOfAudioInputs(); i++) {
         product *= inputs[i];
     }
     outputs[0] = product;

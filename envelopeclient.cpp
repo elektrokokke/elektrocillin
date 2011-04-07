@@ -25,7 +25,6 @@ EnvelopeClient::EnvelopeClient(const QString &clientName, Envelope *processEnvel
     processEnvelope(processEnvelope_),
     guiEnvelope(guiEnvelope_)
 {
-    activateMidiOutput(false);
 }
 
 EnvelopeClient::~EnvelopeClient()

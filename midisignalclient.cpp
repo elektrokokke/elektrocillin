@@ -183,11 +183,10 @@ void MidiSignalThread::sendPitchWheel(unsigned char channel, unsigned int pitch)
 }
 
 MidiSignalClient::MidiSignalClient(const QString &clientName, size_t ringBufferSize) :
-    JackThreadEventProcessorClient(new MidiSignalThread(this), clientName, QStringList(), QStringList(), ringBufferSize),
+    JackThreadEventProcessorClient(new MidiSignalThread(this), clientName, QStringList(), QStringList(), QStringList("Midi in"), QStringList("Midi out"), ringBufferSize),
     ringBufferToThread(ringBufferSize)
 {
     getMidiSignalThread()->setRingBufferFromClient(&ringBufferToThread);
-    activateMidiOutput(true);
 }
 
 MidiSignalClient::~MidiSignalClient()
@@ -210,13 +209,13 @@ bool MidiSignalClient::processEvent(const RingBufferEvent *event, jack_nframes_t
 {
     if (const MidiProcessor::MidiEvent *midiEvent = dynamic_cast<const MidiProcessor::MidiEvent*>(event)) {
         // write this event to the MIDI output buffer:
-        writeMidi(*midiEvent, time);
+        writeMidi(0, *midiEvent, time);
         return true;
     }
     return false;
 }
 
-void MidiSignalClient::processMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t)
+void MidiSignalClient::processMidi(int inputIndex, const MidiProcessor::MidiEvent &event, jack_nframes_t)
 {
     // notify the associated thread:
     ringBufferToThread.write(event);

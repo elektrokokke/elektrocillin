@@ -41,7 +41,7 @@ private:
     bool _ambis;
     Reverb _reverb;
 
-    static QStringList inputPortNames, outputPortNames, outputPortNamesAmbis;
+    static QStringList audioInputPortNames, audioOutputPortNames, outputPortNamesAmbis;
 };
 
 #endif // ZITAREVERBCLIENT_H

@@ -26,6 +26,19 @@
 class MidiProcessorClient : public AudioProcessorClient, public MidiProcessor::MidiWriter
 {
 public:
+    struct MidiInputPort {
+        jack_port_t *port;
+        void *buffer;
+        jack_nframes_t eventIndex;
+        jack_nframes_t eventCount;
+        MidiProcessor::MidiEvent event;
+        jack_nframes_t time;
+    };
+    struct MidiOutputPort {
+        jack_port_t *port;
+        void *buffer;
+    };
+
     MidiProcessorClient(const QString &clientName, AudioProcessor *audioProcessor, MidiProcessor *midiProcessor, unsigned int channelMask = (1 << 16) - 1);
     virtual ~MidiProcessorClient();
 
@@ -37,7 +50,7 @@ public:
     /**
       This may only be called from any of the process...() methods!
       */
-    virtual void writeMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t time);
+    virtual void writeMidi(int outputIndex, const MidiProcessor::MidiEvent &event, jack_nframes_t time);
 
 protected:
     /**
@@ -58,58 +71,53 @@ protected:
       See AudioProcessorClient::AudioProcessorClient(const QString &, const QStringList &, const QStringList &)
       for a description of the parameters.
       */
-    MidiProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames, unsigned int channels = (1 << 16) - 1);
-
-    void activateMidiInput(bool active);
-    void activateMidiOutput(bool active);
+    MidiProcessorClient(const QString &clientName, const QStringList &audioInputPortNames, const QStringList &audioOutputPortNames, const QStringList &midiInputPortNames, const QStringList &midiOutputPortNames, unsigned int channels = (1 << 16) - 1);
 
     // reimplemented methods from AudioProcessorClient:
     virtual bool init();
     virtual bool process(jack_nframes_t nframes);
 
     virtual void processMidi(jack_nframes_t start, jack_nframes_t end);
-    virtual void processMidi(const MidiProcessor::MidiEvent &event, jack_nframes_t time);
+    virtual void processMidi(int inputIndex, const MidiProcessor::MidiEvent &event, jack_nframes_t time);
 
     /**
       Override this in subclasses if you did not provide a MidiProcessor in the constructor.
       */
-    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processNoteOn(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     /**
       Override this in subclasses if you did not provide a MidiProcessor in the constructor.
       */
-    virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processNoteOff(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     /**
       Override this in subclasses if you did not provide a MidiProcessor in the constructor.
       */
-    virtual void processAfterTouch(unsigned char channel, unsigned char noteNumber, unsigned char pressure, jack_nframes_t time);
+    virtual void processAfterTouch(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char pressure, jack_nframes_t time);
     /**
       Override this in subclasses if you did not provide a MidiProcessor in the constructor.
       */
-    virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
+    virtual void processController(int inputIndex, unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     /**
       Override this in subclasses if you did not provide a MidiProcessor in the constructor.
       */
-    virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
+    virtual void processPitchBend(int inputIndex, unsigned char channel, unsigned int value, jack_nframes_t time);
     /**
       Override this in subclasses if you did not provide a MidiProcessor in the constructor.
       */
-    virtual void processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time);
+    virtual void processChannelPressure(int inputIndex, unsigned char channel, unsigned char pressure, jack_nframes_t time);
 
     /**
       If you override process(jack_nframes_t nframes) call this function
       before you call processMidi(jack_nframes_t start, jack_nframes_t end).
       */
-    void getMidiPortBuffer(jack_nframes_t nframes);
+    void getMidiPortBuffers(jack_nframes_t nframes);
 
 private:
     MidiProcessor *midiProcessor;
-    jack_port_t *midiInputPort, *midiOutputPort;
-    void *midiInputBuffer, *midiOutputBuffer;
-    jack_nframes_t currentMidiEventIndex;
-    jack_nframes_t midiEventCount;
     jack_nframes_t nframes;
-    bool midiInput, midiOutput;
     unsigned int channels;
+    QStringList midiInputPortNames, midiOutputPortNames;
+    QVector<MidiInputPort> midiInputPorts;
+    QVector<MidiOutputPort> midiOutputPorts;
 };
 
 #endif // NOTETRIGGEREDCLIENT_H

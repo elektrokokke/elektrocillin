@@ -71,7 +71,6 @@ LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, Line
     processWaveShaper(processWaveShaper_),
     guiWaveShaper(guiWaveShaper_)
 {
-    activateMidiInput(false);
 }
 
 LinearWaveShapingClient::~LinearWaveShapingClient()

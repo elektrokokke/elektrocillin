@@ -1,21 +1,24 @@
 #include "midiparameterprocessor.h"
 
-MidiParameterProcessor::MidiParameterProcessor() :
+MidiParameterProcessor::MidiParameterProcessor(const QStringList &additionMidiInputPortNames, const QStringList &additionMidiOutputPortNames, MidiProcessor::MidiWriter *midiWriter) :
+    MidiProcessor(QStringList("Midi control in") + additionMidiInputPortNames, QStringList("Midi control out") + additionMidiOutputPortNames, midiWriter),
     channel(0)
 {
     // register a parameter that controls the first controller used for controlling parameters:
     registerParameter("First MIDI controller", 0, 0, 127, 1);
 }
 
-void MidiParameterProcessor::processController(unsigned char, unsigned char controller, unsigned char value, jack_nframes_t time)
+void MidiParameterProcessor::processController(int inputIndex, unsigned char, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
-    int parameterId = (int)controller - qRound(getParameter(0).value) + 1;
-    Q_ASSERT(parameterId > 0);
-    if (parameterId < getNrOfParameters()) {
-        // update the corresponding parameter value:
-        const ParameterProcessor::Parameter &parameter = getParameter(parameterId);
-        if (parameter.max != parameter.min) {
-            ParameterProcessor::setParameterValue(parameterId, (double)value * (parameter.max - parameter.min) / 127.0 + parameter.min, time);
+    if (inputIndex == 0) {
+        int parameterId = (int)controller - qRound(getParameter(0).value) + 1;
+        Q_ASSERT(parameterId > 0);
+        if (parameterId < getNrOfParameters()) {
+            // update the corresponding parameter value:
+            const ParameterProcessor::Parameter &parameter = getParameter(parameterId);
+            if (parameter.max != parameter.min) {
+                ParameterProcessor::setParameterValue(parameterId, (double)value * (parameter.max - parameter.min) / 127.0 + parameter.min, time);
+            }
         }
     }
 }
@@ -33,7 +36,7 @@ bool MidiParameterProcessor::setParameterValue(int index, double value, double m
                 // parameters with equal min and max values are not controllable via MIDI:
                 if (parameter.max != parameter.min) {
                     int controllerValue = qRound((parameter.value - parameter.min) * 127.0 / (parameter.max - parameter.min));
-                    writeControlller(channel, controller, controllerValue, time);
+                    writeControlller(0, channel, controller, controllerValue, time);
                 }
             }
         }

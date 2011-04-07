@@ -26,7 +26,6 @@ IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilte
     processFilter(processFilter_),
     guiFilter(guiFilter_)
 {
-    activateMidiOutput(true);
 }
 
 IirMoogFilterClient::~IirMoogFilterClient()

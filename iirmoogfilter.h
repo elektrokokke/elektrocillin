@@ -36,8 +36,8 @@ public:
     // reimplemented from IirFilter (originally from AudioProcessor):
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplemented from MidiProcessor:
-    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
-    virtual void processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time);
+    virtual void processNoteOn(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processPitchBend(int inputIndex, unsigned char channel, unsigned int value, jack_nframes_t time);
     // reimplemented from MidiParameterProcessor:
     virtual bool setParameterValue(int index, double value, double min, double max, unsigned int time);
 

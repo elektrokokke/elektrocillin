@@ -82,7 +82,7 @@ protected:
       @param outputPortnames the desired audio output port names, at the same time determining
         the output port count
       */
-    AudioProcessorClient(const QString &clientName, const QStringList &inputPortNames, const QStringList &outputPortNames);
+    AudioProcessorClient(const QString &clientName, const QStringList &audioInputPortNames, const QStringList &audioOutputPortNames);
 
     /**
       This implementation creates the Jack input and output ports as specified
@@ -150,14 +150,16 @@ protected:
       @param nframes the audio buffer size as given by the Jack server in the
         call to process(jack_nframes_t nframes)
       */
-    void getPortBuffers(jack_nframes_t nframes);
+    void getAudioPortBuffers(jack_nframes_t nframes);
+
+    jack_default_audio_sample_t * getInputBuffer(int index);
+    jack_default_audio_sample_t * getOutputBuffer(int index);
 
 private:
     AudioProcessor *audioProcessor;
-    QStringList inputPortNames, outputPortNames;
-    QVector<jack_port_t*> inputPorts, outputPorts;
-protected:
-    QVector<jack_default_audio_sample_t*> inputBuffers, outputBuffers;
+    QStringList audioInputPortNames, audioOutputPortNames;
+    QVector<jack_port_t*> audioInputPorts, audioOutputPorts;
+    QVector<jack_default_audio_sample_t*> audioInputBuffers, audioOutputBuffers;
 private:
     QVector<double> inputs, outputs;
 };

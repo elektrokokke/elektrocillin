@@ -55,8 +55,8 @@ public:
     int getSustainIndex() const;
 
     // reimplemented from MidiProcessor:
-    virtual void processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
-    virtual void processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processNoteOn(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processNoteOff(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplemented from EventProcessor:

@@ -23,28 +23,28 @@
 AudioProcessorClient::AudioProcessorClient(const QString &clientName, AudioProcessor *audioProcessor_) :
     JackClient(clientName),
     audioProcessor(audioProcessor_),
-    inputPortNames(audioProcessor->getInputPortNames()),
-    outputPortNames(audioProcessor->getOutputPortNames()),
-    inputPorts(inputPortNames.size()),
-    outputPorts(outputPortNames.size()),
-    inputBuffers(inputPortNames.size()),
-    outputBuffers(outputPortNames.size()),
-    inputs(inputPortNames.size()),
-    outputs(outputPortNames.size())
+    audioInputPortNames(audioProcessor->getAudioInputPortNames()),
+    audioOutputPortNames(audioProcessor->getAudioOutputPortNames()),
+    audioInputPorts(audioInputPortNames.size()),
+    audioOutputPorts(audioOutputPortNames.size()),
+    audioInputBuffers(audioInputPortNames.size()),
+    audioOutputBuffers(audioOutputPortNames.size()),
+    inputs(audioInputPortNames.size()),
+    outputs(audioOutputPortNames.size())
 {
 }
 
 AudioProcessorClient::AudioProcessorClient(const QString &clientName, const QStringList &inputPortNames_, const QStringList &outputPortNames_) :
     JackClient(clientName),
     audioProcessor(0),
-    inputPortNames(inputPortNames_),
-    outputPortNames(outputPortNames_),
-    inputPorts(inputPortNames.size()),
-    outputPorts(outputPortNames.size()),
-    inputBuffers(inputPortNames.size()),
-    outputBuffers(outputPortNames.size()),
-    inputs(inputPortNames.size()),
-    outputs(outputPortNames.size())
+    audioInputPortNames(inputPortNames_),
+    audioOutputPortNames(outputPortNames_),
+    audioInputPorts(audioInputPortNames.size()),
+    audioOutputPorts(audioOutputPortNames.size()),
+    audioInputBuffers(audioInputPortNames.size()),
+    audioOutputBuffers(audioOutputPortNames.size()),
+    inputs(audioInputPortNames.size()),
+    outputs(audioOutputPortNames.size())
 {
 }
 
@@ -62,11 +62,11 @@ bool AudioProcessorClient::init()
 {
     bool ok = true;
     // create audio input and output ports:
-    for (int i = 0; ok && (i < inputPortNames.size()); i++) {
-        ok = ok && (inputPorts[i] = registerAudioPort(inputPortNames[i], JackPortIsInput));
+    for (int i = 0; ok && (i < audioInputPortNames.size()); i++) {
+        ok = ok && (audioInputPorts[i] = registerAudioPort(audioInputPortNames[i], JackPortIsInput));
     }
-    for (int i = 0; ok && (i < outputPortNames.size()); i++) {
-        ok = ok && (outputPorts[i] = registerAudioPort(outputPortNames[i], JackPortIsOutput));
+    for (int i = 0; ok && (i < audioOutputPortNames.size()); i++) {
+        ok = ok && (audioOutputPorts[i] = registerAudioPort(audioOutputPortNames[i], JackPortIsOutput));
     }
     if (audioProcessor) {
         audioProcessor->setSampleRate(getSampleRate());
@@ -76,7 +76,7 @@ bool AudioProcessorClient::init()
 
 bool AudioProcessorClient::process(jack_nframes_t nframes)
 {
-    getPortBuffers(nframes);
+    getAudioPortBuffers(nframes);
     processAudio(0, nframes);
     return true;
 }
@@ -86,11 +86,11 @@ void AudioProcessorClient::processAudio(jack_nframes_t start, jack_nframes_t end
     if (inputs.size() || outputs.size()) {
         for (jack_nframes_t currentFrame = start; currentFrame < end; currentFrame++) {
             for (int i = 0; i < inputs.size(); i++) {
-                inputs[i] = inputBuffers[i][currentFrame];
+                inputs[i] = audioInputBuffers[i][currentFrame];
             }
             processAudio(inputs.data(), outputs.data(), currentFrame);
             for (int i = 0; i < outputs.size(); i++) {
-                outputBuffers[i][currentFrame] = outputs[i];
+                audioOutputBuffers[i][currentFrame] = outputs[i];
             }
         }
     }
@@ -102,13 +102,25 @@ void AudioProcessorClient::processAudio(const double *inputs, double *outputs, j
     audioProcessor->processAudio(inputs, outputs, time);
 }
 
-void AudioProcessorClient::getPortBuffers(jack_nframes_t nframes)
+void AudioProcessorClient::getAudioPortBuffers(jack_nframes_t nframes)
 {
-    // get port buffers:
+    // get audio port buffers:
     for (int i = 0; i < inputs.size(); i++) {
-        inputBuffers[i] = reinterpret_cast<jack_default_audio_sample_t*>(jack_port_get_buffer(inputPorts[i], nframes));
+        audioInputBuffers[i] = reinterpret_cast<jack_default_audio_sample_t*>(jack_port_get_buffer(audioInputPorts[i], nframes));
     }
     for (int i = 0; i < outputs.size(); i++) {
-        outputBuffers[i] = reinterpret_cast<jack_default_audio_sample_t*>(jack_port_get_buffer(outputPorts[i], nframes));
+        audioOutputBuffers[i] = reinterpret_cast<jack_default_audio_sample_t*>(jack_port_get_buffer(audioOutputPorts[i], nframes));
     }
+}
+
+jack_default_audio_sample_t * AudioProcessorClient::getInputBuffer(int index)
+{
+    Q_ASSERT((index >= 0) && (index < audioInputBuffers.size()));
+    return audioInputBuffers[index];
+}
+
+jack_default_audio_sample_t * AudioProcessorClient::getOutputBuffer(int index)
+{
+    Q_ASSERT((index >= 0) && (index < audioInputBuffers.size()));
+    return audioOutputBuffers[index];
 }

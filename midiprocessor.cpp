@@ -20,7 +20,9 @@
 #include "midiprocessor.h"
 #include <cmath>
 
-MidiProcessor::MidiProcessor(MidiWriter *midiWriter_) :
+MidiProcessor::MidiProcessor(const QStringList &midiInputPortNames_, const QStringList &midiOutputPortNames_, MidiWriter *midiWriter_) :
+    midiInputPortNames(midiInputPortNames_),
+    midiOutputPortNames(midiOutputPortNames_),
     midiWriter(midiWriter_)
 {
 }
@@ -29,14 +31,34 @@ MidiProcessor::~MidiProcessor()
 {
 }
 
-void MidiProcessor::writeMidi(const MidiEvent &event, jack_nframes_t time)
+const QStringList & MidiProcessor::getMidiInputPortNames() const
+{
+    return midiInputPortNames;
+}
+
+const QStringList & MidiProcessor::getMidiOutputPortNames() const
+{
+    return midiOutputPortNames;
+}
+
+int MidiProcessor::getNrOfMidiInputs() const
+{
+    return midiInputPortNames.size();
+}
+
+int MidiProcessor::getNrOfMidiOutputs() const
+{
+    return midiOutputPortNames.size();
+}
+
+void MidiProcessor::writeMidi(int outputIndex, const MidiEvent &event, jack_nframes_t time)
 {
     if (midiWriter) {
-        midiWriter->writeMidi(event, time);
+        midiWriter->writeMidi(outputIndex, event, time);
     }
 }
 
-void MidiProcessor::writeNoteOff(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
+void MidiProcessor::writeNoteOff(int outputIndex, unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
 {
     if (midiWriter) {
         // create the midi message:
@@ -45,11 +67,11 @@ void MidiProcessor::writeNoteOff(unsigned char channel, unsigned char note, unsi
         event.buffer[0] = 0x80 + channel;
         event.buffer[1] = note;
         event.buffer[2] = velocity;
-        midiWriter->writeMidi(event, time);
+        midiWriter->writeMidi(outputIndex, event, time);
     }
 }
 
-void MidiProcessor::writeNoteOn(unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
+void MidiProcessor::writeNoteOn(int outputIndex, unsigned char channel, unsigned char note, unsigned char velocity, jack_nframes_t time)
 {
     if (midiWriter) {
         // create the midi message:
@@ -58,11 +80,11 @@ void MidiProcessor::writeNoteOn(unsigned char channel, unsigned char note, unsig
         event.buffer[0] = 0x90 + channel;
         event.buffer[1] = note;
         event.buffer[2] = velocity;
-        midiWriter->writeMidi(event, time);
+        midiWriter->writeMidi(outputIndex, event, time);
     }
 }
 
-void MidiProcessor::writeControlller(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
+void MidiProcessor::writeControlller(int outputIndex, unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
     if (midiWriter) {
         // create the midi message:
@@ -71,7 +93,7 @@ void MidiProcessor::writeControlller(unsigned char channel, unsigned char contro
         event.buffer[0] = 0xB0 + channel;
         event.buffer[1] = controller;
         event.buffer[2] = value;
-        midiWriter->writeMidi(event, time);
+        midiWriter->writeMidi(outputIndex, event, time);
     }
 }
 
@@ -97,26 +119,26 @@ double MidiProcessor::computePitchBendFactorFromMidiPitch(double base, unsigned 
     return pow(base, (double)pitchCentered / 49152.0);
 }
 
-void MidiProcessor::processNoteOn(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
+void MidiProcessor::processNoteOn(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
 {
 }
 
-void MidiProcessor::processNoteOff(unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
+void MidiProcessor::processNoteOff(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time)
 {
 }
 
-void MidiProcessor::processAfterTouch(unsigned char channel, unsigned char noteNumber, unsigned char pressure, jack_nframes_t time)
+void MidiProcessor::processAfterTouch(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char pressure, jack_nframes_t time)
 {
 }
 
-void MidiProcessor::processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
+void MidiProcessor::processController(int inputIndex, unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
 {
 }
 
-void MidiProcessor::processPitchBend(unsigned char channel, unsigned int value, jack_nframes_t time)
+void MidiProcessor::processPitchBend(int inputIndex, unsigned char channel, unsigned int value, jack_nframes_t time)
 {
 }
 
-void MidiProcessor::processChannelPressure(unsigned char channel, unsigned char pressure, jack_nframes_t time)
+void MidiProcessor::processChannelPressure(int inputIndex, unsigned char channel, unsigned char pressure, jack_nframes_t time)
 {
 }

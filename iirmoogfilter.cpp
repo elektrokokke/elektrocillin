@@ -22,6 +22,7 @@
 
 IirMoogFilter::IirMoogFilter(int zeros) :
     IirFilter(1 + zeros, 4, QStringList("Cutoff mod.") + QStringList("Resonance mod.")),
+    MidiParameterProcessor(QStringList("Midi note in"), QStringList()),
     recomputeCoefficients(false)
 {
     // cutoff frequency in Hertz (default is a quarter the sample rate)
@@ -70,17 +71,21 @@ void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nfr
     IirFilter::processAudio(inputs, outputs, time);
 }
 
-void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t time)
+void IirMoogFilter::processNoteOn(int inputIndex, unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t time)
 {
-    // set base cutoff frequency from note number:
-    ParameterProcessor::setParameterValue(1, computeFrequencyFromMidiNoteNumber(noteNumber) * pow(2.0, getCutoffMidiNoteOffset() / 12.0), time);
+    if (inputIndex == 1) {
+        // set base cutoff frequency from note number:
+        ParameterProcessor::setParameterValue(1, computeFrequencyFromMidiNoteNumber(noteNumber) * pow(2.0, getCutoffMidiNoteOffset() / 12.0), time);
+    }
 }
 
-void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nframes_t time)
+void IirMoogFilter::processPitchBend(int inputIndex, unsigned char, unsigned int value, jack_nframes_t time)
 {
-    // cutoff modulation through pitch bend wheel:
-    int pitchCentered = (int)value - 0x2000;
-    ParameterProcessor::setParameterValue(10, (double)pitchCentered / 8192.0, time);
+    if (inputIndex == 1) {
+        // cutoff modulation through pitch bend wheel:
+        int pitchCentered = (int)value - 0x2000;
+        ParameterProcessor::setParameterValue(10, (double)pitchCentered / 8192.0, time);
+    }
 }
 
 bool IirMoogFilter::setParameterValue(int index, double value, double min, double max, unsigned int time)

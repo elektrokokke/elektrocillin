@@ -24,11 +24,10 @@
 #include <QPen>
 
 CubicSplineWaveShapingClient::CubicSplineWaveShapingClient(const QString &clientName, CubicSplineInterpolator *processWaveShaper_, CubicSplineInterpolator *guiWaveShaper_, size_t ringBufferSize) :
-    EventProcessorClient(clientName, QStringList("Audio in"), QStringList("Audio out"), ringBufferSize),
+    EventProcessorClient(clientName, QStringList("Audio in"), QStringList("Audio out"), QStringList(), QStringList(), ringBufferSize),
     processWaveShaper(processWaveShaper_),
     guiWaveShaper(guiWaveShaper_)
 {
-    activateMidiInput(false);
 }
 
 CubicSplineWaveShapingClient::~CubicSplineWaveShapingClient()

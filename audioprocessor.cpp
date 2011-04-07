@@ -23,18 +23,18 @@
 AudioProcessor::AudioProcessor(const QStringList &inputPortNames_, const QStringList &outputPortNames_) :
     sampleRate(44100.0),
     sampleDuration(1.0 / sampleRate),
-    inputPortNames(inputPortNames_),
-    outputPortNames(outputPortNames_),
-    inputs(inputPortNames.size()),
-    outputs(outputPortNames.size())
+    audioInputPortNames(inputPortNames_),
+    audioOutputPortNames(outputPortNames_),
+    inputs(audioInputPortNames.size()),
+    outputs(audioOutputPortNames.size())
 {
 }
 
 AudioProcessor::AudioProcessor(const AudioProcessor &tocopy) :
     sampleRate(tocopy.sampleRate),
     sampleDuration(tocopy.sampleDuration),
-    inputPortNames(tocopy.inputPortNames),
-    outputPortNames(tocopy.outputPortNames),
+    audioInputPortNames(tocopy.audioInputPortNames),
+    audioOutputPortNames(tocopy.audioOutputPortNames),
     inputs(tocopy.inputs),
     outputs(tocopy.outputs)
 {
@@ -44,23 +44,23 @@ AudioProcessor::~AudioProcessor()
 {
 }
 
-const QStringList & AudioProcessor::getInputPortNames() const
+const QStringList & AudioProcessor::getAudioInputPortNames() const
 {
-    return inputPortNames;
+    return audioInputPortNames;
 }
-const QStringList & AudioProcessor::getOutputPortNames() const
+const QStringList & AudioProcessor::getAudioOutputPortNames() const
 {
-    return outputPortNames;
-}
-
-int AudioProcessor::getNrOfInputs() const
-{
-    return inputPortNames.size();
+    return audioOutputPortNames;
 }
 
-int AudioProcessor::getNrOfOutputs() const
+int AudioProcessor::getNrOfAudioInputs() const
 {
-    return outputPortNames.size();
+    return audioInputPortNames.size();
+}
+
+int AudioProcessor::getNrOfAudioOutputs() const
+{
+    return audioOutputPortNames.size();
 }
 
 void AudioProcessor::setSampleRate(double sampleRate)

@@ -28,14 +28,14 @@
 class AudioProcessor
 {
 public:
-    AudioProcessor(const QStringList &inputPortNames, const QStringList &outputPortNames);
+    AudioProcessor(const QStringList &audioInputPortNames, const QStringList &audioOutputPortNames);
     AudioProcessor(const AudioProcessor &tocopy);
     virtual ~AudioProcessor();
 
-    const QStringList & getInputPortNames() const;
-    const QStringList & getOutputPortNames() const;
-    int getNrOfInputs() const;
-    int getNrOfOutputs() const;
+    const QStringList & getAudioInputPortNames() const;
+    const QStringList & getAudioOutputPortNames() const;
+    int getNrOfAudioInputs() const;
+    int getNrOfAudioOutputs() const;
 
     virtual void setSampleRate(double sampleRate);
     double getSampleRate() const;
@@ -50,7 +50,7 @@ public:
 
 private:
     double sampleRate, sampleDuration;
-    QStringList inputPortNames, outputPortNames;
+    QStringList audioInputPortNames, audioOutputPortNames;
     QVector<double> inputs, outputs;
 };
 

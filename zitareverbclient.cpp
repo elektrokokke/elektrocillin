@@ -20,12 +20,12 @@
 
 #include "zitareverbclient.h"
 
-QStringList ZitaReverbClient::inputPortNames = QStringList("in.L") + QStringList("in.R");
-QStringList ZitaReverbClient::outputPortNames = QStringList("out.L") + QStringList("out.R");
+QStringList ZitaReverbClient::audioInputPortNames = QStringList("in.L") + QStringList("in.R");
+QStringList ZitaReverbClient::audioOutputPortNames = QStringList("out.L") + QStringList("out.R");
 QStringList ZitaReverbClient::outputPortNamesAmbis = QStringList("out.W") + QStringList("out.X") + QStringList("out.X") + QStringList("out.Z");
 
 ZitaReverbClient::ZitaReverbClient(const QString &clientName, bool ambis) :
-    AudioProcessorClient(clientName, inputPortNames, (ambis ? outputPortNamesAmbis : outputPortNames)),
+    AudioProcessorClient(clientName, audioInputPortNames, (ambis ? outputPortNamesAmbis : audioOutputPortNames)),
     _ambis(ambis)
 {
 }
@@ -45,7 +45,7 @@ bool ZitaReverbClient::init()
 
 bool ZitaReverbClient::process(jack_nframes_t frames)
 {
-    getPortBuffers(frames);
+    getAudioPortBuffers(frames);
 
     int   i, k, n_inp, n_out;
     float *inp [2];
@@ -53,8 +53,8 @@ bool ZitaReverbClient::process(jack_nframes_t frames)
 
     n_inp = 2;
     n_out = _ambis ? 4 : 2;
-    for (i = 0; i < n_inp; i++) inp [i] = (float *) inputBuffers[i];
-    for (i = 0; i < n_out; i++) out [i] = (float *) outputBuffers[i];
+    for (i = 0; i < n_inp; i++) inp [i] = (float *) getInputBuffer(i);
+    for (i = 0; i < n_out; i++) out [i] = (float *) getOutputBuffer(i);
 
     while (frames)
     {

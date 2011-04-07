@@ -61,7 +61,7 @@ public:
         AddControlPointEvent(double x_, double y_) :
             x(x_), y(y_)
         {}
-        bool x, y;
+        double x, y;
     };
     class DeleteControlPointEvent : public InterpolatorEvent
     {

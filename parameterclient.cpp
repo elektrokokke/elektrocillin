@@ -30,11 +30,6 @@ ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audi
     ringBufferFromGuiToProcess(ringBufferSize),
     thread(new ParameterThread(this, &ringBufferFromProcessToGui, &ringBufferFromGuiToProcess))
 {
-    activateMidiInput(true);
-    activateMidiOutput(true);
-    if (midiProcessor) {
-        midiProcessor->setMidiWriter(this);
-    }
     QObject::connect(thread, SIGNAL(changedParameterValue(int,double,double,double)), this, SLOT(onChangedParameterValue(int,double,double,double)));
 }
 
@@ -146,8 +141,8 @@ void ParameterClient::deinit()
 bool ParameterClient::process(jack_nframes_t nframes)
 {
     // get port buffers:
-    getPortBuffers(nframes);
-    getMidiPortBuffer(nframes);
+    getAudioPortBuffers(nframes);
+    getMidiPortBuffers(nframes);
     // process all parameter changes:
     processParameters(0, nframes, nframes);
     // synchronize all changes that have been done during this process cycle to the GUI thread:
