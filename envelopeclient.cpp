@@ -62,7 +62,6 @@ QGraphicsItem * EnvelopeClient::createGraphicsItem()
     item->setRect((rect | parameterItem->boundingRect().translated(parameterItem->pos())).adjusted(-padding, -padding, padding, padding));
     item->setPen(QPen(QBrush(Qt::black), 1));
     item->setBrush(QBrush(Qt::white));
-    QObject::connect(ourItem->getGraphItem(), SIGNAL(changedNrOfControlPoints()), parameterItem, SLOT(changedParameterBounds()));
     return item;
 }
 
@@ -91,6 +90,7 @@ QPointF EnvelopeClient::getControlPoint(int index)
 void EnvelopeClient::changeControlPoint(int index, double x, double y)
 {
     guiEnvelope->changeControlPoint(index, x, y);
+    // send the change to the process thread:
     Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
     postEvent(event);
 }
@@ -98,6 +98,10 @@ void EnvelopeClient::changeControlPoint(int index, double x, double y)
 void EnvelopeClient::addControlPoint(double x, double y)
 {
     guiEnvelope->addControlPoint(x, y);
+    // this will have changed the bounds of the sustain index parameter:
+    const ParameterProcessor::Parameter &parameter = guiEnvelope->getParameter(1);
+    changedParameterValue(1, parameter.value, parameter.min, parameter.max);
+    // send the change to the process thread:
     Interpolator::AddControlPointEvent *event = new Interpolator::AddControlPointEvent(x, y);
     postEvent(event);
 }
@@ -105,6 +109,10 @@ void EnvelopeClient::addControlPoint(double x, double y)
 void EnvelopeClient::deleteControlPoint(int index)
 {
     guiEnvelope->deleteControlPoint(index);
+    // this will have changed the bounds of the sustain index parameter:
+    const ParameterProcessor::Parameter &parameter = guiEnvelope->getParameter(1);
+    changedParameterValue(1, parameter.value, parameter.min, parameter.max);
+    // send the change to the process thread:
     Interpolator::DeleteControlPointEvent *event = new Interpolator::DeleteControlPointEvent(index);
     postEvent(event);
 }
@@ -128,12 +136,15 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
     setCursor(Qt::ArrowCursor);
-    QObject::connect(client, SIGNAL(changedParameters()), this, SLOT(updateInterpolator()));
+    QObject::connect(client, SIGNAL(changedParameterValue(int,double,double,double)), this, SLOT(onChangedParameterValue(int)));
 }
 
-void EnvelopeGraphicsItem::updateInterpolator()
+void EnvelopeGraphicsItem::onChangedParameterValue(int index)
 {
-    interpolatorChanged();
+    // update the interpolator if the sustain index has been changed:
+    if (index == 1) {
+        interpolatorChanged();
+    }
 }
 
 class EnvelopeClientFactory : public JackClientFactory

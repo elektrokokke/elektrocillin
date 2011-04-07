@@ -62,33 +62,30 @@ void IirMoogFilter::setSampleRate(double sampleRate)
 void IirMoogFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
 {
     // cutoff modulation through audio input 2:
-    setParameterValue(8, inputs[1], time);
+    ParameterProcessor::setParameterValue(8, inputs[1], time);
     // resonance modulation through audio input 3:
-    setParameterValue(9, inputs[2], time);
+    ParameterProcessor::setParameterValue(9, inputs[2], time);
     // compute coefficients if necessary:
-    if (recomputeCoefficients) {
-        computeCoefficients();
-        recomputeCoefficients = false;
-    }
+    computeCoefficients();
     IirFilter::processAudio(inputs, outputs, time);
 }
 
 void IirMoogFilter::processNoteOn(unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t time)
 {
     // set base cutoff frequency from note number:
-    setParameterValue(1, computeFrequencyFromMidiNoteNumber(noteNumber) * pow(2.0, getCutoffMidiNoteOffset() / 12.0), time);
+    ParameterProcessor::setParameterValue(1, computeFrequencyFromMidiNoteNumber(noteNumber) * pow(2.0, getCutoffMidiNoteOffset() / 12.0), time);
 }
 
 void IirMoogFilter::processPitchBend(unsigned char, unsigned int value, jack_nframes_t time)
 {
     // cutoff modulation through pitch bend wheel:
     int pitchCentered = (int)value - 0x2000;
-    setParameterValue(10, (double)pitchCentered / 8192.0, time);
+    ParameterProcessor::setParameterValue(10, (double)pitchCentered / 8192.0, time);
 }
 
-bool IirMoogFilter::setParameterValue(int index, double value, jack_nframes_t time)
+bool IirMoogFilter::setParameterValue(int index, double value, double min, double max, unsigned int time)
 {
-    if (MidiParameterProcessor::setParameterValue(index, value, time)) {
+    if (MidiParameterProcessor::setParameterValue(index, value, min, max, time)) {
         recomputeCoefficients = true;
         return true;
     } else {
@@ -146,44 +143,50 @@ double IirMoogFilter::getCutoffPitchBendModulation() const
     return getParameter(10).value;
 }
 
-void IirMoogFilter::computeCoefficients()
+bool IirMoogFilter::computeCoefficients()
 {
-    double cutoffFrequencyInHertz = getBaseCutoffFrequency() * pow(2.0, (getCutoffPitchBendModulationIntensity() * getCutoffPitchBendModulation() +  getCutoffControllerModulationIntensity() * getCutoffControllerModulation() + getCutoffAudioModulationIntensity() * getCutoffAudioModulation()) / 12.0);
-    double resonance = getResonance() + getResonanceAudioModulation();
-    if (resonance < -1.0) {
-        resonance += 2.0;
-    } else if (resonance < 0.0) {
-        resonance = -resonance;
-    } else if (resonance > 2.0) {
-        resonance -= 2.0;
-    } else if (resonance > 1.0) {
-        resonance = 2.0 - resonance;
-    }
+    if (recomputeCoefficients) {
+        double cutoffFrequencyInHertz = getBaseCutoffFrequency() * pow(2.0, (getCutoffPitchBendModulationIntensity() * getCutoffPitchBendModulation() +  getCutoffControllerModulationIntensity() * getCutoffControllerModulation() + getCutoffAudioModulationIntensity() * getCutoffAudioModulation()) / 12.0);
+        double resonance = getResonance() + getResonanceAudioModulation();
+        if (resonance < -1.0) {
+            resonance += 2.0;
+        } else if (resonance < 0.0) {
+            resonance = -resonance;
+        } else if (resonance > 2.0) {
+            resonance -= 2.0;
+        } else if (resonance > 1.0) {
+            resonance = 2.0 - resonance;
+        }
 
-    double radians = convertHertzToRadians(cutoffFrequencyInHertz);
-    if (radians > M_PI) {
-        radians = M_PI;
-    }
-    double s = sin(radians);
-    double c = cos(radians);
-    double t = tan((radians - M_PI) * 0.25);
-    double a1 = t / (s - c * t);
-    double a2 = a1 * a1;
-    double g1Square_inv = 1.0 + a2 + 2.0 * a1 * c;
-    double k = resonance * g1Square_inv * g1Square_inv;
-    getFeedBackCoefficients()[0] = k + 4.0 * a1;
-    getFeedBackCoefficients()[1] = 6.0 * a2;
-    getFeedBackCoefficients()[2] = 4.0 * a2 * a1;
-    getFeedBackCoefficients()[3] = a2 * a2;
+        double radians = convertHertzToRadians(cutoffFrequencyInHertz);
+        if (radians > M_PI) {
+            radians = M_PI;
+        }
+        double s = sin(radians);
+        double c = cos(radians);
+        double t = tan((radians - M_PI) * 0.25);
+        double a1 = t / (s - c * t);
+        double a2 = a1 * a1;
+        double g1Square_inv = 1.0 + a2 + 2.0 * a1 * c;
+        double k = resonance * g1Square_inv * g1Square_inv;
+        getFeedBackCoefficients()[0] = k + 4.0 * a1;
+        getFeedBackCoefficients()[1] = 6.0 * a2;
+        getFeedBackCoefficients()[2] = 4.0 * a2 * a1;
+        getFeedBackCoefficients()[3] = a2 * a2;
 
-    int n = getFeedForwardCoefficients().size() - 1;
-    double feedBackSum = 1.0 + getFeedBackCoefficients()[0] + getFeedBackCoefficients()[1] + getFeedBackCoefficients()[2] + getFeedBackCoefficients()[3];
-    int powerOfTwo = 1 << n;
-    double factor = 1.0 / powerOfTwo;
-    for (int k = 0; k < (n + 2) / 2; k++) {
-        getFeedForwardCoefficients()[k] = factor * IirFilter::computeBinomialCoefficient(n, k) * feedBackSum;
-    }
-    for (int k = (n + 2) / 2; k <= n; k++) {
-        getFeedForwardCoefficients()[k] = getFeedForwardCoefficients()[n - k];
+        int n = getFeedForwardCoefficients().size() - 1;
+        double feedBackSum = 1.0 + getFeedBackCoefficients()[0] + getFeedBackCoefficients()[1] + getFeedBackCoefficients()[2] + getFeedBackCoefficients()[3];
+        int powerOfTwo = 1 << n;
+        double factor = 1.0 / powerOfTwo;
+        for (int k = 0; k < (n + 2) / 2; k++) {
+            getFeedForwardCoefficients()[k] = factor * IirFilter::computeBinomialCoefficient(n, k) * feedBackSum;
+        }
+        for (int k = (n + 2) / 2; k <= n; k++) {
+            getFeedForwardCoefficients()[k] = getFeedForwardCoefficients()[n - k];
+        }
+        recomputeCoefficients = false;
+        return true;
+    } else {
+        return false;
     }
 }

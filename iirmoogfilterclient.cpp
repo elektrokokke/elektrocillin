@@ -18,6 +18,8 @@
  */
 
 #include "iirmoogfilterclient.h"
+#include <QDebug>
+#include <QTime>
 
 IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilter *processFilter_, IirMoogFilter *guiFilter_, size_t ringBufferSize) :
     ParameterClient(clientName, processFilter_, processFilter_, 0, processFilter_, guiFilter_, ringBufferSize),
@@ -81,19 +83,26 @@ IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client
     cutoffResonanceNode->setZValue(10);
     cutoffResonanceNode->setBounds(QRectF(getFrequencyResponseRectangle().topLeft(), QPointF(getFrequencyResponseRectangle().right(), getZeroDecibelY())));
     cutoffResonanceNode->setBoundsScaled(QRectF(QPointF(getLowestHertz(), 1), QPointF(getHighestHertz(), 0)));
-    onClientChangedParameters();
     QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onGuiChangedFilterParameters(QPointF)));
-    QObject::connect(client, SIGNAL(changedParameters()), this, SLOT(onClientChangedParameters()));
+    QObject::connect(client, SIGNAL(changedParameterValue(int,double,double,double)), this, SLOT(onClientChangedParameters()));
+}
+
+void IirMoogFilterGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    qDebug() << "IirMoogFilterGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)" << QTime::currentTime();
+    if (client->getMoogFilter()->computeCoefficients()) {
+        updateFrequencyResponse(0);
+    }
+    FrequencyResponseGraphicsItem::paint(painter, option, widget);
 }
 
 void IirMoogFilterGraphicsItem::onClientChangedParameters()
 {
-    client->getMoogFilter()->computeCoefficients();
-    updateFrequencyResponse(0);
     if (!cutoffResonanceNode->isMoving()) {
         cutoffResonanceNode->setXScaled(client->getMoogFilter()->getBaseCutoffFrequency());
         cutoffResonanceNode->setYScaled(client->getMoogFilter()->getResonance());
     }
+    update();
 }
 
 void IirMoogFilterGraphicsItem::onGuiChangedFilterParameters(const QPointF &cutoffResonance)

@@ -65,7 +65,7 @@ class EnvelopeGraphicsItem : public QObject, public GraphicsInterpolatorEditItem
 public:
     EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client, QGraphicsItem *parent = 0);
 private slots:
-    void updateInterpolator();
+    void onChangedParameterValue(int index);
 private:
     EnvelopeClient *client;
 };

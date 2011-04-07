@@ -12,7 +12,7 @@ public:
     // reimplemented from MidiProcessor:
     virtual void processController(unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     // reimplemented from ParameterProcessor:
-    virtual bool setParameterValue(int index, double value, unsigned int time);
+    virtual bool setParameterValue(int index, double value, double min, double max, unsigned int time);
 private:
     unsigned char channel;
 };

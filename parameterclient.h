@@ -60,7 +60,7 @@ class ParameterClient : public EventProcessorClient
 public:
     struct ParameterChange {
         int id;
-        double value;
+        double value, min, max;
         jack_nframes_t time;
     };
 
@@ -101,23 +101,16 @@ signals:
       Note: the signal is only triggered once each process cycle
       with the same parameterId.
       */
-    void changedParameterValue(int parameterId, double value, unsigned int  time);
-    /**
-      This signal will be triggered after all changed parameter
-      signals (see above) have been triggered for the last
-      process cycle.
-      */
-    void changedParameters();
+    void changedParameterValue(int index, double value, double min, double max);
 public slots:
     /**
-      Connect to or call this slot to communicate parameter changes
-      from the GUI thread to the process thread.
-
-      getParameterValue() will still return the old value until
-      the change has been sent to the process thread and
-      changedParameterValue() has been triggered.
+      Connect to or call this slot to change a parameter both in the
+      GUI thread (instantly) and the process thread (during the next
+      process callback).
       */
-    void changeParameterValue(int parameterId, double value);
+    void changeParameterValue(int index, double value);
+    void changeParameterValue(int index, double value, double min, double max);
+    void changeParameterBounds(int index, double min, double max);
 protected:
     /**
       Reimplemented from MidiProcessorClient.
@@ -152,10 +145,10 @@ protected:
     void synchronizeChangedParametersWithGui();
 protected slots:
     /**
-      This slot is connected to the corresponding signal of ParameterThread
+      These slots are connected to the corresponding signals of ParameterThread
       to keep the non-process thread set of parameters in sync with the process thread's.
       */
-    virtual void onChangedParameterValue(int parameterId, double value, unsigned int time);
+    virtual void onChangedParameterValue(int index, double value, double min, double max);
 private:
     ParameterProcessor *processParameterProcessor, *guiParameterProcessor;
     JackRingBuffer<ParameterChange> ringBufferFromProcessToGui, ringBufferFromGuiToProcess;
@@ -172,8 +165,7 @@ signals:
       to ParameterClient's signal with the same name instead.
       It will be triggered correspondingly.
       */
-    void changedParameterValue(int parameterId, double value, unsigned int time);
-    void changedParameters();
+    void changedParameterValue(int index, double value, double min, double max);
 protected:
     void processDeferred();
 private:
@@ -186,14 +178,12 @@ class ParameterGraphicsItem : public QObject, public QGraphicsRectItem {
     Q_OBJECT
 public:
     ParameterGraphicsItem(ParameterClient *client, QGraphicsItem *parent = 0);
-public slots:
-    void changedParameterBounds();
 protected:
     virtual void focusInEvent(QFocusEvent * event);
     virtual void focusOutEvent(QFocusEvent * event);
 private slots:
     void onGuiChangedParameterValue(double value);
-    void onClientChangedParameterValue(int parameterId, double value, unsigned int time);
+    void onClientChangedParameterValue(int index, double value, double min, double max);
 private:
     ParameterClient *client;
     QMap<QObject*, int> mapSenderToId;

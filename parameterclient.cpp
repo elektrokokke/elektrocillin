@@ -35,9 +35,7 @@ ParameterClient::ParameterClient(const QString &clientName, AudioProcessor *audi
     if (midiProcessor) {
         midiProcessor->setMidiWriter(this);
     }
-    QObject::connect(thread, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SLOT(onChangedParameterValue(int,double,unsigned int)));
-    QObject::connect(thread, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SIGNAL(changedParameterValue(int,double,unsigned int)));
-    QObject::connect(thread, SIGNAL(changedParameters()), this, SIGNAL(changedParameters()));
+    QObject::connect(thread, SIGNAL(changedParameterValue(int,double,double,double)), this, SLOT(onChangedParameterValue(int,double,double,double)));
 }
 
 void ParameterClient::saveState(QDataStream &stream)
@@ -82,15 +80,55 @@ QGraphicsItem * ParameterClient::createGraphicsItem()
     return new ParameterGraphicsItem(this);
 }
 
-void ParameterClient::changeParameterValue(int parameterId, double value)
+void ParameterClient::changeParameterValue(int index, double value)
 {
-    Q_ASSERT(parameterId < guiParameterProcessor->getNrOfParameters());
-    ParameterChange change;
-    change.id = parameterId;
-    change.value = value;
-    change.time = getEstimatedCurrentTime();
-    // send the change with the process thread:
-    ringBufferFromGuiToProcess.write(change);
+    Q_ASSERT(index < guiParameterProcessor->getNrOfParameters());
+    const ParameterProcessor::Parameter &parameter = guiParameterProcessor->getParameter(index);
+    if (guiParameterProcessor->setParameterValue(index, value, parameter.min, parameter.max, 0)) {
+        changedParameterValue(index, parameter.value, parameter.min, parameter.max);
+        ParameterChange change;
+        change.id = index;
+        change.value = parameter.value;
+        change.min = parameter.min;
+        change.max = parameter.max;
+        change.time = getEstimatedCurrentTime();
+        // send the change to the process thread:
+        ringBufferFromGuiToProcess.write(change);
+    }
+}
+
+void ParameterClient::changeParameterValue(int index, double value, double min, double max)
+{
+    Q_ASSERT(index < guiParameterProcessor->getNrOfParameters());
+    if (guiParameterProcessor->setParameterValue(index, value, min, max, 0)) {
+        const ParameterProcessor::Parameter &parameter = guiParameterProcessor->getParameter(index);
+        changedParameterValue(index, parameter.value, parameter.min, parameter.max);
+        ParameterChange change;
+        change.id = index;
+        change.value = parameter.value;
+        change.min = parameter.min;
+        change.max = parameter.max;
+        change.time = getEstimatedCurrentTime();
+        // send the change to the process thread:
+        ringBufferFromGuiToProcess.write(change);
+    }
+}
+
+void ParameterClient::changeParameterBounds(int index, double min, double max)
+{
+    Q_ASSERT(index < guiParameterProcessor->getNrOfParameters());
+    const ParameterProcessor::Parameter &parameter = guiParameterProcessor->getParameter(index);
+    if (guiParameterProcessor->setParameterValue(index, parameter.value, min, max, 0)) {
+        changedParameterValue(index, parameter.value, parameter.min, parameter.max);
+        ParameterChange change;
+        change.id = index;
+        change.value = parameter.value;
+        change.min = parameter.min;
+        change.max = parameter.max;
+        change.time = getEstimatedCurrentTime();
+        // send the change to the process thread:
+        ringBufferFromGuiToProcess.write(change);
+    }
 }
 
 bool ParameterClient::init()
@@ -139,7 +177,7 @@ bool ParameterClient::processParameters(jack_nframes_t start, jack_nframes_t end
                 currentFrame = change.time;
                 // process the parameter change:
                 ringBufferFromGuiToProcess.readAdvance(1);
-                processParameterProcessor->setParameterValue(change.id, change.value, change.time);
+                processParameterProcessor->setParameterValue(change.id, change.value, change.min, change.max, change.time);
             } else {
                 processEvents(currentFrame, end, nframes);
                 currentFrame = end;
@@ -161,9 +199,12 @@ void ParameterClient::synchronizeChangedParametersWithGui()
       */
     for (int i = 0; i < processParameterProcessor->getNrOfParameters(); i++) {
         if (processParameterProcessor->hasParameterChanged(i)) {
+            const ParameterProcessor::Parameter &parameter = processParameterProcessor->getParameter(i);
             ParameterChange change;
             change.id = i;
-            change.value = processParameterProcessor->getParameter(i).value;
+            change.value = parameter.value;
+            change.min = parameter.min;
+            change.max = parameter.max;
             change.time = 0;
             ringBufferFromProcessToGui.write(change);
         }
@@ -173,10 +214,12 @@ void ParameterClient::synchronizeChangedParametersWithGui()
     thread->wake();
 }
 
-void ParameterClient::onChangedParameterValue(int parameterId, double value, unsigned int time)
+void ParameterClient::onChangedParameterValue(int index, double value, double min, double max)
 {
     // a parameter has been changed from the process thread, change it in the GUI thread:
-    guiParameterProcessor->setParameterValue(parameterId, value, time);
+    if (guiParameterProcessor->setParameterValue(index, value, min, max, 0)) {
+        changedParameterValue(index, value, min, max);
+    }
 }
 
 ParameterThread::ParameterThread(ParameterClient *client, JackRingBuffer<ParameterClient::ParameterChange> *ringBufferFromProcessToGui_, JackRingBuffer<ParameterClient::ParameterChange> *ringBufferFromGuiToProcess_) :
@@ -188,13 +231,9 @@ ParameterThread::ParameterThread(ParameterClient *client, JackRingBuffer<Paramet
 void ParameterThread::processDeferred()
 {
     // read from the ring buffer and trigger the corresponding signals:
-    bool changes = ringBufferFromProcessToGui->readSpace();
     for (; ringBufferFromProcessToGui->readSpace(); ) {
         ParameterClient::ParameterChange change = ringBufferFromProcessToGui->read();
-        changedParameterValue(change.id, change.value, change.time);
-    }
-    if (changes) {
-        changedParameters();
+        changedParameterValue(change.id, change.value, change.min, change.max);
     }
 }
 
@@ -205,7 +244,7 @@ ParameterGraphicsItem::ParameterGraphicsItem(ParameterClient *client_, QGraphics
     setFlags(QGraphicsItem::ItemIsFocusable);
     setPen(QPen(QBrush(Qt::black), 1));
     setBrush(QBrush(Qt::white));
-    QObject::connect(client, SIGNAL(changedParameterValue(int,double,unsigned int)), this, SLOT(onClientChangedParameterValue(int,double,unsigned int)));
+    QObject::connect(client, SIGNAL(changedParameterValue(int,double,double,double)), this, SLOT(onClientChangedParameterValue(int,double,double,double)));
     int padding = 4;
     QRectF rectControls;
     qreal y = 0;
@@ -227,17 +266,6 @@ ParameterGraphicsItem::ParameterGraphicsItem(ParameterClient *client_, QGraphics
     setRect(rectControls.adjusted(-padding, -padding, padding, padding));
 }
 
-void ParameterGraphicsItem::changedParameterBounds()
-{
-    for (int i = 0; i < controls.size(); i++) {
-        const ParameterProcessor::Parameter &parameter = client->getParameter(i);
-        if (controls[i]) {
-            controls[i]->setMinValue(parameter.min);
-            controls[i]->setMaxValue(parameter.max);
-        }
-    }
-}
-
 void ParameterGraphicsItem::focusInEvent(QFocusEvent *)
 {
     setZValue(1);
@@ -257,11 +285,13 @@ void ParameterGraphicsItem::onGuiChangedParameterValue(double value)
     client->changeParameterValue(id, value);
 }
 
-void ParameterGraphicsItem::onClientChangedParameterValue(int parameterId, double value, unsigned int time)
+void ParameterGraphicsItem::onClientChangedParameterValue(int index, double value, double min, double max)
 {
-    Q_ASSERT(parameterId < controls.size());
-    if (controls[parameterId]) {
+    Q_ASSERT(index < controls.size());
+    if (controls[index]) {
         // reflect the new value in the appropriate control:
-        controls[parameterId]->setValue(value, false);
+        controls[index]->setMinValue(min);
+        controls[index]->setMaxValue(max);
+        controls[index]->setValue(value, false);
     }
 }

@@ -57,6 +57,8 @@ class IirMoogFilterGraphicsItem : public QObject, public FrequencyResponseGraphi
     Q_OBJECT
 public:
     IirMoogFilterGraphicsItem(IirMoogFilterClient *client, const QRectF &rect, QGraphicsItem *parent = 0);
+protected:
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 private:
     IirMoogFilterClient *client;
     GraphicsNodeItem *cutoffResonanceNode;

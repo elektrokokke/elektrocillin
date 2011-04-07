@@ -46,10 +46,17 @@ public:
     virtual Parameter & getParameter(int index);
     virtual const Parameter & getParameter(int index) const;
     /**
-      @return true, if the previous value of the parameter with given index
-        differed from the given value, false otherwise
+      Changes the value, minimum and maximum of a parameter with given
+      index.
+
+      @return true, if value, min or max of the parameter with given index
+        differ from their previous values, false otherwise
       */
-    virtual bool setParameterValue(int index, double value, unsigned int time);
+    virtual bool setParameterValue(int index, double value, double min, double max, unsigned int time);
+    /**
+      Convenience method that calls the above method with the current min and max values.
+      */
+    bool setParameterValue(int index, double value, unsigned int time);
 
     bool hasParameterChanged(int index) const;
     bool hasAnyParameterChanged() const;

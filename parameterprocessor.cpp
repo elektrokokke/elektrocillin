@@ -64,18 +64,26 @@ const ParameterProcessor::Parameter & ParameterProcessor::getParameter(int index
     return parameters[index];
 }
 
-bool ParameterProcessor::setParameterValue(int index, double value, unsigned int time)
+bool ParameterProcessor::setParameterValue(int index, double value, double min, double max, unsigned int time)
 {
     Q_ASSERT(index < parameters.size());
     Q_ASSERT(index < parametersChanged.size());
-    if (parameters[index].value != value) {
-        parameters[index].value = value;
+    if ((parameters[index].value != value) || (parameters[index].min != min) || (parameters[index].max != max)) {
+        parameters[index].value = (min != max ? qBound(min, value, max) : value);
+        parameters[index].min = min;
+        parameters[index].max = max;
         parametersChanged[index] = true;
         anyParameterChanged = true;
         return true;
     } else {
         return false;
     }
+}
+
+bool ParameterProcessor::setParameterValue(int index, double value, unsigned int time)
+{
+    const Parameter &parameter = getParameter(index);
+    return setParameterValue(index, value, parameter.min, parameter.max, time);
 }
 
 bool ParameterProcessor::hasParameterChanged(int index) const

@@ -140,13 +140,14 @@ bool Envelope::processEvent(const RingBufferEvent *event, jack_nframes_t)
     }
 }
 
-bool Envelope::setParameterValue(int index, double value, jack_nframes_t time)
+bool Envelope::setParameterValue(int index, double value, double min, double max, unsigned int time)
 {
-    if (ParameterProcessor::setParameterValue(index, value, time)) {
+    if (ParameterProcessor::setParameterValue(index, value, min, max, time)) {
+        const ParameterProcessor::Parameter &parameter = getParameter(index);
         if (index == 0) {
-            LogarithmicInterpolator::setBase(value);
+            LogarithmicInterpolator::setBase(parameter.value);
         } else if (index == 1) {
-            setSustainIndex(qRound(value));
+            setSustainIndex(qRound(parameter.value));
         }
         return true;
     } else {
@@ -183,12 +184,9 @@ void Envelope::addControlPoint(double x, double y)
 
 void Envelope::controlPointsChanged()
 {
-    if (sustainIndex >= getNrOfControlPoints()) {
-        setSustainIndex(getNrOfControlPoints() - 1);
-    }
     // adjust the bounds of the sustain parameter:
     ParameterProcessor::Parameter &parameter = getParameter(1);
-    parameter.max = getNrOfControlPoints() - 1;
+    setParameterValue(1, parameter.value, parameter.min, getNrOfControlPoints() - 1, 0);
 }
 
 void Envelope::setSustainIndex(int sustainIndex)
