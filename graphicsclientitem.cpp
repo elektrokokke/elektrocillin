@@ -55,7 +55,8 @@ GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsCli
         controlsItem->setZValue(1);
         controlsItem->setVisible(false);
         controlsItem->setParentItem(this);
-        controlsItem->setPos(getRect().topRight());
+        controlsItem->setPos(getRect().bottomLeft());
+        controlsItem->setCursor(Qt::ArrowCursor);
     }
 }
 

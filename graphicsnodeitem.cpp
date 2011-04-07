@@ -255,7 +255,6 @@ void GraphicsNodeItem::init()
     verticalScale = LINEAR;
     mouseButtonPressed = false;
     setAcceptHoverEvents(true);
-    setCursor(Qt::ArrowCursor);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges | QGraphicsItem::ItemIsSelectable);
 }
 

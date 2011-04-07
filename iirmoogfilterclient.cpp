@@ -82,6 +82,7 @@ IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client
     cutoffResonanceNode->setZValue(10);
     cutoffResonanceNode->setBounds(QRectF(getFrequencyResponseRectangle().topLeft(), QPointF(getFrequencyResponseRectangle().right(), getZeroDecibelY())));
     cutoffResonanceNode->setBoundsScaled(QRectF(QPointF(getLowestHertz(), 1), QPointF(getHighestHertz(), 0)));
+    onClientChangedParameters();
     QObject::connect(cutoffResonanceNode, SIGNAL(positionChangedScaled(QPointF)), this, SLOT(onGuiChangedFilterParameters(QPointF)));
     QObject::connect(client, SIGNAL(changedParameterValue(int,double,double,double)), this, SLOT(onClientChangedParameters()));
 }

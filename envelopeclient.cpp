@@ -134,7 +134,6 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
     client(client_)
 {
     setVisible(GraphicsInterpolatorEditItem::FIRST, false);
-    setCursor(Qt::ArrowCursor);
     QObject::connect(client, SIGNAL(changedParameterValue(int,double,double,double)), this, SLOT(onChangedParameterValue(int)));
 }
 

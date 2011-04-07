@@ -35,7 +35,6 @@ GraphicsKeyboardItem::GraphicsKeyboardItem(unsigned char channel_, QGraphicsItem
     }
     setRect(childrenBoundingRect());
     setBrush(QBrush(Qt::white));
-    setCursor(Qt::ArrowCursor);
 }
 
 unsigned char GraphicsKeyboardItem::getChannel() const

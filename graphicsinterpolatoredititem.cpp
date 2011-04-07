@@ -33,7 +33,6 @@ GraphicsInterpolatorEditItem::GraphicsInterpolatorEditItem(AbstractInterpolator 
     font.setPointSize(6);
     setPen(QPen(QBrush(Qt::black), 1));
     setBrush(QBrush(Qt::white));
-    setCursor(Qt::ArrowCursor);
     setRect(rectangle, rectScaled);
 }
 
