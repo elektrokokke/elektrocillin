@@ -20,6 +20,7 @@
 #include "jackclient.h"
 #include "graphicsclientitemsclient.h"
 #include <QSet>
+#include <QRegExp>
 
 JackClient::JackClient(const QString &clientName) :
     requestedName(clientName),
@@ -173,7 +174,7 @@ int JackClient::getPortFlags(const QString &fullPortName)
 
 QStringList JackClient::getMyPorts(const char *typeNamePattern, unsigned long flags)
 {
-    return getPorts(QString("%1:.*").arg(getClientName()).toAscii().data(), typeNamePattern, flags);
+    return getPorts(QString(QRegExp::escape(getClientName()) + ":.*").toAscii().data(), typeNamePattern, flags);
 }
 
 QStringList JackClient::getPorts(const char *fullPortNamePattern, const char *typeNamePattern, unsigned long flags)

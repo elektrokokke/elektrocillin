@@ -27,6 +27,7 @@
 #include <QLinearGradient>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QRegExp>
 
 GraphicsClientItem::GraphicsClientItem(GraphicsClientItemsClient *clientItemsClient_, JackClient *jackClient_,bool isMacro_, const QString &clientName_, int clientStyle_, int audioPortStyle_, int midiPortStyle_, QFont font_, QGraphicsItem *parent) :
     QGraphicsPathItem(parent, clientItemsClient_->getScene()),
@@ -179,7 +180,7 @@ void GraphicsClientItem::initItem()
     QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(clientName, this);
     textItem->setFont(font);
     textItem->setPos(padding, padding);
-    QStringList inputPorts = clientItemsClient->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsInput);
+    QStringList inputPorts = clientItemsClient->getPorts(QString(QRegExp::escape(clientName) + ":.*").toAscii().data(), 0, JackPortIsInput);
     QList<GraphicsPortItem*> inputPortItems;
     int inputPortsWidth = -portPadding;
     int minimumInputPortWidth = 0;
@@ -195,7 +196,7 @@ void GraphicsClientItem::initItem()
             minimumInputPortWidth = inputPortItems[i]->getRect().width();
         }
     }
-    QStringList outputPorts = clientItemsClient->getPorts(QString(clientName + ":.*").toAscii().data(), 0, JackPortIsOutput);
+    QStringList outputPorts = clientItemsClient->getPorts(QString(QRegExp::escape(clientName) + ":.*").toAscii().data(), 0, JackPortIsOutput);
     QList<GraphicsPortItem*> outputPortItems;
     int outputPortsWidth = -portPadding;
     int minimumOutputPortWidth = 0;
