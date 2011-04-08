@@ -21,9 +21,11 @@
 #include <cmath>
 #include <QtGlobal>
 
-Oscillator::Oscillator(const QStringList &additionalInputPortNames) :
+Oscillator::Oscillator(const QStringList &additionalInputPortNames, MidiProcessor::MidiWriter *midiWriter) :
     AudioProcessor(QStringList("Pitch modulation") + additionalInputPortNames, QStringList("Audio out")),
-    MidiProcessor(QStringList("Midi note in"), QStringList())
+    MidiParameterProcessor(QStringList("Midi note in"), QStringList(), midiWriter),
+    pitchBend(0),
+    pitchModulation(0)
 {
     registerParameter("Gain", 1, 0, 1, 0.01);
     registerParameter("Octave", 0, -3, 3, 1);
@@ -31,10 +33,6 @@ Oscillator::Oscillator(const QStringList &additionalInputPortNames) :
     registerParameter("Pitch mod. intensity", 12, 0, 24, 1);
     // maximum frequency modulation by pitch bend input in semitones (default is two semitones)
     registerParameter("Pitch bend modulation intensity", 2, 0, 12, 1);
-    registerParameter("MIDI tune controller", 3, 0, 127, 1);
-    // uneditable parameters for cutoff modulation from audio, pitch bend and controller, and for resonance modulation from audio and controller:
-    registerParameter("Pitch bend", 0, 0, 0, 0);
-    registerParameter("Frequency modulation", 0, 0, 0, 0);
     init();
 }
 
@@ -50,40 +48,32 @@ Oscillator & Oscillator::operator=(const Oscillator &oscillator)
     return *this;
 }
 
-void Oscillator::setSampleRate(double sampleRate)
-{
-    AudioProcessor::setSampleRate(sampleRate);
-}
-
 void Oscillator::processNoteOn(int inputIndex, unsigned char, unsigned char noteNumber, unsigned char, jack_nframes_t)
 {
-    frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
+    if (inputIndex == 1) {
+        frequency = computeFrequencyFromMidiNoteNumber(noteNumber);
+    }
 }
 
 void Oscillator::processPitchBend(int inputIndex, unsigned char, unsigned int value, jack_nframes_t time)
 {
-    int pitchCentered = (int)value - 0x2000;
-    setParameterValue(6, (double)pitchCentered / 8192.0, time);
-}
-
-void Oscillator::processController(int inputIndex, unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time)
-{
-    if (controller == qRound(getParameter(5).value)) {
-        setParameterValue(2, ((double)value - 64.0) / 128.0 * 200.0, time);
+    if (inputIndex == 1) {
+        int pitchCentered = (int)value - 0x2000;
+        pitchBend = (double)pitchCentered / 8192.0;
     }
 }
 
 void Oscillator::processAudio(const double *inputs, double *outputs, jack_nframes_t time)
 {
     // consider frequency modulation input:
-    setParameterValue(7, inputs[0], time);
+    pitchModulation = inputs[0];
     computeNormalizedFrequency();
     double phase2 = phase + normalizedFrequency;
     if (phase2 >= 1) {
         phase2 -= 1;
     }
     // compute the oscillator output:
-    outputs[0] = getParameter(0).value * valueAtPhase(phase);
+    outputs[0] = getParameter(1).value * valueAtPhase(phase);
     phase = phase2;
 }
 
@@ -99,12 +89,10 @@ double Oscillator::valueAtPhase(double phase)
 
 void Oscillator::computeNormalizedFrequency()
 {
-    double octave = getParameter(1).value;
-    double tune = getParameter(2).value;
-    double pitchModulationIntensity = getParameter(3).value;
-    double pitchBendIntensity = getParameter(4).value;
-    double pitchBend = getParameter(6).value;
-    double pitchModulation = getParameter(7).value;
+    double octave = getParameter(2).value;
+    double tune = getParameter(3).value;
+    double pitchModulationIntensity = getParameter(4).value;
+    double pitchBendIntensity = getParameter(5).value;
     normalizedFrequency = frequency * pow(2.0, octave + pitchModulation * pitchModulationIntensity / 12.0 + tune / 1200.0 + pitchBend * pitchBendIntensity / 12.0) / getSampleRate();
     if (normalizedFrequency < 0.0) {
         normalizedFrequency = 0;

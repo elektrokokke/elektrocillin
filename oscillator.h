@@ -21,24 +21,20 @@
  */
 
 #include "audioprocessor.h"
-#include "midiprocessor.h"
 #include "eventprocessor.h"
-#include "parameterprocessor.h"
+#include "midiparameterprocessor.h"
 
-class Oscillator : public AudioProcessor, public MidiProcessor, public ParameterProcessor
+class Oscillator : public AudioProcessor, public MidiParameterProcessor
 {
 public:
-    Oscillator(const QStringList &additionalInputPortNames = QStringList());
+    Oscillator(const QStringList &additionalInputPortNames = QStringList(), MidiProcessor::MidiWriter *midiWriter = 0);
     virtual ~Oscillator();
 
     Oscillator & operator=(const Oscillator &oscillator);
 
-    // reimplemented from AudioProcessor:
-    virtual void setSampleRate(double sampleRate);
     // reimplemented from MidiProcessor:
     virtual void processNoteOn(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
     virtual void processPitchBend(int inputIndex, unsigned char channel, unsigned int value, jack_nframes_t time);
-    virtual void processController(int inputIndex, unsigned char channel, unsigned char controller, unsigned char value, jack_nframes_t time);
     // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
 
@@ -56,7 +52,7 @@ protected:
 
 private:
     // derived member variables:
-    double phase, frequency, normalizedFrequency;
+    double phase, frequency, normalizedFrequency, pitchBend, pitchModulation;
 
     void computeNormalizedFrequency();
     void init();
