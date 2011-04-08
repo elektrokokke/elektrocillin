@@ -36,7 +36,7 @@ bool MidiParameterProcessor::setParameterValue(int index, double value, double m
                 // parameters with equal min and max values are not controllable via MIDI:
                 if (parameter.max != parameter.min) {
                     int controllerValue = qRound((parameter.value - parameter.min) * 127.0 / (parameter.max - parameter.min));
-                    writeControlller(0, channel, controller, controllerValue, time);
+                    writeController(0, channel, controller, controllerValue, time);
                 }
             }
         }
