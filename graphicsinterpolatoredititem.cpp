@@ -160,6 +160,26 @@ GraphicsInterpolatorGraphItem * GraphicsInterpolatorEditItem::getGraphItem()
     return child;
 }
 
+void GraphicsInterpolatorEditItem::setVerticalSlices(int slices)
+{
+    if (slices > 0) {
+        verticalSlices = slices * 2;
+    } else {
+        verticalSlices = 8;
+    }
+    setRect(rect(), child->getScaledRect());
+}
+
+void GraphicsInterpolatorEditItem::setHorizontalSlices(int slices)
+{
+    if (slices > 0) {
+        horizontalSlices = slices * 2;
+    } else {
+        horizontalSlices = 8;
+    }
+    setRect(rect(), child->getScaledRect());
+}
+
 GraphicsInterpolatorGraphItem::GraphicsInterpolatorGraphItem(AbstractInterpolator *interpolator_, const QRectF &rectangle, const QRectF &rectScaled_, GraphicsInterpolatorEditItem *parent_, bool logarithmicX_) :
     QGraphicsRectItem(rectangle, parent_),
     rectScaled(rectScaled_),
@@ -310,6 +330,11 @@ void GraphicsInterpolatorGraphItem::setNodeBrush(const QBrush &brush)
 const QBrush & GraphicsInterpolatorGraphItem::getNodeBrush() const
 {
     return nodeBrush;
+}
+
+const QRectF & GraphicsInterpolatorGraphItem::getScaledRect() const
+{
+    return rectScaled;
 }
 
 void GraphicsInterpolatorGraphItem::mousePressEvent (QGraphicsSceneMouseEvent * event)

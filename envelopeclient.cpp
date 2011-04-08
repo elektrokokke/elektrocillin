@@ -56,11 +56,11 @@ QGraphicsItem * EnvelopeClient::createGraphicsItem()
     rect = rect.translated(parameterItem->boundingRect().width() + 2 * padding, padding);
     parameterItem->setPos(padding, padding);
     parameterItem->setParentItem(item);
-    EnvelopeGraphicsItem *ourItem = new EnvelopeGraphicsItem(rect, this);
-    ourItem->setParentItem(item);
+    EnvelopeGraphicsItem *ourItem = new EnvelopeGraphicsItem(rect, this, item);
     item->setRect((rect | parameterItem->boundingRect().translated(parameterItem->pos())).adjusted(-padding, -padding, padding, padding));
     item->setPen(QPen(QBrush(Qt::black), 1));
     item->setBrush(QBrush(Qt::white));
+    QObject::connect(this, SIGNAL(changedYSteps(int)), ourItem, SLOT(setHorizontalSlices(int)));
     return item;
 }
 
@@ -121,6 +121,15 @@ QString EnvelopeClient::getControlPointName(int index) const
     return guiEnvelope->getControlPointName(index);
 }
 
+void EnvelopeClient::onChangedParameterValue(int index, double value, double min, double max)
+{
+    if (index == 2) {
+        // y steps:
+        changedYSteps(qRound(value));
+    }
+    ParameterClient::onChangedParameterValue(index, value, min, max);
+}
+
 EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *client_, QGraphicsItem *parent_) :
     GraphicsInterpolatorEditItem(
         client_,
@@ -139,8 +148,8 @@ EnvelopeGraphicsItem::EnvelopeGraphicsItem(const QRectF &rect, EnvelopeClient *c
 
 void EnvelopeGraphicsItem::onChangedParameterValue(int index)
 {
-    // update the interpolator if the sustain index has been changed:
-    if (index == 1) {
+    // update the interpolator if the slope or sustain index have been changed:
+    if (index <= 1) {
         interpolatorChanged();
     }
 }

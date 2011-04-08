@@ -32,7 +32,7 @@ LinearWaveShaper::LinearWaveShaper() :
     yy.append(1);
     changeControlPoints(xx, yy);
     // register numeric parameters:
-    registerParameter("X steps", 0, 0, 32, 1);
+    registerParameter("X steps", 0, 0, 16, 1);
     registerParameter("Y steps", 0, 0, 12, 1);
 }
 
@@ -102,10 +102,12 @@ QGraphicsItem * LinearWaveShapingClient::createGraphicsItem()
     rect = rect.translated(parameterItem->boundingRect().width() + 2 * padding, padding);
     parameterItem->setPos(padding, padding);
     parameterItem->setParentItem(item);
-    new GraphicsInterpolatorEditItem(this, rect, QRectF(-1, 1, 2, -2), item);
+    GraphicsInterpolatorEditItem *ourItem = new GraphicsInterpolatorEditItem(this, rect, QRectF(-1, 1, 2, -2), item);
     item->setRect((rect | parameterItem->boundingRect().translated(parameterItem->pos())).adjusted(-padding, -padding, padding, padding));
     item->setPen(QPen(QBrush(Qt::black), 1));
     item->setBrush(QBrush(Qt::white));
+    QObject::connect(this, SIGNAL(changedXSteps(int)), ourItem, SLOT(setVerticalSlices(int)));
+    QObject::connect(this, SIGNAL(changedYSteps(int)), ourItem, SLOT(setHorizontalSlices(int)));
     return item;
 }
 
@@ -148,6 +150,18 @@ void LinearWaveShapingClient::deleteControlPoint(int index)
 QString LinearWaveShapingClient::getControlPointName(int index) const
 {
     return guiWaveShaper->getControlPointName(index);
+}
+
+void LinearWaveShapingClient::onChangedParameterValue(int index, double value, double min, double max)
+{
+    if (index == 0) {
+        // x steps:
+        changedXSteps(qRound(value));
+    } else if (index == 1) {
+        // y steps:
+        changedYSteps(qRound(value));
+    }
+    ParameterClient::onChangedParameterValue(index, value, min, max);
 }
 
 class LinearWaveShapingClientFactory : public JackClientFactory

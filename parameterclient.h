@@ -145,7 +145,7 @@ protected:
     void synchronizeChangedParametersWithGui();
 protected slots:
     /**
-      These slots are connected to the corresponding signals of ParameterThread
+      This slot is connected to the corresponding signal of ParameterThread
       to keep the non-process thread set of parameters in sync with the process thread's.
       */
     virtual void onChangedParameterValue(int index, double value, double min, double max);

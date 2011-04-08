@@ -34,8 +34,9 @@
 
 class GraphicsInterpolatorGraphItem;
 
-class GraphicsInterpolatorEditItem : public QGraphicsRectItem
+class GraphicsInterpolatorEditItem : public QObject, public QGraphicsRectItem
 {
+    Q_OBJECT
 public:
     enum ControlPoint {
         FIRST = 0,
@@ -49,6 +50,9 @@ public:
     AbstractInterpolator * getInterpolator();
     QRectF getInnerRectangle() const;
     GraphicsInterpolatorGraphItem * getGraphItem();
+public slots:
+    void setVerticalSlices(int slices);
+    void setHorizontalSlices(int slices);
 private:
     AbstractInterpolator *interpolator;
     GraphicsInterpolatorGraphItem *child;
@@ -72,6 +76,7 @@ public:
     const QPen & getNodePen() const;
     void setNodeBrush(const QBrush &brush);
     const QBrush & getNodeBrush() const;
+    const QRectF & getScaledRect() const;
 signals:
     void changedNrOfControlPoints();
 protected:

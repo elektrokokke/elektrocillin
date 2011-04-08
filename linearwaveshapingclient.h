@@ -38,6 +38,7 @@ public:
 
 class LinearWaveShapingClient : public ParameterClient, public AbstractInterpolator
 {
+    Q_OBJECT
 public:
     LinearWaveShapingClient(const QString &clientName, LinearWaveShaper *processWaveShaper, LinearWaveShaper * guiWaveShaper, size_t ringBufferSize = 1024);
     virtual ~LinearWaveShapingClient();
@@ -64,6 +65,12 @@ public:
     virtual void addControlPoint(double x, double y);
     virtual void deleteControlPoint(int index);
     virtual QString getControlPointName(int index) const;
+signals:
+    void changedXSteps(int steps);
+    void changedYSteps(int steps);
+protected:
+    // Reimplemented from ParameterClient:
+    virtual void onChangedParameterValue(int index, double value, double min, double max);
 private:
     LinearWaveShaper *processWaveShaper, *guiWaveShaper;
 };

@@ -24,7 +24,7 @@
 Envelope::Envelope(double durationInSeconds_) :
     AudioProcessor(QStringList(), QStringList("Envelope out")),
     MidiProcessor(QStringList("Midi trigger in"), QStringList()),
-    LogarithmicInterpolator(0.01),
+    LogarithmicInterpolator(1),
     durationInSeconds(durationInSeconds_),
     currentTime(0),
     previousLevel(0),
@@ -32,7 +32,7 @@ Envelope::Envelope(double durationInSeconds_) :
     startLevel(0)
 {
     // register numeric parameters:
-    registerParameter("Base", 0.01, 0.001, 1, 0.001);
+    registerParameter("Slope", 0, -2, 2, 0.01);
     registerParameter("Sustain index", 1, 1, getNrOfControlPoints() - 1, 1);
     registerParameter("Y steps", 0, 0, 12, 1);
     // initialize the interpolators to represent a simple ASR envelope:
@@ -146,8 +146,10 @@ bool Envelope::setParameterValue(int index, double value, double min, double max
     if (ParameterProcessor::setParameterValue(index, value, min, max, time)) {
         const ParameterProcessor::Parameter &parameter = getParameter(index);
         if (index == 0) {
-            LogarithmicInterpolator::setBase(parameter.value);
+            // slope:
+            LogarithmicInterpolator::setBase(pow(1000.0, parameter.value));
         } else if (index == 1) {
+            // sustain index:
             setSustainIndex(qRound(parameter.value));
         }
         return true;

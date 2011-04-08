@@ -31,6 +31,7 @@
 
 class EnvelopeClient : public ParameterClient, public AbstractInterpolator
 {
+    Q_OBJECT
 public:
     /**
       Creates a new envelope client with the given name.
@@ -55,11 +56,16 @@ public:
     virtual void addControlPoint(double x, double y);
     virtual void deleteControlPoint(int index);
     virtual QString getControlPointName(int index) const;
+signals:
+    void changedYSteps(int steps);
+protected:
+    // Reimplemented from ParameterClient:
+    virtual void onChangedParameterValue(int index, double value, double min, double max);
 private:
     Envelope *processEnvelope, *guiEnvelope;
 };
 
-class EnvelopeGraphicsItem : public QObject, public GraphicsInterpolatorEditItem
+class EnvelopeGraphicsItem : public GraphicsInterpolatorEditItem
 {
     Q_OBJECT
 public:
