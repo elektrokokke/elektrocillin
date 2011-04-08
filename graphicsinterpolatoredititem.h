@@ -46,13 +46,13 @@ public:
 
     void setRect(const QRectF &rect, const QRectF &rectScaled);
     void setVisible(ControlPoint controlPoint, bool visible);
-    void interpolatorChanged();
     AbstractInterpolator * getInterpolator();
     QRectF getInnerRectangle() const;
     GraphicsInterpolatorGraphItem * getGraphItem();
 public slots:
     void setVerticalSlices(int slices);
     void setHorizontalSlices(int slices);
+    void updateInterpolator();
 private:
     AbstractInterpolator *interpolator;
     GraphicsInterpolatorGraphItem *child;

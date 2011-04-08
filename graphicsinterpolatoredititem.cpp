@@ -140,7 +140,7 @@ void GraphicsInterpolatorEditItem::setVisible(ControlPoint controlPoint, bool vi
     child->setVisible(controlPoint, visible);
 }
 
-void GraphicsInterpolatorEditItem::interpolatorChanged()
+void GraphicsInterpolatorEditItem::updateInterpolator()
 {
     child->interpolatorChanged();
 }

@@ -92,7 +92,8 @@ SOURCES += main.cpp\
     reverb.cc \
     zitareverbclient.cpp \
     pareq.cc \
-    midiparameterprocessor.cpp
+    midiparameterprocessor.cpp \
+    logarithmicwaveshaper.cpp
 
 HEADERS  += mainwindow.h \
     midi2audioclient.h \
@@ -181,7 +182,8 @@ HEADERS  += mainwindow.h \
     reverb.h \
     zitareverbclient.h \
     pareq.h \
-    midiparameterprocessor.h
+    midiparameterprocessor.h \
+    logarithmicwaveshaper.h
 
 FORMS    += mainwindow.ui \
     zplanewidget.ui

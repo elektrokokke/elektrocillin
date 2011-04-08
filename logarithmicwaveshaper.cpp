@@ -1,29 +1,13 @@
-/*
-    Copyright 2011 Arne Jacobs <jarne@jarne.de>
+#include "logarithmicwaveshaper.h"
 
-    This file is part of elektrocillin.
-
-    Elektrocillin is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Foobar is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-#include "linearwaveshapingclient.h"
 #include "graphicsnodeitem.h"
 #include <QPen>
 #include <QtGlobal>
+#include <cmath>
 
-LinearWaveShaper::LinearWaveShaper() :
-    AudioProcessor(QStringList("Audio in"), QStringList("Audio out"))
+LogarithmicWaveShaper::LogarithmicWaveShaper() :
+    AudioProcessor(QStringList("Audio in"), QStringList("Audio out")),
+    LogarithmicInterpolator(1)
 {
     QVector<double> xx, yy;
     xx.append(-1);
@@ -32,14 +16,15 @@ LinearWaveShaper::LinearWaveShaper() :
     yy.append(1);
     changeControlPoints(xx, yy);
     // register numeric parameters:
+    registerParameter("Slope", 0, -5, 5, 0.1);
     registerParameter("X steps", 0, 0, 16, 1);
     registerParameter("Y steps", 0, 0, 12, 1);
 }
 
-void LinearWaveShaper::addControlPoint(double x, double y)
+void LogarithmicWaveShaper::addControlPoint(double x, double y)
 {
-    double xSteps = getParameter(0).value;
-    double ySteps = getParameter(1).value;
+    double xSteps = getParameter(1).value;
+    double ySteps = getParameter(2).value;
     if (xSteps) {
         // discretize the X coordinate:
         x = qRound(x * xSteps) / xSteps;
@@ -48,13 +33,13 @@ void LinearWaveShaper::addControlPoint(double x, double y)
         // discretize the Y coordinate:
         y = qRound(y * ySteps) / ySteps;
     }
-    LinearInterpolator::addControlPoint(x, y);
+    LogarithmicInterpolator::addControlPoint(x, y);
 }
 
-void LinearWaveShaper::changeControlPoint(int index, double x, double y)
+void LogarithmicWaveShaper::changeControlPoint(int index, double x, double y)
 {
-    double xSteps = getParameter(0).value;
-    double ySteps = getParameter(1).value;
+    double xSteps = getParameter(1).value;
+    double ySteps = getParameter(2).value;
     if (xSteps) {
         // discretize the X coordinate:
         x = qRound(x * xSteps) / xSteps;
@@ -63,15 +48,15 @@ void LinearWaveShaper::changeControlPoint(int index, double x, double y)
         // discretize the Y coordinate:
         y = qRound(y * ySteps) / ySteps;
     }
-    LinearInterpolator::changeControlPoint(index, x, y);
+    LogarithmicInterpolator::changeControlPoint(index, x, y);
 }
 
-void LinearWaveShaper::processAudio(const double *inputs, double *outputs, jack_nframes_t)
+void LogarithmicWaveShaper::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     outputs[0] = evaluate(inputs[0]);
 }
 
-bool LinearWaveShaper::processEvent(const RingBufferEvent *event, jack_nframes_t)
+bool LogarithmicWaveShaper::processEvent(const RingBufferEvent *event, jack_nframes_t)
 {
     if (const Interpolator::InterpolatorEvent *event_ = dynamic_cast<const Interpolator::InterpolatorEvent*>(event)) {
         processInterpolatorEvent(event_);
@@ -81,34 +66,48 @@ bool LinearWaveShaper::processEvent(const RingBufferEvent *event, jack_nframes_t
     }
 }
 
-LinearWaveShapingClient::LinearWaveShapingClient(const QString &clientName, LinearWaveShaper *processWaveShaper_, LinearWaveShaper * guiWaveShaper_, size_t ringBufferSize) :
+bool LogarithmicWaveShaper::setParameterValue(int index, double value, double min, double max, unsigned int time)
+{
+    if (ParameterProcessor::setParameterValue(index, value, min, max, time)) {
+        const ParameterProcessor::Parameter &parameter = getParameter(index);
+        if (index == 0) {
+            // slope:
+            LogarithmicInterpolator::setBase(pow(1000.0, parameter.value));
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
+LogarithmicWaveShapingClient::LogarithmicWaveShapingClient(const QString &clientName, LogarithmicWaveShaper *processWaveShaper_, LogarithmicWaveShaper * guiWaveShaper_, size_t ringBufferSize) :
     ParameterClient(clientName, processWaveShaper_, 0, processWaveShaper_, processWaveShaper_, guiWaveShaper_, ringBufferSize),
     processWaveShaper(processWaveShaper_),
     guiWaveShaper(guiWaveShaper_)
 {
 }
 
-LinearWaveShapingClient::~LinearWaveShapingClient()
+LogarithmicWaveShapingClient::~LogarithmicWaveShapingClient()
 {
     close();
     delete processWaveShaper;
     delete guiWaveShaper;
 }
 
-void LinearWaveShapingClient::saveState(QDataStream &stream)
+void LogarithmicWaveShapingClient::saveState(QDataStream &stream)
 {
     EventProcessorClient::saveState(stream);
     guiWaveShaper->save(stream);
 }
 
-void LinearWaveShapingClient::loadState(QDataStream &stream)
+void LogarithmicWaveShapingClient::loadState(QDataStream &stream)
 {
     EventProcessorClient::loadState(stream);
     guiWaveShaper->load(stream);
     processWaveShaper->changeControlPoints(guiWaveShaper->getX(), guiWaveShaper->getY());
 }
 
-QGraphicsItem * LinearWaveShapingClient::createGraphicsItem()
+QGraphicsItem * LogarithmicWaveShapingClient::createGraphicsItem()
 {
     int padding = 4;
     QGraphicsRectItem *item = new QGraphicsRectItem();
@@ -123,83 +122,84 @@ QGraphicsItem * LinearWaveShapingClient::createGraphicsItem()
     item->setBrush(QBrush(Qt::white));
     QObject::connect(this, SIGNAL(changedXSteps(int)), ourItem, SLOT(setVerticalSlices(int)));
     QObject::connect(this, SIGNAL(changedYSteps(int)), ourItem, SLOT(setHorizontalSlices(int)));
+    QObject::connect(this, SIGNAL(changedParameterValue(int,double,double,double)), ourItem, SLOT(updateInterpolator()));
     return item;
 }
 
-double LinearWaveShapingClient::evaluate(double x, int *index)
+double LogarithmicWaveShapingClient::evaluate(double x, int *index)
 {
     return guiWaveShaper->evaluate(x, index);
 }
 
-int LinearWaveShapingClient::getNrOfControlPoints()
+int LogarithmicWaveShapingClient::getNrOfControlPoints()
 {
     return guiWaveShaper->getNrOfControlPoints();
 }
 
-QPointF LinearWaveShapingClient::getControlPoint(int index)
+QPointF LogarithmicWaveShapingClient::getControlPoint(int index)
 {
     return guiWaveShaper->getControlPoint(index);
 }
 
-void LinearWaveShapingClient::changeControlPoint(int index, double x, double y)
+void LogarithmicWaveShapingClient::changeControlPoint(int index, double x, double y)
 {
     guiWaveShaper->changeControlPoint(index, x, y);
     Interpolator::ChangeControlPointEvent *event = new Interpolator::ChangeControlPointEvent(index, x, y);
     postEvent(event);
 }
 
-void LinearWaveShapingClient::addControlPoint(double x, double y)
+void LogarithmicWaveShapingClient::addControlPoint(double x, double y)
 {
     guiWaveShaper->addControlPoint(x, y);
     Interpolator::AddControlPointEvent *event = new Interpolator::AddControlPointEvent(x, y);
     postEvent(event);
 }
 
-void LinearWaveShapingClient::deleteControlPoint(int index)
+void LogarithmicWaveShapingClient::deleteControlPoint(int index)
 {
     guiWaveShaper->deleteControlPoint(index);
     Interpolator::DeleteControlPointEvent *event = new Interpolator::DeleteControlPointEvent(index);
     postEvent(event);
 }
 
-QString LinearWaveShapingClient::getControlPointName(int index) const
+QString LogarithmicWaveShapingClient::getControlPointName(int index) const
 {
     return guiWaveShaper->getControlPointName(index);
 }
 
-void LinearWaveShapingClient::onChangedParameterValue(int index, double value, double min, double max)
+void LogarithmicWaveShapingClient::onChangedParameterValue(int index, double value, double min, double max)
 {
-    if (index == 0) {
+    if (index == 1) {
         // x steps:
         changedXSteps(qRound(value));
-    } else if (index == 1) {
+    } else if (index == 2) {
         // y steps:
         changedYSteps(qRound(value));
     }
     ParameterClient::onChangedParameterValue(index, value, min, max);
 }
 
-class LinearWaveShapingClientFactory : public JackClientFactory
+class LogarithmicWaveShapingClientFactory : public JackClientFactory
 {
 public:
-    LinearWaveShapingClientFactory()
+    LogarithmicWaveShapingClientFactory()
     {
         JackClientSerializer::getInstance()->registerFactory(this);
     }
     QString getName()
     {
-        return "Piecewise linear wave shaper";
+        return "Logarithmic shaper";
     }
     JackClient * createClient(const QString &clientName)
     {
-        return new LinearWaveShapingClient(clientName, new LinearWaveShaper(), new LinearWaveShaper());
+        return new LogarithmicWaveShapingClient(clientName, new LogarithmicWaveShaper(), new LogarithmicWaveShaper());
     }
-    static LinearWaveShapingClientFactory factory;
+    static LogarithmicWaveShapingClientFactory factory;
 };
 
-LinearWaveShapingClientFactory LinearWaveShapingClientFactory::factory;
+LogarithmicWaveShapingClientFactory LogarithmicWaveShapingClientFactory::factory;
 
-JackClientFactory * LinearWaveShapingClient::getFactory()
+JackClientFactory * LogarithmicWaveShapingClient::getFactory()
 {
-    return &LinearWaveShapingClientFactory::factory;
+    return &LogarithmicWaveShapingClientFactory::factory;
 }

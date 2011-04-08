@@ -1,5 +1,5 @@
-#ifndef LINEARWAVESHAPINGCLIENT_H
-#define LINEARWAVESHAPINGCLIENT_H
+#ifndef LOGARITHMICWAVESHAPER_H
+#define LOGARITHMICWAVESHAPER_H
 
 /*
     Copyright 2011 Arne Jacobs <jarne@jarne.de>
@@ -20,29 +20,31 @@
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "linearinterpolator.h"
+#include "logarithmicinterpolator.h"
 #include "parameterclient.h"
 #include "graphicsinterpolatoredititem.h"
 
-class LinearWaveShaper : public AudioProcessor, public EventProcessor, public ParameterProcessor, public LinearInterpolator
+class LogarithmicWaveShaper : public AudioProcessor, public EventProcessor, public ParameterProcessor, public LogarithmicInterpolator
 {
 public:
-    LinearWaveShaper();
-    // reimplemented from Interpolator; change the behaviour when adding/changing control points:
+    LogarithmicWaveShaper();
+    // Reimplemented from Interpolator; change the behaviour when adding/changing control points:
     virtual void addControlPoint(double x, double y);
     virtual void changeControlPoint(int index, double x, double y);
-    // reimplemented from AudioProcessor:
+    // Reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
-    // reimplemented from EventProcessor:
+    // Reimplemented from EventProcessor:
     virtual bool processEvent(const RingBufferEvent *event, jack_nframes_t time);
+    // Reimplemented from ParameterProcessor:
+    virtual bool setParameterValue(int index, double value, double min, double max, unsigned int time);
 };
 
-class LinearWaveShapingClient : public ParameterClient, public AbstractInterpolator
+class LogarithmicWaveShapingClient : public ParameterClient, public AbstractInterpolator
 {
     Q_OBJECT
 public:
-    LinearWaveShapingClient(const QString &clientName, LinearWaveShaper *processWaveShaper, LinearWaveShaper * guiWaveShaper, size_t ringBufferSize = 1024);
-    virtual ~LinearWaveShapingClient();
+    LogarithmicWaveShapingClient(const QString &clientName, LogarithmicWaveShaper *processWaveShaper, LogarithmicWaveShaper * guiWaveShaper, size_t ringBufferSize = 1024);
+    virtual ~LogarithmicWaveShapingClient();
 
     virtual JackClientFactory * getFactory();
     virtual void saveState(QDataStream &stream);
@@ -73,7 +75,7 @@ protected:
     // Reimplemented from ParameterClient:
     virtual void onChangedParameterValue(int index, double value, double min, double max);
 private:
-    LinearWaveShaper *processWaveShaper, *guiWaveShaper;
+    LogarithmicWaveShaper *processWaveShaper, *guiWaveShaper;
 };
 
-#endif // LINEARWAVESHAPINGCLIENT_H
+#endif // LOGARITHMICWAVESHAPER_H

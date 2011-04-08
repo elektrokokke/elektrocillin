@@ -150,7 +150,7 @@ void EnvelopeGraphicsItem::onChangedParameterValue(int index)
 {
     // update the interpolator if the slope or sustain index have been changed:
     if (index <= 1) {
-        interpolatorChanged();
+        updateInterpolator();
     }
 }
 
