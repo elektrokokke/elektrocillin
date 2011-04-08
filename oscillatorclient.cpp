@@ -45,7 +45,7 @@ public:
     }
     QString getName()
     {
-        return "Sine oscillator";
+        return "Oscillator (sine)";
     }
     JackClient * createClient(const QString &clientName)
     {

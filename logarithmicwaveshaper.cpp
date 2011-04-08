@@ -188,7 +188,7 @@ public:
     }
     QString getName()
     {
-        return "Logarithmic shaper";
+        return "Shaper (logarithmic)";
     }
     JackClient * createClient(const QString &clientName)
     {

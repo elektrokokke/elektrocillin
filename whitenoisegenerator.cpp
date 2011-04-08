@@ -51,7 +51,7 @@ public:
     }
     QString getName()
     {
-        return "White noise generator";
+        return "Oscillator (white noise)";
     }
     JackClient * createClient(const QString &clientName)
     {

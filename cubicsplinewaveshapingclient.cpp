@@ -120,7 +120,7 @@ public:
     }
     QString getName()
     {
-        return "Cubic spline wave shaper";
+        return "Shaper (cubic)";
     }
     JackClient * createClient(const QString &clientName)
     {

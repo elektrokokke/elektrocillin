@@ -188,7 +188,7 @@ public:
     }
     QString getName()
     {
-        return "Piecewise linear wave shaper";
+        return "Shaper (linear)";
     }
     JackClient * createClient(const QString &clientName)
     {

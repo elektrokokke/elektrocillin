@@ -83,7 +83,7 @@ public:
     }
     QString getName()
     {
-        return "Zita-rev1";
+        return "Effect (Zita-rev1)";
     }
     JackClient * createClient(const QString &clientName)
     {

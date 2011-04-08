@@ -117,7 +117,7 @@ public:
     }
     QString getName()
     {
-        return "Lowpass filter";
+        return "Filter (low-pass)";
     }
     JackClient * createClient(const QString &clientName)
     {
