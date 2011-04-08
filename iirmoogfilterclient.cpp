@@ -18,8 +18,6 @@
  */
 
 #include "iirmoogfilterclient.h"
-#include <QDebug>
-#include <QTime>
 
 IirMoogFilterClient::IirMoogFilterClient(const QString &clientName, IirMoogFilter *processFilter_, IirMoogFilter *guiFilter_, size_t ringBufferSize) :
     ParameterClient(clientName, processFilter_, processFilter_, 0, processFilter_, guiFilter_, ringBufferSize),
@@ -89,7 +87,6 @@ IirMoogFilterGraphicsItem::IirMoogFilterGraphicsItem(IirMoogFilterClient *client
 
 void IirMoogFilterGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    qDebug() << "IirMoogFilterGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)" << QTime::currentTime();
     if (client->getMoogFilter()->computeCoefficients()) {
         updateFrequencyResponse(0);
     }
