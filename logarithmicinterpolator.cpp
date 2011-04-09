@@ -71,7 +71,11 @@ double LogarithmicInterpolator::interpolate(int j, double x)
         return yy[j + 1];
     } else {
         double weight2 = (x - xx[j]) / (xx[j + 1] - xx[j]);
-        if (base != 1) {
+        if (base <= 0.000000000000001) {
+            return yy[j + 1];
+        } else if (base >= 1000000000000000) {
+            return yy[j];
+        } else if (base != 1) {
             weight2 = (1.0 - pow(base, weight2)) / (1.0 - base);
         }
         double weight1 = 1.0 - weight2;
