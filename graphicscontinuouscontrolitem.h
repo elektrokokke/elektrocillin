@@ -21,6 +21,7 @@
  */
 
 #include "graphicslabelitem.h"
+#include "parameterprocessor.h"
 
 class GraphicsContinuousControlItem : public GraphicsLabelItem
 {
@@ -40,6 +41,7 @@ public:
     };
 
     GraphicsContinuousControlItem(const QString &name, double minValue, double maxValue, double currentValue, qreal size, Orientation orientation = HORIZONTAL, char format = 'g', int precision = -1, double resolution = 0, QGraphicsItem *parent = 0);
+    GraphicsContinuousControlItem(const ParameterProcessor::Parameter &parameter, qreal size, Orientation orientation = HORIZONTAL, char format = 'g', int precision = -1, QGraphicsItem *parent = 0);
 
     void setHorizontalAlignment(HorizontalAlignment horizontalAlignment);
 public slots:
@@ -58,6 +60,7 @@ protected:
 private:
     QString name;
     double minValue, maxValue, currentValue;
+    QMap<double, QString> stringValues;
     double size;
     Orientation orientation;
     HorizontalAlignment horizontalAlignment;
@@ -74,6 +77,7 @@ private:
 
 private:
     qreal alignX(QRectF rect, QRectF rectAlign);
+    void setLabelText(GraphicsLabelItem *label, double value);
 };
 
 #endif // GRAPHICSCONTINOUSCONTROLITEM_H

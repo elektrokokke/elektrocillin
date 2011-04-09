@@ -39,10 +39,10 @@ ParameterProcessor & ParameterProcessor::operator=(const ParameterProcessor &par
     return *this;
 }
 
-int ParameterProcessor::registerParameter(const QString &name, double value, double min, double max, double resolution)
+int ParameterProcessor::registerParameter(const QString &name, double value, double min, double max, double resolution, QMap<double, QString> stringValues)
 {
     int id = parameters.size();
-    parameters.append(Parameter(name, value, min, max, resolution));
+    parameters.append(Parameter(name, value, min, max, resolution, stringValues));
     parametersChanged.append(false);
     return id;
 }

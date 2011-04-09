@@ -39,16 +39,57 @@ GraphicsContinuousControlItem::GraphicsContinuousControlItem(const QString &name
     resolution(resolution_),
     waitingForMouseReleaseEvent(false),
     backgroundRect(new QGraphicsRectItem(parent)),
-    minLabel(new GraphicsLabelItem(QString("%1: %2").arg(name).arg(minValue, 0, format, precision), parent)),
-    maxLabel(new GraphicsLabelItem(QString("%1: %2").arg(name).arg(maxValue, 0, format, precision), parent))
+    minLabel(new GraphicsLabelItem(parent)),
+    maxLabel(new GraphicsLabelItem(parent))
 {
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
     setCursor(Qt::PointingHandCursor);
     setPen(QPen(QBrush(QColor("steelblue")), 2));
-    setText(QString("%1: %2").arg(name).arg(currentValue, 0, format, precision));
     backgroundRect->setPen(QPen(QBrush(Qt::black), 1));
     backgroundRect->setBrush(minLabel->brush());
     backgroundRect->setVisible(false);
+    setLabelText(this, currentValue);
+    setLabelText(minLabel, minValue);
+    setLabelText(maxLabel, maxValue);
+    minLabel->setPen(QPen(Qt::NoPen));
+    maxLabel->setPen(QPen(Qt::NoPen));
+    minLabel->setBrush(QBrush(Qt::NoBrush));
+    maxLabel->setBrush(QBrush(Qt::NoBrush));
+    minLabel->setVisible(false);
+    maxLabel->setVisible(false);
+    backgroundRect->setZValue(1);
+    minLabel->setZValue(1);
+    maxLabel->setZValue(1);
+}
+
+GraphicsContinuousControlItem::GraphicsContinuousControlItem(const ParameterProcessor::Parameter &parameter, qreal size_, Orientation orientation_, char format_, int precision_, QGraphicsItem *parent) :
+    GraphicsLabelItem(parent),
+    name(parameter.name),
+    minValue(parameter.min),
+    maxValue(parameter.max),
+    currentValue(parameter.value),
+    stringValues(parameter.stringValues),
+    size(size_),
+    orientation(orientation_),
+    horizontalAlignment(LEFT),
+    verticalAlignment(TOP),
+    format(format_),
+    precision(precision_),
+    resolution(parameter.resolution),
+    waitingForMouseReleaseEvent(false),
+    backgroundRect(new QGraphicsRectItem(parent)),
+    minLabel(new GraphicsLabelItem(parent)),
+    maxLabel(new GraphicsLabelItem(parent))
+{
+    setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+    setCursor(Qt::PointingHandCursor);
+    setPen(QPen(QBrush(QColor("steelblue")), 2));
+    backgroundRect->setPen(QPen(QBrush(Qt::black), 1));
+    backgroundRect->setBrush(minLabel->brush());
+    backgroundRect->setVisible(false);
+    setLabelText(this, currentValue);
+    setLabelText(minLabel, minValue);
+    setLabelText(maxLabel, maxValue);
     minLabel->setPen(QPen(Qt::NoPen));
     maxLabel->setPen(QPen(Qt::NoPen));
     minLabel->setBrush(QBrush(Qt::NoBrush));
@@ -69,14 +110,14 @@ void GraphicsContinuousControlItem::setMinValue(double minValue)
 {
     this->minValue = minValue;
     setValue(currentValue, false);
-    minLabel->setText(QString("%1: %2").arg(name).arg(minValue, 0, format, precision));
+    setLabelText(minLabel, minValue);
 }
 
 void GraphicsContinuousControlItem::setMaxValue(double maxValue)
 {
     this->maxValue = maxValue;
     setValue(currentValue, false);
-    maxLabel->setText(QString("%1: %2").arg(name).arg(maxValue, 0, format, precision));
+    setLabelText(maxLabel, maxValue);
 }
 
 void GraphicsContinuousControlItem::setSize(double size)
@@ -93,7 +134,7 @@ void GraphicsContinuousControlItem::setValue(double value, bool emitSignal)
         QRectF previousRect = rect().translated(pos());
         currentValue = value;
         // change the text accordingly:
-        setText(QString("%1: %2").arg(name).arg(currentValue,  0, 'g', precision));
+        setLabelText(this, currentValue);
         if (emitSignal) {
             valueChanged(currentValue);
         }
@@ -143,7 +184,7 @@ QVariant GraphicsContinuousControlItem::itemChange(GraphicsItemChange change, co
         if (nextValue != currentValue) {
             currentValue = nextValue;
             // change the text accordingly:
-            setText(QString("%1: %2").arg(name).arg(currentValue,  0, 'g', precision));
+            setLabelText(this, currentValue);
             valueChanged(currentValue);
         }
         if (orientation == VERTICAL) {
@@ -212,5 +253,15 @@ qreal GraphicsContinuousControlItem::alignX(QRectF rect, QRectF rectAlign)
         return rectAlign.x();
     } else {
         return rectAlign.x() + rectAlign.width() - rect.width();
+    }
+}
+
+void GraphicsContinuousControlItem::setLabelText(GraphicsLabelItem *label, double value)
+{
+    QString stringValue = stringValues.value(value, QString());
+    if (stringValue.isNull()) {
+        label->setText(QString("%1: %2").arg(name).arg(value, 0, format, precision));
+    } else {
+        label->setText(QString("%1: %2").arg(name).arg(stringValue));
     }
 }

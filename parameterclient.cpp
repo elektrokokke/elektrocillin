@@ -247,7 +247,7 @@ ParameterGraphicsItem::ParameterGraphicsItem(ParameterClient *client_, QGraphics
     for (int i = 0; i < client->getNrOfParameters(); i++) {
         const ParameterProcessor::Parameter &parameter = client->getParameter(i);
         if (parameter.min != parameter.max) {
-            GraphicsContinuousControlItem *control = new GraphicsContinuousControlItem(parameter.name, parameter.min, parameter.max, parameter.value, qMin(800.0, qMax(200.0, qAbs(parameter.max - parameter.min) / qMax(parameter.resolution, 0.01))), GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, parameter.resolution, this);
+            GraphicsContinuousControlItem *control = new GraphicsContinuousControlItem(parameter, qMin(800.0, qMax(200.0, qAbs(parameter.max - parameter.min) / qMax(parameter.resolution, 0.01))), GraphicsContinuousControlItem::HORIZONTAL, 'g', -1, this);
             QObject::connect(control, SIGNAL(valueChanged(double)), this, SLOT(onGuiChangedParameterValue(double)));
             control->setPos(QPointF(padding, padding + y));
             y += control->rect().height() + padding;

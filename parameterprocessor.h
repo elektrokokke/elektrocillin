@@ -20,6 +20,7 @@
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QMap>
 #include <QString>
 #include <QVector>
 
@@ -28,11 +29,12 @@ class ParameterProcessor
 public:
     struct Parameter {
         Parameter() {}
-        Parameter(const QString &name_, double value_, double min_, double max_, double resolution_) :
-            name(name_), value(value_), min(min_), max(max_), resolution(resolution_)
+        Parameter(const QString &name_, double value_, double min_, double max_, double resolution_, QMap<double, QString> stringValues_) :
+            name(name_), value(value_), min(min_), max(max_), resolution(resolution_), stringValues(stringValues_)
         {}
         QString name;
         double value, min, max, resolution;
+        QMap<double, QString> stringValues;
     };
 
     ParameterProcessor();
@@ -40,7 +42,7 @@ public:
 
     ParameterProcessor & operator=(const ParameterProcessor &parameterProcessor);
 
-    virtual int registerParameter(const QString &name, double value, double min, double max, double resolution);
+    virtual int registerParameter(const QString &name, double value, double min, double max, double resolution, QMap<double, QString> stringValues = QMap<double, QString>());
 
     virtual int getNrOfParameters() const;
     virtual Parameter & getParameter(int index);
