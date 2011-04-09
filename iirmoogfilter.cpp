@@ -8,13 +8,13 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Foobar is distributed in the hope that it will be useful,
+    Elektrocillin is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+    along with Elektrocillin.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "iirmoogfilter.h"
@@ -152,6 +152,12 @@ bool IirMoogFilter::computeCoefficients()
 {
     if (recomputeCoefficients) {
         double cutoffFrequencyInHertz = getBaseCutoffFrequency() * pow(2.0, (getCutoffPitchBendModulationIntensity() * getCutoffPitchBendModulation() +  getCutoffControllerModulationIntensity() * getCutoffControllerModulation() + getCutoffAudioModulationIntensity() * getCutoffAudioModulation()) / 12.0);
+
+//        // invert frequency:
+//        double cutoffFrequency = cutoffFrequencyInHertz * getSampleDuration();
+//        if (cutoffFrequency > 0.5) cutoffFrequency = 0.5;
+//        cutoffFrequencyInHertz = getSampleRate() * (0.5 - cutoffFrequency);
+
         double resonance = getResonance() + getResonanceAudioModulation();
         if (resonance < -1.0) {
             resonance += 2.0;
@@ -189,6 +195,9 @@ bool IirMoogFilter::computeCoefficients()
         for (int k = (n + 2) / 2; k <= n; k++) {
             getFeedForwardCoefficients()[k] = getFeedForwardCoefficients()[n - k];
         }
+
+//        invert();
+
         recomputeCoefficients = false;
         return true;
     } else {
