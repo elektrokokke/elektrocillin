@@ -33,6 +33,8 @@ public:
     IirFilter(int feedForwardCoefficients, int feedBackCoefficients, const QStringList &additionalInputPortNames = QStringList());
     IirFilter(const IirFilter &tocopy);
 
+    void copyCoefficients(const IirFilter &tocopy);
+
     // reimplemented from AudioProcessor:
     virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
     // reimplemented from FrequencyResponse:

@@ -52,7 +52,7 @@ private:
     IirMoogFilter *processFilter, *guiFilter;
 };
 
-class IirMoogFilterGraphicsItem : public QObject, public FrequencyResponseGraphicsItem
+class IirMoogFilterGraphicsItem : public FrequencyResponseGraphicsItem
 {
     Q_OBJECT
 public:

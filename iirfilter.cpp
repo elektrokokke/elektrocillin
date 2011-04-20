@@ -39,6 +39,12 @@ IirFilter::IirFilter(const IirFilter &tocopy) :
 {
 }
 
+void IirFilter::copyCoefficients(const IirFilter &tocopy)
+{
+    feedForward = tocopy.feedForward;
+    feedBack = tocopy.feedBack;
+}
+
 void IirFilter::processAudio(const double *inputs, double *outputs, jack_nframes_t)
 {
     if (x.size()) {

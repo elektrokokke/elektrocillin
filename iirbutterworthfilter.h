@@ -21,8 +21,10 @@
  */
 
 #include "iirfilter.h"
+#include "midiparameterprocessor.h"
+#include "parameterclient.h"
 
-class IirButterworthFilter : public IirFilter
+class IirButterworthFilter2 : public IirFilter
 {
 public:
     enum Type {
@@ -30,7 +32,7 @@ public:
         HIGH_PASS
     };
 
-    IirButterworthFilter(double cutoffFrequencyInHertz, Type type = LOW_PASS);
+    IirButterworthFilter2(double cutoffFrequencyInHertz, Type type = LOW_PASS);
 
     virtual void setCutoffFrequency(double cutoffFrequencyInHertz, Type type);
 
@@ -43,6 +45,45 @@ public:
 private:
     double cutoffFrequency;
     Type type;
+};
+
+class IirButterworthFilter : public AudioProcessor, public MidiParameterProcessor
+{
+public:
+    IirButterworthFilter();
+
+    // Reimplemented from AudioProcessor:
+    virtual void setSampleRate(double sampleRate);
+    virtual void processAudio(const double *inputs, double *outputs, jack_nframes_t time);
+    // Reimplemented from MidiProcessor:
+    virtual void processNoteOn(int inputIndex, unsigned char channel, unsigned char noteNumber, unsigned char velocity, jack_nframes_t time);
+    virtual void processPitchBend(int inputIndex, unsigned char channel, unsigned int value, jack_nframes_t time);
+    // Reimplemented from MidiParameterProcessor:
+    virtual bool setParameterValue(int index, double value, double min, double max, unsigned int time);
+
+    FrequencyResponse * getLowpassResponse();
+    FrequencyResponse * getHighpassResponse();
+    FrequencyResponse * getBandpassResponse();
+private:
+    IirButterworthFilter2 lowpass, highpass;
+    IirFilter bandpass;
+
+    void computeCoefficients();
+};
+
+class IirButterworthFilterClient : public ParameterClient
+{
+    Q_OBJECT
+public:
+    IirButterworthFilterClient(const QString &clientName, IirButterworthFilter *processFilter, IirButterworthFilter *guiFilter, size_t ringBufferSize = 1024);
+    virtual ~IirButterworthFilterClient();
+    virtual QGraphicsItem * createGraphicsItem();
+    virtual JackClientFactory * getFactory();
+protected:
+    // reimplemented from ParameterClient:
+    virtual bool init();
+private:
+    IirButterworthFilter *processFilter, *guiFilter;
 };
 
 #endif // IIRBUTTERWORTHFILTER_H

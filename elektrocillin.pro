@@ -191,8 +191,8 @@ FORMS    += mainwindow.ui \
     zplanewidget.ui
 
 #win32:INCLUDEPATH += C:\\boost_1_45_0
-win32:INCLUDEPATH += "C:\\Program Files\\Jack v1.9.6\\includes"
-win32:LIBS += $$quote(c:\\Program Files\\Jack v1.9.6\\lib\\libjack.a) $$quote(c:\\Program Files\\Jack v1.9.6\\lib\\libjackserver.a)
+win32:INCLUDEPATH += "C:\\Program Files\\Jack v1.9.7\\includes"
+win32:LIBS += $$quote(c:\\Program Files\\Jack v1.9.7\\lib\\libjack.a) $$quote(c:\\Program Files\\Jack v1.9.7\\lib\\libjackserver.a)
 unix:LIBS += -ljack
 
 OTHER_FILES +=
