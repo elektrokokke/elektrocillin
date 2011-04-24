@@ -25,6 +25,7 @@
 class SincFilter : public AudioProcessor
 {
 public:
+    SincFilter();
     /**
       @param size determines the number of filter coefficients. Actual filter size
         will be size * 2 + 1.

@@ -42,7 +42,8 @@ public:
 
     ParameterProcessor & operator=(const ParameterProcessor &parameterProcessor);
 
-    virtual int registerParameter(const QString &name, double value, double min, double max, double resolution, QMap<double, QString> stringValues = QMap<double, QString>());
+    virtual int registerParameter(const QString &name, double value, double min, double max, double resolution);
+    virtual int registerParameter(const QString &name, double value, double min, double max, double resolution, QMap<double, QString> stringValues);
 
     virtual int getNrOfParameters() const;
     virtual Parameter & getParameter(int index);
