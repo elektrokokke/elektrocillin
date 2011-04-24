@@ -223,7 +223,7 @@ void MidiSignalClient::processMidi(int inputIndex, const MidiProcessor::MidiEven
 }
 
 MidiSignalGraphicsItem::MidiSignalGraphicsItem(MidiSignalClient *client, QGraphicsItem *parent) :
-    GraphicsKeyboardItem(1, parent)
+    GraphicsKeyboardItem(0, parent)
 {
     QObject::connect(this, SIGNAL(keyPressed(unsigned char,unsigned char,unsigned char)), client->getMidiSignalThread(), SLOT(sendNoteOn(unsigned char,unsigned char,unsigned char)));
     QObject::connect(this, SIGNAL(keyReleased(unsigned char,unsigned char,unsigned char)), client->getMidiSignalThread(), SLOT(sendNoteOff(unsigned char,unsigned char,unsigned char)));
