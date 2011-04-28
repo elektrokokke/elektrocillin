@@ -20,6 +20,10 @@
 #include "sincfilter.h"
 #include <math.h>
 
+SincFilter::SincFilter() :
+        AudioProcessor(QStringList(), QStringList())
+{}
+
 SincFilter::SincFilter(int size_, double frequency_) :
     AudioProcessor(QStringList("Audio in"), QStringList("Filtered out")),
     index(0),
