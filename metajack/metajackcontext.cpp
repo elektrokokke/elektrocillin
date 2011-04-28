@@ -792,7 +792,7 @@ int MetaJackContext::get_client_pid (const char *name)
     return wrapperInterface->get_client_pid(wrapperInterface->get_client_name(wrapperClient));
 }
 
-pthread_t MetaJackContext::client_thread_id (jack_client_t *client)
+jack_native_thread_t MetaJackContext::client_thread_id (jack_client_t *client)
 {
     return wrapperInterface->client_thread_id(wrapperClient);
 }

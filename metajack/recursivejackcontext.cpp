@@ -296,7 +296,7 @@ int RecursiveJackContext::get_client_pid (const char *name)
     return interfaceStack.top()->get_client_pid(name);
 }
 
-pthread_t RecursiveJackContext::client_thread_id (jack_client_t *client)
+jack_native_thread_t RecursiveJackContext::client_thread_id (jack_client_t *client)
 {
     return mapClientToInterface[client]->client_thread_id(client);
 }

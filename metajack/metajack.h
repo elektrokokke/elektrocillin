@@ -284,7 +284,7 @@ int meta_jack_get_client_pid (const char *name) JACK_OPTIONAL_WEAK_EXPORT;
  * @return the pthread ID of the thread running the JACK client side
  * code.
  */
-pthread_t meta_jack_client_thread_id (jack_client_t *) JACK_OPTIONAL_WEAK_EXPORT;
+jack_native_thread_t meta_jack_client_thread_id (jack_client_t *) JACK_OPTIONAL_WEAK_EXPORT;
 
 /*@}*/
 

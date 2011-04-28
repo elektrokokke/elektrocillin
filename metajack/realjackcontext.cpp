@@ -105,7 +105,7 @@ int RealJackContext::get_client_pid (const char *name)
     return jack_get_client_pid(name);
 }
 
-pthread_t RealJackContext::client_thread_id (jack_client_t *client)
+jack_native_thread_t RealJackContext::client_thread_id (jack_client_t *client)
 {
     return jack_client_thread_id(client);
 }

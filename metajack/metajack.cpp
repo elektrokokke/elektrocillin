@@ -77,7 +77,7 @@ int meta_jack_get_client_pid (const char *name)
     return RecursiveJackContext::getInstance()->get_client_pid(name);
 }
 
-pthread_t meta_jack_client_thread_id (jack_client_t *client)
+jack_native_thread_t meta_jack_client_thread_id (jack_client_t *client)
 {
     return RecursiveJackContext::getInstance()->client_thread_id(client);
 }

@@ -47,7 +47,7 @@ public:
     int activate (jack_client_t *client);
     int deactivate (jack_client_t *client);
     int get_client_pid (const char *);
-    pthread_t client_thread_id (jack_client_t *client);
+    jack_native_thread_t client_thread_id (jack_client_t *client);
     int is_realtime (jack_client_t *client);
     int set_thread_init_callback (jack_client_t *client, JackThreadInitCallback thread_init_callback, void *arg);
     void on_shutdown (jack_client_t *client, JackShutdownCallback shutdown_callback, void *arg);

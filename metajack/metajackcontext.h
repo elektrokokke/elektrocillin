@@ -182,7 +182,7 @@ public:
     virtual int activate (jack_client_t *client);
     virtual int deactivate (jack_client_t *client);
     virtual int get_client_pid (const char *);
-    virtual pthread_t client_thread_id (jack_client_t *client);
+    virtual jack_native_thread_t client_thread_id (jack_client_t *client);
     virtual int is_realtime (jack_client_t *client);
     virtual int set_thread_init_callback (jack_client_t *client, JackThreadInitCallback thread_init_callback, void *arg);
     virtual void on_shutdown (jack_client_t *client, JackShutdownCallback shutdown_callback, void *arg);
