@@ -41,7 +41,7 @@ ParameterProcessor & ParameterProcessor::operator=(const ParameterProcessor &par
 
 int ParameterProcessor::registerParameter(const QString &name, double value, double min, double max, double resolution)
 {
-    registerParameter(name, value, min, max, resolution, QMap<double, QString>());
+    return registerParameter(name, value, min, max, resolution, QMap<double, QString>());
 }
 
 int ParameterProcessor::registerParameter(const QString &name, double value, double min, double max, double resolution, QMap<double, QString> stringValues)
